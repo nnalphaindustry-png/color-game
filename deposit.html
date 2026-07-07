@@ -8,18 +8,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
 body { background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 40px; }
 .app-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; overflow-x: hidden; position: relative; padding: 15px; }
-
-/* Header Style with Fixed Back Button Location */
 .header-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2d2d2d; margin-bottom: 15px; }
 .back-btn { background: none; border: none; color: #f3c343; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
 .page-title { font-size: 18px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 30px; }
-
-/* Available Card Layout */
 .balance-card { background: linear-gradient(135deg, #1e1e1e, #252525); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); margin-bottom: 20px; }
 .bal-lbl { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 .bal-num { font-size: 24px; font-weight: bold; color: #f3c343; margin-top: 5px; font-family: monospace; }
-
-/* Amount Section Elements */
 .section-title { font-size: 14px; color: #dbb35e; font-weight: bold; margin-bottom: 12px; border-left: 3px solid #dbb35e; padding-left: 8px; }
 .input-box-wrapper { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
 input { background-color: #121212; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 15px; outline: none; width: 100%; transition: border-color 0.2s; }
@@ -27,13 +21,9 @@ input:focus { border-color: #f3c343; }
 .chips-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
 .chip { background-color: #121212; border: 1px solid #333; color: #ddd; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; cursor: pointer; font-weight: 600; }
 .chip:active { background-color: #2a2a2a; }
-
-/* Navigation Multi-tabs Grid */
 .method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
 .method-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 10px; padding: 12px 5px; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: bold; color: #aaa; }
 .method-box.active-method { background: linear-gradient(180deg, #fcebb8, #e4bf6b); color: #4a3200; border-color: #f3c343; box-shadow: 0 2px 8px rgba(243, 195, 67, 0.2); }
-
-/* Dynamic Multi-view Payment Boxes */
 .payment-inner-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 12px; padding: 15px; display: none; flex-direction: column; gap: 12px; }
 .payment-inner-box.show-box { display: flex; }
 .info-display-box { background-color: #121212; border: 1px solid #2d2d2d; border-radius: 8px; padding: 12px; font-size: 14px; color: #ddd; display: flex; flex-direction: column; gap: 4px; position: relative; text-align: left; }
@@ -41,17 +31,8 @@ input:focus { border-color: #f3c343; }
 .qr-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin: 5px 0; }
 .qr-img { width: 165px; height: 165px; border: 2px solid #dbb35e; padding: 5px; background: white; border-radius: 8px; }
 .selected-amt-alert { font-size: 15px; color: #f3c343; font-weight: bold; text-align: center; margin: 5px 0; background: rgba(243,195,67,0.1); padding: 8px; border-radius: 6px; }
-
-/* Submissions Action Buttons */
 .btn-submit { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 3px 6px rgba(0,0,0,0.3); }
 .btn-submit:active { transform: scale(0.98); }
-
-/* In-Progress UI Design */
-.status-overlay { background-color: #191919; text-align: center; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-.status-icon { font-size: 55px; color: #f3c343; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
-/* App Notification Center Overlay */
 .custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
 .custom-alert-box { width: 85%; max-width: 330px; background-color: #252525; border-radius: 16px; border: 1px solid #444; padding: 25px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: scale(0.8); transition: transform 0.2s ease; }
 .custom-alert-overlay.show { display: flex; }
@@ -64,123 +45,101 @@ input:focus { border-color: #f3c343; }
 </head>
 <body>
 <div class="app-container" id="depositMainContainer">
-    
-    <!--   1:      (   ) -->
-    <div id="screen-amount-select" style="display: flex; flex-direction: column; width: 100%;">
-        <div class="header-container">
-            <!--         -->
-            <button class="back-btn" onclick="window.location.href='home'"></button>
-            <div class="page-title">Deposit Funds</div>
-        </div>
-        
-        <div class="balance-card">
-            <div class="bal-lbl">Available Balance</div>
-            <div class="bal-num" id="user-wallet-balance">0.00</div>
-        </div>
-
-        <div class="section-title">Enter Deposit Amount</div>
-        <div class="input-box-wrapper">
-            <input type="number" id="main-amount-input" placeholder="Enter amount (Min 100)" min="100">
-            <div class="chips-row">
-                <div class="chip" onclick="setQuickAmount(100)">100</div>
-                <div class="chip" onclick="setQuickAmount(500)">500</div>
-                <div class="chip" onclick="setQuickAmount(1000)">1000</div>
-            </div>
-        </div>
-        
-        <button class="btn-submit" style="margin-top: 15px;" onclick="goToPaymentScreen()">Next (Proceed)</button>
-    </div>
-
-    <!--   2:     (   ) -->
-    <div id="screen-payment-gateway" style="display: none; flex-direction: column; width: 100%;">
-        <div class="header-container">
-            <!--              -->
-            <button class="back-btn" onclick="backToAmountSelect()"></button>
-            <div class="page-title">Payment Options</div>
-        </div>
-
-        <div class="selected-amt-alert">Amount to Pay: <span id="gateway-amount-title">0</span></div>
-
-        <div class="section-title" style="margin-top: 10px;">Select Channel</div>
-        <div class="method-grid">
-            <div class="method-box active-method" id="m-upi" onclick="switchGatewayMethod('upi')"> UPI</div>
-            <div class="method-box" id="m-qr" onclick="switchGatewayMethod('qr')"> QR Code</div>
-            <div class="method-box" id="m-bank" onclick="switchGatewayMethod('bank')"> Bank</div>
-        </div>
-
-        <!--  :    -->
-        <div id="box-upi" class="payment-inner-box show-box">
-            <label style="font-weight: bold; color: #dbb35e;">Copy Admin UPI ID:</label>
-            <div class="info-display-box">
-                <span id="b-upi-id">merchant@upi</span>
-                <button class="copy-btn" onclick="copyTextData('b-upi-id')">COPY</button>
-            </div>
-        </div>
-
-        <!--  :    -->
-        <div id="box-qr" class="payment-inner-box">
-            <div class="qr-container">
-                <label style="font-weight: bold; color: #dbb35e;">Scan QR Code via GPay/PhonePe</label>
-                <img class="qr-img" id="b-qr-img" src="https://wikimedia.org" alt="Admin QR">
-                <p style="font-size: 11px; color: #888; margin-top: 3px;">Take a screenshot to scan from gallery</p>
-            </div>
-        </div>
-
-        <!--  :    -->
-        <div id="box-bank" class="payment-inner-box">
-            <label style="font-weight: bold; color: #dbb35e;">Transfer to Admin Account:</label>
-            <div class="info-display-box"><label>Bank Name</label><span id="b-name">SBI Bank</span></div>
-            <div class="info-display-box">
-                <label>Account Number</label><span id="b-acc">30214589745</span>
-                <button class="copy-btn" onclick="copyTextData('b-acc')">COPY</button>
-            </div>
-            <div class="info-display-box"><label>Beneficiary Name</label><span id="b-holder">RM Game Admin</span></div>
-            <div class="info-display-box">
-                <label>IFSC Code</label><span id="b-ifsc">SBIN0001234</span>
-                <button class="copy-btn" onclick="copyTextData('b-ifsc')">COPY</button>
-            </div>
-        </div>
-
-        <!--     (   ) -->
-        <div class="section-title" style="margin-top: 20px;">Confirm Transaction</div>
-        <div class="input-box-wrapper" style="gap: 6px; display: flex; flex-direction: column;">
-            <label>Enter 12-Digit UTR / Transaction Ref ID:</label>
-            <input type="text" id="final-utr-input" maxlength="12" placeholder="Enter 12-digit transaction number">
-        </div>
-
-        <button class="btn-submit" style="margin-top: 5px;" onclick="submitFinalDepositRequest()">Submit Payment Request</button>
-    </div>
+<div id="screen-amount-select" style="display: flex; flex-direction: column; width: 100%;">
+<div class="header-container">
+<button class="back-btn" onclick="window.location.href='home.html'"></button>
+<div class="page-title">Deposit Funds</div>
+</div>
+<div class="balance-card">
+<div class="bal-lbl">Available Balance</div>
+<div class="bal-num" id="user-wallet-balance">0.00</div>
+</div>
+<div class="section-title">Enter Deposit Amount</div>
+<div class="input-box-wrapper">
+<input type="number" id="main-amount-input" placeholder="Enter amount (Min 100)" min="100">
+<div class="chips-row">
+<div class="chip" onclick="setQuickAmount(100)">100</div>
+<div class="chip" onclick="setQuickAmount(500)">500</div>
+<div class="chip" onclick="setQuickAmount(1000)">1000</div>
+</div>
+</div>
+<button class="btn-submit" style="margin-top: 15px;" onclick="goToPaymentScreen()">Next (Proceed)</button>
 </div>
 
-<!--  -    -->
+<div id="screen-payment-gateway" style="display: none; flex-direction: column; width: 100%;">
+<div class="header-container">
+<button class="back-btn" onclick="backToAmountSelect()"></button>
+<div class="page-title">Payment Options</div>
+</div>
+<div class="selected-amt-alert">Amount to Pay: <span id="gateway-amount-title">0</span></div>
+<div class="section-title" style="margin-top: 10px;">Select Channel</div>
+<div class="method-grid">
+<div class="method-box active-method" id="m-upi" onclick="switchGatewayMethod('upi')"> UPI</div>
+<div class="method-box" id="m-qr" onclick="switchGatewayMethod('qr')"> QR Code</div>
+<div class="method-box" id="m-bank" onclick="switchGatewayMethod('bank')"> Bank</div>
+</div>
+
+<div id="box-upi" class="payment-inner-box show-box">
+<label style="font-weight: bold; color: #dbb35e;">Copy Admin UPI ID:</label>
+<div class="info-display-box">
+<span id="b-upi-id">merchant@upi</span>
+<button class="copy-btn" onclick="copyTextData('b-upi-id')">COPY</button>
+</div>
+</div>
+
+<div id="box-qr" class="payment-inner-box">
+<div class="qr-container">
+<label style="font-weight: bold; color: #dbb35e;">Scan QR Code via GPay/PhonePe</label>
+<img class="qr-img" id="b-qr-img" src="https://wikimedia.org" alt="Admin QR">
+<p style="font-size: 11px; color: #888; margin-top: 3px;">Take a screenshot to scan from gallery</p>
+</div>
+</div>
+
+<div id="box-bank" class="payment-inner-box">
+<label style="font-weight: bold; color: #dbb35e;">Transfer to Admin Account:</label>
+<div class="info-display-box"><label>Bank Name</label><span id="b-name">SBI Bank</span></div>
+<div class="info-display-box">
+<label>Account Number</label><span id="b-acc">30214589745</span>
+<button class="copy-btn" onclick="copyTextData('b-acc')">COPY</button>
+</div>
+<div class="info-display-box"><label>Beneficiary Name</label><span id="b-holder">RM Game Admin</span></div>
+<div class="info-display-box">
+<label>IFSC Code</label><span id="b-ifsc">SBIN0001234</span>
+<button class="copy-btn" onclick="copyTextData('b-ifsc')">COPY</button>
+</div>
+</div>
+
+<div class="section-title" style="margin-top: 20px;">Confirm Transaction</div>
+<div class="input-box-wrapper" style="gap: 6px; display: flex; flex-direction: column;">
+<label>Enter 12-Digit UTR / Transaction Ref ID:</label>
+<input type="text" id="final-utr-input" maxlength="12" placeholder="Enter 12-digit transaction number">
+</div>
+<button class="btn-submit" style="margin-top: 5px;" onclick="submitFinalDepositRequest()">Submit Payment Request</button>
+</div>
+</div>
+
 <div class="custom-alert-overlay" id="appAlert">
-    <div class="custom-alert-box">
-        <div class="custom-alert-icon" id="alertIcon"></div>
-        <div class="custom-alert-title" id="alertTitle">Notification</div>
-        <div class="custom-alert-msg" id="alertMessage">Content text...</div>
-        <button class="custom-alert-btn" onclick="closeAppAlert()">OK</button>
-    </div>
+<div class="custom-alert-box">
+<div class="custom-alert-icon" id="alertIcon"></div>
+<div class="custom-alert-title" id="alertTitle">Notification</div>
+<div class="custom-alert-msg" id="alertMessage">Content text...</div>
+<button class="custom-alert-btn" onclick="closeAppAlert()">OK</button>
+</div>
 </div>
 <script>
-//    
 let adminUpiConfig = "rk14702@ibl";
-let adminQrConfig = "https://wikimedia.org"; 
+let adminQrConfig = "https://wikimedia.org";
 let adminBankConfig = {
     bankName: "HDFC Bank Ltd",
     holderName: "RM Game Entertainment",
     accNumber: "50200087459612",
     ifscCode: "HDFC0001234"
 };
-
 let selectedGatewayMethod = "upi";
 let finalValidatedAmount = 0;
-
-//        
-const loggedInUserPhone = localStorage.getItem("user_phone") || "9999999999";
-
+const loggedInUserPhone = localStorage.getItem("user_phone");
 let postAlertCallback = null;
 
-//  -  
 function showPopup(title, message, icon = '', callback = null) {
     document.getElementById("alertIcon").innerText = icon;
     document.getElementById("alertTitle").innerText = title;
@@ -194,21 +153,17 @@ function closeAppAlert() {
     if (typeof postAlertCallback === 'function') { postAlertCallback(); }
 }
 
-//       100%  
 document.addEventListener("DOMContentLoaded", () => {
-    let targetPhone = loggedInUserPhone;
-    
-    //          
-    if (!targetPhone || targetPhone === "undefined" || targetPhone === "9999999999") {
+    if (!loggedInUserPhone) {
         document.getElementById("user-wallet-balance").innerText = "0.00";
-        console.warn("User phone number not found in localStorage!");
-        return; 
+        showPopup("Session Error", "Please login first to add funds!", "", () => {
+            window.location.href = "index.html";
+        });
+        return;
     }
-    
-    fetch('/api/balance/' + targetPhone)
+    fetch('https://color-game-1kc2.onrender.com' + loggedInUserPhone)
     .then(res => {
-        //        (404),     , JSON   
-        if (!res.ok) { throw new Error("API route not found on server (404)"); }
+        if (!res.ok) { throw new Error("API route not found on server"); }
         return res.json();
     })
     .then(data => {
@@ -226,32 +181,24 @@ function setQuickAmount(val) {
     document.getElementById("main-amount-input").value = val;
 }
 
-//   1   2 (New Payment Screen)    
 function goToPaymentScreen() {
     const amtInput = document.getElementById("main-amount-input").value;
     finalValidatedAmount = parseInt(amtInput);
-
     if (isNaN(finalValidatedAmount) || finalValidatedAmount < 100) {
         showPopup("Validation Error", "Minimum deposit amount is 100! Please enter a valid value.", "");
         return;
     }
-
-    //        
     document.getElementById("gateway-amount-title").innerText = "" + finalValidatedAmount;
-    
-    //    
     document.getElementById("b-upi-id").innerText = adminUpiConfig;
     document.getElementById("b-qr-img").src = adminQrConfig;
     document.getElementById("b-name").innerText = adminBankConfig.bankName;
     document.getElementById("b-acc").innerText = adminBankConfig.accNumber;
     document.getElementById("b-holder").innerText = adminBankConfig.holderName;
     document.getElementById("b-ifsc").innerText = adminBankConfig.ifscCode;
-
-    //   (Amount Select  , Gateway  )
+    
     document.getElementById("screen-amount-select").style.display = "none";
     document.getElementById("screen-payment-gateway").style.display = "flex";
 }
-
 function backToAmountSelect() {
     document.getElementById("screen-payment-gateway").style.display = "none";
     document.getElementById("screen-amount-select").style.display = "flex";
@@ -261,7 +208,6 @@ function switchGatewayMethod(methodKey) {
     selectedGatewayMethod = methodKey;
     document.querySelectorAll('.method-box').forEach(box => box.classList.remove('active-method'));
     document.querySelectorAll('.payment-inner-box').forEach(box => box.classList.remove('show-box'));
-    
     document.getElementById('m-' + methodKey).classList.add('active-method');
     document.getElementById('box-' + methodKey).classList.add('show-box');
 }
@@ -273,16 +219,13 @@ function copyTextData(elementId) {
     });
 }
 
-//      - (Auto-Redirect Gateway Engine)
 function submitFinalDepositRequest() {
     const utrValue = document.getElementById("final-utr-input").value.trim();
-
     if (utrValue.length !== 12 || isNaN(utrValue)) {
         showPopup("UTR Error", "Please enter a valid, complete 12-digit UTR / Transaction Reference ID!", "");
         return;
     }
-
-    fetch('/api/user/submit-deposit', {
+    fetch('https://color-game-1kc2.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -292,22 +235,16 @@ function submitFinalDepositRequest() {
         })
     })
     .then(res => {
-        if (!res.ok) { throw new Error("Deposit submit route not found on server (404)"); }
+        if (!res.ok) { throw new Error("Deposit route failure"); }
         return res.json();
     })
     .then(data => {
         if (data.success) {
-            //        -
             showPopup("Request Submitted", "Your deposit request has been submitted successfully! Pending approval.", "", () => {
-                //   
                 document.getElementById("main-amount-input").value = "";
                 document.getElementById("final-utr-input").value = "";
-                
-                //       
                 document.getElementById("screen-payment-gateway").style.display = "none";
                 document.getElementById("screen-amount-select").style.display = "flex";
-                
-                //      
                 location.reload();
             });
         } else {
@@ -316,7 +253,7 @@ function submitFinalDepositRequest() {
     })
     .catch(err => {
         console.error(err);
-        showPopup("Connection Failure", "Unable to connect to the server. Please check your Termux network state!", "");
+        showPopup("Connection Failure", "Unable to connect to the server. Please check your Render server log state!", "");
     });
 }
 </script>

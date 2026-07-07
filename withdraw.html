@@ -1,208 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RM GAME - Withdraw Module</title>
-    
-    <!-- ========================================================================= -->
-    <!-- 1. STYLE SECTION (इसके अंदर पूरा CSS डिज़ाइन कोड डालें)                    -->
-    <!-- ========================================================================= -->
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM GAME - Withdraw Module</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
 body { background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 40px; }
-
-/* 📱 मुख्य मोबाइल फ्रेम कंटेनर */
 .app-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; overflow-x: hidden; position: relative; padding: 15px; }
-
-/* 🔙 टॉप हेडर बार */
 .header-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2d2d2d; margin-bottom: 15px; }
 .back-btn { background: none; border: none; color: #f3c343; font-size: 20px; cursor: pointer; }
 .page-title { font-size: 18px; font-weight: bold; color: #ffffff; }
-
-/* 💰 विड्रॉल बैलेंस बॉक्स */
 .balance-card { background: linear-gradient(135deg, #1e1e1e, #252525); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); margin-bottom: 20px; }
 .bal-lbl { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 .bal-num { font-size: 24px; font-weight: bold; color: #3399ff; margin-top: 5px; font-family: monospace; }
-
-/* 💵 इनपुट कंटेनर्स और व्यू मैनेजमेंट */
 .amount-view-box { background-color: #1e1e1e; border-radius: 12px; padding: 15px; border: 1px solid #2d2d2d; display: flex; }
 .withdraw-view-box { background-color: #1e1e1e; border-radius: 12px; padding: 15px; border: 1px solid #2d2d2d; display: none; flex-direction: column; gap: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .withdraw-view-box.active-view { display: flex; }
-
 .form-group { display: flex; flex-direction: column; gap: 6px; width: 100%; }
 label { font-size: 11px; color: #aaa; font-weight: 500; text-align: left; }
 input { background-color: #121212; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 14px; outline: none; width: 100%; transition: border-color 0.2s; }
 input:focus { border-color: #3399ff; }
 .tax-note { font-size: 11px; color: #888; margin-top: 4px; }
 .gold-text { color: #f3c343; font-weight: bold; }
-
-/* 🗺️ पेआउट मेथड सिलेक्शन ग्रिड */
 .section-title { font-size: 14px; color: #dbb35e; font-weight: bold; margin-bottom: 10px; border-left: 3px solid #dbb35e; padding-left: 8px; margin-top: 15px; }
 .method-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
 .method-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 10px; padding: 14px 5px; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: bold; color: #aaa; }
 .method-box.active-method { background: linear-gradient(180deg, #fcebb8, #e4bf6b); color: #4a3200; border-color: #f3c343; box-shadow: 0 2px 8px rgba(243, 195, 67, 0.2); }
-
-/* 👑 मुख्य सबमिशन बटन */
 .btn-submit { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 5px; box-shadow: 0 3px 6px rgba(0,0,0,0.3); }
 .btn-submit:active { transform: scale(0.98); }
-
-/* ⏳ सबमिशन के बाद दिखने वाली लाइव स्टेटस स्क्रीन स्टाइल */
 .status-overlay { background-color: #191919; text-align: center; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
 .status-icon { font-size: 55px; color: #3399ff; animation: pulse 1.5s infinite; margin-bottom: 10px; }
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
-    </style>
+</style>
 </head>
-
-<!-- ========================================================================= -->
-<!-- 2. BODY SECTION (लेआउट और एलिमेंट्स)                                      -->
-<!-- ========================================================================= -->
 <body>
-    <div class="app-container" id="withdrawMainContainer">
-        <!-- टॉप हेडर नेविगेशन -->
-        <div class="header-container">
-            <button class="back-btn" onclick="window.history.back()">⬅</button>
-            <div class="page-title">Withdrawal</div>
-            <div style="width:20px;"></div>
-        </div>
+<div class="app-container" id="withdrawMainContainer">
+<div class="header-container">
+<button class="back-btn" onclick="window.history.back()"></button>
+<div class="page-title">Withdrawal</div>
+<div style="width:20px;"></div>
+</div>
+<div class="balance-card">
+<div class="bal-lbl">Withdrawable Balance</div>
+<div class="bal-num" id="user-wallet-balance">0.00</div>
+</div>
+<div class="amount-view-box">
+<div class="form-group">
+<label>Enter Withdrawal Amount (Min 100):</label>
+<input type="number" id="withdraw-amount" placeholder="Enter amount (e.g. 500)" min="100">
+<p class="tax-note">Processing Fee / Tax: <span class="gold-text">0%</span></p>
+</div>
+</div>
+<div class="section-title">Select Payout Method</div>
+<div class="method-grid">
+<div class="method-box active-method" id="m-upi" onclick="switchWithdrawMethod('upi')"> UPI Address</div>
+<div class="method-box" id="m-bank" onclick="switchWithdrawMethod('bank')"> Bank Account</div>
+</div>
 
-        <!-- यूज़र वॉलेट बैलेंस डिस्प्ले कार्ड -->
-        <div class="balance-card">
-            <div class="bal-lbl">Withdrawable Balance</div>
-            <div class="bal-num" id="user-wallet-balance">₹0.00</div>
-        </div>
+<div id="form-upi" class="withdraw-view-box active-view">
+<div class="form-group">
+<label>Your UPI ID (VPA):</label>
+<input type="text" id="user-upi-id" placeholder="example@apl, username@ybl">
+</div>
+<button class="btn-submit" onclick="submitWithdrawal('upi')">Request Withdrawal</button>
+</div>
 
-        <!-- विड्रॉल राशि दर्ज करने का मुख्य बॉक्स -->
-        <div class="amount-view-box">
-            <div class="form-group">
-                <label>Enter Withdrawal Amount (Min ₹100):</label>
-                <input type="number" id="withdraw-amount" placeholder="Enter amount (e.g. 500)" min="100">
-                <p class="tax-note">Processing Fee / Tax: <span class="gold-text">0%</span></p>
-            </div>
-        </div>
+<div id="form-bank" class="withdraw-view-box">
+<div class="form-group">
+<label>Bank Name:</label>
+<input type="text" id="bank-name" placeholder="e.g. SBI, HDFC Bank">
+</div>
+<div class="form-group">
+<label>Account Number:</label>
+<input type="text" id="bank-account" placeholder="Enter account number">
+</div>
+<div class="form-group">
+<label>Account Holder Name:</label>
+<input type="text" id="bank-holder" placeholder="Enter full name">
+</div>
+<div class="form-group">
+<label>IFSC Code:</label>
+<input type="text" id="bank-ifsc" placeholder="11 character code (e.g. SBIN0001234)">
+</div>
+<button class="btn-submit" onclick="submitWithdrawal('bank')">Request Withdrawal</button>
+</div>
+</div>
+<script>
+let currentMethod = "upi";
+let userCurrentBalance = 0;
+const loggedInUserPhone = localStorage.getItem("user_phone") || "9999999999";
 
-        <!-- भुगतान का माध्यम चुनने का मेनू -->
-        <div class="section-title">Select Payout Method</div>
-        <div class="method-grid">
-            <div class="method-box active-method" id="m-upi" onclick="switchWithdrawMethod('upi')">🔗 UPI Address</div>
-            <div class="method-box" id="m-bank" onclick="switchWithdrawMethod('bank')">🏦 Bank Account</div>
-        </div>
-
-        <!-- ================= OPTION A: UPI FORM ================= -->
-        <div id="form-upi" class="withdraw-view-box active-view">
-            <div class="form-group">
-                <label>Your UPI ID (VPA):</label>
-                <input type="text" id="user-upi-id" placeholder="example@apl, username@ybl">
-            </div>
-            <button class="btn-submit" onclick="submitWithdrawal('upi')">Request Withdrawal</button>
-        </div>
-
-        <!-- ================= OPTION B: BANK FORM ================= -->
-        <div id="form-bank" class="withdraw-view-box">
-            <div class="form-group">
-                <label>Bank Name:</label>
-                <input type="text" id="bank-name" placeholder="e.g. SBI, HDFC Bank">
-            </div>
-            <div class="form-group">
-                <label>Account Number:</label>
-                <input type="text" id="bank-account" placeholder="Enter account number">
-            </div>
-            <div class="form-group">
-                <label>Account Holder Name:</label>
-                <input type="text" id="bank-holder" placeholder="Enter full name">
-            </div>
-            <div class="form-group">
-                <label>IFSC Code:</label>
-                <input type="text" id="bank-ifsc" placeholder="11 character code (e.g. SBIN0001234)">
-            </div>
-            <button class="btn-submit" onclick="submitWithdrawal('bank')">Request Withdrawal</button>
-        </div>
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- 3. SCRIPT SECTION (इसके अंदर पूरा जावास्क्रिप्ट वर्किंग लॉजिक डालें)      -->
-    <!-- ========================================================================= -->
-    <script>
-        let currentMethod = "upi";
-let userCurrentBalance = 0; 
-
-// लॉगिन पेज से सेट हुए यूज़र के लाइव फ़ोन नंबर को सिंक करना
-const loggedInUserPhone = localStorage.getItem("user_phone") || "9999999999"; 
-
-// पेज ओपन होते ही सर्वर से लाइव बैलेंस लोड करना
 document.addEventListener("DOMContentLoaded", () => {
     fetch(`/api/balance/${loggedInUserPhone}`)
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                userCurrentBalance = parseFloat(data.balance);
-                document.getElementById("user-wallet-balance").innerText = "₹" + userCurrentBalance.toFixed(2);
-            }
-        }).catch(err => console.error("Balance fetch error:", err));
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            userCurrentBalance = parseFloat(data.balance);
+            document.getElementById("user-wallet-balance").innerText = "" + userCurrentBalance.toFixed(2);
+        }
+    }).catch(err => console.error("Balance fetch error:", err));
 });
 
-// फॉर्म स्विचिंग लॉजिक (UPI <-> Bank)
 function switchWithdrawMethod(type) {
     currentMethod = type;
     document.querySelectorAll('.method-box').forEach(box => box.classList.remove('active-method'));
     document.querySelectorAll('.withdraw-view-box').forEach(view => view.classList.remove('active-view'));
-    
     document.getElementById(`m-${type}`).classList.add('active-method');
     document.getElementById(`form-${type}`).classList.add('active-view');
 }
 
-// विड्रॉल सबमिट और इन-प्रोग्रेस एनीमेशन ट्रिगर
 function submitWithdrawal(type) {
     const amountVal = parseInt(document.getElementById("withdraw-amount").value);
-    
-    // ₹100 न्यूनतम लिमिट और पर्याप्त बैलेंस की वैलिडेशन जांच
     if (isNaN(amountVal) || amountVal < 100) {
-        alert("त्रुटि: न्यूनतम निकासी सीमा ₹100 है!");
+        alert("Error: Minimum withdrawal limit is 100!");
         return;
     }
     if (amountVal > userCurrentBalance) {
-        alert("त्रुटि: आपके पास पर्याप्त वॉलेट बैलेंस नहीं है!");
+        alert("Error: Insufficient wallet balance!");
         return;
     }
-
-    // फ़ील्ड्स वेरिफिकेशन
+    
+    let targetDetails = "";
     if (type === 'upi') {
         const upiId = document.getElementById("user-upi-id").value.trim();
         if (!upiId.includes('@')) {
-            alert("कृपया सही UPI ID दर्ज करें!");
+            alert("Error: Please enter a valid UPI ID!");
             return;
         }
+        targetDetails = upiId;
     } else {
         const bName = document.getElementById("bank-name").value.trim();
         const bAcc = document.getElementById("bank-account").value.trim();
         const bHolder = document.getElementById("bank-holder").value.trim();
         const bIfsc = document.getElementById("bank-ifsc").value.trim();
-
         if (!bName || !bAcc || !bHolder || bIfsc.length < 11) {
-            alert("कृपया बैंक की पूरी और सही जानकारी भरें!");
+            alert("Error: Please fill all bank account details correctly!");
             return;
         }
+        targetDetails = `Bank: ${bName} | Acc: ${bAcc} | Holder: ${bHolder} | IFSC: ${bIfsc}`;
     }
-
-    // रिक्वेस्ट सबमिट होते ही पूरी स्क्रीन को 'Success Waiting Queue' में बदलना
-    const mainContainer = document.getElementById("withdrawMainContainer");
-    mainContainer.innerHTML = `
-        <div class="status-overlay" style="margin-top: 80px;">
-            <div class="status-icon">⏳</div>
-            <h2 style="color: #ffffff; font-size: 20px;">Withdrawal Request Submitted</h2>
-            <p style="color: #aaa; font-size: 14px; padding: 0 20px; line-height: 1.6; margin-top: 5px;">
-                आपकी <strong style="color: #3399ff;">₹${amountVal}</strong> की विड्रॉल रिक्वेस्ट समीक्षा के अधीन है।<br>
-                पेमेंट मोड: <strong style="color: #fff;">${type.toUpperCase()} Transfer</strong>
-            </p>
-            <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; font-size: 12px; color: #dbb35e; border: 1px dashed #333; width: 90%; margin-top: 15px; line-height: 1.5; text-align: left;">
-                📢 <strong>सुरक्षा लॉजिक:</strong> गेम के नियमों के अनुसार यह राशि आपके बैलेंस से तुरंत होल्ड कर दी गई है। एडमिन द्वारा विवरण चेक करके बैंक से अप्रूव करते ही यह स्टेटस अपडेट हो जाएगा।
-            </div>
-            <button class="btn-submit" style="width: 85%; margin-top: 25px;" onclick="window.location.href='home.html'">Back to Dashboard</button>
-        </div>
-    `;
+    
+    fetch('/api/user/submit-withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            phone: loggedInUserPhone,
+            amount: amountVal,
+            method: type.toUpperCase(),
+            details: targetDetails
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const mainContainer = document.getElementById("withdrawMainContainer");
+            mainContainer.innerHTML = `
+                <div class="status-overlay" style="margin-top: 80px;">
+                    <div class="status-icon"></div>
+                    <h2 style="color: #ffffff; font-size: 20px;">Withdrawal Request Submitted</h2>
+                    <p style="color: #aaa; font-size: 14px; padding: 0 20px; line-height: 1.6; margin-top: 5px;">
+                        Your withdrawal request for <strong style="color: #3399ff;">${amountVal}</strong> has been sent to review.<br>
+                        Payout Channel: <strong style="color: #fff;">${type.toUpperCase()} Transfer</strong>
+                    </p>
+                    <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; font-size: 12px; color: #dbb35e; border: 1px dashed #333; width: 90%; margin-top: 15px; line-height: 1.5; text-align: left;">
+                         <strong>Security Logic:</strong> As per game standard regulations, this amount has been safely frozen from your active balance. The request will instantly process once the administrator approves it from the control panel.
+                    </div>
+                    <button class="btn-submit" style="width: 85%; margin-top: 25px;" onclick="window.location.href='home.html'">Back to Dashboard</button>
+                </div>
+            `;
+        } else {
+            alert(data.message || "Withdrawal submission failed!");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Connection failure. Unable to submit request to Render server logs.");
+    });
 }
-
-    </script>
+</script>
 </body>
 </html>

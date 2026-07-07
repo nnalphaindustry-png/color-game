@@ -8,14 +8,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
 body { background-color: #222222; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 20px; }
 .game-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; overflow-x: hidden; position: relative; padding: 12px; gap: 12px; }
-
-/* Top Back Header Navigation */
 .top-nav-header { display: flex; align-items: center; justify-content: space-between; padding: 5px 0px; background-color: #191919; border-bottom: 1px solid #2d2d2d; width: 100%; }
 .back-btn-box { display: flex; align-items: center; cursor: pointer; color: #ffffff; background: none; border: none; }
 .back-icon-svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .header-center-title { font-size: 16px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 24px; }
-
-/* Wallet Balance UI */
 .wallet-section { background-color: #2b2b2b; border-radius: 15px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .balance-title { font-size: 24px; font-weight: bold; color: #ffffff; margin-bottom: 5px; }
 .wallet-sub { font-size: 12px; color: #aaaaaa; display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 15px; }
@@ -23,14 +19,11 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 .wl-btn { flex: 1; border: none; padding: 12px; border-radius: 25px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; }
 .wl-withdraw { background-color: #d32f2f; }
 .wl-deposit { background-color: #2aa453; }
-
-/* Game Modes Buttons */
 .game-modes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background-color: #252525; padding: 10px; border-radius: 12px; }
 .mode-btn { background: #333; border: none; border-radius: 8px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: #bbb; font-size: 10px; }
 .mode-btn.active { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; font-weight: bold; }
 .mode-icon { width: 20px; height: 20px; background: #555; border-radius: 50%; }
 .mode-btn.active .mode-icon { background: #4a3200; }
-/* Timer Panel */
 .timer-panel { background: linear-gradient(135deg, #fbe29a, #e4bf6b); color: #4a3200; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
 .timer-left { display: flex; flex-direction: column; gap: 4px; }
 .game-title { font-size: 13px; font-weight: bold; }
@@ -41,34 +34,24 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 .countdown-boxes { display: flex; gap: 3px; margin-top: 4px; }
 .box-num { background-color: #191919; color: #ffffff; padding: 4px 6px; border-radius: 4px; font-size: 18px; font-weight: bold; font-family: monospace; }
 .period-txt { font-size: 12px; margin-top: 5px; font-weight: bold; letter-spacing: 0.5px; }
-
-/* Color Buttons */
 .color-bet-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 5px; }
 .color-btn { border: none; padding: 12px; border-radius: 5px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; }
 .bg-green { background-color: #2aa453; }
 .bg-violet { background-color: #9c27b0; }
 .bg-red { background-color: #d32f2f; }
-
-/* Numbers Grid */
 .bdg-numbers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; background-color: #252525; padding: 12px; border-radius: 12px; margin-top: 5px; }
 .num-ball { border: none; width: 100%; aspect-ratio: 1/1; border-radius: 50%; font-size: 18px; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(255,255,255,0.3); }
 .ball-0 { background: linear-gradient(135deg, #9c27b0 50%, #d32f2f 50%); }
 .ball-5 { background: linear-gradient(135deg, #9c27b0 50%, #2aa453 50%); }
 .ball-green { background: radial-gradient(circle at 30% 30%, #5cb85c, #2aa453); }
 .ball-red { background: radial-gradient(circle at 30% 30%, #d9534f, #d32f2f); }
-
-/* Multiplier Row */
 .multiplier-row { display: flex; gap: 5px; margin-top: 5px; overflow-x: auto; padding: 4px 0; }
 .mult-btn { background-color: #333; border: none; color: #ccc; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
 .mult-btn.active { background-color: #2aa453; color: white; font-weight: bold; }
-
-/* Big / Small Row */
 .size-bet-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
 .size-btn { border: none; padding: 12px; border-radius: 5px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; }
 .bg-big { background-color: #ff9800; border-top-left-radius: 20px; border-bottom-left-radius: 20px; }
 .bg-small { background-color: #2196f3; border-top-right-radius: 20px; border-bottom-right-radius: 20px; }
-
-/* Game History Tabs & Tables */
 .history-tabs { display: flex; background-color: #252525; margin-top: 10px; border-radius: 8px 8px 0 0; border-bottom: 1px solid #333; }
 .tab-btn { flex: 1; background: none; border: none; color: #aaa; padding: 12px; font-size: 14px; cursor: pointer; font-weight: bold; text-align: center; }
 .tab-btn.active { background-color: #f3c343; color: #191919; border-radius: 8px 8px 0 0; }
@@ -79,8 +62,6 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 .text-green { color: #2aa453; }
 .text-red { color: #d32f2f; }
 .dot-res { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin: 0 2px; }
-
-/* Premium Betting Popup Sheet Modal CSS */
 .bet-modal { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background-color: #252525; border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -5px 25px rgba(0,0,0,0.6); transition: bottom 0.3s ease-in-out; z-index: 1000; padding: 15px; color: white; }
 .bet-modal.show { bottom: 0; }
 .modal-header { text-align: center; padding: 5px 0 15px; font-size: 16px; font-weight: bold; border-bottom: 1px solid #333; position: relative; }
@@ -97,7 +78,6 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 .confirm-bet-btn { flex: 1; background: linear-gradient(180deg, #2aa453, #166e33); color: white; border: none; padding: 12px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); text-align: center; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 999; }
 .modal-overlay.show { display: block; }
-/* Custom Premium Popup Overlay & Box */
 .custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); }
 .custom-alert-box { width: 85%; max-width: 340px; background-color: #252525; border-radius: 16px; border: 1px solid #444; padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.8); transition: transform 0.2s ease; }
 .custom-alert-overlay.show { display: flex; }
@@ -111,185 +91,155 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 </head>
 <body>
 <div class="game-container">
-    <!-- Top Back Navigation Header -->
-    <div class="top-nav-header">
-        <button class="back-btn-box" onclick="goToHome()">
-            <svg class="back-icon-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <div class="header-center-title">Win Go</div>
-    </div>
-
-    <!-- Wallet Section -->
-    <div class="wallet-section">
-        <div class="balance-title">₹0.00</div>
-        <div class="wallet-sub">💼 Wallet balance</div>
-        <div class="wallet-buttons">
-            <button class="wl-btn wl-withdraw" onclick="window.location.href='withdraw.html'">Withdraw</button>
-            <button class="wl-btn wl-deposit" onclick="window.location.href='deposit.html'">Deposit</button>
-        </div>
-    </div>
-
-    <!-- Game Modes Bar -->
-    <div class="game-modes">
-        <button id="mode-30s" class="mode-btn active" onclick="switchGameMode('30s')"><div class="mode-icon"></div><span>WinGo 30sec</span></button>
-        <button id="mode-1m" class="mode-btn" onclick="switchGameMode('1m')"><div class="mode-icon"></div><span>WinGo 1 Min</span></button>
-        <button id="mode-3m" class="mode-btn" onclick="switchGameMode('3m')"><div class="mode-icon"></div><span>WinGo 3 Min</span></button>
-        <button id="mode-5m" class="mode-btn" onclick="switchGameMode('5m')"><div class="mode-icon"></div><span>WinGo 5 Min</span></button>
-    </div>
-
-    <!-- Golden Timer Panel Box -->
-    <div class="timer-panel">
-        <div class="timer-left">
-            <span class="game-title" id="current-game-title">WinGo 30sec</span>
-            <div class="recent-balls" id="recent-balls-row">
-                <div class="ball-sm bg-green">3</div>
-                <div class="ball-sm bg-red">2</div>
-                <div class="ball-sm bg-green">7</div>
-            </div>
-        </div>
-        <div class="timer-right">
-            <span class="t-label">Time remaining</span>
-            <div class="countdown-boxes">
-                <span class="box-num" id="t-min1">0</span>
-                <span class="box-num" id="t-min2">0</span>
-                <span class="box-num">:</span>
-                <span class="box-num" id="t-sec1">0</span>
-                <span class="box-num" id="t-sec2">0</span>
-            </div>
-            <span class="period-txt" id="period-display">Loading...</span>
-        </div>
-    </div>
-
-    <!-- Color Bet Selectors -->
-    <div class="color-bet-row">
-        <button class="color-btn bg-green" onclick="placeBet('Green')">Green</button>
-        <button class="color-btn bg-violet" onclick="placeBet('Violet')">Violet</button>
-        <button class="color-btn bg-red" onclick="placeBet('Red')">Red</button>
-    </div>
-
-    <!-- 0-9 Numbers Keypad -->
-    <div class="bdg-numbers-grid">
-        <button class="num-ball ball-0" onclick="placeBet('0')">0</button>
-        <button class="num-ball ball-green" onclick="placeBet('1')">1</button>
-        <button class="num-ball ball-red" onclick="placeBet('2')">2</button>
-        <button class="num-ball ball-green" onclick="placeBet('3')">3</button>
-        <button class="num-ball ball-red" onclick="placeBet('4')">4</button>
-        <button class="num-ball ball-5" onclick="placeBet('5')">5</button>
-        <button class="num-ball ball-red" onclick="placeBet('6')">6</button>
-        <button class="num-ball ball-green" onclick="placeBet('7')">7</button>
-        <button class="num-ball ball-red" onclick="placeBet('8')">8</button>
-        <button class="num-ball ball-green" onclick="placeBet('9')">9</button>
-    </div>
-
-    <!-- Multipliers Shortcut Selector -->
-    <div class="multiplier-row">
-        <button class="mult-btn active" onclick="selectMultiplier(1)">X1</button>
-        <button class="mult-btn" onclick="selectMultiplier(5)">X5</button>
-        <button class="mult-btn" onclick="selectMultiplier(10)">X10</button>
-        <button class="mult-btn" onclick="selectMultiplier(20)">X20</button>
-        <button class="mult-btn" onclick="selectMultiplier(50)">X50</button>
-        <button class="mult-btn" onclick="selectMultiplier(100)">X100</button>
-    </div>
-
-    <!-- Big and Small Bets -->
-    <div class="size-bet-row">
-        <button class="size-btn bg-big" onclick="placeBet('Big')">Big</button>
-        <button class="size-btn bg-small" onclick="placeBet('Small')">Small</button>
-    </div>
-
-    <!-- Record History Menu Tab Selection -->
-    <div class="history-tabs">
-        <button id="tab-game" class="tab-btn active" onclick="changeTab('game')">Game history</button>
-        <button id="tab-my" class="tab-btn" onclick="changeTab('my')">My history</button>
-    </div>
-
-    <!-- Dynamic Scoreboard Data Output Table -->
-    <table class="history-table">
-        <thead id="table-head">
-            <tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>
-        </thead>
-        <tbody id="history-rows"><!-- Loaded via Socket --></tbody>
-    </table>
-
-    <!-- Pagination Buttons -->
-    <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 10px;">
-        <button id="btn-prev" onclick="changePage(-1)" style="background-color: #333; border: 1px solid #444; color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">&lt; Prev</button>
-        <span id="page-number-display" style="font-size: 14px; font-weight: bold; color: #f3c343;">Page 1</span>
-        <button id="btn-next" onclick="changePage(1)" style="background-color: #333; border: 1px solid #444; color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Next &gt;</button>
-    </div>
+<div class="top-nav-header">
+<button class="back-btn-box" onclick="goToHome()">
+<svg class="back-icon-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</button>
+<div class="header-center-title">Win Go</div>
 </div>
-
-<!-- Betting Overlay Background Sheet & Bottom Drawer -->
+<div class="wallet-section">
+<div class="balance-title">₹0.00</div>
+<div class="wallet-sub">💼 Wallet balance</div>
+<div class="wallet-buttons">
+<button class="wl-btn wl-withdraw" onclick="window.location.href='withdraw.html'">Withdraw</button>
+<button class="wl-btn wl-deposit" onclick="window.location.href='deposit.html'">Deposit</button>
+</div>
+</div>
+<div class="game-modes">
+<button id="mode-30s" class="mode-btn active" onclick="switchGameMode('30s')"><div class="mode-icon"></div><span>WinGo 30sec</span></button>
+<button id="mode-1m" class="mode-btn" onclick="switchGameMode('1m')"><div class="mode-icon"></div><span>WinGo 1 Min</span></button>
+<button id="mode-3m" class="mode-btn" onclick="switchGameMode('3m')"><div class="mode-icon"></div><span>WinGo 3 Min</span></button>
+<button id="mode-5m" class="mode-btn" onclick="switchGameMode('5m')"><div class="mode-icon"></div><span>WinGo 5 Min</span></button>
+</div>
+<div class="timer-panel">
+<div class="timer-left">
+<span class="game-title" id="current-game-title">WinGo 30sec</span>
+<div class="recent-balls" id="recent-balls-row">
+<div class="ball-sm bg-green">3</div>
+<div class="ball-sm bg-red">2</div>
+<div class="ball-sm bg-green">7</div>
+</div>
+</div>
+<div class="timer-right">
+<span class="t-label">Time remaining</span>
+<div class="countdown-boxes">
+<span class="box-num" id="t-min1">0</span>
+<span class="box-num" id="t-min2">0</span>
+<span class="box-num">:</span>
+<span class="box-num" id="t-sec1">0</span>
+<span class="box-num" id="t-sec2">0</span>
+</div>
+<span class="period-txt" id="period-display">Loading...</span>
+</div>
+</div>
+<div class="color-bet-row">
+<button class="color-btn bg-green" onclick="placeBet('Green')">Green</button>
+<button class="color-btn bg-violet" onclick="placeBet('Violet')">Violet</button>
+<button class="color-btn bg-red" onclick="placeBet('Red')">Red</button>
+</div>
+<div class="bdg-numbers-grid">
+<button class="num-ball ball-0" onclick="placeBet('0')">0</button>
+<button class="num-ball ball-green" onclick="placeBet('1')">1</button>
+<button class="num-ball ball-red" onclick="placeBet('2')">2</button>
+<button class="num-ball ball-green" onclick="placeBet('3')">3</button>
+<button class="num-ball ball-red" onclick="placeBet('4')">4</button>
+<button class="num-ball ball-5" onclick="placeBet('5')">5</button>
+<button class="num-ball ball-red" onclick="placeBet('6')">6</button>
+<button class="num-ball ball-green" onclick="placeBet('7')">7</button>
+<button class="num-ball ball-red" onclick="placeBet('8')">8</button>
+<button class="num-ball ball-green" onclick="placeBet('9')">9</button>
+</div>
+<div class="multiplier-row">
+<button class="mult-btn active" onclick="selectMultiplier(1)">X1</button>
+<button class="mult-btn" onclick="selectMultiplier(5)">X5</button>
+<button class="mult-btn" onclick="selectMultiplier(10)">X10</button>
+<button class="mult-btn" onclick="selectMultiplier(20)">X20</button>
+<button class="mult-btn" onclick="selectMultiplier(50)">X50</button>
+<button class="mult-btn" onclick="selectMultiplier(100)">X100</button>
+</div>
+<div class="size-bet-row">
+<button class="size-btn bg-big" onclick="placeBet('Big')">Big</button>
+<button class="size-btn bg-small" onclick="placeBet('Small')">Small</button>
+</div>
+<div class="history-tabs">
+<button id="tab-game" class="tab-btn active" onclick="changeTab('game')">Game history</button>
+<button id="tab-my" class="tab-btn" onclick="changeTab('my')">My history</button>
+</div>
+<table class="history-table">
+<thead id="table-head">
+<tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>
+</thead>
+<tbody id="history-rows"></tbody>
+</table>
+<div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 10px;">
+<button id="btn-prev" onclick="changePage(-1)" style="background-color: #333; border: 1px solid #444; color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">&lt; Prev</button>
+<span id="page-number-display" style="font-size: 14px; font-weight: bold; color: #f3c343;">Page 1</span>
+<button id="btn-next" onclick="changePage(1)" style="background-color: #333; border: 1px solid #444; color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Next &gt;</button>
+</div>
+</div>
 <div class="modal-overlay" id="betOverlay" onclick="closeBetModal()"></div>
 <div class="bet-modal" id="betModal">
-    <div class="modal-header">
-        <span id="modal-select-title">Select Green</span>
-        <button class="close-modal-btn" onclick="closeBetModal()">✕</button>
-    </div>
-    <div class="modal-section-title">Amount</div>
-    <div class="modal-amount-row">
-        <button class="mod-amt-btn active" onclick="selectAmount(1)">₹1</button>
-        <button class="mod-amt-btn" onclick="selectAmount(10)">₹10</button>
-        <button class="mod-amt-btn" onclick="selectAmount(100)">₹100</button>
-        <button class="mod-amt-btn" onclick="selectAmount(500)">₹500</button>
-    </div>
-    <div class="modal-section-title">Quantity</div>
-    <div class="qty-block">
-        <button class="qty-btn" onclick="changeQty(-1)">−</button>
-        <span class="qty-val" id="modal-qty-display">1</span>
-        <button class="qty-btn" onclick="changeQty(1)">+</button>
-    </div>
-    <div class="modal-footer-row">
-        <button class="cancel-bet-btn" onclick="closeBetModal()">Cancel</button>
-        <button class="confirm-bet-btn" id="total-bet-submit-btn" onclick="submitFinalBet()">Total Bet ₹1</button>
-    </div>
+<div class="modal-header">
+<span id="modal-select-title">Select Green</span>
+<button class="close-modal-btn" onclick="closeBetModal()">✕</button>
 </div>
-<!-- Custom Premium Popup Structure -->
+<div class="modal-section-title">Amount</div>
+<div class="modal-amount-row">
+<button class="mod-amt-btn active" onclick="selectAmount(1)">₹1</button>
+<button class="mod-amt-btn" onclick="selectAmount(10)">₹10</button>
+<button class="mod-amt-btn" onclick="selectAmount(100)">₹100</button>
+<button class="mod-amt-btn" onclick="selectAmount(500)">₹500</button>
+</div>
+<div class="modal-section-title">Quantity</div>
+<div class="qty-block">
+<button class="qty-btn" onclick="changeQty(-1)">−</button>
+<span class="qty-val" id="modal-qty-display">1</span>
+<button class="qty-btn" onclick="changeQty(1)">+</button>
+</div>
+<div class="modal-footer-row">
+<button class="cancel-bet-btn" onclick="closeBetModal()">Cancel</button>
+<button class="confirm-bet-btn" id="total-bet-submit-btn" onclick="submitFinalBet()">Total Bet ₹1</button>
+</div>
+</div>
 <div class="custom-alert-overlay" id="customAlert">
-    <div class="custom-alert-box">
-        <div class="custom-alert-icon" id="customAlertIcon">⚠</div>
-        <div class="custom-alert-title" id="customAlertTitle">Notification</div>
-        <div class="custom-alert-msg" id="customAlertMessage">Message text goes here.</div>
-        <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
-    </div>
+<div class="custom-alert-box">
+<div class="custom-alert-icon" id="customAlertIcon">⚠</div>
+<div class="custom-alert-title" id="customAlertTitle">Notification</div>
+<div class="custom-alert-msg" id="customAlertMessage">Message text goes here.</div>
+<button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
 </div>
-
-<script src="/socket.io/socket.io.js"></script>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
 <script>
-// मास्टर कस्टम अलर्ट इंजन (Call this instead of default alert)
 function showAppAlert(title, message, icon = '⚠') {
     document.getElementById("customAlertIcon").innerText = icon;
     document.getElementById("customAlertTitle").innerText = title;
     document.getElementById("customAlertMessage").innerText = message;
     document.getElementById("customAlert").classList.add("show");
 }
-
 function closeCustomAlert() {
     document.getElementById("customAlert").classList.remove("show");
 }
 
-const socket = io();
+const socket = io("https://color-game-1kc2.onrender.com");
 const loggedUserPhone = localStorage.getItem('user_phone');
-
-let activeMode = '30s'; 
+let activeMode = '30s';
 let currentTab = 'game';
-let allGamesData = {}; 
+let allGamesData = {};
 let localCountdown = 30;
 let currentWalletBalance = 0;
 let currentGamePage = 1;
 const resultsPerPage = 10;
-
 let selectedBetType = '';
 let selectedBetAmount = 1;
 let selectedBetQty = 1;
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!loggedUserPhone) {
-    showAppAlert("Access Denied", "Please login first to access the game room!", "🔒");
-    setTimeout(() => { window.location.href = "index.html"; }, 2000);
-    return;
-}
-
+        showAppAlert("Access Denied", "Please login first to access the game room!", "🔒");
+        setTimeout(() => { window.location.href = "index.html"; }, 2000);
+        return;
+    }
     fetchUserBalance();
     const urlParams = new URLSearchParams(window.location.search);
     const urlMode = urlParams.get('mode');
@@ -297,10 +247,9 @@ document.addEventListener("DOMContentLoaded", () => {
         activeMode = urlMode;
     }
 });
-
 function fetchUserBalance() {
     if (!loggedUserPhone) return;
-    fetch(`/api/balance/${loggedUserPhone}`)
+    fetch(`https://color-game-1kc2.onrender.com{loggedUserPhone}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {
@@ -321,12 +270,11 @@ function selectMultiplier(val) {
 }
 
 function switchGameMode(modeKey) {
-    currentGamePage = 1; 
+    currentGamePage = 1;
     activeMode = modeKey;
     document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
     const targetBtn = document.getElementById(`mode-${modeKey}`);
     if(targetBtn) targetBtn.classList.add('active');
-    
     let titleMap = { '30s': 'WinGo 30sec', '1m': 'WinGo 1 Min', '3m': 'WinGo 3 Min', '5m': 'WinGo 5 Min' };
     document.getElementById("current-game-title").innerText = titleMap[modeKey] || 'Win Go';
     
@@ -335,8 +283,6 @@ function switchGameMode(modeKey) {
         localCountdown = game.countdown;
         updateTimerUI(game.countdown);
         document.getElementById("period-display").innerText = game.period || "Loading...";
-        
-        // टैब के हिसाब से सही रेंडरिंग करें
         if(currentTab === 'game') {
             renderGameTable(game.history);
         } else {
@@ -349,10 +295,7 @@ function switchGameMode(modeKey) {
 function changeTab(tabName) {
     currentTab = tabName;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    
-    // टेबल बॉडी को तुरंत साफ करें ताकि कचरा डेटा न दिखे
-    document.getElementById("history-rows").innerHTML = ""; 
-    
+    document.getElementById("history-rows").innerHTML = "";
     if (tabName === 'game') {
         document.getElementById('tab-game').classList.add('active');
         document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>`;
@@ -366,13 +309,12 @@ function changeTab(tabName) {
 
 function placeBet(type) {
     if (localCountdown <= 5) {
-    showAppAlert("Round Closed", "Time over! This game round has closed.", "🛑");
-    closeBetModal();
-    return;
-}
-
+        showAppAlert("Round Closed", "Time over! This game round has closed.", "🛑");
+        closeBetModal();
+        return;
+    }
     selectedBetType = type;
-    selectedBetAmount = 1; 
+    selectedBetAmount = 1;
     selectedBetQty = 1;
     document.getElementById("modal-select-title").innerText = "Select " + type + " [" + activeMode.toUpperCase() + "]";
     document.getElementById("modal-qty-display").innerText = "1";
@@ -394,6 +336,7 @@ function selectAmount(amt) {
     if(typeof event !== 'undefined' && event.target) event.target.classList.add('active');
     calculateTotalBet();
 }
+
 function changeQty(val) {
     selectedBetQty += val;
     if (selectedBetQty < 1) selectedBetQty = 1;
@@ -409,15 +352,14 @@ function calculateTotalBet() {
 function submitFinalBet() {
     let totalAmount = selectedBetAmount * selectedBetQty;
     if (localCountdown <= 5) {
-        alert("⚠ समय समाप्त! गेम क्लोज हो चुका है।");
+        showAppAlert("Timeout", "Round closed! Time is over.", "⚠");
         closeBetModal();
         return;
     }
     if (totalAmount > currentWalletBalance) {
-    showAppAlert("Insufficient Balance", `Your wallet balance is ₹${currentWalletBalance.toFixed(2)}. Please deposit funds to continue playing.`, "🔴");
-    return;
-}
-
+        showAppAlert("Insufficient Balance", `Your wallet balance is insufficient. Please deposit funds.`, "🔴");
+        return;
+    }
     socket.emit('place_bet', {
         phone: loggedUserPhone,
         mode: activeMode,
@@ -426,7 +368,6 @@ function submitFinalBet() {
     });
     closeBetModal();
 }
-
 socket.on('bet_response', (data) => {
     if (data.success) {
         showAppAlert("Success", "Your bet has been placed successfully!", "✅");
@@ -438,7 +379,6 @@ socket.on('bet_response', (data) => {
     }
 });
 
-// 🔥 रीलोड करने पर डेटा तुरंत लोड करने वाला फिक्स
 socket.on('all_modes_state', (modesData) => {
     allGamesData = modesData;
     let titleMap = { '30s': 'WinGo 30sec', '1m': 'WinGo 1 Min', '3m': 'WinGo 3 Min', '5m': 'WinGo 5 Min' };
@@ -446,14 +386,11 @@ socket.on('all_modes_state', (modesData) => {
     document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
     const targetBtn = document.getElementById(`mode-${activeMode}`);
     if(targetBtn) targetBtn.classList.add('active');
-    
     let activeGame = allGamesData[activeMode];
     if (activeGame) {
         localCountdown = activeGame.countdown;
         updateTimerUI(activeGame.countdown);
         document.getElementById("period-display").innerText = activeGame.period || "Loading...";
-        
-        // यहाँ फिक्स: रीलोड करते ही डेटा दिखेगा
         if(currentTab === 'game') {
             renderGameTable(activeGame.history);
         } else {
@@ -467,7 +404,6 @@ socket.on('time_update', (data) => {
     if (!allGamesData[data.mode]) allGamesData[data.mode] = {};
     allGamesData[data.mode].countdown = data.countdown;
     allGamesData[data.mode].period = data.period;
-    
     if (data.mode === activeMode) {
         localCountdown = data.countdown;
         updateTimerUI(data.countdown);
@@ -479,9 +415,7 @@ socket.on('time_update', (data) => {
 socket.on('game_result', (data) => {
     if (!allGamesData[data.mode]) allGamesData[data.mode] = {};
     allGamesData[data.mode].history = data.history;
-    
     if (data.mode === activeMode) {
-        // 🔥 यहाँ सुधार: सिर्फ तभी रेंडर करें जब यूजर गेम हिस्ट्री वाले टैब पर खुला हो!
         if(currentTab === 'game') {
             renderGameTable(data.history);
         }
@@ -561,26 +495,20 @@ socket.on('bet_outcome', (data) => {
     if(currentTab === 'my') fetchMyHistory();
 });
 
-// 🔥 यूजर की पर्सनल माई हिस्ट्री रेंडर करने का साफ सुथरा लॉजिक
 socket.on('my_history_data', (data) => {
-    if (currentTab !== 'my') return; // अगर यूजर माई हिस्ट्री टैब पर नहीं है तो कुछ न करें
-    
+    if (currentTab !== 'my') return;
     const tbody = document.getElementById("history-rows");
     tbody.innerHTML = "";
-    
     if (!data.success || !data.bets || data.bets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:20px;">कोई बेटिंग रिकॉर्ड नहीं मिला</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:20px;">No betting records found</td></tr>`;
         return;
     }
-    
     data.bets.forEach(bet => {
         let statusStyle = 'color: #aaa;';
         if (bet.status === 'WIN') statusStyle = 'color: #2aa453; font-weight: bold;';
         if (bet.status === 'LOSS') statusStyle = 'color: #d32f2f;';
-        
         let resultText = bet.status;
         if (bet.status === 'WIN') resultText = `Win (+₹${bet.winAmount.toFixed(2)})`;
-        
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${bet.period}</td><td style="font-weight: bold; color: #f3c343;">${bet.selectValue}</td><td>₹${bet.amount}</td><td style="${statusStyle}">${resultText}</td>`;
         tbody.appendChild(tr);

@@ -1,434 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RM GAME - Master Admin Panel</title>
-    <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background-color: #121212; color: #e0e0e0; min-height: 100vh; overflow-x: hidden; }
-    
-    /* ☰ Top Navigation Bar */
-    .admin-top-bar {
-        background-color: #1e1e1e;
-        border-bottom: 1px solid #2d2d2d;
-        height: 55px;
-        display: flex;
-        align-items: center;
-        padding: 0 15px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 900;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    .menu-toggle-btn {
-        background: none;
-        border: none;
-        color: #dbb35e;
-        font-size: 24px;
-        cursor: pointer;
-        margin-right: 15px;
-    }
-    .admin-title { font-size: 15px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px; }
-
-    /* 🗂️ Three Lines Sliding Sidebar Drawer */
-    .admin-sidebar {
-        position: fixed;
-        top: 0;
-        left: -260px; /* Hidden by default */
-        width: 260px;
-        height: 100%;
-        background-color: #1a1a1a;
-        z-index: 1001;
-        transition: left 0.3s ease-in-out;
-        box-shadow: 4px 0 15px rgba(0,0,0,0.5);
-        display: flex;
-        flex-direction: column;
-    }
-    .admin-sidebar.open { left: 0; } /* Show when open class added */
-    
-    .sidebar-header {
-        background: linear-gradient(135deg, #dbb35e, #c79a49);
-        color: #201500;
-        padding: 18px 15px;
-        font-size: 14px;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .sidebar-links { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; }
-    .sidebar-links button {
-        background: none;
-        border: none;
-        color: #cccccc;
-        padding: 14px 20px;
-        text-align: left;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        border-left: 3px solid transparent;
-    }
-    .sidebar-links button:hover { background-color: #252525; color: #dbb35e; border-left-color: #dbb35e; }
-    
-    /* Dark Menu Overlay Background */
-    .sidebar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: none;
-        z-index: 1000;
-    }
-    .sidebar-overlay.show { display: block; }
-
-    /* 📱 Main Dynamic Workspace Layout */
-    .main-panel-content { padding: 75px 12px 20px 12px; margin: 0 auto; width: 100%; max-width: 500px; }
-    
-    /* Hide unselected tab sections automatically */
-    .admin-section { display: none; flex-direction: column; gap: 15px; }
-    .admin-section.active-view { display: flex; } /* Show only active view */
-    /* 📊 4 Mini Analytics Statistics Cards Grid */
-    .stats-grid-row {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        width: 100%;
-    }
-    .stat-mini-box {
-        background-color: #1e1e1e;
-        border: 1px solid #2d2d2d;
-        border-radius: 10px;
-        padding: 12px 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
-    .st-num { font-size: 16px; font-weight: bold; color: #ffffff; font-family: monospace; }
-    .st-lbl { font-size: 10px; color: #888888; font-weight: 500; text-transform: uppercase; }
-
-    /* Admin Content Cards */
-    .admin-card {
-        background-color: #1e1e1e;
-        border-radius: 12px;
-        padding: 15px;
-        border: 1px solid #2d2d2d;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    .card-title { font-size: 13px; font-weight: bold; color: #dbb35e; border-left: 3px solid #dbb35e; padding-left: 8px; margin-bottom: 2px; text-align: left; }
-    
-    /* Form fields elements */
-    .form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
-    .form-group.row-flex { flex-direction: row; gap: 8px; align-items: center; }
-    .form-group.row-flex input { flex: 1; margin-top: 0; }
-    
-    label { font-size: 11px; color: #aaa; font-weight: 500; }
-    input, select { background-color: #121212; color: #ffffff; border: 1px solid #333333; padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none; width: 100%; }
-    input:focus, select:focus { border-color: #dbb35e; }
-
-    /* 🏦 Fixed Separated Bank Input Columns (One Row Grid Layout) */
-    .bank-row-inputs {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        margin-top: 5px;
-    }
-    .bank-col { display: flex; flex-direction: column; gap: 4px; text-align: left; }
-
-    /* 📦 4 Separate QR Code Upload Slots Matrix Layout */
-    .qr-upload-grid-4 {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin-top: 8px;
-    }
-    .qr-slot-box {
-        background-color: #121212;
-        border: 1px dashed #444444;
-        border-radius: 10px;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        align-items: center;
-    }
-    .qr-slot-box label { font-size: 11px; color: #dbb35e; font-weight: bold; }
-    .qr-slot-box input[type="file"] { padding: 4px; font-size: 11px; background: none; border: none; }
-    .qr-preview-frame {
-        width: 70px;
-        height: 70px;
-        border: 1px solid #2d2d2d;
-        border-radius: 6px;
-        background-color: #1a1a1a;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }
-    .qr-preview-frame img { width: 100%; height: 100%; object-fit: contain; }
-    
-    /* Control Action Buttons design */
-    .btn { display: inline-block; border: none; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; text-transform: uppercase; }
-    .btn-save { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; width: 100%; }
-    .btn-blue { background-color: #2196f3; color: white; white-space: nowrap; height: 38px; }
-    .btn-green { background-color: #2aa453; color: white; }
-    .btn-red { background-color: #d32f2f; color: white; }
-    .btn-warn { background-color: #ff9800; color: #121212; }
-    
-    /* Tabular Layout grid dashboard */
-    .admin-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-top: 5px; min-width: 450px; }
-    .admin-table th { background-color: #2d2d2d; color: #aaa; padding: 10px 6px; font-weight: 600; border-bottom: 2px solid #333; }
-    .admin-table td { padding: 12px 6px; border-bottom: 1px solid #2d2d2d; color: #ddd; background-color: #161616; vertical-align: middle; }
-    
-    .action-btn-sm { border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; margin: 0 2px; text-transform: uppercase; }
-    .act-approve { background-color: #2aa453; color: white; }
-    .act-reject { background-color: #d32f2f; color: white; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM GAME - Master Admin Panel</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background-color: #121212; color: #e0e0e0; min-height: 100vh; overflow-x: hidden; }
+.admin-top-bar { background-color: #1e1e1e; border-bottom: 1px solid #2d2d2d; height: 55px; display: flex; align-items: center; padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; z-index: 900; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.menu-toggle-btn { background: none; border: none; color: #dbb35e; font-size: 24px; cursor: pointer; margin-right: 15px; }
+.admin-title { font-size: 15px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px; }
+.admin-sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background-color: #1a1a1a; z-index: 1001; transition: left 0.3s ease-in-out; box-shadow: 4px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
+.admin-sidebar.open { left: 0; }
+.sidebar-header { background: linear-gradient(135deg, #dbb35e, #c79a49); color: #201500; padding: 18px 15px; font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+.sidebar-links { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; }
+.sidebar-links button { background: none; border: none; color: #cccccc; padding: 14px 20px; text-align: left; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+.sidebar-links button:hover { background-color: #252525; color: #dbb35e; border-left-color: #dbb35e; }
+.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1000; }
+.sidebar-overlay.show { display: block; }
+.main-panel-content { padding: 75px 12px 20px 12px; margin: 0 auto; width: 100%; max-width: 500px; }
+.admin-section { display: none; flex-direction: column; gap: 15px; }
+.admin-section.active-view { display: flex; }
+.stats-grid-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+.stat-mini-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 10px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+.st-num { font-size: 16px; font-weight: bold; color: #ffffff; font-family: monospace; }
+.st-lbl { font-size: 10px; color: #888888; font-weight: 500; text-transform: uppercase; }
+.admin-card { background-color: #1e1e1e; border-radius: 12px; padding: 15px; border: 1px solid #2d2d2d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 12px; }
+.card-title { font-size: 13px; font-weight: bold; color: #dbb35e; border-left: 3px solid #dbb35e; padding-left: 8px; margin-bottom: 2px; text-align: left; }
+.form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+.form-group.row-flex { display: flex; flex-direction: row; gap: 8px; align-items: center; }
+.form-group.row-flex input { flex: 1; margin-top: 0; }
+label { font-size: 11px; color: #aaa; font-weight: 500; }
+input, select { background-color: #121212; color: #ffffff; border: 1px solid #333333; padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none; width: 100%; }
+input:focus, select:focus { border-color: #dbb35e; }
+.bank-row-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 5px; }
+.bank-col { display: flex; flex-direction: column; gap: 4px; text-align: left; }
+.qr-upload-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 8px; }
+.qr-slot-box { background-color: #121212; border: 1px dashed #444444; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.qr-slot-box label { font-size: 11px; color: #dbb35e; font-weight: bold; }
+.qr-slot-box input[type="file"] { padding: 4px; font-size: 11px; background: none; border: none; }
+.qr-preview-frame { width: 70px; height: 70px; border: 1px solid #2d2d2d; border-radius: 6px; background-color: #1a1a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.qr-preview-frame img { width: 100%; height: 100%; object-fit: contain; }
+.btn { display: inline-block; border: none; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; text-transform: uppercase; }
+.btn-save { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; width: 100%; }
+.btn-blue { background-color: #2196f3; color: white; white-space: nowrap; height: 38px; }
+.btn-green { background-color: #2aa453; color: white; }
+.btn-red { background-color: #d32f2f; color: white; }
+.btn-warn { background-color: #ff9800; color: #121212; }
+.admin-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-top: 5px; min-width: 450px; }
+.admin-table th { background-color: #2d2d2d; color: #aaa; padding: 10px 6px; font-weight: 600; border-bottom: 2px solid #333; }
+.admin-table td { padding: 12px 6px; border-bottom: 1px solid #2d2d2d; color: #ddd; background-color: #161616; vertical-align: middle; }
+.action-btn-sm { border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; margin: 0 2px; text-transform: uppercase; }
+.act-approve { background-color: #2aa453; color: white; }
+.act-reject { background-color: #d32f2f; color: white; }
+.custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; pointer-events: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
+.custom-alert-box { width: 85%; max-width: 330px; background-color: #252525; border-radius: 16px; border: 1px solid #444; padding: 25px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: scale(0.8); transition: transform 0.2s ease; }
+.custom-alert-overlay.show { display: flex; pointer-events: auto; }
+.custom-alert-overlay.show .custom-alert-box { transform: scale(1); }
+.custom-alert-icon { font-size: 36px; margin-bottom: 12px; }
+.custom-alert-title { font-size: 18px; font-weight: bold; color: #dbb35e; margin-bottom: 8px; }
+.custom-alert-msg { font-size: 14px; color: #e0e0e0; line-height: 1.4; margin-bottom: 22px; }
+.custom-alert-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 11px 40px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; }
 </style>
 </head>
 <body>
+<div class="admin-top-bar">
+<button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
+<div class="admin-title">RM Game Control Dashboard</div>
+</div>
 
-    <!-- ☰ Top Header with Hamburger Icon -->
-    <div class="admin-top-bar">
-        <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
-        <div class="admin-title">RM Game Control Dashboard</div>
-    </div>
+<div class="admin-sidebar" id="sidebarMenu">
+<div class="sidebar-header">
+🛡 Master Panel Menu
+<button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
+</div>
+<div class="sidebar-links">
+<button onclick="switchAdminView('dashboard-view')">📊 Dashboard Overview</button>
+<button onclick="switchAdminView('game-control-view')">🎮 Game Control</button>
+<button onclick="switchAdminView('deposit-requests-view')">📥 Deposit Approvals</button>
+<button onclick="switchAdminView('withdraw-requests-view')">📤 Withdraw Manager</button>
+<button onclick="switchAdminView('user-management-view')">👤 Member Accounts</button>
+<button onclick="switchAdminView('gateway-updater-view')">💳 Bank & QR Settings</button>
+</div>
+</div>
+<div class="sidebar-overlay" id="menuOverlay" onclick="toggleSidebar()"></div>
 
-    <!-- 🗂️ Three Lines Sliding Sidebar Navigation Menu -->
-    <div class="admin-sidebar" id="sidebarMenu">
-        <div class="sidebar-header">
-            🛡️ Master Panel Menu 
-            <button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
-        </div>
-        <div class="sidebar-links">
-            <button onclick="switchAdminView('dashboard-view')">📊 Dashboard Overview</button>
-            <button onclick="switchAdminView('game-control-view')">🎮 Game Control</button>
-            <button onclick="switchAdminView('deposit-requests-view')">📥 Deposit Approvals</button>
-            <button onclick="switchAdminView('withdraw-requests-view')">📤 Withdraw Manager</button>
-            <button onclick="switchAdminView('user-management-view')">👤 Member Accounts</button>
-            <button onclick="switchAdminView('gateway-updater-view')">💳 Bank &amp; QR Settings</button>
-        </div>
-    </div>
-    <div class="sidebar-overlay" id="menuOverlay" onclick="toggleSidebar()"></div>
+<div class="main-panel-content">
+<div id="dashboard-view" class="admin-section active-view">
+<div class="stats-grid-row">
+<div class="stat-mini-box"><span class="st-num" id="stat-total-users">0</span><span class="st-lbl">Total Users</span></div>
+<div class="stat-mini-box"><span class="st-num" id="stat-total-deposits" style="color:#2aa453;">₹0.00</span><span class="st-lbl">Total Deposit</span></div>
+<div class="stat-mini-box"><span class="st-num" id="stat-total-withdraws" style="color:#d32f2f;">₹0.00</span><span class="st-lbl">Total Withdraw</span></div>
+<div class="stat-mini-box"><span class="st-num" id="stat-active-bets">0</span><span class="st-lbl">Active Bets</span></div>
+</div>
+<div class="admin-card" style="margin-top: 15px;">
+<div class="card-title">👥 Registered Users List</div>
+<div style="overflow-x: auto;">
+<table class="admin-table">
+<thead>
+<tr><th>UID</th><th>Mobile Number</th><th>Wallet Balance</th><th>Status</th></tr>
+</thead>
+<tbody id="master-users-list-rows">
+<tr><td colspan="4" style="color:#888; padding:15px;">Loading users feed...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="game-control-view" class="admin-section">
+<div class="admin-card">
+<div class="card-title">🎮 WinGo Auto-Profit & Control Desk</div>
+<div class="form-group">
+<label>Select Game Mode:</label>
+<select id="ctrl-mode-select">
+<option value="30s">WinGo 30sec</option>
+<option value="1m">WinGo 1 Min</option>
+<option value="3m">WinGo 3 Min</option>
+<option value="5m">WinGo 5 Min</option>
+</select>
+</div>
+<div class="form-group">
+<label>Execution Mode Policy:</label>
+<select id="game-control-type" onchange="toggleManualInputBox(this.value)">
+<option value="auto">Automatic (Auto-Profit Mode)</option>
+<option value="manual">Manual Force (Admin Chooses Winner)</option>
+</select>
+</div>
+<div class="form-group" id="manual-num-block" style="display: none;">
+<label>Forced Winning Number (0-9):</label>
+<input type="number" id="manual-target-number" min="0" max="9" placeholder="Enter number 0-9">
+</div>
+<button class="btn btn-save" onclick="updateGameControl()">Commit Game Directives</button>
+</div>
+</div>
 
-    <!-- 📱 MAIN PANEL INTERFACE CONTAINER -->
-    <div class="main-panel-content">
+<div id="deposit-requests-view" class="admin-section">
+<div class="admin-card">
+<div class="card-title">📥 Pending Deposit UTR Requests</div>
+<div style="overflow-x: auto;">
+<table class="admin-table">
+<thead>
+<tr><th>User Phone</th><th>Amount</th><th>UTR Number</th><th>Action Panel</th></tr>
+</thead>
+<tbody id="deposit-request-rows">
+<tr><td colspan="4" style="color:#888; padding:15px;">No pending deposits found.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 
-        <!-- 📊 SECTION 1: DASHBOARD OVERVIEW (4 Analytics Boxes) -->
-        <div id="dashboard-view" class="admin-section active-view">
-            <div class="stats-grid-row">
-                <div class="stat-mini-box">
-                    <span class="st-num" id="stat-total-users">0</span>
-                    <span class="st-lbl">Total Users</span>
-                </div>
-                <div class="stat-mini-box">
-                    <span class="st-num" id="stat-total-deposits" style="color: #2aa453;">₹0.00</span>
-                    <span class="st-lbl">Total Deposit</span>
-                </div>
-                <div class="stat-mini-box">
-                    <span class="st-num" id="stat-total-withdraws" style="color: #d32f2f;">₹0.00</span>
-                    <span class="st-lbl">Total Withdraw</span>
-                </div>
-                <div class="stat-mini-box">
-                    <span class="st-num" id="stat-active-bets">0</span>
-                    <span class="st-lbl">Active Bets</span>
-                </div>
-            </div>
+<div id="withdraw-requests-view" class="admin-section">
+<div class="admin-card">
+<div class="card-title">📤 Pending Withdraw Payout Requests</div>
+<div style="overflow-x: auto;">
+<table class="admin-table">
+<thead>
+<tr><th>User Phone</th><th>Amount</th><th>Payout Details</th><th>Action Panel</th></tr>
+</thead>
+<tbody id="withdraw-request-rows">
+<tr><td colspan="4" style="color:#888; padding:15px;">No pending withdrawals found.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 
-            <!-- Users Registry Master Database Feed Table -->
-            <div class="admin-card" style="margin-top: 15px;">
-                <div class="card-title">👥 Registered Users List</div>
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>UID</th>
-                                <th>Mobile Number</th>
-                                <th>Gmail Account</th>
-                                <th>Wallet Balance</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="master-users-list-rows">
-                            <!-- Data will load here dynamically via Socket -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-                <!-- 🎮 SECTION 2: GAME CONTROL OVERRIDES -->
-        <div id="game-control-view" class="admin-section">
-            <div class="admin-card">
-                <div class="card-title">🎮 WinGo Auto-Profit &amp; Control Desk</div>
-                <div class="form-group">
-                    <label>Select Game Mode:</label>
-                    <select id="ctrl-mode-select">
-                        <option value="30s">WinGo 30sec</option>
-                        <option value="1m">WinGo 1 Min</option>
-                        <option value="3m">WinGo 3 Min</option>
-                        <option value="5m">WinGo 5 Min</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Execution Mode Policy:</label>
-                    <select id="game-control-type" onchange="toggleManualInputBox(this.value)">
-                        <option value="auto">Automatic (Auto-Profit Mode)</option>
-                        <option value="manual">Manual Force (Admin Chooses Winner)</option>
-                    </select>
-                </div>
-                <div class="form-group" id="manual-num-block" style="display: none;">
-                    <label>Forced Winning Number (0-9):</label>
-                    <input type="number" id="manual-target-number" min="0" max="9" placeholder="Enter number 0-9">
-                </div>
-                <button class="btn btn-save" onclick="updateGameControl()">Commit Game Directives</button>
-            </div>
-        </div>
+<div id="user-management-view" class="admin-section">
+<div class="admin-card">
+<div class="card-title">👤 User Account Balance & Ban Control</div>
+<div class="form-group row-flex">
+<input type="text" id="search-user-phone" placeholder="Enter Mobile Number">
+<button class="btn btn-blue" onclick="manageUserAccount('search')">Search Profile</button>
+</div>
+<div id="user-stats-box" style="display:none; background:#121212; padding:12px; border-radius:8px; border:1px solid #333; margin-top:10px;">
+<p><strong>Phone:</strong> <span id="res-user-phone">-</span></p>
+<p><strong>Wallet:</strong> <span id="res-user-balance" style="color:#2aa453; font-weight:bold;">₹0.00</span></p>
+<p><strong>Status:</strong> <span id="res-user-status">-</span></p>
+<div class="form-group" style="margin-top:10px;">
+<label>Adjustment Amount (INR):</label>
+<input type="number" id="balance-modifier-amount" placeholder="Enter Value">
+</div>
+<div style="display:flex; gap:10px; margin-top:8px;">
+<button class="btn btn-green" style="flex:1;" onclick="manageUserAccount('add_balance')">Credit (+)</button>
+<button class="btn btn-red" style="flex:1;" onclick="manageUserAccount('deduct_balance')">Debit (-)</button>
+</div>
+<button class="btn btn-warn" style="width:100%; margin-top:10px; font-weight:bold;" id="ban-toggle-btn" onclick="manageUserAccount('ban')">Suspend Account</button>
+</div>
+</div>
+</div>
 
-        <!-- 📥 SECTION 3: DEPOSIT VERIFIER -->
-        <div id="deposit-requests-view" class="admin-section">
-            <div class="admin-card">
-                <div class="card-title">📥 Pending Deposit UTR Requests</div>
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>User Phone</th>
-                                <th>Amount</th>
-                                <th>UTR / TXN Number</th>
-                                <th>Action Panel</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deposit-request-rows">
-                            <!-- Loaded via Script -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+<div id="gateway-updater-view" class="admin-section">
+<div class="admin-card">
+<div class="card-title">💳 System Payment & QR Settings</div>
+<div class="form-group">
+<label>Master Gateway UPI ID Handle:</label>
+<input type="text" id="admin-upi-id" placeholder="merchant@upi">
+</div>
+<div class="bank-row-inputs">
+<div class="bank-col"><label>Bank Name</label><input type="text" id="bank-name-field" placeholder="SBI, HDFC..."></div>
+<div class="bank-col"><label>Beneficiary Name</label><input type="text" id="bank-holder-field" placeholder="Holder Name"></div>
+<div class="bank-col"><label>Account Number</label><input type="text" id="bank-acc-field" placeholder="Account Number"></div>
+<div class="bank-col"><label>IFSC Code</label><input type="text" id="bank-ifsc-field" placeholder="IFSC Code"></div>
+</div>
+<label style="margin-top: 15px; display: block; font-weight: bold; color: #dbb35e;">📦 4 Separate QR Code Upload Slots</label>
+<div class="qr-upload-grid-4">
+<div class="qr-slot-box"><label>QR Code Slot 1</label><input type="file" id="qr-input-1" accept="image/*" onchange="processQrImage(1)"><div class="qr-preview-frame"><img id="qr-prev-1" src="" style="display:none;" alt="QR 1"></div></div>
+<div class="qr-slot-box"><label>QR Code Slot 2</label><input type="file" id="qr-input-2" accept="image/*" onchange="processQrImage(2)"><div class="qr-preview-frame"><img id="qr-prev-2" src="" style="display:none;" alt="QR 2"></div></div>
+<div class="qr-slot-box"><label>QR Code Slot 3</label><input type="file" id="qr-input-3" accept="image/*" onchange="processQrImage(3)"><div class="qr-preview-frame"><img id="qr-prev-3" src="" style="display:none;" alt="QR 3"></div></div>
+<div class="qr-slot-box"><label>QR Code Slot 4</label><input type="file" id="qr-input-4" accept="image/*" onchange="processQrImage(4)"><div class="qr-preview-frame"><img id="qr-prev-4" src="" style="display:none;" alt="QR 4"></div></div>
+</div>
+<button class="btn btn-save" style="margin-top:15px;" onclick="updateAdminGateways()">Commit Gateway Changes</button>
+</div>
+</div>
+</div>
 
-        <!-- 📤 SECTION 4: WITHDRAW DISBURSER -->
-        <div id="withdraw-requests-view" class="admin-section">
-            <div class="admin-card">
-                <div class="card-title">📤 Pending Withdraw Payout Requests</div>
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>User Phone</th>
-                                <th>Amount</th>
-                                <th>Target Payout Details</th>
-                                <th>Action Panel</th>
-                            </tr>
-                        </thead>
-                        <tbody id="withdraw-request-rows">
-                            <!-- Loaded via Script -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- 👤 SECTION 5: MEMBER MODIFIER AND BAN SEARCH ENGINE -->
-        <div id="user-management-view" class="admin-section">
-            <div class="admin-card">
-                <div class="card-title">👤 User Account Balance &amp; Ban Control</div>
-                <div class="form-group row-flex">
-                    <input type="text" id="search-user-phone" placeholder="Enter Mobile Number">
-                    <button class="btn btn-blue" onclick="manageUserAccount('search')">Search Profile</button>
-                </div>
-                <div id="user-stats-box" style="display:none; background:#121212; padding:12px; border-radius:8px; border:1px solid #333; margin-top:10px;">
-                    <p><strong>Phone:</strong> <span id="res-user-phone">-</span></p>
-                    <p><strong>Wallet:</strong> <span id="res-user-balance" style="color:#2aa453; font-weight:bold;">₹0.00</span></p>
-                    <p><strong>Status:</strong> <span id="res-user-status">-</span></p>
-                    <div class="form-group" style="margin-top:10px;">
-                        <label>Adjustment Amount (INR):</label>
-                        <input type="number" id="balance-modifier-amount" placeholder="Enter Value">
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top:8px;">
-                        <button class="btn btn-green" style="flex:1;" onclick="manageUserAccount('add_balance')">Credit (+)</button>
-                        <button class="btn btn-red" style="flex:1;" onclick="manageUserAccount('deduct_balance')">Debit (-)</button>
-                    </div>
-                    <button class="btn btn-warn" style="width:100%; margin-top:10px; font-weight:bold;" id="ban-toggle-btn" onclick="manageUserAccount('ban')">Suspend Account</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 💳 SECTION 6: FIXED SEPARATED BANK COLUMNS AND 4 QR UPLOADERS -->
-        <div id="gateway-updater-view" class="admin-section">
-            <div class="admin-card">
-                <div class="card-title">💳 System Payment &amp; QR Settings</div>
-                <div class="form-group">
-                    <label>Master Gateway UPI ID Handle:</label>
-                    <input type="text" id="admin-upi-id" placeholder="merchant@upi">
-                </div>
-                
-                <!-- Separated Columns Bank Fields Matrix -->
-                <div class="bank-row-inputs">
-                    <div class="bank-col"><label>Bank Name</label><input type="text" id="bank-name-field" placeholder="SBI, HDFC..."></div>
-                    <div class="bank-col"><label>Beneficiary Name</label><input type="text" id="bank-holder-field" placeholder="Holder Name"></div>
-                    <div class="bank-col"><label>Account Number</label><input type="text" id="bank-acc-field" placeholder="Account Number"></div>
-                    <div class="bank-col"><label>IFSC Code</label><input type="text" id="bank-ifsc-field" placeholder="IFSC Code"></div>
-                </div>
-
-                <label style="margin-top: 15px; display: block; font-weight: bold; color: #dbb35e;">📦 4 Separate QR Code Upload Slots</label>
-                <div class="qr-upload-grid-4">
-                    <div class="qr-slot-box">
-                        <label>QR Code Slot 1</label>
-                        <input type="file" id="qr-input-1" accept="image/*" onchange="processQrImage(1)">
-                        <div class="qr-preview-frame"><img id="qr-prev-1" src="" style="display:none;" alt="QR 1"></div>
-                    </div>
-                    <div class="qr-slot-box">
-                        <label>QR Code Slot 2</label>
-                        <input type="file" id="qr-input-2" accept="image/*" onchange="processQrImage(2)">
-                        <div class="qr-preview-frame"><img id="qr-prev-2" src="" style="display:none;" alt="QR 2"></div>
-                    </div>
-                    <div class="qr-slot-box">
-                        <label>QR Code Slot 3</label>
-                        <input type="file" id="qr-input-3" accept="image/*" onchange="processQrImage(3)">
-                        <div class="qr-preview-frame"><img id="qr-prev-3" src="" style="display:none;" alt="QR 3"></div>
-                    </div>
-                    <div class="qr-slot-box">
-                        <label>QR Code Slot 4</label>
-                        <input type="file" id="qr-input-4" accept="image/*" onchange="processQrImage(4)">
-                        <div class="qr-preview-frame"><img id="qr-prev-4" src="" style="display:none;" alt="QR 4"></div>
-                    </div>
-                </div>
-
-                <button class="btn btn-save" style="margin-top:15px;" onclick="updateAdminGateways()">Commit Gateway Changes</button>
-            </div>
-        </div>
-
-    </div> <!-- main-panel-content end -->
-    <!-- 1. सबसे पहले सॉकेट लाइब्रेरी लोड होगी ताकि io defined हो सके -->
+<div class="custom-alert-overlay" id="adminAlertOverlay">
+<div class="custom-alert-box">
+<div class="custom-alert-icon" id="admAlertIcon">⚠</div>
+<div class="custom-alert-title" id="admAlertTitle">Notification</div>
+<div class="custom-alert-msg" id="admAlertMessage">Message text.</div>
+<button class="custom-alert-btn" onclick="closeAdminAlert()">OK</button>
+</div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
 <script>
-// 2. यहाँ आपका लाइव रेंडर सर्वर लिंक सेट है
-const socket = io("https://color-game-1kc2.onrender.com");
+const API_BASE_URL = "https://color-game-1kc2.onrender.com";
+const socket = io(API_BASE_URL);
+
 let currentSearchedPhone = "";
 let qrBase64_1 = "", qrBase64_2 = "", qrBase64_3 = "", qrBase64_4 = "";
 let alertCallback = null;
 
 function showAdminPopup(title, message, icon = '⚠', callback = null) {
-    document.getElementById("admAlertIcon").innerText = icon;
-    document.getElementById("admAlertTitle").innerText = title;
-    document.getElementById("admAlertMessage").innerText = message;
+    if(document.getElementById("admAlertIcon")) document.getElementById("admAlertIcon").innerText = icon;
+    if(document.getElementById("admAlertTitle")) document.getElementById("admAlertTitle").innerText = title;
+    if(document.getElementById("admAlertMessage")) document.getElementById("admAlertMessage").innerText = message;
+    
     alertCallback = callback;
-    document.getElementById("adminAlertOverlay").classList.add("show");
+    
+    if(document.getElementById("adminAlertOverlay")) document.getElementById("adminAlertOverlay").classList.add("show");
 }
 
 function closeAdminAlert() {
-    document.getElementById("adminAlertOverlay").classList.remove("show");
+    if(document.getElementById("adminAlertOverlay")) document.getElementById("adminAlertOverlay").classList.remove("show");
     if(typeof alertCallback === 'function') alertCallback();
 }
 
@@ -454,9 +269,9 @@ function toggleManualInputBox(policyValue) {
 document.addEventListener("DOMContentLoaded", () => {
     loadGlobalDashboardStats();
 });
+
 function loadGlobalDashboardStats() {
-    // 🌐 यहाँ सही एपीआई यूआरएल सेट है जो आपके रेंडर बैकएंड से जुड़ेगा
-    fetch('https://onrender.com')
+    fetch(`${API_BASE_URL}/api/admin/dashboard-data`)
     .then(res => { 
         if(!res.ok) throw new Error("API Route not found"); 
         return res.json(); 
@@ -502,7 +317,6 @@ function loadGlobalDashboardStats() {
 function manageUserAccount(actionType) {
     let phoneInput = document.getElementById("search-user-phone").value.trim();
     let amount = document.getElementById("balance-modifier-amount").value;
-    
     let targetPhone = (actionType === "search") ? phoneInput : currentSearchedPhone;
     
     if (!targetPhone) {
@@ -514,7 +328,7 @@ function manageUserAccount(actionType) {
         return;
     }
     
-    fetch('https://onrender.com', {
+    fetch(`${API_BASE_URL}/api/admin/user-control`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: actionType, phone: targetPhone, amount: parseFloat(amount) })
@@ -548,57 +362,63 @@ function manageUserAccount(actionType) {
 function updateGameControl() {
     const mode = document.getElementById("ctrl-mode-select").value;
     const controlMode = document.getElementById("game-control-type").value;
-    const adminResult = document.getElementById("manual-target-number").value;
+    let inputField = document.getElementById("manual-target-number") || document.getElementById("manual-target-num");
+    const adminResult = inputField ? inputField.value.trim() : "";
+    
     let requestBody = { mode, controlMode };
     if (controlMode === "manual") {
-        if (adminResult === "" || adminResult < 0 || adminResult > 9) {
+        if (adminResult === "" || isNaN(adminResult) || adminResult < 0 || adminResult > 9) {
             showAdminPopup("Input Error", "Please enter a forced winning number between 0 and 9!", "🔢");
             return;
         }
         requestBody.adminResult = parseInt(adminResult);
     }
-    fetch('https://onrender.com', {
+    
+    fetch(`${API_BASE_URL}/api/admin/control-game`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
     })
     .then(res => res.json())
     .then(data => {
-        showAdminPopup("Directives Committed", data.message, "🎮");
-        if (data.success) document.getElementById("manual-target-number").value = "";
-    });
+        showAdminPopup("Directives Committed", data.message || "Manual round rules applied successfully!", "🎮");
+        if (inputField) inputField.value = "";
+    })
+    .catch(() => showAdminPopup("Error", "Failed to send command to server.", "❌"));
 }
 
 function processDepositRequest(requestId, action) {
-    fetch('https://onrender.com', {
+    fetch(`${API_BASE_URL}/api/admin/deposit-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, action })
     })
     .then(res => res.json())
     .then(data => {
-        showAdminPopup("Deposit Panel", data.message, "📥");
+        showAdminPopup("Deposit Ledger Panel", data.message || "Request updated successfully!", "📥");
         loadGlobalDashboardStats();
-    });
+    })
+    .catch(() => showAdminPopup("Error", "Network connection lost.", "❌"));
 }
 
 function processWithdrawRequest(requestId, action) {
-    fetch('https://onrender.com', {
+    fetch(`${API_BASE_URL}/api/admin/withdraw-action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, action })
     })
     .then(res => res.json())
     .then(data => {
-        showAdminPopup("Withdraw Panel", data.message, "📤");
+        showAdminPopup("Withdraw Payout Panel", data.message || "Request updated successfully!", "📤");
         loadGlobalDashboardStats();
-    });
+    })
+    .catch(() => showAdminPopup("Error", "Network connection lost.", "❌"));
 }
 
 function processQrImage(slotNumber) {
     const fileInput = document.getElementById(`qr-input-${slotNumber}`);
     const previewImg = document.getElementById(`qr-prev-${slotNumber}`);
-    if (!fileInput.files || !fileInput.files) return;
+    if (!fileInput.files || !fileInput.files[0]) return;
     const reader = new FileReader();
     reader.onload = function(e) {
         previewImg.src = e.target.result;
@@ -608,27 +428,28 @@ function processQrImage(slotNumber) {
         if (slotNumber === 3) qrBase64_3 = e.target.result;
         if (slotNumber === 4) qrBase64_4 = e.target.result;
     };
-    reader.readAsDataURL(fileInput.files);
+    reader.readAsDataURL(fileInput.files[0]);
 }
 
 function updateAdminGateways() {
     let payload = {
         upiId: document.getElementById("admin-upi-id").value,
-        bankDetails: [{
+        bankDetails: {
             bankName: document.getElementById("bank-name-field").value,
             holderName: document.getElementById("bank-holder-field").value,
             accNumber: document.getElementById("bank-acc-field").value,
             ifscCode: document.getElementById("bank-ifsc-field").value
-        }],
+        },
         qrCodes: [qrBase64_1, qrBase64_2, qrBase64_3, qrBase64_4]
     };
-    fetch('https://onrender.com', {
+    fetch(`${API_BASE_URL}/api/admin/update-gateway`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
     .then(res => res.json())
-    .then(data => showAdminPopup("Gateway Center", data.message, "💳"));
+    .then(data => showAdminPopup("Gateway System Settings", data.message || "Payment interfaces updated successfully!", "💳"))
+    .catch(() => showAdminPopup("Error", "Failed to write gateway config.", "❌"));
 }
 </script>
 </body>

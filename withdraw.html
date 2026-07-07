@@ -89,17 +89,33 @@ input:focus { border-color: #3399ff; }
 <script>
 let currentMethod = "upi";
 let userCurrentBalance = 0;
-const loggedInUserPhone = localStorage.getItem("user_phone") || "9999999999";
+
+// 🌐 रेंडर सर्वर का मुख्य लिंक (HTTPS के साथ पूरी तरह फिक्स)
+const API_BASE_URL = "https://color-game-1kc2.onrender.com";
+const loggedInUserPhone = localStorage.getItem("user_phone");
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetch(`/api/balance/${loggedInUserPhone}`)
-    .then(res => res.json())
+    if (!loggedInUserPhone) {
+        alert("Session Expired: Please login first!");
+        window.location.href = "index.html";
+        return;
+    }
+    
+    // 🔗 यहाँ पूरा लाइव HTTPS यूआरएल जोड़ दिया गया है जिससे "SyntaxError" नहीं आएगा
+    fetch(`${API_BASE_URL}/api/balance/${loggedInUserPhone}`)
+    .then(res => {
+        if (!res.ok) { throw new Error("Invalid Server Response"); }
+        return res.json();
+    })
     .then(data => {
         if(data.success) {
             userCurrentBalance = parseFloat(data.balance);
-            document.getElementById("user-wallet-balance").innerText = "" + userCurrentBalance.toFixed(2);
+            document.getElementById("user-wallet-balance").innerText = "₹" + userCurrentBalance.toFixed(2);
         }
-    }).catch(err => console.error("Balance fetch error:", err));
+    })
+    .catch(err => {
+        console.log("Balance sync delayed safely.");
+    });
 });
 
 function switchWithdrawMethod(type) {
@@ -113,7 +129,7 @@ function switchWithdrawMethod(type) {
 function submitWithdrawal(type) {
     const amountVal = parseInt(document.getElementById("withdraw-amount").value);
     if (isNaN(amountVal) || amountVal < 100) {
-        alert("Error: Minimum withdrawal limit is 100!");
+        alert("Error: Minimum withdrawal limit is ₹100!");
         return;
     }
     if (amountVal > userCurrentBalance) {
@@ -141,7 +157,8 @@ function submitWithdrawal(type) {
         targetDetails = `Bank: ${bName} | Acc: ${bAcc} | Holder: ${bHolder} | IFSC: ${bIfsc}`;
     }
     
-    fetch('/api/user/submit-withdraw', {
+    // 🔗 विथड्रॉल सबमिशन को भी सीधे लाइव सर्वर लिंक से कनेक्ट कर दिया गया है
+    fetch(`${API_BASE_URL}/api/user/submit-withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,22 +168,25 @@ function submitWithdrawal(type) {
             details: targetDetails
         })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) { throw new Error("Submission network failure"); }
+        return res.json();
+    })
     .then(data => {
         if (data.success) {
             const mainContainer = document.getElementById("withdrawMainContainer");
             mainContainer.innerHTML = `
-                <div class="status-overlay" style="margin-top: 80px;">
-                    <div class="status-icon"></div>
+                <div class="status-overlay" style="margin-top: 80px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
+                    <div class="status-icon" style="font-size: 55px; color: #3399ff;">⏳</div>
                     <h2 style="color: #ffffff; font-size: 20px;">Withdrawal Request Submitted</h2>
                     <p style="color: #aaa; font-size: 14px; padding: 0 20px; line-height: 1.6; margin-top: 5px;">
-                        Your withdrawal request for <strong style="color: #3399ff;">${amountVal}</strong> has been sent to review.<br>
+                        Your withdrawal request for <strong style="color: #3399ff;">₹${amountVal}</strong> has been sent to review.<br>
                         Payout Channel: <strong style="color: #fff;">${type.toUpperCase()} Transfer</strong>
                     </p>
                     <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; font-size: 12px; color: #dbb35e; border: 1px dashed #333; width: 90%; margin-top: 15px; line-height: 1.5; text-align: left;">
-                         <strong>Security Logic:</strong> As per game standard regulations, this amount has been safely frozen from your active balance. The request will instantly process once the administrator approves it from the control panel.
+                        📢 <strong>Security Logic:</strong> As per game regulations, this amount has been safely frozen from your active balance. The request will instantly process once approved from the control panel.
                     </div>
-                    <button class="btn-submit" style="width: 85%; margin-top: 25px;" onclick="window.location.href='home.html'">Back to Dashboard</button>
+                    <button class="btn-submit" style="background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 85%; margin-top: 25px;" onclick="window.location.href='home.html'">Back to Dashboard</button>
                 </div>
             `;
         } else {
@@ -175,7 +195,7 @@ function submitWithdrawal(type) {
     })
     .catch(err => {
         console.error(err);
-        alert("Connection failure. Unable to submit request to Render server logs.");
+        alert("Connection failure. Unable to submit request to Render server.");
     });
 }
 </script>

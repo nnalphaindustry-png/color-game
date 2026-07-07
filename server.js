@@ -214,7 +214,7 @@ async function generateMultiGameResult(mode) {
         const winningBigSmall = winningNumber >= 5 ? 'Big' : 'Small';
         
         let winningColor = 'Red';
-        let greenNums = [1, 3, 7, 9];
+        let greenNums =;
         if (greenNums.includes(winningNumber)) winningColor = 'Green';
         if (winningNumber === 5) winningColor = 'Green-Violet';
         if (winningNumber === 0) winningColor = 'Red-Violet';

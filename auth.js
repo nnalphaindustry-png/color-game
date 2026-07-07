@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "https://color-game-1kc2.onrender.com";
 
 //      (     )
 let redirectAction = null;

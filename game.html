@@ -221,7 +221,8 @@ function closeCustomAlert() {
     document.getElementById("customAlert").classList.remove("show");
 }
 
-const socket = io("https://color-game-1kc2.onrender.com");
+const API_URL = "https://color-game-1kc2.onrender.com";
+const socket = io(API_URL);
 const loggedUserPhone = localStorage.getItem('user_phone');
 let activeMode = '30s';
 let currentTab = 'game';
@@ -249,15 +250,23 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 function fetchUserBalance() {
     if (!loggedUserPhone) return;
-    fetch(`https://color-game-1kc2.onrender.com{loggedUserPhone}`)
-        .then(res => res.json())
+    fetch(`${API_URL}/api/balance/${loggedUserPhone}`)
+        .then(res => {
+            if (!res.ok) throw new Error("Server busy");
+            return res.json();
+        })
         .then(data => {
             if (data.success) {
                 currentWalletBalance = data.balance;
                 document.querySelector(".balance-title").innerText = "₹" + data.balance.toFixed(2);
             }
-        }).catch(err => console.error(err));
+        })
+        .catch(err => {
+            // 🤫 यहाँ स्क्रीन वाले alert() पॉपअप को हटा दिया गया है ताकि खिलाड़ी को एरर न दिखे
+            console.log("Wallet balance sync delayed safely.");
+        });
 }
+
 
 function goToHome() { window.location.href = "home.html"; }
 
@@ -420,10 +429,16 @@ socket.on('game_result', (data) => {
             renderGameTable(data.history);
         }
         updateRecentBalls(data.history);
-        fetchUserBalance();
+        
+        // ⏱️ रेंडर सर्वर को लोड से बचाने के लिए 1.5 सेकंड का डिले दिया गया है
+        setTimeout(() => {
+            fetchUserBalance();
+        }, 1500);
+
         if(currentTab === 'my') fetchMyHistory();
     }
 });
+
 
 function updateTimerUI(timeLeft) {
     let minutes = Math.floor(timeLeft / 60);

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RM GAME - My Account</title>
+    <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background-color: #191919; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 80px; }
+    
+    .profile-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; overflow-x: hidden; position: relative; gap: 15px; padding: 0 12px; }
+    
+    /* 0. Top Nav Header for Profile Page */
+    .profile-top-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 5px;
+        background-color: #191919;
+        border-bottom: 1px solid #252525;
+        width: 100%;
+        margin-bottom: -5px;
+    }
+    .prof-back-btn { display: flex; align-items: center; cursor: pointer; color: #ffffff; background: none; border: none; }
+    .prof-back-svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .prof-nav-title { font-size: 16px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 24px; }
+
+    /* 1. Top Header Profile Card (Gold Gradient) */
+    .profile-header-card {
+        background: linear-gradient(180deg, #dbb35e, #c79a49);
+        border-bottom-left-radius: 25px;
+        border-bottom-right-radius: 25px;
+        padding: 25px 15px 50px 15px;
+        margin: 0 -12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        position: relative;
+    }
+    .avatar-box { width: 65px; height: 65px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255,255,255,0.6); }
+    .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+    .user-info-box { display: flex; flex-direction: column; gap: 4px; color: #4a3200; }
+    .username-row { font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+    .vip-badge { background: #191919; color: #dbb35e; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 900; }
+    .uid-row { font-size: 12px; font-weight: bold; opacity: 0.9; letter-spacing: 0.5px; }
+    .last-login-row { font-size: 10px; opacity: 0.8; margin-top: 2px; }
+
+    /* 2. Total Balance Main Box */
+    .balance-card {
+        background-color: #252525;
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: -35px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        z-index: 10;
+    }
+    .bal-left { display: flex; flex-direction: column; gap: 5px; }
+    .bal-title-row { font-size: 12px; color: #aaaaaa; display: flex; align-items: center; gap: 5px; }
+    .refresh-icon { cursor: pointer; width: 14px; height: 14px; fill: #aaaaaa; vertical-align: middle; transition: transform 0.3s; }
+    .main-balance-txt { font-size: 24px; font-weight: bold; color: #ffffff; }
+    .enter-wallet-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; }
+
+    /* 3. Quick Wallet Actions Grid */
+    .quick-actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background-color: #252525; padding: 12px; border-radius: 12px; text-align: center; }
+    .action-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; font-size: 11px; color: #dddddd; }
+    .action-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px; }
+
+    /* 4. History Grid Big Buttons */
+    .history-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .hist-card-btn { background-color: #252525; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .hist-icon-box { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .hist-text-box { display: flex; flex-direction: column; gap: 2px; }
+    .hist-main-title { font-size: 13px; font-weight: bold; color: #ffffff; }
+    .hist-sub-title { font-size: 10px; color: #888888; }
+
+    /* 5. Menu List Section */
+    .menu-list-container { background-color: #252525; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+    .menu-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 15px; border-bottom: 1px solid #333333; cursor: pointer; }
+    .menu-list-item:last-child { border-bottom: none; }
+    .menu-item-left { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #ffffff; }
+    .menu-item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .menu-item-right { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #888888; }
+    .arrow-right-svg { width: 14px; height: 14px; fill: #666666; }
+
+    /* 6. Service Center Grid */
+    .service-center-box { background-color: #252525; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+    .service-title { font-size: 14px; font-weight: bold; color: #ffffff; border-left: 3px solid #dbb35e; padding-left: 8px; }
+    .service-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; text-align: center; margin-top: 5px; }
+    .service-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; font-size: 11px; color: #aaaaaa; }
+    .service-icon-img { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+    /* 7. Log out Button */
+    .logout-btn-box { margin: 10px 0; }
+    .logout-btn { width: 100%; background: none; border: 1px solid #dbb35e; color: #dbb35e; padding: 12px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+</style>
+
+</head>
+<body>
+
+<div class="profile-container">
+    
+    <!-- 0. Top Back Navigation Header -->
+    <div class="profile-top-nav">
+        <button class="prof-back-btn" onclick="goToHome()">
+            <svg class="prof-back-svg" viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <div class="prof-nav-title">Account</div>
+    </div>
+    
+    <!-- 1. Top Header Profile Card -->
+    <div class="profile-header-card">
+        <div class="avatar-box">
+            <img src="https://unsplash.com" alt="User Avatar">
+        </div>
+        <div class="user-info-box" style="text-align: left;">
+            <div class="username-row">
+                <span id="prof-username">MEMBERNNGO8202</span>
+                <span class="vip-badge">VIP0</span>
+            </div>
+            <div class="uid-row">UID | <span id="prof-uid">4164328</span></div>
+            <div class="last-login-row">Last login: <span id="prof-last-login">2026-07-06 18:34:38</span></div>
+        </div>
+    </div>
+
+    <!-- 2. Total Balance Main Box -->
+    <div class="balance-card">
+        <div class="bal-left" style="text-align: left;">
+            <div class="bal-title-row">
+                <span>Total balance</span>
+                <svg class="refresh-icon" viewBox="0 0 24 24" onclick="fetchUserBalance()">
+                    <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                </svg>
+            </div>
+            <div class="main-balance-txt" id="prof-balance-display">₹0.39</div>
+        </div>
+        <button class="enter-wallet-btn" onclick="alert('Wallet Details Open!')">Enter wallet</button>
+    </div>
+
+    <!-- 3. Quick Wallet Actions Grid -->
+    <div class="quick-actions-grid">
+        <div class="action-item" onclick="alert('ARWallet Open')">
+            <div class="action-icon" style="background-color: #ff4d4d;">👛</div>
+            <span>ARWallet</span>
+        </div>
+        <div class="action-item" onclick="window.location.href='deposit.html'">
+    <div class="action-icon" style="background-color: #ff9933;">💰</div>
+    <span>Deposit</span>
+</div>
+                <div class="action-item" onclick="window.location.href='withdraw.html'">
+            <div class="action-icon" style="background-color: #3399ff;">💳</div>
+            <span>Withdraw</span>
+        </div>
+        
+        <div class="action-item" onclick="alert('VIP Open')">
+            <div class="action-icon" style="background-color: #00cc66;">👑</div>
+            <span>VIP</span>
+        </div>
+    </div>
+
+    <!-- 4. History Grid Big Buttons -->
+    <div class="history-grid-2x2">
+        <div class="hist-card-btn" onclick="alert('Game History Open')">
+            <div class="hist-icon-box" style="background-color: rgba(51,153,255,0.15); color: #3399ff;">📊</div>
+            <div class="hist-text-box">
+                <span class="hist-main-title">Game History</span>
+                <span class="hist-sub-title">My game history</span>
+            </div>
+        </div>
+        <div class="hist-card-btn" onclick="alert('Transaction History Open')">
+            <div class="hist-icon-box" style="background-color: rgba(0,204,102,0.15); color: #00cc66;">📝</div>
+            <div class="hist-text-box">
+                <span class="hist-main-title">Transaction</span>
+                <span class="hist-sub-title">My transaction history</span>
+            </div>
+        </div>
+        <div class="hist-card-btn" onclick="alert('Deposit History Open')">
+            <div class="hist-icon-box" style="background-color: rgba(255,77,77,0.15); color: #ff4d4d;">📥</div>
+            <div class="hist-text-box">
+                <span class="hist-main-title">Deposit</span>
+                <span class="hist-sub-title">My deposit history</span>
+            </div>
+        </div>
+        <div class="hist-card-btn" onclick="alert('Withdraw History Open')">
+            <div class="hist-icon-box" style="background-color: rgba(255,153,51,0.15); color: #ff9933;">📤</div>
+            <div class="hist-text-box">
+                <span class="hist-main-title">Withdraw</span>
+                <span class="hist-sub-title">My withdraw history</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Menu List Section -->
+    <div class="menu-list-container">
+        <div class="menu-list-item" onclick="alert('Notification Open')">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">🔔</div>
+                <span>Notification</span>
+            </div>
+            <div class="menu-item-right">
+                <svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+            </div>
+        </div>
+        <div class="menu-list-item" onclick="alert('Gifts Open')">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">🎁</div>
+                <span>Gifts</span>
+            </div>
+            <div class="menu-item-right">
+                <svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+            </div>
+        </div>
+        <div class="menu-list-item" onclick="alert('Game Statistics Open')">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">📈</div>
+                <span>Game statistics</span>
+            </div>
+            <div class="menu-item-right">
+                <svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+            </div>
+        </div>
+        <div class="menu-list-item" onclick="alert('Language Selection Open')">
+            <div class="menu-item-left">
+                <div class="menu-item-icon">🌐</div>
+                <span>Language</span>
+            </div>
+            <div class="menu-item-right">
+                <span>English</span>
+                <svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Service Center Section -->
+    <div class="service-center-box">
+        <div class="service-title">Service center</div>
+        <div class="service-grid-3col">
+            <div class="service-item" onclick="alert('Settings Open')">
+                <div class="service-icon-img">⚙️</div>
+                <span>Settings</span>
+            </div>
+            <div class="service-item" onclick="alert('Feedback Open')">
+                <div class="service-icon-img">📋</div>
+                <span>Feedback</span>
+            </div>
+            <div class="service-item" onclick="alert('Announcement Open')">
+                <div class="service-icon-img">📢</div>
+                <span>Announcement</span>
+            </div>
+            <div class="service-item" onclick="alert('Customer Service Open')">
+                <div class="service-icon-img">🎧</div>
+                <span>Customer Service</span>
+            </div>
+            <div class="service-item" onclick="alert('Beginner Guide Open')">
+                <div class="service-icon-img">📖</div>
+                <span>Beginner's Guide</span>
+            </div>
+            <div class="service-item" onclick="alert('About us Open')">
+                <div class="service-icon-img">ℹ️</div>
+                <span>About us</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Log out Button -->
+    <div class="logout-btn-box">
+        <button class="logout-btn" onclick="logoutUser()">Log out</button>
+    </div>
+
+</div> <!-- profile-container end -->
+<script>
+    // लोकल स्टोरेज से लॉगिन किए हुए यूजर का मोबाइल नंबर निकालना
+    const userPhone = localStorage.getItem('user_phone');
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // 🔒 सुरक्षा नियम: अगर यूजर लॉगिन नहीं है तो उसे वापस लॉगिन पेज पर भेजें
+        if (!userPhone) {
+            alert("कृपया पहले लॉगिन करें!");
+            window.location.href = "index.html";
+            return;
+        }
+
+        // स्क्रीन पर यूजर का फोन नंबर दिखाना
+        document.getElementById("prof-username").innerText = "MEMBER_" + userPhone;
+
+        // फोन नंबर के आधार पर एक फिक्स और यूनीक UID जनरेट करके दिखाना
+        let generatedUID = generateFixedUID(userPhone);
+        document.getElementById("prof-uid").innerText = generatedUID;
+
+        // वर्तमान समय को लास्ट लॉगिन टाइम के रूप में दिखाना
+        let now = new Date();
+        document.getElementById("prof-last-login").innerText = now.toISOString().slice(0, 10) + " " + now.toTimeString().slice(0, 8);
+
+        // डेटाबेस से यूजर का असली वॉलेट बैलेंस फेच करना
+        fetchUserBalance();
+    });
+
+    // बैकएंड API से असली बैलेंस लाने का फंक्शन
+    function fetchUserBalance() {
+        if (!userPhone) return;
+
+        // रिफ्रेश एनीमेशन के लिए रिफ्रेश आइकन को थोड़ा घुमाना
+        const refreshBtn = document.querySelector(".refresh-icon");
+        if (refreshBtn) refreshBtn.style.transform = "rotate(360deg)";
+
+        fetch(`/api/balance/${userPhone}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // स्क्रीन पर बैलेंस को अपडेट करना
+                    document.getElementById("prof-balance-display").innerText = "₹" + data.balance.toFixed(2);
+                }
+                
+                // एनीमेशन रीसेट करना
+                setTimeout(() => {
+                    if (refreshBtn) refreshBtn.style.transform = "rotate(0deg)";
+                }, 300);
+            })
+            .catch(err => {
+                console.error("बैलेंस लोड करने में एरर:", err);
+            });
+    }
+
+    // फोन नंबर के आधार पर हमेशा एक ही जैसी (फिक्स) यूनीक आईडी बनाने का एल्गोरिदम
+    function generateFixedUID(phoneStr) {
+        let hash = 0;
+        for (let i = 0; i < phoneStr.length; i++) {
+            hash = phoneStr.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        let finalUID = Math.abs(hash % 9000000) + 1000000; // हमेशा 7 डिजिट का नंबर देगा
+        return finalUID;
+    }
+
+    // 🔙 होमपेज (home.html) पर वापस जाने का फंक्शन
+    function goToHome() {
+        window.location.href = "home.html";
+    }
+
+    // 🚪 लॉगआउट करने का फंक्शन
+    function logoutUser() {
+        if (confirm("क्या आप वाकई लॉग आउट करना चाहते हैं?")) {
+            localStorage.removeItem('user_phone'); // लोकल स्टोरेज साफ करें
+            alert("सफलतापूर्वक लॉग आउट किया गया!");
+            window.location.href = "index.html"; // लॉगिन पेज पर भेजें
+        }
+    }
+</script>
+</body>
+</html>
+

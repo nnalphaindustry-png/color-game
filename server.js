@@ -797,75 +797,6 @@ app.post('/api/agency/transfer-to-main', async (req, res) => {
     res.status(500).json({ success: false, message: "Wallet transfer server error" });
   }
 });
-//      API
-app.post('/api/user/spin-wheel', async (req, res) => {
-    try {
-        const { phone, type } = req.body; // type   'self'   'referral'
-        const user = await User.findOne({ phone });
-        if (!user) return res.json({ success: false, message: "User not found!" });
-
-        let bonusAmount = 0;
-        let percentage = 0;
-
-        if (type === 'self') {
-            if (user.selfSpinCount <= 0) {
-                return res.json({ success: false, message: "      !" });
-            }
-            //     : 3%  12% 
-            percentage = Math.random() * (12 - 3) + 3;
-            bonusAmount = (user.lastDepositAmount * percentage) / 100;
-            
-            //   
-            user.selfSpinCount -= 1;
-        } else if (type === 'referral') {
-            if (user.referralSpinCount <= 0) {
-                return res.json({ success: false, message: "      !" });
-            }
-            //     : 3%  5% 
-            percentage = Math.random() * (5 - 3) + 3;
-            bonusAmount = (user.lastRefDepositAmount * percentage) / 100;
-            
-            //   
-            user.referralSpinCount -= 1;
-        } else {
-            return res.json({ success: false, message: "Invalid spin type Selection!" });
-        }
-
-        //     ( 12.34  12.35    )
-        bonusAmount = parseFloat(bonusAmount.toFixed(2));
-
-        //    ARWallet (promoBalance)  
-        user.promoBalance += bonusAmount;
-        user.totalCommissionEarned += bonusAmount; //      
-        await user.save();
-
-        res.json({ 
-            success: true, 
-            message: ` !  ${bonusAmount}   !`, 
-            bonus: bonusAmount,
-            selfSpins: user.selfSpinCount,
-            refSpins: user.referralSpinCount
-        });
-
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Spin Wheel server error!" });
-    }
-});
-
-//         API (  )
-app.get('/api/user/spin-status/:phone', async (req, res) => {
-    try {
-        const user = await User.findOne({ phone: req.params.phone });
-        if (!user) return res.json({ success: false, selfSpins: 0, refSpins: 0 });
-        res.json({ 
-            success: true, 
-            selfSpins: user.selfSpinCount || 0, 
-            refSpins: user.referralSpinCount || 0 
-        });
-    } catch (err) {
-        res.json({ success: false, selfSpins: 0, refSpins: 0 });
-    }
-});
 
 // 📝 1. एडमिन पैनल से नया मैसेज भेजने का रास्ता (POST API)
 app.post('/api/admin/add-notice', async (req, res) => {
@@ -951,6 +882,72 @@ app.get('/api/admin/get-complaints', async (req, res) => {
     } catch (error) {
         console.error("Fetch Complaints Error:", error);
         res.status(500).json({ success: false, message: "Failed to load complaints data!" });
+    }
+});
+// ===       ( server.js     ) ===
+
+app.get('/api/user/spin-status/:phone', async (req, res) => {
+    try {
+        const phone = req.params.phone;
+        const user = await mongoose.model('User').findOne({ phone: phone });
+        if (!user) {
+            return res.json({ success: true, selfSpins: 0, refSpins: 0 });
+        }
+        res.json({ 
+            success: true, 
+            selfSpins: user.selfSpinCount || 0, 
+            refSpins: user.referralSpinCount || 0 
+        });
+    } catch (err) {
+        console.error("Spin status error:", err);
+        res.json({ success: false, selfSpins: 0, refSpins: 0, error: err.message });
+    }
+});
+
+app.post('/api/user/spin-wheel', async (req, res) => {
+    try {
+        const { phone, type } = req.body;
+        const UserMod = mongoose.model('User');
+        const user = await UserMod.findOne({ phone: phone });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        let bonusAmount = 0;
+        let percentage = 0;
+
+        if (type === 'self') {
+            if ((user.selfSpinCount || 0) <= 0) {
+                return res.json({ success: false, message: "You don't have personal spins!" });
+            }
+            percentage = Math.random() * (12 - 3) + 3;
+            bonusAmount = ((user.lastDepositAmount || 0) * percentage) / 100;
+            user.selfSpinCount = (user.selfSpinCount || 1) - 1;
+        } else if (type === 'referral') {
+            if ((user.referralSpinCount || 0) <= 0) {
+                return res.json({ success: false, message: "You don't have referral spins!" });
+            }
+            percentage = Math.random() * (5 - 3) + 3;
+            bonusAmount = ((user.lastRefDepositAmount || 0) * percentage) / 100;
+            user.referralSpinCount = (user.referralSpinCount || 1) - 1;
+        } else {
+            return res.json({ success: false, message: "Invalid spin type selection!" });
+        }
+
+        bonusAmount = parseFloat(bonusAmount.toFixed(2));
+        user.promoBalance = (user.promoBalance || 0) + bonusAmount;
+        user.totalCommissionEarned = (user.totalCommissionEarned || 0) + bonusAmount;
+        
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: `Success! You won ${bonusAmount}`, 
+            bonus: bonusAmount,
+            selfSpins: user.selfSpinCount,
+            refSpins: user.referralSpinCount
+        });
+    } catch (err) {
+        console.error("Spin wheel error:", err);
+        res.status(500).json({ success: false, message: "Internal server error!" });
     }
 });
 

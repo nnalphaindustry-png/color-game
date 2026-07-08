@@ -35,6 +35,11 @@ const userSchema = new mongoose.Schema({
   promoBalance: { type: Number, default: 0 },            // प्रमोशन/कमीशन वॉलेट बैलेंस
   totalCommissionEarned: { type: Number, default: 0 },   // अब तक की कुल कमाई का रिकॉर्ड
   claimedMissions: { type: [Number], default: [] }       // जो मिशन्स (1,3,5..) क्लेम हो चुके हैं उनकी ID
+  //       
+selfSpinCount: { type: Number, default: 0 },       //      
+referralSpinCount: { type: Number, default: 0 },   //      
+lastDepositAmount: { type: Number, default: 0 },   //     
+lastRefDepositAmount: { type: Number, default: 0 }  //     
 });
 
 const User = mongoose.model('User', userSchema);
@@ -595,25 +600,54 @@ app.post('/api/admin/control-game', (req, res) => {
 });
 
 app.post('/api/admin/deposit-action', async (req, res) => {
-    try {
-        const { requestId, action } = req.body;
-        const dep = await Deposit.findById(requestId);
-        if (!dep || dep.status !== 'PENDING') return res.json({ success: false, message: "Request already processed!" });
-        if (action === "Success") {
-            dep.status = 'SUCCESS';
-            await dep.save();
-            await User.updateOne({ phone: dep.phone }, { $inc: { balance: dep.amount } });
-            io.emit('deposit_credited', { phone: dep.phone, amount: dep.amount });
-            res.json({ success: true, message: "Deposit request approved successfully!" });
-        } else {
-            dep.status = 'REJECTED';
-            await dep.save();
-            res.json({ success: true, message: "Deposit request rejected cleanly!" });
+try {
+    const { requestId, action } = req.body;
+    const dep = await Deposit.findById(requestId);
+    if (!dep || dep.status !== 'PENDING') return res.json({ success: false, message: "Request already processed!" });
+
+    if (action === "Success") {
+        dep.status = 'SUCCESS';
+        await dep.save();
+        
+        //    
+        await User.updateOne({ phone: dep.phone }, { $inc: { balance: dep.amount } });
+
+        // === [     ] ===
+        const allowedAmounts =;
+        if (allowedAmounts.includes(dep.amount)) {
+            //      
+            await User.updateOne(
+                { phone: dep.phone },
+                { $inc: { selfSpinCount: 1 }, $set: { lastDepositAmount: dep.amount } }
+            );
         }
-    } catch (err) {
-        res.json({ success: false, message: "Server error during deposit processing!" });
+
+        //     (       )
+        const userDetails = await User.findOne({ phone: dep.phone });
+        if (userDetails && userDetails.referredBy) {
+            const allDeps = await Deposit.countDocuments({ phone: dep.phone, status: 'SUCCESS' });
+            //         ,       
+            if (allDeps === 1) {
+                await User.updateOne(
+                    { phone: userDetails.referredBy },
+                    { $inc: { referralSpinCount: 1 }, $set: { lastRefDepositAmount: dep.amount } }
+                );
+            }
+        }
+        // === [   ] ===
+
+        io.emit('deposit_credited', { phone: dep.phone, amount: dep.amount });
+        res.json({ success: true, message: "Deposit request approved successfully!" });
+    } else {
+        dep.status = 'REJECTED';
+        await dep.save();
+        res.json({ success: true, message: "Deposit request rejected cleanly!" });
     }
+} catch (err) {
+    res.json({ success: false, message: "Server error during deposit processing!" });
+}
 });
+
 
 app.post('/api/admin/withdraw-action', async (req, res) => {
     try {
@@ -764,6 +798,76 @@ app.post('/api/agency/transfer-to-main', async (req, res) => {
     res.status(500).json({ success: false, message: "Wallet transfer server error" });
   }
 });
+//      API
+app.post('/api/user/spin-wheel', async (req, res) => {
+    try {
+        const { phone, type } = req.body; // type   'self'   'referral'
+        const user = await User.findOne({ phone });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        let bonusAmount = 0;
+        let percentage = 0;
+
+        if (type === 'self') {
+            if (user.selfSpinCount <= 0) {
+                return res.json({ success: false, message: "      !" });
+            }
+            //     : 3%  12% 
+            percentage = Math.random() * (12 - 3) + 3;
+            bonusAmount = (user.lastDepositAmount * percentage) / 100;
+            
+            //   
+            user.selfSpinCount -= 1;
+        } else if (type === 'referral') {
+            if (user.referralSpinCount <= 0) {
+                return res.json({ success: false, message: "      !" });
+            }
+            //     : 3%  5% 
+            percentage = Math.random() * (5 - 3) + 3;
+            bonusAmount = (user.lastRefDepositAmount * percentage) / 100;
+            
+            //   
+            user.referralSpinCount -= 1;
+        } else {
+            return res.json({ success: false, message: "Invalid spin type Selection!" });
+        }
+
+        //     ( 12.34  12.35    )
+        bonusAmount = parseFloat(bonusAmount.toFixed(2));
+
+        //    ARWallet (promoBalance)  
+        user.promoBalance += bonusAmount;
+        user.totalCommissionEarned += bonusAmount; //      
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: ` !  ${bonusAmount}   !`, 
+            bonus: bonusAmount,
+            selfSpins: user.selfSpinCount,
+            refSpins: user.referralSpinCount
+        });
+
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Spin Wheel server error!" });
+    }
+});
+
+//         API (  )
+app.get('/api/user/spin-status/:phone', async (req, res) => {
+    try {
+        const user = await User.findOne({ phone: req.params.phone });
+        if (!user) return res.json({ success: false, selfSpins: 0, refSpins: 0 });
+        res.json({ 
+            success: true, 
+            selfSpins: user.selfSpinCount || 0, 
+            refSpins: user.referralSpinCount || 0 
+        });
+    } catch (err) {
+        res.json({ success: false, selfSpins: 0, refSpins: 0 });
+    }
+});
+
 // 📝 1. एडमिन पैनल से नया मैसेज भेजने का रास्ता (POST API)
 app.post('/api/admin/add-notice', async (req, res) => {
     try {

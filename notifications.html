@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM GAME - Updates & Notifications</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background-color: #191919; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 30px; }
+.noti-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; padding: 0 12px; gap: 15px; }
+.noti-top-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 5px; background-color: #191919; border-bottom: 1px solid #252525; width: 100%; }
+.noti-back-btn { display: flex; align-items: center; cursor: pointer; color: #ffffff; background: none; border: none; }
+.noti-back-svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.noti-nav-title { font-size: 16px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 24px; }
+.noti-list-wrapper { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.noti-card { background-color: #252525; border-radius: 12px; padding: 15px; border-left: 4px solid #dbb35e; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.noti-message-txt { font-size: 13px; color: #e0e0e0; line-height: 1.5; white-space: pre-wrap; }
+.noti-time-row { font-size: 10px; color: #666; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="noti-container">
+    <!-- टॉप नेविगेशन बार (वापस होमपेज जाने के लिए) -->
+    <div class="noti-top-nav">
+        <button class="noti-back-btn" onclick="window.location.href='home.html'">
+            <svg class="noti-back-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="noti-nav-title">Notifications History</div>
+    </div>
+
+    <!-- लाइव नोटिफिकेशन्स लोड होने का मुख्य एरिया -->
+    <div id="user-notifications-list" class="noti-list-wrapper">
+        <p style="text-align: center; color: #888; font-size: 13px; margin-top: 30px;">Loading announcements history...</p>
+    </div>
+</div>
+<script>
+// सर्वर का मुख्य URL (आपके server.js से जोड़ने के लिए)
+const NOTI_API_URL = "https://color-game-1kc2.onrender.com";
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadAllGameNotifications();
+});
+
+// सर्वर के डेटाबेस से सारे नोटिफिकेशन्स खींचने का फंक्शन
+function loadAllGameNotifications() {
+    const listContainer = document.getElementById("user-notifications-list");
+    if (!listContainer) return;
+
+    fetch(`${NOTI_API_URL}/api/user/get-notices`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.history && data.history.length > 0) {
+            listContainer.innerHTML = ""; // लोडिंग टेक्स्ट हटाना
+            
+            // सारे नोटिफिकेशन्स को एक-एक करके लिस्ट में जोड़ना
+            data.history.forEach(item => {
+                let dateObj = new Date(item.createdAt);
+                let dateStr = dateObj.toLocaleDateString();
+                let timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                let cardHtml = `
+                    <div class="noti-card">
+                        <div class="noti-message-txt">${item.message}</div>
+                        <div class="noti-time-row">📅 ${dateStr} | ⏰ ${timeStr}</div>
+                    </div>`;
+                listContainer.innerHTML += cardHtml;
+            });
+        } else {
+            listContainer.innerHTML = '<p style="text-align: center; color: #666; font-size: 13px; margin-top: 30px;">कोई सूचना या अपडेट उपलब्ध नहीं है।</p>';
+        }
+    })
+    .catch(err => {
+        console.error("Notifications Page Error:", err);
+        listContainer.innerHTML = '<p style="text-align: center; color: #ff4d4d; font-size: 13px; margin-top: 30px;">इतिहास लोड करने में समस्या आई।</p>';
+    });
+}
+</script>
+</body>
+</html>

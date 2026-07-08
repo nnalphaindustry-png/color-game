@@ -121,6 +121,51 @@ app.get('/api/withdraw-history/:phone', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error fetching withdraw history!" });
   }
 });
+// 📊 API to fetch Game History (Bets) for a specific user
+app.get('/api/game-history/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    
+    // डेटाबेस से यूज़र के सभी बेट्स (bets) निकालकर लेटेस्ट वाले पहले दिखाएगा
+    // ध्यान रखें: आपके डेटाबेस मॉडल का नाम 'Bet' होना चाहिए जो हमने पहले place_bet में देखा था
+    const history = await Bet.find({ phone }).sort({ createdAt: -1 }).limit(50); 
+    
+    res.json({ success: true, history });
+  } catch (err) {
+    console.error("Game history error:", err);
+    res.status(500).json({ success: false, message: "Server error fetching game history!" });
+  }
+});
+// 📝 API to fetch Wallet Transactions for a specific user
+app.get('/api/transaction-history/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    
+    // हम डेटाबेस से डिपॉजिट और विड्रॉल दोनों निकाल रहे हैं ताकि पासबुक बन सके
+    const deposits = await Deposit.find({ phone, status: 'SUCCESS' }).lean();
+    const withdraws = await Withdraw.find({ phone }).lean();
+    const bets = await Bet.find({ phone }).lean();
+
+    // सभी रिकॉर्ड्स को एक लिस्ट में मिलाकर 'Transaction' फॉर्मेट देना
+    let txList = [];
+
+    deposits.forEach(d => txList.push({ type: 'Deposit Info', amount: d.amount, isPlus: true, createdAt: d.createdAt }));
+    withdraws.forEach(w => txList.push({ type: `Withdrawal (${w.status})`, amount: w.amount, isPlus: false, createdAt: w.createdAt }));
+    bets.forEach(b => {
+      txList.push({ type: 'Game Bet Placed', amount: b.amount, isPlus: false, createdAt: b.createdAt });
+      if(b.status === 'WIN') {
+        txList.push({ type: 'Game Winning Bonus', amount: b.winAmount, isPlus: true, createdAt: b.createdAt });
+      }
+    });
+
+    // तारीख के हिसाब से लेटेस्ट ट्रांजैक्शन सबसे ऊपर सेट करना
+    txList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({ success: true, history: txList.slice(0, 50) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error fetching transactions!" });
+  }
+});
 
 app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'game.html')));

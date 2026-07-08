@@ -118,6 +118,32 @@ const NoticeSchema = new mongoose.Schema({
 
 // मॉडल को एक्सपोर्ट करना
 const Notice = mongoose.model('Notice', NoticeSchema);
+// 🎧 Customer Helpdesk Ticket Database Schema
+const ComplaintSchema = new mongoose.Schema({
+    phone: {
+        type: String,
+        required: true
+    },
+    category: {
+        type: String,
+        required: true // Store chosen category like Deposit, Withdrawal etc.
+    },
+    message: {
+        type: String,
+        required: true
+    },
+    status: {
+        type: String,
+        default: "Pending" // Pending, Resolved, or Rejected
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now // Server will record exact live time automatically
+    }
+});
+
+// Exporting the Complaint Model
+const Complaint = mongoose.model('Complaint', ComplaintSchema);
 
 
 app.post('/api/login', async (req, res) => {

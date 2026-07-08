@@ -110,28 +110,37 @@ body { background-color: #191919; color: #ffffff; display: flex; justify-content
 <span class="hist-sub-title">My game history</span>
 </div>
 </div>
-<div class="hist-card-btn" onclick="alert('Financial Account Transaction History Open')">
-<div class="hist-icon-box" style="background-color: rgba(0,204,102,0.15); color: #00cc66;">📝</div>
-<div class="hist-text-box">
-<span class="hist-main-title">Transaction</span>
-<span class="hist-sub-title">My transactions</span>
+<div class="hist-card-btn" onclick="alert('Transaction History Open')" style="flex: 1;">
+    <div class="hist-icon-box" style="background-color: rgba(0,204,102,0.15); color: #00cc66;"></div>
+    <div class="hist-text-box">
+      <span class="hist-main-title">Transaction</span>
+      <span class="hist-sub-title">My transactions</span>
+    </div>
+  </div>
 </div>
+<!--  DEPOSIT & WITHDRAW STATEMENT ROW (         flex container) -->
+<div style="display: flex; gap: 15px; margin-bottom: 15px;">
+
+  <!-- Deposit Statement  -->
+  <div class="hist-card-btn" onclick="openDepositHistoryModal()" style="flex: 1;">
+    <div class="hist-icon-box" style="background-color: rgba(255,77,77,0.15); color: #ff4d4d;"></div>
+    <div class="hist-text-box">
+      <span class="hist-main-title">Deposit</span>
+      <span class="hist-sub-title">My deposit statement</span>
+    </div>
+  </div>
+
+  <!-- Withdraw Statement  -->
+  <div class="hist-card-btn" onclick="openWithdrawHistoryModal()" style="flex: 1;">
+    <div class="hist-icon-box" style="background-color: rgba(255,153,51,0.15); color: #ff9933;"></div>
+    <div class="hist-text-box">
+      <span class="hist-main-title">Withdraw</span>
+      <span class="hist-sub-title">My withdrawal statement</span>
+    </div>
+  </div>
+
 </div>
-<div class="hist-card-btn" onclick="alert('Deposit Ledger History Open')">
-<div class="hist-icon-box" style="background-color: rgba(255,77,77,0.15); color: #ff4d4d;">📥</div>
-<div class="hist-text-box">
-<span class="hist-main-title">Deposit</span>
-<span class="hist-sub-title">My deposit statement</span>
-</div>
-</div>
-<div class="hist-card-btn" onclick="alert('Withdraw Statement History Open')">
-<div class="hist-icon-box" style="background-color: rgba(255,153,51,0.15); color: #ff9933;">📤</div>
-<div class="hist-text-box">
-<span class="hist-main-title">Withdraw</span>
-<span class="hist-sub-title">My withdrawal statement</span>
-</div>
-</div>
-</div>
+
 <div class="menu-list-container">
 <div class="menu-list-item" onclick="alert('Notifications Center Open')">
 <div class="menu-item-left"><div class="menu-item-icon">🔔</div><span>Notification</span></div>
@@ -165,6 +174,29 @@ body { background-color: #191919; color: #ffffff; display: flex; justify-content
 <button class="logout-btn" onclick="logoutUser()">Log out</button>
 </div>
 </div>
+<!--  Deposit History Popup Modal Container -->
+<div id="depositModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; padding:15px;">
+  <div style="background:#252525; width:100%; max-width:400px; border-radius:15px; padding:20px; color:#fff; position:relative; box-shadow:0 5px 15px rgba(0,0,0,0.5);">
+    <h3 style="margin-bottom:15px; border-bottom:2px solid #dbb35e; padding-bottom:8px; color:#dbb35e;">Deposit History</h3>
+    <button onclick="closeDepositModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;">&times;</button>
+    
+    <!--       -->
+    <div id="depositHistoryList" style="max-height:300px; overflow-y:auto; margin-top:10px; padding-right:5px;">
+      <p style="text-align:center; color:#aaa;">Loading history...</p>
+    </div>
+  </div>
+</div>
+<!-- Withdraw History Popup Modal -->
+<div id="withdrawModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; padding:15px;">
+  <div style="background:#252525; width:100%; max-width:400px; border-radius:15px; padding:20px; color:#fff; position:relative; box-shadow:0 5px 15px rgba(0,0,0,0.5);">
+    <h3 style="margin-bottom:15px; border-bottom:2px solid #ff9933; padding-bottom:8px; color:#ff9933;">Withdraw History</h3>
+    <button onclick="closeWithdrawModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;">&times;</button>
+    <div id="withdrawHistoryList" style="max-height:300px; overflow-y:auto; margin-top:10px; padding-right:5px;">
+      <p style="text-align:center; color:#aaa;">Loading history...</p>
+    </div>
+  </div>
+</div>
+
 <script>
 const userPhone = localStorage.getItem('user_phone');
 const API_BASE_URL = "https://color-game-1kc2.onrender.com";
@@ -202,6 +234,96 @@ function fetchUserBalance() {
         .catch(err => {
             console.error("Error loading account balance from server:", err);
         });
+}
+
+//  Function to open Modal and Fetch Data from Live Server
+function openDepositHistoryModal() {
+  const modal = document.getElementById("depositModal");
+  const listContainer = document.getElementById("depositHistoryList");
+  
+  modal.style.display = "flex";
+  listContainer.innerHTML = '<p style="text-align:center; color:#aaa;">Loading history...</p>';
+
+  if (!userPhone) return;
+
+  fetch(`${API_BASE_URL}/api/deposit-history/${userPhone}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.history.length > 0) {
+        listContainer.innerHTML = ""; //   
+        
+        data.history.forEach(item => {
+          //        
+          let date = new Date(item.createdAt).toLocaleDateString();
+          let time = new Date(item.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
+          //         
+          let statusColor = item.status === 'SUCCESS' ? '#00cc66' : (item.status === 'PENDING' ? '#ff9933' : '#ff4d4d');
+
+          let itemHtml = `
+            <div style="background:#191919; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:between; align-items:center; border-left:4px solid ${statusColor};">
+              <div style="text-align:left;">
+                <div style="font-weight:bold; font-size:14px;">${item.amount.toFixed(2)}</div>
+                <div style="font-size:10px; color:#888; margin-top:2px;">${date} | ${time}</div>
+              </div>
+              <div style="color:${statusColor}; font-size:12px; font-weight:bold; margin-left:auto;">${item.status}</div>
+            </div>
+          `;
+          listContainer.innerHTML += itemHtml;
+        });
+      } else {
+        listContainer.innerHTML = '<p style="text-align:center; color:#aaa; padding:20px;">No deposit history found.</p>';
+      }
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      listContainer.innerHTML = '<p style="text-align:center; color:#ff4d4d; padding:20px;">Failed to load history.</p>';
+    });
+}
+function openWithdrawHistoryModal() {
+  const modal = document.getElementById("withdrawModal");
+  const listContainer = document.getElementById("withdrawHistoryList");
+  modal.style.display = "flex";
+  listContainer.innerHTML = '<p style="text-align:center; color:#aaa;">Loading history...</p>';
+  if (!userPhone) return;
+
+  fetch(`${API_BASE_URL}/api/withdraw-history/${userPhone}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.history.length > 0) {
+        listContainer.innerHTML = "";
+        data.history.forEach(item => {
+          let date = new Date(item.createdAt).toLocaleDateString();
+          let time = new Date(item.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          // SUCCESS   , PENDING   ,  FAILED/REJECTED    
+          let statusColor = item.status === 'SUCCESS' ? '#00cc66' : (item.status === 'PENDING' ? '#ff9933' : '#ff4d4d');
+          
+          let itemHtml = `
+            <div style="background:#191919; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${statusColor};">
+              <div style="text-align:left;">
+                <div style="font-weight:bold; font-size:14px;">${item.amount.toFixed(2)}</div>
+                <div style="font-size:10px; color:#888; margin-top:2px;">${date} | ${time}</div>
+              </div>
+              <div style="color:${statusColor}; font-size:12px; font-weight:bold;">${item.status}</div>
+            </div>
+          `;
+          listContainer.innerHTML += itemHtml;
+        });
+      } else {
+        listContainer.innerHTML = '<p style="text-align:center; color:#aaa; padding:20px;">No withdraw history found.</p>';
+      }
+    })
+    .catch(err => {
+      listContainer.innerHTML = '<p style="text-align:center; color:#ff4d4d; padding:20px;">Failed to load history.</p>';
+    });
+}
+
+function closeWithdrawModal() {
+  document.getElementById("withdrawModal").style.display = "none";
+}
+
+function closeDepositModal() {
+  document.getElementById("depositModal").style.display = "none";
 }
 
 function generateFixedUID(phoneStr) {

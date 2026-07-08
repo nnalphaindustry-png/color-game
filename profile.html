@@ -49,6 +49,21 @@ body { background-color: #191919; color: #ffffff; display: flex; justify-content
 .service-icon-img { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .logout-btn-box { margin: 10px 0; }
 .logout-btn { width: 100%; background: none; border: 1px solid #dbb35e; color: #dbb35e; padding: 12px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+/*  Commission Wallet Specific Custom Styles */
+.promo-wallet-card { background: linear-gradient(135deg, #2a2515, #191919); border: 1px solid #dbb35e; border-radius: 15px; padding: 15px; margin: 15px 0; text-align: center; }
+.promo-balance-lbl { font-size: 13px; color: #aaaaaa; }
+.promo-balance-val { font-size: 24px; font-weight: bold; color: #dbb35e; margin: 5px 0 12px 0; }
+
+/* Modal Background Overlay */
+.p-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+.p-modal-content { background-color: #252525; width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; color: #ffffff; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; animation: popScale 0.25s ease-out; border: 1px solid #333; }
+@keyframes popScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.p-modal-title { font-size: 18px; font-weight: bold; color: #dbb35e; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+.p-transfer-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 12px 25px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: background 0.2s; }
+.p-transfer-btn:disabled { background: #444444; color: #888888; cursor: not-allowed; }
+.p-close-btn { background: none; border: 1px solid #444; color: #aaaaaa; padding: 8px 20px; border-radius: 20px; font-size: 13px; cursor: pointer; margin-top: 15px; width: 100%; }
+
 </style>
 </head>
 <body>
@@ -85,10 +100,11 @@ body { background-color: #191919; color: #ffffff; display: flex; justify-content
 <button class="enter-wallet-btn" onclick="alert('Wallet Details Dashboard Open!')">Enter wallet</button>
 </div>
 <div class="quick-actions-grid">
-<div class="action-item" onclick="alert('ARWallet Dashboard Open')">
-<div class="action-icon" style="background-color: #ff4d4d;">👛</div>
+<div class="action-item" onclick="openPromoModal()">
+<div class="action-icon" style="background-color: #ff4d4d;"></div>
 <span>ARWallet</span>
 </div>
+
 <div class="action-item" onclick="window.location.href='deposit.html'">
 <div class="action-icon" style="background-color: #ff9933;">💰</div>
 <span>Deposit</span>
@@ -218,6 +234,26 @@ body { background-color: #191919; color: #ffffff; display: flex; justify-content
       <p style="text-align:center; color:#aaa;">Loading history...</p>
     </div>
   </div>
+</div>
+<!--  POPUP MODAL: Transfer to Main Wallet (  ,  Wallet    ) -->
+<div id="promoTransferModal" class="p-modal-overlay">
+    <div class="p-modal-content">
+        <div class="p-modal-title"> Commission Wallet</div>
+        <p style="font-size: 13px; color: #aaa; margin-bottom: 15px; text-align: center;">
+            You can instantly transfer your accumulated referral earnings and betting commissions directly into your main gaming wallet.
+        </p>
+        
+        <div style="background:#191919; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333;">
+            <div style="font-size:12px; color:#888;">Available to Transfer</div>
+            <div style="font-size:22px; font-weight:bold; color:#00cc66; margin-top:5px;" id="modal-promo-balance">0.00</div>
+        </div>
+
+        <button class="p-transfer-btn" id="transfer-action-btn" onclick="executeWalletTransfer()">
+            Transfer to Main Wallet
+        </button>
+        
+        <button class="p-close-btn" onclick="closePromoModal()">Close</button>
+    </div>
 </div>
 
 <script>
@@ -458,9 +494,92 @@ function openTransactionModal() {
       listContainer.innerHTML = '<p style="text-align:center; color:#ff4d4d; padding:20px;">Failed to load history.</p>';
     });
 }
+//  Commission Wallet Integration Script (  )
+const PROFILE_API_URL = "https://color-game-1kc2.onrender.com"; 
+const loggedUserPhone = localStorage.getItem('user_phone');
 
-function closeTxModal() {
-  document.getElementById("txModal").style.display = "none";
+//          
+document.addEventListener("DOMContentLoaded", () => {
+    if (loggedUserPhone) {
+        syncPromoWalletBalance();
+    }
+});
+
+//  -    (CORS  Null   )
+function syncPromoWalletBalance() {
+    fetch(`${PROFILE_API_URL}/api/agency/dashboard/${loggedUserPhone}`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            //         ,  'null'     
+            const modalBal = document.getElementById('modal-promo-balance');
+            if(modalBal) {
+                modalBal.innerText = "" + data.promoBalance.toFixed(2);
+            }
+            
+            const btn = document.getElementById('transfer-action-btn');
+            if (btn) {
+                if (data.promoBalance <= 0) {
+                    btn.disabled = true;
+                    btn.innerText = "Nothing to Transfer";
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = "Transfer to Main Wallet";
+                }
+            }
+        }
+    })
+    .catch(err => {
+        console.error("Network or CORS issue:", err);
+        const modalBal = document.getElementById('modal-promo-balance');
+        if(modalBal) modalBal.innerText = "0.00";
+    });
+}
+
+function openPromoModal() {
+    syncPromoWalletBalance(); //       
+    const modal = document.getElementById('promoTransferModal');
+    if(modal) modal.style.display = 'flex';
+}
+
+function closePromoModal() {
+    const modal = document.getElementById('promoTransferModal');
+    if(modal) modal.style.display = 'none';
+}
+
+//  -   
+function executeWalletTransfer() {
+    const btn = document.getElementById('transfer-action-btn');
+    if (!btn) return;
+    
+    btn.disabled = true;
+    btn.innerText = "Processing Transfer...";
+
+    fetch(`${PROFILE_API_URL}/api/agency/transfer-to-main`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: loggedUserPhone })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        closePromoModal();
+        if (data.success) {
+            //                
+            window.location.reload();
+        }
+    })
+    .catch(err => {
+        console.error("Transfer error:", err);
+        alert("Transfer connection failed! Please make sure your server is active.");
+        btn.disabled = false;
+        btn.innerText = "Transfer to Main Wallet";
+    });
 }
 
 </script>

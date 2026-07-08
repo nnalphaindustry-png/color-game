@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Money - Central Wallet</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #000000; color: #ffffff; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /*     */
+        .top-nav { display: flex; align-items: center; margin-bottom: 30px; }
+        .back-arrow { font-size: 24px; color: #ffffff; text-decoration: none; cursor: pointer; margin-right: 15px; }
+        .page-title { font-size: 18px; font-weight: 700; color: #9d4edd; text-transform: uppercase; }
+        
+        .search-card { background: #121212; border: 1px solid #1c1c1c; border-radius: 20px; padding: 20px; text-align: center; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; text-transform: uppercase; }
+        .input-group input { width: 100%; padding: 14px; background: #000000; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 16px; outline: none; }
+        .input-group input:focus { border-color: #9d4edd; }
+        
+        .search-btn { width: 100%; padding: 14px; background: #9d4edd; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        
+        /*        */
+        .result-box { display: none; margin-top: 24px; background: #1a1a1a; border: 1px solid #334155; border-radius: 12px; padding: 16px; text-align: left; }
+        .result-title { font-size: 12px; color: #10b981; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+        .user-name { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+        .pay-btn { width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <!--        -->
+    <div class="top-nav">
+        <span class="back-arrow" onclick="window.location.href='dashboard.html'"></span>
+        <div class="page-title">Send to Mobile / UID</div>
+    </div>
+
+    <div class="search-card">
+        <div class="input-group">
+            <label>Search Beneficiary</label>
+            <input type="text" id="search-query" placeholder="Enter Mobile Number or UID">
+        </div>
+        <button class="search-btn" onclick="executeUserSearch()">Search User</button>
+
+        <!--      -->
+        <div id="search-result" class="result-box">
+            <div class="result-title"> User Found</div>
+            <div id="display-name" class="user-name">------ ------</div>
+            <button class="pay-btn" onclick="alert(' Direct transfer feature will be active with MPIN confirmation!')">Proceed to Pay</button>
+        </div>
+    </div>
+
+<!--   2   -->
+<script>
+    //      
+    const API_URL = "https://central-wallet-1.onrender.com";
+
+    //     
+    async function executeUserSearch() {
+        const query = document.getElementById('search-query').value.trim();
+        const resultBox = document.getElementById('search-result');
+        const nameDisplay = document.getElementById('display-name');
+
+        if (!query) {
+            alert("     UID  !");
+            return;
+        }
+
+        try {
+            //       
+            const response = await fetch(`${API_URL}/api/wallet/search-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.user_found) {
+                //    ,    
+                nameDisplay.innerText = result.name;
+                resultBox.style.display = 'block';
+            } else {
+                //       -  
+                resultBox.style.display = 'none';
+                alert(` ${result.message}`);
+            }
+        } catch (err) {
+            alert("   !    ");
+            console.error(err);
+        }
+    }
+</script>
+
+</body>
+</html>

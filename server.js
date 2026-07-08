@@ -303,7 +303,7 @@ io.on('connection', (socket) => {
     if (!hasDeposited && user.balance <= 70) {
       return socket.emit('bet_response', { 
         success: false, 
-        message: "गेम खेलने के लिए कृपया पहली बार कम से कम ₹100 का रिचार्ज (Deposit) करें!" 
+        message: "First-time deposit is required to unlock your bonus and start playing! Please recharge now!" 
       });
     }
 

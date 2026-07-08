@@ -211,6 +211,29 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
 <script>
+// 📱 लॉगिन पेज के अनुसार सही नाम ('user_phone') से नंबर निकालना
+let userPhone = localStorage.getItem('user_phone');
+console.log("Logged in user phone (Fixed Name):", userPhone);
+                localStorage.getItem('mobile') ||
+                localStorage.getItem('user');
+
+// 🔍 अगर पूरा यूज़र ऑब्जेक्ट सेव है, तो उसमें से नंबर निकालें
+if (!userPhone) {
+    let userData = localStorage.getItem('userData') || localStorage.getItem('userInfo');
+    if (userData) {
+        try {
+            let parsed = JSON.parse(userData);
+            userPhone = parsed.phone || parsed.mobile || parsed.username;
+        } catch(e) {
+            console.error("Error parsing user data", e);
+        }
+    }
+}
+
+console.log("Logged in user phone (New Check):", userPhone);
+
+console.log("Logged in user phone:", userPhone);
+
 function showAppAlert(title, message, icon = '⚠') {
     document.getElementById("customAlertIcon").innerText = icon;
     document.getElementById("customAlertTitle").innerText = title;
@@ -301,19 +324,22 @@ function switchGameMode(modeKey) {
     }
 }
 
+// ✅ इसे अपनी फाइल में बदलें
 function changeTab(tabName) {
-    currentTab = tabName;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById("history-rows").innerHTML = "";
-    if (tabName === 'game') {
-        document.getElementById('tab-game').classList.add('active');
-        document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>`;
-        if (allGamesData[activeMode]) renderGameTable(allGamesData[activeMode].history);
-    } else {
-        document.getElementById('tab-my').classList.add('active');
-        document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Select</th><th>Amount</th><th>Result</th></tr>`;
-        fetchMyHistory();
-    }
+  currentTab = tabName;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById("history-rows").innerHTML = ""; // पुरानी लिस्ट साफ़ करें
+  
+  if (tabName === 'game') {
+    document.getElementById('tab-game').classList.add('active');
+    document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>`;
+    if (allGamesData[activeMode]) renderGameTable(allGamesData[activeMode].history);
+  } else {
+    document.getElementById('tab-my').classList.add('active');
+    // 📊 माई हिस्ट्री के लिए सही हेडर सेट करें
+    document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Select</th><th>Amount</th><th>Result</th></tr>`;
+    fetchMyHistory(); // 🚀 यूज़र का खुद का डेटा डेटाबेस से मंगाएं
+  }
 }
 
 function placeBet(type) {
@@ -422,22 +448,24 @@ socket.on('time_update', (data) => {
 });
 
 socket.on('game_result', (data) => {
-    if (!allGamesData[data.mode]) allGamesData[data.mode] = {};
-    allGamesData[data.mode].history = data.history;
-    if (data.mode === activeMode) {
-        if(currentTab === 'game') {
-            renderGameTable(data.history);
-        }
-        updateRecentBalls(data.history);
-        
-        // ⏱️ रेंडर सर्वर को लोड से बचाने के लिए 1.5 सेकंड का डिले दिया गया है
-        setTimeout(() => {
-            fetchUserBalance();
-        }, 1500);
-
-        if(currentTab === 'my') fetchMyHistory();
+  if (!allGamesData[data.mode]) allGamesData[data.mode] = {};
+  allGamesData[data.mode].history = data.history;
+  
+  if (data.mode === activeMode) {
+    if(currentTab === 'game') {
+      renderGameTable(data.history);
+    } else {
+      // 🔄 अगर यूजर My History देख रहा है, तो रिजल्ट आते ही उसकी लिस्ट तुरंत अपडेट करें
+      fetchMyHistory();
     }
+    updateRecentBalls(data.history);
+    
+    setTimeout(() => {
+      fetchUserBalance();
+    }, 1500);
+  }
 });
+
 
 
 function updateTimerUI(timeLeft) {
@@ -497,7 +525,19 @@ function updateRecentBalls(history) {
 }
 
 function fetchMyHistory() {
-    socket.emit('get_my_history', { phone: loggedUserPhone, mode: activeMode });
+  // अगर अभी भी नंबर नहीं मिला, तो दोबारा चेक करें
+  if (!userPhone) {
+    userPhone = localStorage.getItem('userPhone') || localStorage.getItem('phone');
+  }
+
+  // 🔒 सुरक्षा चेक: अगर लॉगइन नंबर बिल्कुल गायब है
+  if (!userPhone) {
+    console.error("User phone number is missing! Please re-login.");
+    return;
+  }
+
+  // 🚀 सर्वर को रिक्वेस्ट भेजें
+  socket.emit('get_my_history', { phone: userPhone, mode: activeMode });
 }
 
 socket.on('bet_outcome', (data) => {
@@ -511,24 +551,30 @@ socket.on('bet_outcome', (data) => {
 });
 
 socket.on('my_history_data', (data) => {
-    if (currentTab !== 'my') return;
-    const tbody = document.getElementById("history-rows");
-    tbody.innerHTML = "";
-    if (!data.success || !data.bets || data.bets.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:20px;">No betting records found</td></tr>`;
-        return;
-    }
-    data.bets.forEach(bet => {
-        let statusStyle = 'color: #aaa;';
-        if (bet.status === 'WIN') statusStyle = 'color: #2aa453; font-weight: bold;';
-        if (bet.status === 'LOSS') statusStyle = 'color: #d32f2f;';
-        let resultText = bet.status;
-        if (bet.status === 'WIN') resultText = `Win (+₹${bet.winAmount.toFixed(2)})`;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${bet.period}</td><td style="font-weight: bold; color: #f3c343;">${bet.selectValue}</td><td>₹${bet.amount}</td><td style="${statusStyle}">${resultText}</td>`;
-        tbody.appendChild(tr);
-    });
+  if (currentTab !== 'my') return;
+  const tbody = document.getElementById("history-rows");
+  tbody.innerHTML = "";
+  
+  if (!data.success || !data.bets || data.bets.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:20px;">No betting records found</td></tr>`;
+    return;
+  }
+  
+  data.bets.forEach(bet => {
+    let statusStyle = 'color: #aaa;';
+    if (bet.status === 'WIN') statusStyle = 'color: #2aa453; font-weight: bold;';
+    if (bet.status === 'LOSS') statusStyle = 'color: #d32f2f;';
+    
+    let resultText = bet.status;
+    if (bet.status === 'WIN') resultText = `Win (+₹${bet.winAmount.toFixed(2)})`;
+    
+    const tr = document.createElement('tr');
+    // ✅ इसे बिना तोड़े बिल्कुल एक ही सिंगल लाइन में रखना भाई
+    tr.innerHTML = `<td>${bet.period}</td><td style="font-weight: bold; color: #f3c343;">${bet.selectValue}</td><td>₹${bet.amount}</td><td style="${statusStyle}">${resultText}</td>`;
+    tbody.appendChild(tr);
+  });
 });
+
 </script>
 </body>
 </html>

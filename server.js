@@ -98,6 +98,17 @@ app.get('/api/balance/:phone', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error!" });
     }
 });
+// 📑 API to fetch Deposit History for a specific user
+app.get('/api/deposit-history/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    // डेटाबेस से यूज़र के सभी डिपॉजिट्स निकालकर लेटेस्ट वाले पहले दिखाएगा
+    const history = await Deposit.find({ phone }).sort({ createdAt: -1 });
+    res.json({ success: true, history });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error fetching history!" });
+  }
+});
 
 app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'game.html')));

@@ -802,6 +802,30 @@ app.get('/api/user/get-notices', async (req, res) => {
     }
 });
 
+// 📥 1. API Route for Users to Submit a New Complaint Ticket (POST API)
+app.post('/api/user/submit-complaint', async (req, res) => {
+    try {
+        const { phone, category, message } = req.body;
+        
+        if (!phone || !category || !message) {
+            return res.status(400).json({ success: false, message: "All fields are required!" });
+        }
+
+        // Saving new complaint details to database
+        const newComplaint = new Complaint({
+            phone,
+            category,
+            message
+        });
+
+        await newComplaint.save();
+        res.json({ success: true, message: "Your support request has been recorded successfully!" });
+
+    } catch (error) {
+        console.error("Complaint Submit Error:", error);
+        res.status(500).json({ success: false, message: "Server connection failed!" });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colorgame')

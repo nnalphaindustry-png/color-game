@@ -283,38 +283,46 @@ io.on('connection', (socket) => {
     socket.emit('all_modes_state', gameStates);
     
     socket.on('place_bet', async (data) => {
-        try {
-            const { phone, mode, selectValue, amount } = data;
-            const betAmount = parseInt(amount);
-            if (gameStates[mode].countdown <= 5) {
-                return socket.emit('bet_response', { success: false, message: "Betting closed! Time is over for this round." });
-            }
-            const user = await User.findOne({ phone });
-            if (!user || user.balance < betAmount) {
-                return socket.emit('bet_response', { success: false, message: "Insufficient wallet balance to place this bet!" });
-            }
-            user.balance -= betAmount;
-            await user.save();
-            const currentPeriod = gameStates[mode].period;
-            const newBet = new Bet({
-                phone, period: currentPeriod, mode, selectValue, amount: betAmount, socketId: socket.id
-            });
-            await newBet.save();
-            socket.emit('bet_response', { success: true, message: "Bet placed successfully!", newBalance: user.balance });
-        } catch (err) {
-            socket.emit('bet_response', { success: false, message: "Server error!" });
-        }
-    });
+  try {
+    const { phone, mode, selectValue, amount } = data;
+    const betAmount = parseInt(amount);
 
-    socket.on('get_my_history', async (data) => {
-        try {
-            const { phone, mode } = data;
-            const myBets = await Bet.find({ phone, mode }).sort({ createdAt: -1 }).limit(20);
-            socket.emit('my_history_data', { success: true, bets: myBets });
-        } catch (err) {
-            socket.emit('my_history_data', { success: false, bets: [] });
-        }
+    if (gameStates[mode].countdown <= 5) {
+      return socket.emit('bet_response', { success: false, message: "Betting closed! Time is over for this round." });
+    }
+
+    const user = await User.findOne({ phone });
+    if (!user || user.balance < betAmount) {
+      return socket.emit('bet_response', { success: false, message: "Insufficient wallet balance to place this bet!" });
+    }
+
+    // 🔒 नया नियम: चेक करें कि यूज़र ने कभी डिपॉजिट किया है या नहीं
+    const hasDeposited = await Deposit.findOne({ phone: phone, status: 'SUCCESS' });
+    
+    // अगर यूज़र के पास सिर्फ बोनस का ₹70 है और उसने कभी रिचार्ज नहीं किया है, तो उसे रोकें
+    if (!hasDeposited && user.balance <= 70) {
+      return socket.emit('bet_response', { 
+        success: false, 
+        message: "गेम खेलने के लिए कृपया पहली बार कम से कम ₹100 का रिचार्ज (Deposit) करें!" 
+      });
+    }
+
+    // अगर सब सही है तो बैलेंस काटें और गेम लगाने दें
+    user.balance -= betAmount;
+    await user.save();
+
+    const currentPeriod = gameStates[mode].period;
+    const newBet = new Bet({
+      phone, period: currentPeriod, mode, selectValue, amount: betAmount, socketId: socket.id
     });
+    await newBet.save();
+
+    socket.emit('bet_response', { success: true, message: "Bet placed successfully!", newBalance: user.balance });
+  } catch (err) {
+    socket.emit('bet_response', { success: false, message: "Server error!" });
+  }
+});
+
 
     socket.on('disconnect', () => {});
 });

@@ -109,6 +109,18 @@ app.get('/api/deposit-history/:phone', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error fetching history!" });
   }
 });
+// 📑 API to fetch Withdraw History for a specific user
+app.get('/api/withdraw-history/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    // डेटाबेस से यूज़र के सभी विड्रॉल रिकॉर्ड निकालकर लेटेस्ट वाले पहले दिखाएगा
+    // ध्यान रखें: आपके मॉडल का नाम 'Withdraw' या जो भी हो, उसके अनुसार चेक करें
+    const history = await Withdraw.find({ phone }).sort({ createdAt: -1 });
+    res.json({ success: true, history });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error fetching withdraw history!" });
+  }
+});
 
 app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'game.html')));

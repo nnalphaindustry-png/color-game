@@ -1,351 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RM GAME - My Account</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-body { background-color: #191919; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 80px; }
-.profile-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; overflow-x: hidden; position: relative; gap: 15px; padding: 0 12px; }
-.profile-top-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 5px; background-color: #191919; border-bottom: 1px solid #252525; width: 100%; margin-bottom: -5px; }
-.prof-back-btn { display: flex; align-items: center; cursor: pointer; color: #ffffff; background: none; border: none; }
-.prof-back-svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-.prof-nav-title { font-size: 16px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 24px; }
-.profile-header-card { background: linear-gradient(180deg, #dbb35e, #c79a49); border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; padding: 25px 15px 50px 15px; margin: 0 -12px; display: flex; align-items: center; gap: 15px; position: relative; }
-.avatar-box { width: 65px; height: 65px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255,255,255,0.6); }
-.avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-.user-info-box { display: flex; flex-direction: column; gap: 4px; color: #4a3200; }
-.username-row { font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-.vip-badge { background: #191919; color: #dbb35e; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 900; }
-.uid-row { font-size: 12px; font-weight: bold; opacity: 0.9; letter-spacing: 0.5px; }
-.last-login-row { font-size: 10px; opacity: 0.8; margin-top: 2px; }
-.balance-card { background-color: #252525; border-radius: 15px; padding: 15px; margin-top: -35px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 10; }
-.bal-left { display: flex; flex-direction: column; gap: 5px; }
-.bal-title-row { font-size: 12px; color: #aaaaaa; display: flex; align-items: center; gap: 5px; }
-.refresh-icon { cursor: pointer; width: 14px; height: 14px; fill: #aaaaaa; vertical-align: middle; transition: transform 0.3s; }
-.main-balance-txt { font-size: 24px; font-weight: bold; color: #ffffff; }
-.enter-wallet-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; }
-.quick-actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background-color: #252525; padding: 12px; border-radius: 12px; text-align: center; }
-.action-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; font-size: 11px; color: #dddddd; }
-.action-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px; }
-.history-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.hist-card-btn { background-color: #252525; border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.hist-icon-box { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-.hist-text-box { display: flex; flex-direction: column; gap: 2px; }
-.hist-main-title { font-size: 13px; font-weight: bold; color: #ffffff; }
-.hist-sub-title { font-size: 10px; color: #888888; }
-.menu-list-container { background-color: #252525; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-.menu-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 15px; border-bottom: 1px solid #333333; cursor: pointer; }
-.menu-list-item:last-child { border-bottom: none; }
-.menu-item-left { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #ffffff; }
-.menu-item-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.menu-item-right { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #888888; }
-.arrow-right-svg { width: 14px; height: 14px; fill: #666666; }
-.service-center-box { background-color: #252525; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-.service-title { font-size: 14px; font-weight: bold; color: #ffffff; border-left: 3px solid #dbb35e; padding-left: 8px; }
-.service-grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; text-align: center; margin-top: 5px; }
-.service-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; font-size: 11px; color: #aaaaaa; }
-.service-icon-img { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.logout-btn-box { margin: 10px 0; }
-.logout-btn { width: 100%; background: none; border: 1px solid #dbb35e; color: #dbb35e; padding: 12px; border-radius: 25px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Central Wallet</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #000000; color: #ffffff; padding: 16px; padding-bottom: 40px; }
+        
+        /*     */
+        .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .back-arrow { font-size: 24px; color: #ffffff; text-decoration: none; cursor: pointer; }
+        .page-title { font-size: 18px; font-weight: 700; color: #9d4edd; text-transform: uppercase; }
+        
+        /*       */
+        .profile-card { background: #121212; border: 1px solid #1c1c1c; border-radius: 20px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .user-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .user-info p { font-size: 14px; color: #9d4edd; font-weight: 600; letter-spacing: 0.5px; }
+        .edit-btn { background: #1c1c1c; border: 1px solid #334155; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        
+        /*      */
+        .qr-section { background: #121212; border: 1px solid #1c1c1c; border-radius: 20px; padding: 24px 16px; text-align: center; margin-bottom: 24px; }
+        .qr-title { font-size: 14px; color: #aaa; margin-bottom: 15px; font-weight: 600; }
+        .qr-box { width: 180px; height: 180px; background: #ffffff; margin: 0 auto; border-radius: 12px; padding: 10px; display: flex; justify-content: center; align-items: center; }
+        .qr-box img { width: 100%; height: 100%; }
+        
+        /*     */
+        .setting-list { background: #121212; border: 1px solid #1c1c1c; border-radius: 16px; padding: 6px; margin-bottom: 24px; }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #1c1c1c; }
+        .setting-item:last-child { border-bottom: none; }
+        .item-left { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; }
+        .incoming-text { font-size: 12px; color: #666; font-weight: bold; }
+        
+        /*    (Toggle Switch) */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #9d4edd; }
+        input:checked + .slider:before { transform: translateX(20px); }
+        
+        /*    */
+        .logout-btn { width: 100%; padding: 14px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; text-align: center; }
+    </style>
 </head>
 <body>
-<div class="profile-container">
-<div class="profile-top-nav">
-<button class="prof-back-btn" onclick="goToHome()">
-<svg class="prof-back-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
-</button>
-<div class="prof-nav-title">Account</div>
-</div>
-<div class="profile-header-card">
-<div class="avatar-box">
-<img src="profile.jpg" alt="Avatar">
-</div>
-<div class="user-info-box" style="text-align: left;">
-<div class="username-row">
-<span id="prof-username">MEMBER_LOADING</span>
-<span class="vip-badge">VIP0</span>
-</div>
-<div class="uid-row">UID | <span id="prof-uid">0000000</span></div>
-<div class="last-login-row">Last login: <span id="prof-last-login">Loading...</span></div>
-</div>
-</div>
-<div class="balance-card">
-<div class="bal-left" style="text-align: left;">
-<div class="bal-title-row">
-<span>Total balance</span>
-<svg class="refresh-icon" viewBox="0 0 24 24" onclick="fetchUserBalance()">
-<path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-</svg>
-</div>
-<div class="main-balance-txt" id="prof-balance-display">₹0.00</div>
-</div>
-<button class="enter-wallet-btn" onclick="alert('Wallet Details Dashboard Open!')">Enter wallet</button>
-</div>
-<div class="quick-actions-grid">
-<div class="action-item" onclick="alert('ARWallet Dashboard Open')">
-<div class="action-icon" style="background-color: #ff4d4d;">👛</div>
-<span>ARWallet</span>
-</div>
-<div class="action-item" onclick="window.location.href='deposit.html'">
-<div class="action-icon" style="background-color: #ff9933;">💰</div>
-<span>Deposit</span>
-</div>
-<div class="action-item" onclick="window.location.href='withdraw.html'">
-<div class="action-icon" style="background-color: #3399ff;">💳</div>
-<span>Withdraw</span>
-</div>
-<div class="action-item" onclick="alert('VIP Center Open')">
-<div class="action-icon" style="background-color: #00cc66;">👑</div>
-<span>VIP</span>
-</div>
-</div>
-<div class="history-grid-2x2">
-<div class="hist-card-btn" onclick="alert('Game Statistics History Open')">
-<div class="hist-icon-box" style="background-color: rgba(51,153,255,0.15); color: #3399ff;">📊</div>
-<div class="hist-text-box">
-<span class="hist-main-title">Game History</span>
-<span class="hist-sub-title">My game history</span>
-</div>
-</div>
-<div class="hist-card-btn" onclick="alert('Transaction History Open')" style="flex: 1;">
-    <div class="hist-icon-box" style="background-color: rgba(0,204,102,0.15); color: #00cc66;"></div>
-    <div class="hist-text-box">
-      <span class="hist-main-title">Transaction</span>
-      <span class="hist-sub-title">My transactions</span>
+
+    <!--     -->
+    <div class="top-nav">
+        <span class="back-arrow" onclick="window.location.href='dashboard.html'"></span>
+        <div class="page-title">Profile Settings</div>
+        <div style="width: 24px;"></div>
     </div>
-  </div>
-</div>
-<!--  DEPOSIT & WITHDRAW STATEMENT ROW (         flex container) -->
-<div style="display: flex; gap: 15px; margin-bottom: 15px;">
 
-  <!-- Deposit Statement  -->
-  <div class="hist-card-btn" onclick="openDepositHistoryModal()" style="flex: 1;">
-    <div class="hist-icon-box" style="background-color: rgba(255,77,77,0.15); color: #ff4d4d;"></div>
-    <div class="hist-text-box">
-      <span class="hist-main-title">Deposit</span>
-      <span class="hist-sub-title">My deposit statement</span>
+    <!--     -->
+    <div class="profile-card">
+        <div class="user-info">
+            <h2 id="prof-name">Loading...</h2>
+            <p id="prof-uid">UID: ------</p>
+        </div>
+        <button class="edit-btn" onclick="alert(' Profile editing features are coming soon via advanced form!')">Edit</button>
     </div>
-  </div>
 
-  <!-- Withdraw Statement  -->
-  <div class="hist-card-btn" onclick="openWithdrawHistoryModal()" style="flex: 1;">
-    <div class="hist-icon-box" style="background-color: rgba(255,153,51,0.15); color: #ff9933;"></div>
-    <div class="hist-text-box">
-      <span class="hist-main-title">Withdraw</span>
-      <span class="hist-sub-title">My withdrawal statement</span>
+    <!--      -->
+    <div class="qr-section">
+        <div class="qr-title"> Your Personal Payment QR</div>
+        <div class="qr-box">
+            <!--          -->
+            <img id="user-qr-img" src="" alt="My QR Code">
+        </div>
     </div>
-  </div>
 
-</div>
-
-<div class="menu-list-container">
-<div class="menu-list-item" onclick="alert('Notifications Center Open')">
-<div class="menu-item-left"><div class="menu-item-icon">🔔</div><span>Notification</span></div>
-<div class="menu-item-right"><svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
-</div>
-<div class="menu-list-item" onclick="alert('Gifts Center Open')">
-<div class="menu-item-left"><div class="menu-item-icon">🎁</div><span>Gifts</span></div>
-<div class="menu-item-right"><svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
-</div>
-<div class="menu-list-item" onclick="alert('Game Statistics Center Open')">
-<div class="menu-item-left"><div class="menu-item-icon">📈</div><span>Game statistics</span></div>
-<div class="menu-item-right"><svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
-</div>
-<div class="menu-list-item" onclick="alert('Language Selection Center Open')">
-<div class="menu-item-left"><div class="menu-item-icon">🌐</div><span>Language</span></div>
-<div class="menu-item-right"><span>English</span><svg class="arrow-right-svg" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg></div>
-</div>
-</div>
-<div class="service-center-box">
-<div class="service-title">Service center</div>
-<div class="service-grid-3col">
-<div class="service-item" onclick="alert('Settings Panel Open')"><div class="service-icon-img">⚙</div><span>Settings</span></div>
-<div class="service-item" onclick="alert('Feedback Portal Open')"><div class="service-icon-img">📋</div><span>Feedback</span></div>
-<div class="service-item" onclick="alert('Announcements Bulletin Open')"><div class="service-icon-img">📢</div><span>Announcement</span></div>
-<div class="service-item" onclick="alert('Live Support Helpdesk Open')"><div class="service-icon-img">🎧</div><span>Customer Service</span></div>
-<div class="service-item" onclick="alert('Beginners Tutorial Guide Open')"><div class="service-icon-img">📖</div><span>Beginner Guide</span></div>
-<div class="service-item" onclick="alert('About System Dashboard Open')"><div class="service-icon-img">ℹ</div><span>About us</span></div>
-</div>
-</div>
-<div class="logout-btn-box">
-<button class="logout-btn" onclick="logoutUser()">Log out</button>
-</div>
-</div>
-<!--  Deposit History Popup Modal Container -->
-<div id="depositModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; padding:15px;">
-  <div style="background:#252525; width:100%; max-width:400px; border-radius:15px; padding:20px; color:#fff; position:relative; box-shadow:0 5px 15px rgba(0,0,0,0.5);">
-    <h3 style="margin-bottom:15px; border-bottom:2px solid #dbb35e; padding-bottom:8px; color:#dbb35e;">Deposit History</h3>
-    <button onclick="closeDepositModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;">&times;</button>
-    
-    <!--       -->
-    <div id="depositHistoryList" style="max-height:300px; overflow-y:auto; margin-top:10px; padding-right:5px;">
-      <p style="text-align:center; color:#aaa;">Loading history...</p>
+    <!--     -->
+    <div class="setting-list">
+        <!--    /  -->
+        <div class="setting-item">
+            <div class="item-left"><span></span><span>Shake to Scan Camera</span></div>
+            <label class="switch">
+                <input type="checkbox" id="shake-toggle" onchange="toggleShakeToScan()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <!--  (  ) -->
+        <div class="setting-item">
+            <div class="item-left"><span></span><span style="color:#666">Performance Boost</span></div>
+            <span class="incoming-text">COMING SOON</span>
+        </div>
+        <!--  ( ) -->
+        <div class="setting-item" onclick="alert(' Security password change tab will be linked with app.py encryption route!')" style="cursor: pointer;">
+            <div class="item-left"><span></span><span>Security & Password</span></div>
+            <span style="color:#555; font-weight:bold;"></span>
+        </div>
     </div>
-  </div>
-</div>
-<!-- Withdraw History Popup Modal -->
-<div id="withdrawModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; padding:15px;">
-  <div style="background:#252525; width:100%; max-width:400px; border-radius:15px; padding:20px; color:#fff; position:relative; box-shadow:0 5px 15px rgba(0,0,0,0.5);">
-    <h3 style="margin-bottom:15px; border-bottom:2px solid #ff9933; padding-bottom:8px; color:#ff9933;">Withdraw History</h3>
-    <button onclick="closeWithdrawModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:#aaa; font-size:20px; cursor:pointer;">&times;</button>
-    <div id="withdrawHistoryList" style="max-height:300px; overflow-y:auto; margin-top:10px; padding-right:5px;">
-      <p style="text-align:center; color:#aaa;">Loading history...</p>
-    </div>
-  </div>
-</div>
 
-<script>
-const userPhone = localStorage.getItem('user_phone');
-const API_BASE_URL = "https://color-game-1kc2.onrender.com";
+    <!--    -->
+    <button class="logout-btn" onclick="handleLogout()">Logout Account</button>
 
-document.addEventListener("DOMContentLoaded", () => {
-    if (!userPhone) {
-        alert("Session Expired: Please login first!");
-        window.location.href = "index.html";
-        return;
-    }
-    document.getElementById("prof-username").innerText = "MEMBER_" + userPhone;
-    let generatedUID = generateFixedUID(userPhone);
-    document.getElementById("prof-uid").innerText = generatedUID;
-    
-    let now = new Date();
-    document.getElementById("prof-last-login").innerText = now.toISOString().slice(0, 10) + " " + now.toTimeString().slice(0, 8);
-    fetchUserBalance();
-});
-
-function fetchUserBalance() {
-    if (!userPhone) return;
-    const refreshBtn = document.querySelector(".refresh-icon");
-    if (refreshBtn) refreshBtn.style.transform = "rotate(360deg)";
-    
-    fetch(`${API_BASE_URL}/api/balance/${userPhone}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("prof-balance-display").innerText = "₹" + data.balance.toFixed(2);
-            }
-            setTimeout(() => {
-                if (refreshBtn) refreshBtn.style.transform = "rotate(0deg)";
-            }, 300);
-        })
-        .catch(err => {
-            console.error("Error loading account balance from server:", err);
-        });
-}
-
-//  Function to open Modal and Fetch Data from Live Server
-function openDepositHistoryModal() {
-  const modal = document.getElementById("depositModal");
-  const listContainer = document.getElementById("depositHistoryList");
-  
-  modal.style.display = "flex";
-  listContainer.innerHTML = '<p style="text-align:center; color:#aaa;">Loading history...</p>';
-
-  if (!userPhone) return;
-
-  fetch(`${API_BASE_URL}/api/deposit-history/${userPhone}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.success && data.history.length > 0) {
-        listContainer.innerHTML = ""; //   
-        
-        data.history.forEach(item => {
-          //        
-          let date = new Date(item.createdAt).toLocaleDateString();
-          let time = new Date(item.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-          
-          //         
-          let statusColor = item.status === 'SUCCESS' ? '#00cc66' : (item.status === 'PENDING' ? '#ff9933' : '#ff4d4d');
-
-          let itemHtml = `
-            <div style="background:#191919; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:between; align-items:center; border-left:4px solid ${statusColor};">
-              <div style="text-align:left;">
-                <div style="font-weight:bold; font-size:14px;">${item.amount.toFixed(2)}</div>
-                <div style="font-size:10px; color:#888; margin-top:2px;">${date} | ${time}</div>
-              </div>
-              <div style="color:${statusColor}; font-size:12px; font-weight:bold; margin-left:auto;">${item.status}</div>
-            </div>
-          `;
-          listContainer.innerHTML += itemHtml;
-        });
-      } else {
-        listContainer.innerHTML = '<p style="text-align:center; color:#aaa; padding:20px;">No deposit history found.</p>';
-      }
-    })
-    .catch(err => {
-      console.error("Error:", err);
-      listContainer.innerHTML = '<p style="text-align:center; color:#ff4d4d; padding:20px;">Failed to load history.</p>';
-    });
-}
-function openWithdrawHistoryModal() {
-  const modal = document.getElementById("withdrawModal");
-  const listContainer = document.getElementById("withdrawHistoryList");
-  modal.style.display = "flex";
-  listContainer.innerHTML = '<p style="text-align:center; color:#aaa;">Loading history...</p>';
-  if (!userPhone) return;
-
-  fetch(`${API_BASE_URL}/api/withdraw-history/${userPhone}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.success && data.history.length > 0) {
-        listContainer.innerHTML = "";
-        data.history.forEach(item => {
-          let date = new Date(item.createdAt).toLocaleDateString();
-          let time = new Date(item.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-          // SUCCESS   , PENDING   ,  FAILED/REJECTED    
-          let statusColor = item.status === 'SUCCESS' ? '#00cc66' : (item.status === 'PENDING' ? '#ff9933' : '#ff4d4d');
-          
-          let itemHtml = `
-            <div style="background:#191919; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid ${statusColor};">
-              <div style="text-align:left;">
-                <div style="font-weight:bold; font-size:14px;">${item.amount.toFixed(2)}</div>
-                <div style="font-size:10px; color:#888; margin-top:2px;">${date} | ${time}</div>
-              </div>
-              <div style="color:${statusColor}; font-size:12px; font-weight:bold;">${item.status}</div>
-            </div>
-          `;
-          listContainer.innerHTML += itemHtml;
-        });
-      } else {
-        listContainer.innerHTML = '<p style="text-align:center; color:#aaa; padding:20px;">No withdraw history found.</p>';
-      }
-    })
-    .catch(err => {
-      listContainer.innerHTML = '<p style="text-align:center; color:#ff4d4d; padding:20px;">Failed to load history.</p>';
-    });
-}
-
-function closeWithdrawModal() {
-  document.getElementById("withdrawModal").style.display = "none";
-}
-
-function closeDepositModal() {
-  document.getElementById("depositModal").style.display = "none";
-}
-
-function generateFixedUID(phoneStr) {
-    let hash = 0;
-    for (let i = 0; i < phoneStr.length; i++) {
-        hash = phoneStr.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    let finalUID = Math.abs(hash % 9000000) + 1000000;
-    return finalUID;
-}
-
-function goToHome() {
-    window.location.href = "home.html";
-}
-
-function logoutUser() {
-    if (confirm("Are you sure you want to log out from your account?")) {
-        localStorage.removeItem('user_phone');
-        alert("Logout successful!");
-        window.location.href = "index.html";
-    }
-}
-</script>
+<!--   2   -->
 </body>
 </html>
+<script>
+    //            
+    document.addEventListener("DOMContentLoaded", function() {
+        const uName = localStorage.getItem('user_name') || "User Name";
+        const uUid = localStorage.getItem('user_uid') || "CW00000";
+        const shakeSetting = localStorage.getItem('shake_to_scan') === 'true';
+
+        //     UID 
+        document.getElementById('prof-name').innerText = uName;
+        document.getElementById('prof-uid').innerText = `UID: ${uUid}`;
+
+        //        
+        document.getElementById('shake-toggle').checked = shakeSetting;
+
+        //    UID       (Google API )
+        //         
+        const qrImgElement = document.getElementById('user-qr-img');
+        const qrData = `centralwallet://pay?uid=${uUid}&name=${encodeURIComponent(uName)}`;
+        qrImgElement.src = `https://qrserver.com{encodeURIComponent(qrData)}`;
+    });
+
+    //     /  
+    function toggleShakeToScan() {
+        const isChecked = document.getElementById('shake-toggle').checked;
+        localStorage.setItem('shake_to_scan', isChecked);
+        if(isChecked) {
+            alert(" Shake to Scan   !         ");
+        } else {
+            alert(" Shake to Scan     ");
+        }
+    }
+
+    //   -     
+    function handleLogout() {
+        const confirmClear = confirm("             ?");
+        if (confirmClear) {
+            //        
+            localStorage.clear();
+            alert("        ");
+            //     
+            window.location.href = "index.html";
+        }
+    }
+</script>

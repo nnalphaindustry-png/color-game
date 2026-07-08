@@ -390,10 +390,6 @@ io.on('connection', (socket) => {
     socket.emit('bet_response', { success: false, message: "Server error!" });
   }
 });
-
-
-    socket.on('disconnect', () => {});
-});
 // 🎧 यूज़र की पर्सनल बेट हिस्ट्री (My History) भेजने के लिए बैकएंड कोड
 socket.on('get_my_history', async (data) => {
   try {
@@ -415,6 +411,10 @@ socket.on('get_my_history', async (data) => {
     console.error("Error in get_my_history socket:", err);
     socket.emit('my_history_data', { success: false, bets: [] });
   }
+});
+
+
+    socket.on('disconnect', () => {});
 });
 
 app.get('/api/admin/dashboard-data', async (req, res) => {

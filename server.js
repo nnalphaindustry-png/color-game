@@ -826,6 +826,22 @@ app.post('/api/user/submit-complaint', async (req, res) => {
         res.status(500).json({ success: false, message: "Server connection failed!" });
     }
 });
+// 👑 2. API Route for Admin Panel to Fetch All User Complaints (GET API)
+app.get('/api/admin/get-complaints', async (req, res) => {
+    try {
+        // Fetching all tickets from database (Latest complaints will appear on top)
+        const complaints = await Complaint.find().sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            complaintsList: complaints
+        });
+
+    } catch (error) {
+        console.error("Fetch Complaints Error:", error);
+        res.status(500).json({ success: false, message: "Failed to load complaints data!" });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colorgame')

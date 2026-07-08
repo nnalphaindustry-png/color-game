@@ -394,6 +394,28 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {});
 });
+// 🎧 यूज़र की पर्सनल बेट हिस्ट्री (My History) भेजने के लिए बैकएंड कोड
+socket.on('get_my_history', async (data) => {
+  try {
+    const { phone, mode } = data;
+    
+    if (!phone || !mode) {
+      return socket.emit('my_history_data', { success: false, bets: [], message: "Missing data!" });
+    }
+
+    // 🔍 डेटाबेस के 'Bet' टेबल से इस यूज़र के सिर्फ इस गेम मोड के लेटेस्ट 30 रिकॉर्ड्स निकालना
+    const userBets = await Bet.find({ phone: phone, mode: mode })
+                              .sort({ createdAt: -1 })
+                              .limit(30);
+    
+    // 🚀 वापस फ़्रंटएंड (game.html) को डेटा भेजना
+    socket.emit('my_history_data', { success: true, bets: userBets });
+    
+  } catch (err) {
+    console.error("Error in get_my_history socket:", err);
+    socket.emit('my_history_data', { success: false, bets: [] });
+  }
+});
 
 app.get('/api/admin/dashboard-data', async (req, res) => {
     try {

@@ -324,23 +324,42 @@ function switchGameMode(modeKey) {
     }
 }
 
-// ✅ इसे अपनी फाइल में बदलें
 function changeTab(tabName) {
   currentTab = tabName;
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById("history-rows").innerHTML = ""; // पुरानी लिस्ट साफ़ करें
   
+  // बटनों में एक्टिव क्लास सेट करना
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById("history-rows").innerHTML = "";
+  
+  // 🔍 नीचे वाले Preview / Detail बटन को कोड में ढूंढना
+  const previewBtn = document.querySelector('.more-btn') || 
+                     document.querySelector('.preview-btn') || 
+                     document.getElementById('more-history-btn');
+
   if (tabName === 'game') {
     document.getElementById('tab-game').classList.add('active');
     document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr>`;
     if (allGamesData[activeMode]) renderGameTable(allGamesData[activeMode].history);
+    
+    // 🔄 गेम हिस्ट्री में नीचे वाले बटन का पुराना काम वापस सेट करें
+    if(previewBtn) {
+      previewBtn.setAttribute('onclick', "window.location.href='all-game-history.html'"); 
+      previewBtn.innerText = "Game History Detail >";
+    }
   } else {
     document.getElementById('tab-my').classList.add('active');
-    // 📊 माई हिस्ट्री के लिए सही हेडर सेट करें
     document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Select</th><th>Amount</th><th>Result</th></tr>`;
-    fetchMyHistory(); // 🚀 यूज़र का खुद का डेटा डेटाबेस से मंगाएं
+    
+    // 🚀 माई हिस्ट्री में नीचे वाले बटन का काम बदलकर प्रोफाइल पेज पर सेट करना
+    if(previewBtn) {
+      previewBtn.setAttribute('onclick', "window.location.href='profile.html'");
+      previewBtn.innerText = "My Full Statement >";
+    }
+    
+    fetchMyHistory();
   }
 }
+
 
 function placeBet(type) {
     if (localCountdown <= 5) {
@@ -480,6 +499,11 @@ function updateTimerUI(timeLeft) {
 }
 
 function renderGameTable(history) {
+  // 🔒 सुरक्षा लॉक: अगर यूजर अभी 'My History' देख रहा है, तो गेम हिस्ट्री को रेंडर मत होने दो!
+  if (currentTab === 'my') {
+    console.log("Block auto-rendering game history while on My History tab.");
+    return; 
+  }
     const tbody = document.getElementById("history-rows");
     tbody.innerHTML = "";
     if (!history || history.length === 0) return;
@@ -509,6 +533,8 @@ function changePage(direction) {
 }
 
 function updateRecentBalls(history) {
+  // 🔒 सुरक्षा लॉक: माई हिस्ट्री टैब पर गेंदें अपडेट होने से टेबल नहीं बदलेगी
+  if (currentTab === 'my') return;
     const row = document.getElementById("recent-balls-row");
     row.innerHTML = "";
     if(!history || history.length === 0) return;
@@ -552,6 +578,8 @@ socket.on('bet_outcome', (data) => {
 
 socket.on('my_history_data', (data) => {
   if (currentTab !== 'my') return;
+  
+  document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Select</th><th>Amount</th><th>Result</th></tr>`;
   const tbody = document.getElementById("history-rows");
   tbody.innerHTML = "";
   
@@ -560,7 +588,10 @@ socket.on('my_history_data', (data) => {
     return;
   }
   
-  data.bets.forEach(bet => {
+  // ✅ केवल शुरुआती 10 बेट्स ही स्क्रीन पर दिखाई देंगी
+  const limitedBets = data.bets.slice(0, 17);
+  
+  limitedBets.forEach(bet => {
     let statusStyle = 'color: #aaa;';
     if (bet.status === 'WIN') statusStyle = 'color: #2aa453; font-weight: bold;';
     if (bet.status === 'LOSS') statusStyle = 'color: #d32f2f;';
@@ -569,8 +600,7 @@ socket.on('my_history_data', (data) => {
     if (bet.status === 'WIN') resultText = `Win (+₹${bet.winAmount.toFixed(2)})`;
     
     const tr = document.createElement('tr');
-    // ✅ इसे बिना तोड़े बिल्कुल एक ही सिंगल लाइन में रखना भाई
-    tr.innerHTML = `<td>${bet.period}</td><td style="font-weight: bold; color: #f3c343;">${bet.selectValue}</td><td>₹${bet.amount}</td><td style="${statusStyle}">${resultText}</td>`;
+    tr.innerHTML = `<td>${bet.period}</td><td style="font-weight: bold; color: #f3c343; text-transform: capitalize;">${bet.selectValue}</td><td>₹${bet.amount}</td><td style="${statusStyle}">${resultText}</td>`;
     tbody.appendChild(tr);
   });
 });

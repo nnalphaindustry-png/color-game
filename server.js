@@ -70,7 +70,7 @@ app.post('/api/register', async (req, res) => {
         const { phone, password } = req.body;
         const exists = await User.findOne({ phone });
         if (exists) return res.json({ success: false, message: "This mobile number is already registered!" });
-        const newUser = new User({ phone, password, balance: 100 });
+        const newUser = new User({ phone, password, balance: 70 });
         await newUser.save();
         res.json({ success: true, message: "Registration successful!" });
     } catch (err) {

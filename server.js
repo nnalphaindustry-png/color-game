@@ -30,16 +30,15 @@ const userSchema = new mongoose.Schema({
   balance: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   
-  // 🏆 एजेंसी और कमीशन सिस्टम के लिए नए फ़ील्ड्स
-  referredBy: { type: String, default: null },             // किसने इनवाइट किया (मोबाइल नंबर)
-  promoBalance: { type: Number, default: 0 },            // प्रमोशन/कमीशन वॉलेट बैलेंस
-  totalCommissionEarned: { type: Number, default: 0 },   // अब तक की कुल कमाई का रिकॉर्ड
-  claimedMissions: { type: [Number], default: [] }       // जो मिशन्स (1,3,5..) क्लेम हो चुके हैं उनकी ID
-  //       
-selfSpinCount: { type: Number, default: 0 },       //      
-referralSpinCount: { type: Number, default: 0 },   //      
-lastDepositAmount: { type: Number, default: 0 },   //     
-lastRefDepositAmount: { type: Number, default: 0 }  //     
+  //   33  43    
+  referredBy: { type: String, default: null },
+  promoBalance: { type: Number, default: 0 },
+  totalCommissionEarned: { type: Number, default: 0 },
+  claimedMissions: { type: [Number], default: [] },
+  selfSpinCount: { type: Number, default: 0 },
+  referralSpinCount: { type: Number, default: 0 },
+  lastDepositAmount: { type: Number, default: 0 },
+  lastRefDepositAmount: { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', userSchema);

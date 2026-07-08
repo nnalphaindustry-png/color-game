@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RM GAME - Customer Helpdesk</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background-color: #191919; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 40px; }
+.support-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; padding: 0 12px; gap: 15px; }
+.support-top-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 5px; background-color: #191919; border-bottom: 1px solid #252525; width: 100%; }
+.support-back-btn { display: flex; align-items: center; cursor: pointer; color: #ffffff; background: none; border: none; }
+.support-back-svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.support-nav-title { font-size: 16px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 24px; }
+
+/* 🎛️ हेल्प कैटेगरी बटन्स का स्टाइल */
+.category-title-lbl { font-size: 13px; color: #dbb35e; font-weight: bold; margin-top: 5px; text-align: left; }
+.category-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
+.category-btn { background-color: #252525; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.category-btn:active { transform: scale(0.95); }
+.category-btn.active-selected { background: linear-gradient(135deg, #2a2515, #191919); border: 1px solid #dbb35e; color: #dbb35e; box-shadow: 0 0 8px rgba(219, 179, 94, 0.2); }
+
+/* 📝 इनपुट टेक्स्ट बॉक्स का स्टाइल */
+.complaint-form-box { background-color: #252525; border: 1px solid #333; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.complaint-textarea { width: 100%; background-color: #191919; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 10px; font-size: 13px; resize: none; outline: none; line-height: 1.4; }
+.complaint-submit-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 12px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+.complaint-submit-btn:active { transform: scale(0.98); }
+
+/* ✈️ सोशल लिंक्स बटन्स */
+.social-support-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+.social-support-card { background-color: #252525; border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-size: 12px; font-weight: bold; border: 1px solid #333; }
+
+/* 🎉 सक्सेस पॉपअप बॉक्स स्टाइल */
+.success-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+.success-modal-content { background-color: #252525; width: 100%; max-width: 340px; border-radius: 16px; border: 1px solid #00cc66; padding: 25px 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: popUpScale 0.25s ease-out; }
+@keyframes popUpScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+
+<body>
+<div class="support-container">
+    <!-- Top Navigation Bar -->
+    <div class="support-top-nav">
+        <button class="support-back-btn" onclick="window.location.href='home.html'">
+            <svg class="support-back-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="support-nav-title">Customer Support</div>
+    </div>
+
+    <!-- 🎛️ Step 1: Help Categories Selection Grid -->
+    <div class="category-title-lbl">Select Your Issue Category:</div>
+    <div class="category-grid-2x2">
+        <div class="category-btn" id="cat-deposit" onclick="selectHelpCategory('Deposit Issue')">
+            <span style="font-size: 20px;">💰</span><span>Deposit Issue</span>
+        </div>
+        <div class="category-btn" id="cat-withdraw" onclick="selectHelpCategory('Withdraw Issue')">
+            <span style="font-size: 20px;">💳</span><span>Withdraw Issue</span>
+        </div>
+        <div class="category-btn" id="cat-password" onclick="selectHelpCategory('Password Issue')">
+            <span style="font-size: 20px;">🔑</span><span>Password Issue</span>
+        </div>
+        <div class="category-btn" id="cat-technical" onclick="selectHelpCategory('Technical Issue')">
+            <span style="font-size: 20px;">⚙️</span><span>Technical Issue</span>
+        </div>
+    </div>
+
+    <!-- 📝 Step 2: Hidden Form Box (Appears after choosing category) -->
+    <div id="complaint-input-wrapper" class="complaint-form-box" style="display: none;">
+        <div style="font-size: 12px; color: #aaa; text-align: left;">
+            Selected: <span id="selected-category-display" style="color: #dbb35e; font-weight: bold;">None</span>
+        </div>
+        <textarea id="user-complaint-msg" class="complaint-textarea" rows="4" placeholder="Describe your issue here in detail (e.g. UTR number, Phone)..."></textarea>
+        <button class="complaint-submit-btn" onclick="submitUserComplaintForm()">Submit Complaint Request</button>
+    </div>
+
+    <!-- 🔗 Official Emergency Contact Links -->
+    <div class="category-title-lbl">Or Contact Via Official Links:</div>
+    <div class="social-support-row">
+        <div class="social-support-card" style="color: #3399ff;" onclick="openTelegramSupport()">✈️ Telegram Bot</div>
+        <div class="social-support-card" style="color: #00cc66;" onclick="openWhatsappSupport()">💬 WhatsApp Live</div>
+    </div>
+
+    <div style="font-size: 10px; color: #555; text-align: center; line-height: 1.4; margin-top: 10px;">
+        Security Notice: RM GAME support team will never ask for your account OTP or Password. Beware of fake admins!
+    </div>
+</div>
+
+<!-- 🎉 Beautiful Request Submitted Success Popup Modal -->
+<div id="success-alert-modal" class="success-modal-overlay">
+    <div class="success-modal-content">
+        <div style="font-size: 45px; margin-bottom: 12px; animation: bounce 1s infinite;">✅</div>
+        <h3 style="color: #00cc66; font-size: 18px; margin-bottom: 10px; font-weight: bold;">Request Submitted!</h3>
+        <p style="color: #e0e0e0; font-size: 12px; line-height: 1.5; margin-bottom: 20px;">Thank you for reaching out. Your support ticket has been recorded successfully. Admin will review it shortly!</p>
+        <button onclick="closeSuccessAlertModal()" style="background: #00cc66; color: #191919; border: none; padding: 10px 25px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%;">Understood</button>
+    </div>
+</div>
+<script>
+// Server Main API URL Configurations
+const SUPPORT_API_BASE_URL = "https://color-game-1kc2.onrender.com";
+const userMobileNumber = localStorage.getItem('user_phone'); // Fetching active user session
+
+// Social Links Configurations
+const TELEGRAM_SUPPORT_URL = "https://t.me"; 
+const WHATSAPP_NUMBER = "919999999999"; 
+
+let activeSelectedCategory = "";
+
+// Function to handle category buttons selection clicks
+function selectHelpCategory(categoryName) {
+    activeSelectedCategory = categoryName;
+    
+    // Removing active highlight colors from all cards
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active-selected');
+    });
+    
+    // Adding active highlight color to clicked card
+    if(categoryName === 'Deposit Issue') document.getElementById('cat-deposit').classList.add('active-selected');
+    if(categoryName === 'Withdraw Issue') document.getElementById('cat-withdraw').classList.add('active-selected');
+    if(categoryName === 'Password Issue') document.getElementById('cat-password').classList.add('active-selected');
+    if(categoryName === 'Technical Issue') document.getElementById('cat-technical').classList.add('active-selected');
+    
+    // Revealing text input form details layout block dynamically
+    document.getElementById('selected-category-display').innerText = categoryName;
+    document.getElementById('complaint-input-wrapper').style.display = "flex";
+}
+
+// Function to submit user ticket data details over backend server database
+function submitUserComplaintForm() {
+    const textMessageInput = document.getElementById('user-complaint-msg');
+    const finalMessageText = textMessageInput.value.trim();
+
+    if (!userMobileNumber) {
+        alert("Session Expired: Please re-login to your account first!");
+        window.location.href = "index.html";
+        return;
+    }
+    if (!activeSelectedCategory) {
+        alert("Please select an issue category first!");
+        return;
+    }
+    if (!finalMessageText) {
+        alert("Please type some details about your problem inside the message box!");
+        return;
+    }
+
+    // Triggering post request data transmission to server
+    fetch(`${SUPPORT_API_BASE_URL}/api/user/submit-complaint`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            phone: userMobileNumber,
+            category: activeSelectedCategory,
+            message: finalMessageText
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            textMessageInput.value = ""; // Cleaning up textarea input value
+            document.getElementById('success-alert-modal').style.display = "flex"; // Triggering Success Popup Reveal
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Ticket Submission Error Log:", err);
+        alert("Connection Failed: Unable to connect with live backend server!");
+    });
+}
+
+function closeSuccessAlertModal() {
+    document.getElementById('success-alert-modal').style.display = "none";
+    window.location.href = "home.html"; // Sending user back safely to homepage dashboard dashboard area
+}
+
+function openTelegramSupport() {
+    if(TELEGRAM_SUPPORT_URL.includes("your_telegram_support_username")) {
+        alert("Configuration Notice: Telegram channel hotline link not configured yet.");
+        return;
+    }
+    window.location.href = TELEGRAM_SUPPORT_URL;
+}
+
+function openWhatsappSupport() {
+    if(WHATSAPP_NUMBER === "919992788757") {
+        alert("Configuration Notice: WhatsApp helpline telephone number not configured yet.");
+        return;
+    }
+    const txtMsg = encodeURIComponent("Hello Admin, I need assistance regarding my game account issues.");
+    window.location.href = `https://wa.me{WHATSAPP_NUMBER}?text=${txtMsg}`;
+}
+</script>
+</body>
+</html>

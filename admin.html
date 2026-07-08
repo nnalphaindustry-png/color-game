@@ -80,6 +80,10 @@ input:focus, select:focus { border-color: #dbb35e; }
 <button onclick="switchAdminView('deposit-requests-view')">📥 Deposit Approvals</button>
 <button onclick="switchAdminView('withdraw-requests-view')">📤 Withdraw Manager</button>
 <button onclick="switchAdminView('user-management-view')">👤 Member Accounts</button>
+<!--           -->
+<button onclick="switchAdminView('announcement-alert-view')"> Send Notification</button>
+<!-- This button goes directly inside your sidebar links layout block -->
+<button onclick="switchAdminView('user-complaints-view')"> User Complaints</button>
 <button onclick="switchAdminView('gateway-updater-view')">💳 Bank & QR Settings</button>
 </div>
 </div>
@@ -214,6 +218,53 @@ input:focus, select:focus { border-color: #dbb35e; }
 </div>
 </div>
 </div>
+<!--  Live User Complaints Dashboard Management View Section -->
+<div id="user-complaints-view" class="admin-section" style="display: none;">
+    <div class="admin-card" style="background-color: #252525; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #333;">
+        <div class="card-title" style="color: #dbb35e; font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;"> Active User Complaints & Support Tickets</div>
+        
+        <div style="overflow-x: auto; margin-top: 15px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; background-color: #121212; color: #fff; font-size: 13px; border-radius: 8px; overflow: hidden;">
+                <thead>
+                    <tr style="background: linear-gradient(180deg, #dbb35e, #c79a49); color: #4a3200; font-weight: bold;">
+                        <th style="padding: 12px 10px;">User Phone</th>
+                        <th style="padding: 12px 10px;">Category</th>
+                        <th style="padding: 12px 10px;">Issue Description Details</th>
+                        <th style="padding: 12px 10px;">Date & Time</th>
+                        <th style="padding: 12px 10px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-complaints-table-body">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #666; padding: 20px;">Loading user complaints database timeline...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--         -->
+<div id="announcement-alert-view" class="admin-section">
+    <div class="admin-card">
+        <div class="card-title"> Announcement & Alert System</div>
+        
+        <!--      -->
+        <div class="form-group">
+            <label>Type New Update Message:</label>
+            <textarea id="admin-notice-input" rows="4" style="width: 100%; background-color: #121212; color: #fff; border: 1px solid #333; border-radius: 8px; padding: 10px; font-size: 13px; resize: none; outline: none; font-family: 'Segoe UI', Arial, sans-serif;" placeholder="      ..."></textarea>
+            <button class="btn btn-save" onclick="publishGameNotice()" style="margin-top: 10px;"> Send To All Game Users</button>
+        </div>
+
+        <!--     -->
+        <div style="margin-top: 15px;">
+            <label style="font-weight: bold; color: #dbb35e; display: block; margin-bottom: 8px;">Sent Alerts History</label>
+            <div id="admin-notice-list" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <p style="color: #666; text-align: center; font-size: 12px; padding: 10px;">Loading history...</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="custom-alert-overlay" id="adminAlertOverlay">
 <div class="custom-alert-box">
@@ -257,10 +308,20 @@ function switchAdminView(targetSectionId) {
     const targetSection = document.getElementById(targetSectionId);
     if (targetSection) targetSection.classList.add('active-view');
     toggleSidebar();
-    if (targetSectionId === 'dashboard-view' || targetSectionId === 'deposit-requests-view' || targetSectionId === 'withdraw-requests-view') {
+    
+    //      ( )
+    if (targetSectionId === 'dashboard-view' || targetSectionId === 'deposit-requests-view') {
         loadGlobalDashboardStats();
     }
+    
+    //           ( )
+    if (targetSectionId === 'user-complaints-view') {
+        if (typeof loadUserComplaintsDatabase === 'function') {
+            loadUserComplaintsDatabase();
+        }
+    }
 }
+
 
 function toggleManualInputBox(policyValue) {
     document.getElementById("manual-num-block").style.display = (policyValue === "manual") ? "flex" : "none";
@@ -451,6 +512,78 @@ function updateAdminGateways() {
     .then(data => showAdminPopup("Gateway System Settings", data.message || "Payment interfaces updated successfully!", "💳"))
     .catch(() => showAdminPopup("Error", "Failed to write gateway config.", "❌"));
 }
+//    URL ( server.js     )
+const ADMIN_API_URL = "https://color-game-1kc2.onrender.com";
+
+//        
+document.addEventListener("DOMContentLoaded", () => {
+    loadNoticeHistory();
+});
+
+//        
+function publishGameNotice() {
+    const messageInput = document.getElementById("admin-notice-input");
+    const messageText = messageInput.value.trim();
+
+    if (!messageText) {
+        alert("     !");
+        return;
+    }
+
+    //    
+    fetch(`${ADMIN_API_URL}/api/admin/add-notice`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: messageText })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(": " + data.message);
+            messageInput.value = ""; //   
+            loadNoticeHistory(); //    
+        } else {
+            alert(": " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Notice Error:", err);
+        alert("     !");
+    });
+}
+
+//           
+function loadNoticeHistory() {
+    const listContainer = document.getElementById("admin-notice-list");
+    if (!listContainer) return;
+
+    fetch(`${ADMIN_API_URL}/api/user/get-notices`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.history.length > 0) {
+            listContainer.innerHTML = "";
+            data.history.forEach(item => {
+                let dateObj = new Date(item.createdAt);
+                let dateStr = dateObj.toLocaleDateString();
+                let timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                let itemHtml = `
+                    <div style="background-color: #191919; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #333; text-align: left;">
+                        <p style="font-size: 13px; color: #fff; margin-bottom: 5px; line-height: 1.4;">${item.message}</p>
+                        <div style="font-size: 10px; color: #666; font-weight: bold;"> ${dateStr} |  ${timeStr}</div>
+                    </div>`;
+                listContainer.innerHTML += itemHtml;
+            });
+        } else {
+            listContainer.innerHTML = '<p style="color: #666; text-align: center; font-size: 13px; padding: 10px;">    </p>';
+        }
+    })
+    .catch(err => {
+        console.error("History Load Error:", err);
+        listContainer.innerHTML = '<p style="color: #ff4d4d; text-align: center; font-size: 13px; padding: 10px;">     </p>';
+    });
+}
+
 </script>
 </body>
 </html>

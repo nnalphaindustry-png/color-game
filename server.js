@@ -100,6 +100,26 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error!" });
   }
 });
+// 📢 नोटिफिकेशन और अलर्ट के लिए नया डेटाबेस स्कीमा
+const mongoose = require('mongoose');
+
+const NoticeSchema = new mongoose.Schema({
+    message: {
+        type: String,
+        required: true
+    },
+    imageUrl: {
+        type: String,
+        default: null // भविष्य में इमेज लिंक डालने के लिए
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now // सर्वर अपने आप लाइव टाइम नोट करेगा
+    }
+});
+
+// मॉडल को एक्सपोर्ट करना
+const Notice = mongoose.model('Notice', NoticeSchema);
 
 
 app.post('/api/login', async (req, res) => {
@@ -712,6 +732,30 @@ app.post('/api/agency/transfer-to-main', async (req, res) => {
     res.status(500).json({ success: false, message: "Wallet transfer server error" });
   }
 });
+// 📝 1. एडमिन पैनल से नया मैसेज भेजने का रास्ता (POST API)
+app.post('/api/admin/add-notice', async (req, res) => {
+    try {
+        const { message, imageUrl } = req.body;
+        
+        if (!message) {
+            return res.status(400).json({ success: false, message: "मैसेज लिखना जरूरी है!" });
+        }
+
+        // नया नोटिस डेटाबेस में सुरक्षित करना
+        const newNotice = new Notice({
+            message,
+            imageUrl: imageUrl || null
+        });
+
+        await newNotice.save();
+        res.json({ success: true, message: "नया अलर्ट गेम में लाइव हो गया है!" });
+
+    } catch (error) {
+        console.error("Notice Error:", error);
+        res.status(500).json({ success: false, message: "सर्वर एरर आ गया!" });
+    }
+});
+
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colorgame')

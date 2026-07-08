@@ -273,6 +273,23 @@ input:focus, select:focus { border-color: #dbb35e; }
         </div>
     </div>
 </div>
+<!--  Full Complaint Message View Popup Modal -->
+<div id="complaint-details-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background-color: #252525; width: 100%; max-width: 360px; border-radius: 16px; border: 1px solid #dbb35e; padding: 20px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <button onclick="closeComplaintPopup()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
+        
+        <div style="font-size: 32px; margin-bottom: 10px;"></div>
+        <h3 style="color: #dbb35e; font-size: 16px; margin-bottom: 5px; font-weight: bold;">User Ticket Details</h3>
+        <div id="popup-ticket-user-phone" style="font-size: 11px; color: #888; margin-bottom: 15px; font-weight: bold;">User: Loading...</div>
+        
+        <!--        -   -->
+        <div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; text-align: left; margin-bottom: 20px;">
+            <p id="popup-ticket-full-text" style="color: #e0e0e0; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">No text loaded.</p>
+        </div>
+        
+        <button onclick="closeComplaintPopup()" style="background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 10px 30px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%;">Close Preview</button>
+    </div>
+</div>
 
 <div class="custom-alert-overlay" id="adminAlertOverlay">
 <div class="custom-alert-box">
@@ -590,6 +607,82 @@ function loadNoticeHistory() {
         console.error("History Load Error:", err);
         listContainer.innerHTML = '<p style="color: #ff4d4d; text-align: center; font-size: 13px; padding: 10px;">     </p>';
     });
+}
+// This function pulls complaints and handles modal popup magnification events
+function loadUserComplaintsDatabase() {
+    const tableBody = document.getElementById("admin-complaints-table-body");
+    if (!tableBody) return;
+
+    fetch("https://color-game-1kc2.onrender.com/api/admin/get-complaints")
+    .then(async res => {
+        const responseText = await res.text();
+        
+        try {
+            const data = JSON.parse(responseText);
+            
+            if (data.success && data.complaintsList && data.complaintsList.length > 0) {
+                tableBody.innerHTML = ""; 
+                
+                data.complaintsList.forEach(ticket => {
+                    let dateStr = new Date(ticket.createdAt).toLocaleDateString();
+                    let timeStr = new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    let badgeColor = "#252525";
+                    if(ticket.category === "Deposit Issue") badgeColor = "#ff9933";
+                    if(ticket.category === "Withdraw Issue") badgeColor = "#3399ff";
+                    if(ticket.category === "Password Issue") badgeColor = "#cc33ff";
+                    if(ticket.category === "Technical Issue") badgeColor = "#ff4d4d";
+
+                    // Escape quotes inside text messages to safely pass into function variables safely
+                    let safeMessage = ticket.message.replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+                    let rowHtml = `
+                        <tr style="border-bottom: 1px solid #222;">
+                            <td style="padding: 12px 10px; font-weight: bold; color: #dbb35e;">${ticket.phone}</td>
+                            <td style="padding: 12px 10px;">
+                                <span style="background-color: ${badgeColor}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
+                                    ${ticket.category}
+                                </span>
+                            </td>
+                            <!-- Added click listener and text wrap adjustments below -->
+                            <td style="padding: 12px 10px; color: #e0e0e0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" title="Click to view full message" onclick="revealComplaintPopup('${ticket.phone}', '${safeMessage}')">
+                                 <span style="text-decoration: underline;">${ticket.message}</span>
+                            </td>
+                            <td style="padding: 12px 10px; color: #777; font-size: 11px; font-weight: bold;"> ${dateStr}<br> ${timeStr}</td>
+                            <td style="padding: 12px 10px;">
+                                <span style="color: #ff9933; font-weight: bold;"> ${ticket.status}</span>
+                            </td>
+                        </tr>`;
+                    tableBody.innerHTML += rowHtml;
+                });
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #555; padding: 25px;">No active support tickets found inside server database logs.</td></tr>`;
+            }
+        } catch (parseError) {
+            console.error("Text manipulation error log:", parseError);
+            if (responseText.includes("<!DOCTYPE") || responseText.includes("<html")) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff9933; padding: 25px; font-weight: bold;">Server Connection Pending: Please deploy your updated server.js file to Render first!</td></tr>`;
+            } else {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4d4d; padding: 25px;">Data Parse Error: Unable to read server records stream.</td></tr>`;
+            }
+        }
+    })
+    .catch(err => {
+        console.error("Pipeline connectivity error log:", err);
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4d4d; padding: 25px;">Failed connection: Unable to fetch live complaints history from server!</td></tr>`;
+    });
+}
+
+//         ( )
+function revealComplaintPopup(userPhone, fullMessage) {
+    document.getElementById("popup-ticket-user-phone").innerText = "User Phone: " + userPhone;
+    document.getElementById("popup-ticket-full-text").innerText = fullMessage;
+    document.getElementById("complaint-details-popup").style.display = "flex";
+}
+
+//        ( )
+function closeComplaintPopup() {
+    document.getElementById("complaint-details-popup").style.display = "none";
 }
 
 

@@ -17,11 +17,18 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, '')));
 
 const userSchema = new mongoose.Schema({
-    phone: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    balance: { type: Number, default: 0 },
-    createdAt: { type: Date, default: Date.now }
+  phone: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  balance: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+  
+  // 🏆 एजेंसी और कमीशन सिस्टम के लिए नए फ़ील्ड्स
+  referredBy: { type: String, default: null },             // किसने इनवाइट किया (मोबाइल नंबर)
+  promoBalance: { type: Number, default: 0 },            // प्रमोशन/कमीशन वॉलेट बैलेंस
+  totalCommissionEarned: { type: Number, default: 0 },   // अब तक की कुल कमाई का रिकॉर्ड
+  claimedMissions: { type: [Number], default: [] }       // जो मिशन्स (1,3,5..) क्लेम हो चुके हैं उनकी ID
 });
+
 const User = mongoose.model('User', userSchema);
 
 const betSchema = new mongoose.Schema({
@@ -66,17 +73,34 @@ const withdrawSchema = new mongoose.Schema({
 });
 const Withdraw = mongoose.model('Withdraw', withdrawSchema);
 app.post('/api/register', async (req, res) => {
-    try {
-        const { phone, password } = req.body;
-        const exists = await User.findOne({ phone });
-        if (exists) return res.json({ success: false, message: "This mobile number is already registered!" });
-        const newUser = new User({ phone, password, balance: 70 });
-        await newUser.save();
-        res.json({ success: true, message: "Registration successful!" });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Server error!" });
+  try {
+    // फ्रंटएंड से 'ref' (इनवाइट करने वाले का मोबाइल नंबर) भी स्वीकार करेंगे
+    const { phone, password, ref } = req.body; 
+    const exists = await User.findOne({ phone });
+    if (exists) return res.json({ success: false, message: "This mobile number is already registered!" });
+    
+    // चेक करें कि इनवाइट करने वाला वाकई हमारे डेटाबेस में है या नहीं
+    let referrer = null;
+    if (ref && ref.trim() !== "" && ref !== "null" && ref !== "undefined") {
+      const checkReferrer = await User.findOne({ phone: ref });
+      if (checkReferrer) {
+        referrer = ref;
+      }
     }
+
+    const newUser = new User({ 
+      phone, 
+      password, 
+      balance: 70, // आपका डिफ़ॉल्ट साइन-अप बोनस
+      referredBy: referrer 
+    });
+    await newUser.save();
+    res.json({ success: true, message: "Registration successful!" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error!" });
+  }
 });
+
 
 app.post('/api/login', async (req, res) => {
     try {
@@ -306,32 +330,75 @@ async function generateMultiGameResult(mode) {
     }
 }
 
-async function processUserBetsOutcome(mode, period, winNum, winColor, winBigSmall) {
-    const activeBets = await Bet.find({ period, mode, status: 'PENDING' });
-    for (let bet of activeBets) {
-        let isWin = false;
-        let multiplier = 2;
-        if (!isNaN(bet.selectValue)) {
-            if (parseInt(bet.selectValue) === winNum) { isWin = true; multiplier = 9; }
-        } else if (bet.selectValue === winBigSmall) {
-            isWin = true; multiplier = 2;
-        } else if (winColor.includes(bet.selectValue)) {
-            isWin = true; multiplier = winColor.includes('-Violet') ? 1.5 : 2;
-        }
-        if (isWin) {
-            bet.status = 'WIN';
-            bet.winAmount = bet.amount * multiplier;
-            await User.updateOne({ phone: bet.phone }, { $inc: { balance: bet.winAmount } });
-        } else {
-            bet.status = 'LOSS';
-            bet.winAmount = 0;
-        }
-        await bet.save();
-        if (bet.socketId) {
-            io.to(bet.socketId).emit('bet_outcome', { status: bet.status, winAmount: bet.winAmount, period: period });
-        }
-    }
+// ==========================================
+// 1. एजेंट का VIP टियर और कमीशन प्रतिशत (%) तय करने का नियम
+// ==========================================
+function getAgentCommissionRate(inviteCount) {
+  if (inviteCount >= 500) return 0.012; // Diamond Agent: 1.2% कमीशन
+  if (inviteCount >= 100) return 0.010; // Gold Agent: 1.0% कमीशन
+  if (inviteCount >= 50)  return 0.008; // Silver Agent: 0.8% कमीशन
+  return 0.006;                         // Bronze Agent: 0.6% कमीशन (शुरुआती स्तर)
 }
+
+// ==========================================
+// 2. पूरा अपग्रेड किया हुआ बेट आउटकम फंक्शन (कमीशन के साथ)
+// ==========================================
+async function processUserBetsOutcome(mode, period, winNum, winColor, winBigSmall) {
+  const activeBets = await Bet.find({ period, mode, status: 'PENDING' });
+  for (let bet of activeBets) {
+    let isWin = false;
+    let multiplier = 2;
+    if (!isNaN(bet.selectValue)) {
+      if (parseInt(bet.selectValue) === winNum) { isWin = true; multiplier = 9; }
+    } else if (bet.selectValue === winBigSmall) {
+      isWin = true; multiplier = 2;
+    } else if (winColor.includes(bet.selectValue)) {
+      isWin = true; multiplier = winColor.includes('-Violet') ? 1.5 : 2;
+    }
+    
+    if (isWin) {
+      bet.status = 'WIN';
+      bet.winAmount = bet.amount * multiplier;
+      await User.updateOne({ phone: bet.phone }, { $inc: { balance: bet.winAmount } });
+    } else {
+      bet.status = 'LOSS';
+      bet.winAmount = 0;
+    }
+    await bet.save();
+
+    // 💸 लाइव बेटिंग प्रतिशत कमीशन लॉजिक 💸
+    try {
+      const currentUser = await User.findOne({ phone: bet.phone });
+      // अगर इस यूजर को किसी ने इनवाइट किया है, तो ही कमीशन प्रोसेस होगा
+      if (currentUser && currentUser.referredBy) {
+        const parentAgent = await User.findOne({ phone: currentUser.referredBy });
+        if (parentAgent) {
+          // चेक करें कि एजेंट ने टोटल कितने ऐसे लोगों को जोड़ा है जिन्होंने ₹300+ का सफल डिपॉजिट किया है
+          const validInvitesCount = await User.countDocuments({ 
+            referredBy: parentAgent.phone,
+            phone: { $in: await Deposit.distinct("phone", { status: 'SUCCESS', amount: { $gte: 300 } }) }
+          });
+          
+          // एजेंट के टियर के हिसाब से कमीशन की दर निकालें
+          const rate = getAgentCommissionRate(validInvitesCount);
+          const commissionAmount = bet.amount * rate;
+          
+          // एजेंट के प्रमोशन वॉलेट में कमीशन प्लस करें
+          parentAgent.promoBalance += commissionAmount;
+          parentAgent.totalCommissionEarned += commissionAmount;
+          await parentAgent.save();
+        }
+      }
+    } catch (commissionError) {
+      console.error("Error processing agent commission:", commissionError);
+    }
+
+    if (bet.socketId) {
+      io.to(bet.socketId).emit('bet_outcome', { status: bet.status, winAmount: bet.winAmount, period: period });
+    }
+  }
+}
+
 
 setInterval(() => {
     for (let mode of Object.keys(gameStates)) {
@@ -525,6 +592,125 @@ app.post('/api/admin/update-gateway', (req, res) => {
     } catch (err) {
         res.json({ success: false, message: "Failed to update configuration!" });
     }
+});
+// 📊 1. एजेंसी सेंटर का पूरा डेटा और इनवाइटेड यूज़र्स की लिस्ट लोड करने की API
+app.get('/api/agency/dashboard/:phone', async (req, res) => {
+  try {
+    const { phone } = req.params;
+    const agent = await User.findOne({ phone });
+    if (!agent) return res.json({ success: false, message: "Agent profile not found" });
+
+    // इस एजेंट द्वारा रेफ़र किए गए सभी यूज़र्स निकालें
+    const invitedUsers = await User.find({ referredBy: phone }).select('phone createdAt').sort({ createdAt: -1 }).lean();
+    
+    // हमारे डेटाबेस से सफल डिपॉजिटर्स की लिस्ट (₹300 या उससे ज़्यादा वाले)
+    const successDepositors = await Deposit.distinct("phone", { status: 'SUCCESS', amount: { $gte: 300 } });
+
+    // सभी यूज़र्स के नंबर को छिपाकर और उनका स्टेटस (Valid/Pending) सेट करके लिस्ट तैयार करें
+    const usersListWithStatus = invitedUsers.map(u => {
+      // नंबर को बीच से मास्क करें (जैसे 9876***123) सुरक्षा के लिए
+      const maskedPhone = u.phone.length >= 10 
+        ? u.phone.substring(0, 4) + "****" + u.phone.substring(u.phone.length - 3)
+        : u.phone;
+
+      return {
+        phone: maskedPhone,
+        date: new Date(u.createdAt).toLocaleDateString(),
+        status: successDepositors.includes(u.phone) ? 'Valid (Deposited ₹300+)' : 'Pending (No Recharge)'
+      };
+    });
+
+    // कुल वैलिड यूज़र्स की संख्या गिनें
+    const validCount = usersListWithStatus.filter(u => u.status.startsWith('Valid')).length;
+
+    res.json({
+      success: true,
+      promoBalance: agent.promoBalance,
+      totalEarned: agent.totalCommissionEarned,
+      totalInvites: invitedUsers.length,
+      validInvitesCount: validCount,
+      claimedMissions: agent.claimedMissions,
+      invitedUsers: usersListWithStatus
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Agency dashboard server error" });
+  }
+});
+
+// 🏆 2. इनवाइट मिशन बोनस (50, 150, 250...) क्लेम करने की API
+const milestones = [
+  { id: 1, count: 1, reward: 50 },
+  { id: 2, count: 3, reward: 150 },
+  { id: 3, count: 5, reward: 250 },
+  { id: 4, count: 10, reward: 500 },
+  { id: 5, count: 50, reward: 3000 },
+  { id: 6, count: 100, reward: 7000 },
+  { id: 7, count: 200, reward: 16000 },
+  { id: 8, count: 500, reward: 45000 },
+  { id: 9, count: 1000, reward: 100000 }
+];
+
+app.post('/api/agency/claim-mission', async (req, res) => {
+  try {
+    const { phone, missionId } = req.body;
+    const user = await User.findOne({ phone });
+    if (!user) return res.json({ success: false, message: "User profile not found" });
+
+    // सुरक्षा जाँच: क्या यह मिशन पहले ही क्लेम हो चुका है?
+    if (user.claimedMissions.includes(missionId)) {
+      return res.json({ success: false, message: "This mission reward has already been claimed!" });
+    }
+
+    const mission = milestones.find(m => m.id === missionId);
+    if (!mission) return res.json({ success: false, message: "Invalid Mission Selection" });
+
+    // डेटाबेस में लाइव चेक करें कि एजेंट के कितने वैलिड यूज़र्स हैं
+    const validCount = await User.countDocuments({
+      referredBy: phone,
+      phone: { $in: await Deposit.distinct("phone", { status: 'SUCCESS', amount: { $gte: 300 } }) }
+    });
+
+    if (validCount < mission.count) {
+      return res.json({ success: false, message: `Requirement not met! You need ${mission.count} valid users. Current: ${validCount}` });
+    }
+
+    // मिशन रिवॉर्ड क्लेम करके प्रमोशन बैलेंस में जोड़ें
+    user.claimedMissions.push(missionId);
+    user.promoBalance += mission.reward;
+    user.totalCommissionEarned += mission.reward;
+    await user.save();
+
+    res.json({ success: true, message: `Success! ₹${mission.reward} added to your Promo Wallet!` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Mission claim server error" });
+  }
+});
+
+// 💰 3. कमीशन वॉलेट से मुख्य बैलेंस में पैसे ट्रांसफर करने की API
+app.post('/api/agency/transfer-to-main', async (req, res) => {
+  try {
+    const { phone } = req.body;
+    const user = await User.findOne({ phone });
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    const transferAmount = user.promoBalance;
+    if (transferAmount <= 0) {
+      return res.json({ success: false, message: "Your Promotion Balance is ₹0.00. Nothing to transfer!" });
+    }
+
+    // प्रमोशन बैलेंस को 0 करें और मुख्य बैलेंस में जोड़ें
+    user.promoBalance = 0;
+    user.balance += transferAmount;
+    await user.save();
+
+    res.json({ 
+      success: true, 
+      message: `Successfully transferred ₹${transferAmount.toFixed(2)} to your main gaming wallet!`,
+      newMainBalance: user.balance
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Wallet transfer server error" });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

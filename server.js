@@ -755,6 +755,28 @@ app.post('/api/admin/add-notice', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर एरर आ गया!" });
     }
 });
+// 🔔 2. यूज़र्स के लिए सभी नोटिफिकेशन्स खींचने का रास्ता (GET API)
+app.get('/api/user/get-notices', async (req, res) => {
+    try {
+        // डेटाबेस से सारे मैसेज निकालना (नया मैसेज सबसे ऊपर रहेगा)
+        const notices = await Notice.find().sort({ createdAt: -1 });
+
+        if (notices.length === 0) {
+            return res.json({ success: true, latest: null, history: [] });
+        }
+
+        // सबसे नया मैसेज पॉपअप के लिए और बाकी इतिहास के लिए भेजना
+        res.json({
+            success: true,
+            latest: notices[0], // यह होमपेज पर ऑटोमैटिक पॉपअप खुलेगा
+            history: notices     // यह घंटी दबाने पर पूरी लिस्ट दिखाएगा
+        });
+
+    } catch (error) {
+        console.error("Fetch Notice Error:", error);
+        res.status(500).json({ success: false, message: "डेटा लोड नहीं हो पाया!" });
+    }
+});
 
 
 const PORT = process.env.PORT || 3000;

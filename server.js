@@ -101,8 +101,6 @@ app.post('/api/register', async (req, res) => {
   }
 });
 // 📢 नोटिफिकेशन और अलर्ट के लिए नया डेटाबेस स्कीमा
-const mongoose = require('mongoose');
-
 const NoticeSchema = new mongoose.Schema({
     message: {
         type: String,

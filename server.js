@@ -612,7 +612,7 @@ try {
         await User.updateOne({ phone: dep.phone }, { $inc: { balance: dep.amount } });
 
         // === [     ] ===
-        const allowedAmounts =;
+        const allowedAmounts = [300, 500, 1000, 5000, 10000];
         if (allowedAmounts.includes(dep.amount)) {
             //      
             await User.updateOne(

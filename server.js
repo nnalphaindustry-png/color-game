@@ -246,10 +246,9 @@ app.get('/api/transaction-history/:phone', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error fetching transactions!" });
   }
 });
-// ---       (NEW FEATURE) ---
+// ---       (FIXED CODE) ---
 app.get('/api/admin/daily-stats', async (req, res) => {
     try {
-        //      ,        
         let targetDateStr = req.query.date; 
         if (!targetDateStr) {
             const today = new Date();
@@ -259,11 +258,11 @@ app.get('/api/admin/daily-stats', async (req, res) => {
             targetDateStr = `${yyyy}-${mm}-${dd}`;
         }
 
-        //      (00:00:00.000)   (23:59:59.999)   
+        //     (   12    12 )
         const startOfDay = new Date(targetDateStr + "T00:00:00.000Z");
         const endOfDay = new Date(targetDateStr + "T23:59:59.999Z");
 
-        // 1.     'SUCCESS'     () 
+        // 1.   (  )
         const depositAggregation = await Deposit.aggregate([
             {
                 $match: {
@@ -274,13 +273,12 @@ app.get('/api/admin/daily-stats', async (req, res) => {
             {
                 $group: {
                     _id: null,
-                    totalAmount: { $sum: '$amount' }
+                    totalAmount: { $sum: '$amount' } //  $sign     
                 }
             }
         ]);
 
-        // 2.     'SUCCESS'     () 
-        // ( :      'Withdraw'         )
+        // 2.   (  )
         const withdrawAggregation = await Withdraw.aggregate([
             {
                 $match: {
@@ -291,16 +289,15 @@ app.get('/api/admin/daily-stats', async (req, res) => {
             {
                 $group: {
                     _id: null,
-                    totalAmount: { $sum: '$amount' }
+                    totalAmount: { $sum: '$amount' } //   $sign     
                 }
             }
         ]);
 
-        //          0 
+        //        0  
         const totalDeposit = depositAggregation.length > 0 ? depositAggregation[0].totalAmount : 0;
         const totalWithdraw = withdrawAggregation.length > 0 ? withdrawAggregation[0].totalAmount : 0;
 
-        //    
         return res.json({
             success: true,
             date: targetDateStr,

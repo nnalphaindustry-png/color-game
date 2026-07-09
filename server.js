@@ -287,10 +287,10 @@ app.post('/api/user/submit-withdraw', async (req, res) => {
     }
 });
 let gameStates = {
-    '30s': { countdown: 30, period: "100001", history: [] },
-    '1m': { countdown: 60, period: "300001", history: [] },
-    '3m': { countdown: 180, period: "500001", history: [] },
-    '5m': { countdown: 300, period: "700001", history: [] }
+    '30s': { countdown: 30, period: "2026070710001", history: [] },
+    '1m': { countdown: 60, period: "2026070730001", history: [] },
+    '3m': { countdown: 180, period: "2026070750001", history: [] },
+    '5m': { countdown: 300, period: "2026070770001", history: [] }
 };
 
 let manualControls = { '30s': null, '1m': null, '3m': null, '5m': null };
@@ -300,21 +300,24 @@ let processingLocks = { '30s': false, '1m': false, '3m': false, '5m': false };
 
 async function initializeGameHistory() {
     for (let mode of Object.keys(gameStates)) {
-        // 1.       20   
+        // 1.       20    (     )
         const records = await GameHistory.find({ mode }).sort({ createdAt: -1 }).limit(20);
         gameStates[mode].history = records.map(r => ({
             period: r.period, number: r.number, bigSmall: r.bigSmall, color: r.color
         }));
 
-        // 2.    ,          
+        // 2.   :    ,      (Latest)   
+        //  .sort({ period: -1 })            
         const lastRecord = await GameHistory.findOne({ mode }).sort({ period: -1 });
 
         if (lastRecord && lastRecord.period) {
-            //     (   ),     +1 
+            //      2026070710206 ,      2026070710207  
+            //       +1      
             gameStates[mode].period = String(Number(lastRecord.period) + 1);
+            console.log(`[Game Restarted] Mode ${mode} continued from period: ${gameStates[mode].period}`);
         } else {
-            //     ,   1    
-            console.log(`[Game Init] No previous records for ${mode}. Using default.`);
+            //     ,       
+            console.log(`[Game Init] No previous records for ${mode}. Using default from gameStates.`);
         }
     }
 }

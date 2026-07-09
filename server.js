@@ -246,6 +246,73 @@ app.get('/api/transaction-history/:phone', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error fetching transactions!" });
   }
 });
+// ---       (NEW FEATURE) ---
+app.get('/api/admin/daily-stats', async (req, res) => {
+    try {
+        //      ,        
+        let targetDateStr = req.query.date; 
+        if (!targetDateStr) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            targetDateStr = `${yyyy}-${mm}-${dd}`;
+        }
+
+        //      (00:00:00.000)   (23:59:59.999)   
+        const startOfDay = new Date(targetDateStr + "T00:00:00.000Z");
+        const endOfDay = new Date(targetDateStr + "T23:59:59.999Z");
+
+        // 1.     'SUCCESS'     () 
+        const depositAggregation = await Deposit.aggregate([
+            {
+                $match: {
+                    status: 'SUCCESS',
+                    createdAt: { $gte: startOfDay, $lte: endOfDay }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' }
+                }
+            }
+        ]);
+
+        // 2.     'SUCCESS'     () 
+        // ( :      'Withdraw'         )
+        const withdrawAggregation = await Withdraw.aggregate([
+            {
+                $match: {
+                    status: 'SUCCESS',
+                    createdAt: { $gte: startOfDay, $lte: endOfDay }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' }
+                }
+            }
+        ]);
+
+        //          0 
+        const totalDeposit = depositAggregation.length > 0 ? depositAggregation[0].totalAmount : 0;
+        const totalWithdraw = withdrawAggregation.length > 0 ? withdrawAggregation[0].totalAmount : 0;
+
+        //    
+        return res.json({
+            success: true,
+            date: targetDateStr,
+            totalDeposit: parseFloat(totalDeposit.toFixed(2)),
+            totalWithdraw: parseFloat(totalWithdraw.toFixed(2))
+        });
+
+    } catch (error) {
+        console.error("Error in daily-stats API:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
 
 app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'game.html')));

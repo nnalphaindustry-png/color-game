@@ -246,7 +246,7 @@ app.get('/api/transaction-history/:phone', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error fetching transactions!" });
   }
 });
-// ---       (FIXED CODE) ---
+// ---       (SIMPLE & PERFECT VALUE) ---
 app.get('/api/admin/daily-stats', async (req, res) => {
     try {
         let targetDateStr = req.query.date; 
@@ -258,46 +258,34 @@ app.get('/api/admin/daily-stats', async (req, res) => {
             targetDateStr = `${yyyy}-${mm}-${dd}`;
         }
 
-        //     (   12    12 )
+        //          
         const startOfDay = new Date(targetDateStr + "T00:00:00.000Z");
         const endOfDay = new Date(targetDateStr + "T23:59:59.999Z");
 
-        // 1.   (  )
-        const depositAggregation = await Deposit.aggregate([
-            {
-                $match: {
-                    status: 'SUCCESS',
-                    createdAt: { $gte: startOfDay, $lte: endOfDay }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalAmount: { $sum: '$amount' } //  $sign     
-                }
-            }
-        ]);
+        // 1.      (SUCCESS)  
+        const dayDeposits = await Deposit.find({
+            status: 'SUCCESS',
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        });
 
-        // 2.   (  )
-        const withdrawAggregation = await Withdraw.aggregate([
-            {
-                $match: {
-                    status: 'SUCCESS',
-                    createdAt: { $gte: startOfDay, $lte: endOfDay }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalAmount: { $sum: '$amount' } //   $sign     
-                }
-            }
-        ]);
+        // 2.      (SUCCESS)  
+        const dayWithdraws = await Withdraw.find({
+            status: 'SUCCESS',
+            createdAt: { $gte: startOfDay, $lte: endOfDay }
+        });
 
-        //        0  
-        const totalDeposit = depositAggregation.length > 0 ? depositAggregation[0].totalAmount : 0;
-        const totalWithdraw = withdrawAggregation.length > 0 ? withdrawAggregation[0].totalAmount : 0;
+        // 3.       (    )
+        let totalDeposit = 0;
+        dayDeposits.forEach(d => {
+            if (d.amount) totalDeposit += Number(d.amount);
+        });
 
+        let totalWithdraw = 0;
+        dayWithdraws.forEach(w => {
+            if (w.amount) totalWithdraw += Number(w.amount);
+        });
+
+        //      JSON  
         return res.json({
             success: true,
             date: targetDateStr,

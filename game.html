@@ -400,7 +400,8 @@ function changeQty(val) {
 
 function calculateTotalBet() {
     let total = selectedBetAmount * selectedBetQty;
-    document.getElementById("total-bet-submit-btn").innerText = "Total Bet ₹" + total;
+    let contractAmt = (total * 0.98).toFixed(2); // 2% टैक्स काटकर बचा हुआ अमाउंट
+    document.getElementById("total-bet-submit-btn").innerText = "Total Bet ₹" + total + " (Contract: ₹" + contractAmt + ")";
 }
 
 function submitFinalBet() {

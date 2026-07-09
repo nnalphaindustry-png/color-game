@@ -347,20 +347,20 @@ async function generateMultiGameResult(mode) {
                     let val = bet.selectValue;
 
                     if (!isNaN(val)) {
-                        numberInvestments[parseInt(val)] += (amt * 9);
+                        numberInvestments[parseInt(val)] += (amt * 0.98 * 8); 
                     } else if (val === 'Big') {
-                        for(let i=5; i<=9; i++) numberInvestments[i] += (amt * 2);
-                    } else if (val === 'Small') {
-                        for(let i=0; i<=4; i++) numberInvestments[i] += (amt * 2);
-                    } else if (val === 'Green') {
-                        [1, 3, 7, 9].forEach(n => numberInvestments[n] += (amt * 2));
-                        numberInvestments[5] += (amt * 1.5);
-                    } else if (val === 'Red') {
-                        [2, 4, 6, 8].forEach(n => numberInvestments[n] += (amt * 2));
-                        numberInvestments[0] += (amt * 1.5);
-                    } else if (val === 'Violet') {
-                        [0, 5].forEach(n => numberInvestments[n] += (amt * 4.5));
-                    }
+    for(let i=5; i<=9; i++) numberInvestments[i] += (amt * 0.98 * 2);
+} else if (val === 'Small') {
+    for(let i=0; i<=4; i++) numberInvestments[i] += (amt * 0.98 * 2);
+} else if (val === 'Green') {
+    [1, 3, 7, 9].forEach(n => numberInvestments[n] += (amt * 0.98 * 2));
+    numberInvestments[5] += (amt * 0.98 * 1.5);
+} else if (val === 'Red') {
+    [2, 4, 6, 8].forEach(n => numberInvestments[n] += (amt * 0.98 * 2));
+    numberInvestments[0] += (amt * 0.98 * 1.5);
+} else if (val === 'Violet') {
+    [0, 5].forEach(n => numberInvestments[n] += (amt * 0.98 * 4.5));
+}
                 });
 
                 let minPayout = numberInvestments[0];
@@ -421,7 +421,7 @@ async function processUserBetsOutcome(mode, period, winNum, winColor, winBigSmal
     let isWin = false;
     let multiplier = 2;
     if (!isNaN(bet.selectValue)) {
-      if (parseInt(bet.selectValue) === winNum) { isWin = true; multiplier = 9; }
+      if (parseInt(bet.selectValue) === winNum) { isWin = true; multiplier = 8; }
     } else if (bet.selectValue === winBigSmall) {
       isWin = true; multiplier = 2;
     } else if (winColor.includes(bet.selectValue)) {
@@ -430,7 +430,7 @@ async function processUserBetsOutcome(mode, period, winNum, winColor, winBigSmal
     
     if (isWin) {
       bet.status = 'WIN';
-      bet.winAmount = bet.amount * multiplier;
+      bet.winAmount = parseFloat((bet.amount * 0.98 * multiplier).toFixed(2));
       await User.updateOne({ phone: bet.phone }, { $inc: { balance: bet.winAmount } });
     } else {
       bet.status = 'LOSS';

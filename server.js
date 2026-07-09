@@ -900,7 +900,6 @@ app.get('/api/admin/get-complaints', async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to load complaints data!" });
     }
 });
-const axios = require('axios');
 
 app.post('/api/user/submit-complaint', async (req, res) => {
     try {

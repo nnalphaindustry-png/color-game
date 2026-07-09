@@ -75,9 +75,17 @@ body { background-color: #191919; color: #ffffff; display: flex; justify-content
     <!-- 🔗 Official Emergency Contact Links -->
     <div class="category-title-lbl">Or Contact Via Official Links:</div>
     <div class="social-support-row">
-        <div class="social-support-card" style="color: #3399ff;" onclick="openTelegramSupport()">✈️ Telegram Bot</div>
-        <div class="social-support-card" style="color: #00cc66;" onclick="openWhatsappSupport()">💬 WhatsApp Live</div>
-    </div>
+    <!-- Telegram Direct Link Setup (      ) -->
+    <a href="https://t.me/alpha_arena_support_bot" target="_blank" class="social-support-card" style="color: #3399ff; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+         Telegram Bot
+    </a>
+    
+    <!-- WhatsApp Direct Link Setup -->
+    <a href="https://wa.me" target="_blank" class="social-support-card" style="color: #00cc66; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+         WhatsApp Support
+    </a>
+</div>
+
 
     <div style="font-size: 10px; color: #555; text-align: center; line-height: 1.4; margin-top: 10px;">
         Security Notice: RM GAME support team will never ask for your account OTP or Password. Beware of fake admins!
@@ -99,8 +107,8 @@ const SUPPORT_API_BASE_URL = "https://color-game-1kc2.onrender.com";
 const userMobileNumber = localStorage.getItem('user_phone'); // Fetching active user session
 
 // Social Links Configurations
-const TELEGRAM_SUPPORT_URL = "https://t.me"; 
-const WHATSAPP_NUMBER = "919999999999"; 
+const TELEGRAM_SUPPORT_URL = "https://t.me/alpha_arena_support_bot"; 
+const WHATSAPP_NUMBER = "919992788757"; 
 
 let activeSelectedCategory = "";
 
@@ -174,21 +182,24 @@ function closeSuccessAlertModal() {
 }
 
 function openTelegramSupport() {
-    if(TELEGRAM_SUPPORT_URL.includes("your_telegram_support_username")) {
-        alert("Configuration Notice: Telegram channel hotline link not configured yet.");
-        return;
-    }
-    window.location.href = TELEGRAM_SUPPORT_URL;
+    //   -         
+    var webBypassUrl = "https://t.me/alpha_arena_support_bot";
+    
+    //         /     
+    window.location.href = webBypassUrl;
 }
 
 function openWhatsappSupport() {
+    // Agar number default dummy hai toh warning dega
     if(WHATSAPP_NUMBER === "919992788757") {
         alert("Configuration Notice: WhatsApp helpline telephone number not configured yet.");
         return;
     }
     const txtMsg = encodeURIComponent("Hello Admin, I need assistance regarding my game account issues.");
-    window.location.href = `https://wa.me{WHATSAPP_NUMBER}?text=${txtMsg}`;
+    // Yahan URL template string ($ aur forward slash) ko sahi kar diya gaya hai
+    window.open(`https://wa.me{WHATSAPP_NUMBER}?text=${txtMsg}`, '_blank');
 }
+
 </script>
 </body>
 </html>

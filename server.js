@@ -246,7 +246,7 @@ app.get('/api/transaction-history/:phone', async (req, res) => {
     res.status(500).json({ success: false, message: "Server error fetching transactions!" });
   }
 });
-// ---       (TIMEZONE FIXED) ---
+// ---       (SERVER SIDE 100% FIXED) ---
 app.get('/api/admin/daily-stats', async (req, res) => {
     try {
         let targetDateStr = req.query.date; 
@@ -258,24 +258,23 @@ app.get('/api/admin/daily-stats', async (req, res) => {
             targetDateStr = `${yyyy}-${mm}-${dd}`;
         }
 
-        //    (IST)           
-        //  odb     (+5:30)      
+        //    (IST)           
         const startOfDay = new Date(targetDateStr + "T00:00:00.000+05:30");
         const endOfDay = new Date(targetDateStr + "T23:59:59.999+05:30");
 
-        // 1.        (SUCCESS)  
+        // 1.      (SUCCESS)  
         const dayDeposits = await Deposit.find({
             status: 'SUCCESS',
-            createdAt: { $gte: startOfDay, $lte: endowments } //  :     'updatedAt'    ,   'updatedAt'   
+            createdAt: { $gte: startOfDay, $lte: endOfDay } //        
         });
 
-        // 2.        (SUCCESS)  
+        // 2.      (SUCCESS)  
         const dayWithdraws = await Withdraw.find({
             status: 'SUCCESS',
             createdAt: { $gte: startOfDay, $lte: endOfDay }
         });
 
-        // 3.  
+        // 3.      
         let totalDeposit = 0;
         dayDeposits.forEach(d => {
             if (d.amount) totalDeposit += Number(d.amount);
@@ -286,7 +285,7 @@ app.get('/api/admin/daily-stats', async (req, res) => {
             if (w.amount) totalWithdraw += Number(w.amount);
         });
 
-        //    
+        //      JSON  
         return res.json({
             success: true,
             date: targetDateStr,

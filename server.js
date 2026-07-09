@@ -900,6 +900,43 @@ app.get('/api/admin/get-complaints', async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to load complaints data!" });
     }
 });
+const axios = require('axios');
+
+app.post('/api/user/submit-complaint', async (req, res) => {
+    try {
+        const { phone, category, message } = req.body;
+
+        if (!phone) {
+            return res.status(400).json({ success: false, message: "Session Expired. Please re-login to your account first." });
+        }
+
+        const TELEGRAM_BOT_TOKEN = "8812598977:AAGzPSCTa4pE1V1MZUY4XPiubwfLFOXy1oI"; 
+        const TELEGRAM_CHAT_ID = 8714897219; 
+
+        const telegramMessage = `
+ *New Support Ticket*
+
+ *Phone:* ${phone}
+ *Category:* ${category}
+ *Message:* ${message}
+`;
+
+        const telegramUrl = `https://telegram.org{TELEGRAM_BOT_TOKEN}/sendMessage`;
+        
+        await axios.post(telegramUrl, {
+            chat_id: TELEGRAM_CHAT_ID,
+            text: telegramMessage,
+            parse_mode: "Markdown"
+        });
+
+        res.status(200).json({ success: true, message: "Ticket submitted successfully!" });
+
+    } catch (error) {
+        console.error("Telegram Transmission Error:", error);
+        res.status(500).json({ success: false, message: "Server connection failed with live backend server." });
+    }
+});
+
 // ===       ( server.js     ) ===
 
 app.get('/api/user/spin-status/:phone', async (req, res) => {

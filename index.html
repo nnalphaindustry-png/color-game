@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RM GAME - Login & Register</title>
+<title>N&N Alpha Industry - Login & Register</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
 body { background-color: #222222; color: #ffffff; display: flex; justify-content: center; min-height: 100vh; }
@@ -43,13 +43,40 @@ input::placeholder { color: #666666; }
 .auth-alert-msg { font-size: 14px; color: #e0e0e0; line-height: 1.4; margin-bottom: 22px; font-family: 'Segoe UI', Arial, sans-serif; }
 .auth-alert-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 11px 40px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(205,162,77,0.3); width: 100%; }
 .auth-alert-btn:active { opacity: 0.8; }
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ff3b30; /* यह सिर्फ फोटो के पीछे रहेगा, बाहर नहीं दिखेगा */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.splash-img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; /* यह फोटो को बिना कटे पूरी स्क्रीन पर फैला देगा */
+}
+.splash-hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
 </style>
 </head>
 <body>
+<!-- लोडिंग स्क्रीन -->
+<div id="splash-screen">
+    <img src="home.png" class="splash-img" alt="Welcome Banner">
+</div>
 <div class="app-container">
 <div class="navbar">
 <div class="back-btn" onclick="window.history.back()">Back</div>
-<div class="logo">R M GAME</div>
+<div class="logo">Alpha Arena</div>
 <div class="lang"> EN </div>
 </div>
 <div id="login-section" class="form-box active">
@@ -141,6 +168,15 @@ input::placeholder { color: #666666; }
 <button class="auth-alert-btn" onclick="closeAuthAlert()">Continue</button>
 </div>
 </div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) { splash.classList.add('splash-hide'); }
+    }, 3000); // 3 सेकंड बाद फोटो हट जाएगी
+});
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
 <script src="auth.js"></script>
 </body>

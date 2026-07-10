@@ -161,6 +161,185 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
     font-size: 13px;
     font-weight: bold;
 }
+/* 💎 प्रीमियम गेमिंग रिज़ल्ट पॉपअप की पूरी और सटीक स्टाइलिंग */
+.result-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    display: none;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 99999 !important;
+    backdrop-filter: blur(4px) !important;
+}
+.result-modal-overlay.show {
+    display: flex !important;
+}
+
+/* 📐 बक्से की चौड़ाई कम और लंबाई ज़्यादा की गई है (Slim & Tall) */
+.result-modal-container {
+    width: 82% !important;
+    max-width: 290px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    position: relative !important;
+    animation: popScaleSmooth 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards !important;
+}
+@keyframes popScaleSmooth {
+    from { transform: scale(0.75); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* मुख्य कार्ड डिज़ाइन - पैडिंग बढ़ाकर लंबा किया गया है */
+.result-card {
+    width: 100% !important;
+    border-radius: 32px !important;
+    padding: 65px 12px 30px !important;
+    text-align: center !important;
+    position: relative !important;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+    box-sizing: border-box !important;
+}
+.result-card.win {
+    background: linear-gradient(180deg, #ff6a4d 0%, #ff3b30 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+.result-card.lose {
+    background: linear-gradient(180deg, #cfdff2 0%, #a2bfe6 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* शीर्ष एम्बलेम मेडल */
+.result-emblem-badge {
+    position: absolute !important;
+    top: -45px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90px !important;
+    height: 90px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 4px solid #ffffff !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+    z-index: 10 !important;
+}
+.win .result-emblem-badge { background: linear-gradient(135deg, #ffea9f, #dca842) !important; color: #fff !important; }
+.lose .result-emblem-badge { background: linear-gradient(135deg, #f0f4f8, #9bbad9) !important; color: #fff !important; }
+.emblem-inner-icon { font-size: 42px !important; line-height: 1 !important; }
+
+.result-main-title {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
+    font-family: sans-serif !important;
+    letter-spacing: -0.5px !important;
+}
+.win .result-main-title { color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.15) !important; }
+.lose .result-main-title { color: #3a536e !important; text-shadow: 0 1px 2px rgba(255,255,255,0.5) !important; }
+
+/* रिजल्ट बैजेस रो */
+.lottery-results-row {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+    margin-bottom: 22px !important;
+    flex-wrap: wrap !important;
+}
+.lr-txt { font-size: 12px !important; font-weight: 500 !important; margin-right: 2px !important; }
+.win .lr-txt { color: rgba(255, 255, 255, 0.9) !important; }
+.lose .lr-txt { color: #52677d !important; }
+
+.lr-badge {
+    padding: 3px 8px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+.lr-bg-green { background-color: #2aa453 !important; }
+.lr-bg-red { background-color: #d32f2f !important; }
+.lr-bg-violet { background-color: #9c27b0 !important; }
+
+/* 🤍 रसीद का बैकग्राउंड - अब ज़बरदस्ती 100% दूध जैसा सफ़ेद दिखेगा */
+.receipt-slot-line {
+    width: 92% !important;
+    height: 6px !important;
+    background: rgba(0,0,0,0.15) !important;
+    margin: 0 auto !important;
+    border-radius: 10px !important;
+}
+.result-card .receipt-paper {
+    width: 90% !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    margin: -3px auto 20px !important;
+    border-radius: 0 0 18px 18px !important;
+    padding: 20px 10px !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    position: relative !important;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 95% 97%, 90% 100%, 85% 97%, 80% 100%, 75% 97%, 70% 100%, 65% 97%, 60% 100%, 55% 97%, 50% 100%, 45% 97%, 40% 100%, 35% 97%, 30% 100%, 25% 97%, 20% 100%, 15% 97%, 10% 100%, 5% 97%, 0% 100%) !important;
+}
+
+.receipt-status-title {
+    font-size: 12px !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin: 0 !important;
+}
+.win .receipt-status-title { color: #ff503f !important; }
+.lose .receipt-status-title { color: #738da6 !important; }
+
+.receipt-amount {
+    font-size: 30px !important;
+    font-weight: 800 !important;
+    margin: 6px 0 !important;
+    display: block !important;
+}
+.win .receipt-amount { color: #ff3b30 !important; }
+.lose .receipt-amount { color: #476280 !important; }
+
+.receipt-meta-text { font-size: 11px !important; color: #555555 !important; font-weight: 500 !important; display: block !important; }
+.receipt-period-id { font-size: 11px !important; color: #777777 !important; margin-top: 2px !important; font-family: monospace !important; display: block !important; }
+
+/* ऑटो क्लोज नीचे का टेक्स्ट */
+.auto-close-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+.win .auto-close-bar { color: #ffffff !important; }
+.lose .auto-close-bar { color: #3a536e !important; }
+.chk-icon { width: 14px !important; height: 14px !important; border-radius: 50% !important; font-size: 9px !important; display: flex !important; align-items: center !important; justify-content: center !important; border: 1.5px solid currentColor !important; }
+
+/* नीचे लगा गोल कट (✕) बटन */
+.result-close-x-btn {
+    margin-top: 25px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    color: #ffffff !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
 
 </style>
 </head>
@@ -317,6 +496,36 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 <button class="custom-alert-btn" onclick="closeCustomAlert()">OK</button>
 </div>
 </div>
+<!-- 💎 प्रीमियम रिज़ल्ट पॉपअप HTML -->
+<div class="result-modal-overlay" id="resultModalOverlay">
+    <div class="result-modal-container">
+        <div class="result-card" id="resultCard">
+            <div class="result-emblem-badge">
+                <div class="emblem-inner-icon">🏆</div>
+            </div>
+            <h2 class="result-main-title" id="resultMainTitle">Congratulations</h2>
+            <div class="lottery-results-row">
+                <span class="lr-txt">Lottery results</span>
+                <span class="lr-badge" id="lrBadgeColor">Red</span>
+                <span class="lr-badge" id="lrBadgeNum">8</span>
+                <span class="lr-badge" id="lrBadgeSize">Big</span>
+            </div>
+            <div class="receipt-slot-line"></div>
+            <div class="receipt-paper">
+                <div class="receipt-status-title" id="receiptStatusTitle">Bonus</div>
+                <div class="receipt-amount" id="receiptAmountDisplay">₹4,410.00</div>
+                <div class="receipt-meta-text" id="receiptModeDisplay">Period: WinGo 30sec</div>
+                <div class="receipt-period-id" id="receiptPeriodIdDisplay">-</div>
+            </div>
+            <div class="auto-close-bar">
+                <span class="chk-icon">✓</span>
+                <span id="autoCloseText">3 seconds auto close</span>
+            </div>
+        </div>
+        <button class="result-close-x-btn" onclick="closeResultModal()">✕</button>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
 <script>
 // 📱 लॉगिन पेज के अनुसार सही नाम ('user_phone') से नंबर निकालना
@@ -675,15 +884,65 @@ function fetchMyHistory() {
   socket.emit('get_my_history', { phone: userPhone, mode: activeMode });
 }
 
+// ⏱️ टाइमर और सॉकेट रिज़ल्ट लॉजिक
+let resultTimerInterval = null;
+let resultAutoCloseSeconds = 3;
+
 socket.on('bet_outcome', (data) => {
-    if (data.status === 'WIN') {
-        showAppAlert("Congratulations!", `Period ${data.period} is out! You WON ₹${data.winAmount.toFixed(2)}! 🎉`, "🏆");
-    } else {
-        showAppAlert("Game Result", `Period ${data.period} is out. Result: LOSS. Better luck next time!`, "💸");
-    }
     fetchUserBalance();
-    if(currentTab === 'my') fetchMyHistory();
+    if (typeof currentTab !== 'undefined' && currentTab === 'my') { fetchMyHistory(); }
+    try {
+        if (!data) return;
+        let activeGame = (typeof allGamesData !== 'undefined' && allGamesData[activeMode]) || {};
+        let lastHistoryResult = (activeGame.history && activeGame.history.length > 0) ? activeGame.history : null;
+        let resNumber = lastHistoryResult ? lastHistoryResult.number : "-";
+        let resBigSmall = lastHistoryResult ? (lastHistoryResult.bigSmall || (resNumber >= 5 ? 'Big' : 'Small')) : "-";
+        let resColor = lastHistoryResult ? lastHistoryResult.color : "Green";
+        const modalOverlay = document.getElementById("resultModalOverlay");
+        const card = document.getElementById("resultCard");
+        if (!modalOverlay || !card) return;
+        document.getElementById("lrBadgeNum").innerText = resNumber;
+        document.getElementById("lrBadgeSize").innerText = resBigSmall;
+        document.getElementById("lrBadgeColor").innerText = Array.isArray(resColor) ? resColor.join('/') : resColor;
+        const colorBadge = document.getElementById("lrBadgeColor");
+        colorBadge.className = "lr-badge";
+        if (String(resColor).includes('Red')) colorBadge.classList.add('lr-bg-red');
+        else if (String(resColor).includes('Violet')) colorBadge.classList.add('lr-bg-violet');
+        else colorBadge.classList.add('lr-bg-green');
+        let titleMap = { '30s': 'WinGo 30sec', '1m': 'WinGo 1 Min', '3m': 'WinGo 3 Min', '5m': 'WinGo 5 Min' };
+        document.getElementById("receiptModeDisplay").innerText = "Period: " + (titleMap[activeMode] || 'WinGo');
+        document.getElementById("receiptPeriodIdDisplay").innerText = data.period || "-";
+        let displayAmount = 0;
+        if (data.status === 'WIN') {
+            card.className = "result-card win";
+            document.getElementById("resultMainTitle").innerText = "Congratulations";
+            document.getElementById("receiptStatusTitle").innerText = "Bonus";
+            displayAmount = data.winAmount !== undefined && data.winAmount !== null ? data.winAmount : (data.amount || 0);
+            document.getElementById("receiptAmountDisplay").innerText = "₹" + Number(displayAmount).toFixed(2);
+        } else {
+            card.className = "result-card lose";
+            document.getElementById("resultMainTitle").innerText = "Sorry";
+            document.getElementById("receiptStatusTitle").innerText = "Lose";
+            displayAmount = data.amount !== undefined && data.amount !== null ? data.amount : 0;
+            document.getElementById("receiptAmountDisplay").innerText = "₹" + Number(displayAmount).toFixed(2);
+        }
+        modalOverlay.classList.add("show");
+        clearInterval(resultTimerInterval);
+        resultAutoCloseSeconds = 3;
+        document.getElementById("autoCloseText").innerText = `${resultAutoCloseSeconds} seconds auto close`;
+        resultTimerInterval = setInterval(() => {
+            resultAutoCloseSeconds--;
+            if (resultAutoCloseSeconds <= 0) { closeResultModal(); }
+            else { document.getElementById("autoCloseText").innerText = `${resultAutoCloseSeconds} seconds auto close`; }
+        }, 1000);
+    } catch (err) { console.error("Popup render error:", err); }
 });
+
+function closeResultModal() {
+    if (resultTimerInterval) clearInterval(resultTimerInterval);
+    const modalOverlay = document.getElementById("resultModalOverlay");
+    if (modalOverlay) modalOverlay.classList.remove("show");
+}
 function openBetDetailModal(bet) {
     if (!bet) return;
     try {

@@ -84,6 +84,7 @@ input:focus, select:focus { border-color: #dbb35e; }
 </div>
 <div class="sidebar-links">
 <button onclick="switchAdminView('dashboard-view')">📊 Dashboard Overview</button>
+<button onclick="switchAdminView('per-day-check-view')"> Per Day Withdrawal Deposit Check</button>
 <button onclick="switchAdminView('game-control-view')">🎮 Game Control</button>
 <button onclick="switchAdminView('deposit-requests-view')">📥 Deposit Approvals</button>
 <button onclick="switchAdminView('withdraw-requests-view')">📤 Withdraw Manager</button>
@@ -281,6 +282,37 @@ input:focus, select:focus { border-color: #dbb35e; }
         </div>
     </div>
 </div>
+<!--     ( dashboard-view)       -->
+<div id="per-day-check-view" style="display: none; padding: 20px;">
+    <div class="card" style="padding: 20px; background-color: #1a1a1a; border-radius: 12px; border: 1px solid #333;">
+        
+        <!--  (Date Selector) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="color: #dbb35e; font-size: 16px; margin: 0; font-weight: bold;"> Daily Analytics By Date</h3>
+            <div>
+                <label style="color: #aaa; font-size: 13px; margin-right: 8px;">Select Date:</label>
+                <input type="date" id="stats-calendar-input" onchange="fetchDailyStatsByDate()" style="background-color: #252525; color: #fff; border: 1px solid #dbb35e; padding: 6px 12px; border-radius: 6px; cursor: pointer;">
+            </div>
+        </div>
+
+        <!--    -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <!--  1:  -->
+            <div style="background: linear-gradient(135deg, #1e3c23, #121212); border: 1px solid #2aa453; border-radius: 10px; padding: 20px; text-align: center;">
+                <p style="color: #2aa453; font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 0 0 8px 0;"> Total Deposit</p>
+                <h2 id="daily-box-deposit" style="color: #fff; font-size: 26px; margin: 0; font-weight: bold; font-family: monospace;">0.00</h2>
+            </div>
+            <!--  2:  -->
+            <div style="background: linear-gradient(135deg, #4a1c1c, #121212); border: 1px solid #d9534f; border-radius: 10px; padding: 20px; text-align: center;">
+                <p style="color: #d9534f; font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 0 0 8px 0;"> Total Withdrawal</p>
+                <h2 id="daily-box-withdraw" style="color: #fff; font-size: 26px; margin: 0; font-weight: bold; font-family: monospace;">0.00</h2>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
 <!--  Full Complaint Message View Popup Modal -->
 <div id="complaint-details-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
     <div style="background-color: #252525; width: 100%; max-width: 360px; border-radius: 16px; border: 1px solid #dbb35e; padding: 20px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
@@ -731,8 +763,7 @@ function searchDepositByUTRDirect() {
             }
         }
     });
-
-    // 2.    ,        
+     // 2.    ,        
     if (matchedRow) {
         //       
         rows.forEach(row => { row.style.backgroundColor = "#161616"; });
@@ -751,6 +782,40 @@ function searchDepositByUTRDirect() {
         showAdminPopup("Not Found", "This UTR number does not exist in pending requests list!", "");
     }
 }
+
+//         
+async function fetchDailyStatsByDate() {
+    let dateInput = document.getElementById("stats-calendar-input");
+    if (!dateInput) return;
+
+    let selectedDate = dateInput.value;
+    if (!selectedDate) return;
+
+    try {
+        let response = await fetch(`/api/admin/daily-stats?date=${selectedDate}`);
+        let data = await response.json();
+
+        if (data.success) {
+            document.getElementById("daily-box-deposit").innerText = "" + data.totalDeposit.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            document.getElementById("daily-box-withdraw").innerText = "" + data.totalWithdraw.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+        }
+    } catch (err) {
+        console.error("Error fetching daily stats:", err);
+    }
+}
+
+//           
+document.addEventListener("DOMContentLoaded", function() {
+    let dateInput = document.getElementById("stats-calendar-input");
+    if (dateInput) {
+        let today = new Date();
+        let yyyy = today.getFullYear();
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
+        let dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+        fetchDailyStatsByDate();
+    }
+});   
 
 
 //         ( )

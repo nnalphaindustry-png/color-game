@@ -87,6 +87,81 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 .custom-alert-msg { font-size: 14px; color: #e0e0e0; line-height: 1.4; margin-bottom: 20px; font-family: sans-serif; }
 .custom-alert-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 10px 35px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 10px rgba(205,162,77,0.3); }
 .custom-alert-btn:active { opacity: 0.8; }
+/* Premium My History List Card CSS */
+.my-history-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+    width: 100%;
+}
+.my-history-card-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    border-bottom: 1px solid #2d2d2d;
+    width: 100%;
+    box-sizing: border-box;
+}
+.my-history-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    box-shadow: inset 0 0 8px rgba(255,255,255,0.2);
+}
+.my-history-center-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 12px;
+    text-align: left;
+}
+.my-history-period-id {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+}
+.my-history-order-time {
+    font-size: 11px;
+    color: #777777;
+}
+.my-history-right-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+.my-history-status-box {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+}
+.my-history-status-box.success {
+    border: 1px solid #2aa453;
+    color: #2aa453;
+}
+.my-history-status-box.fail {
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+}
+.my-history-payout-text {
+    font-size: 13px;
+    font-weight: bold;
+}
+
 </style>
 </head>
 <body>
@@ -201,6 +276,39 @@ body { background-color: #222222; color: #ffffff; display: flex; justify-content
 <button class="confirm-bet-btn" id="total-bet-submit-btn" onclick="submitFinalBet()">Total Bet ₹1</button>
 </div>
 </div>
+<!-- Full Detailed Bet Order Receipt Modal Popup -->
+<div id="betDetailOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); padding: 10px;">
+    <div style="width: 100%; max-width: 360px; background-color: #222222; border-radius: 12px; padding: 15px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.6); font-family: 'Segoe UI', Arial, sans-serif; font-size: 13px;">
+        <h3 style="font-size: 15px; font-weight: bold; margin-bottom: 15px; padding-left: 5px;">Details</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Order Number Block -->
+            <div style="background-color: #2d2d2d; padding: 10px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px;">
+                <span style="color: #aaa; font-size: 11px;">Order number</span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="det-order-id" style="color: #e0e0e0; font-size: 11px; word-break: break-all; letter-spacing: 0.5px;">-</span>
+                </div>
+            </div>
+
+            <!-- Detail Rows -->
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Period</span><span id="det-period" style="font-weight: bold; color: #bbb;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Purchase amount</span><span id="det-purchase" style="font-weight: bold;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Quantity</span><span id="det-qty" style="font-weight: bold; color: #bbb;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Amount after tax</span><span id="det-after-tax" style="font-weight: bold;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Tax</span><span id="det-tax" style="font-weight: bold; color: #bbb;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Result</span><span id="det-result" style="font-weight: bold;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Select</span><span id="det-select" style="font-weight: bold; text-transform: capitalize; color: #f3c343;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Status</span><span id="det-status" style="font-weight: bold;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Win/lose</span><span id="det-payout" style="font-weight: bold;">-</span></div>
+            <div style="display: flex; justify-content: space-between; background-color: #2d2d2d; padding: 10px; border-radius: 6px;"><span style="color: #aaa;">Order time</span><span id="det-time" style="font-weight: bold; color: #bbb;">-</span></div>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button onclick="closeBetDetailModal()" style="width: 100%; padding: 12px; background-color: #333; border: 1px solid #444; color: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">Close</button>
+        </div>
+    </div>
+</div>
+
 <div class="custom-alert-overlay" id="customAlert">
 <div class="custom-alert-box">
 <div class="custom-alert-icon" id="customAlertIcon">⚠</div>
@@ -576,35 +684,176 @@ socket.on('bet_outcome', (data) => {
     fetchUserBalance();
     if(currentTab === 'my') fetchMyHistory();
 });
+function openBetDetailModal(bet) {
+    if (!bet) return;
+    try {
+        // 1. आर्डर नंबर जेनरेट करना (अगर डेटाबेस में _id है तो उसका यूज़, नहीं तो ऑटो जेनरेट)
+        let orderNum = bet._id ? "WG" + bet._id : "WG" + bet.period + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById("det-order-id").innerText = orderNum;
+        
+        // 2. बेसिक डेटा सेट करना
+        document.getElementById("det-period").innerText = bet.period || "-";
+        document.getElementById("det-select").innerText = bet.selectValue || "-";
+        
+        let rawAmount = Number(bet.amount || 0);
+        document.getElementById("det-purchase").innerText = "₹" + rawAmount.toFixed(2);
+        
+        // 3. क्वांटिटी और टैक्स का गणित (2% टैक्स डिडक्शन कैलकुलेशन)
+        let calculatedQty = bet.qty || Math.round(rawAmount / 1); 
+        document.getElementById("det-qty").innerText = calculatedQty;
+        
+        let taxAmt = rawAmount * 0.02;
+        let finalAmount = rawAmount - taxAmt;
+        document.getElementById("det-tax").innerText = "₹" + taxAmt.toFixed(2);
+        document.getElementById("det-after-tax").innerText = "₹" + finalAmount.toFixed(2);
+        
+        // 4. गेम परिणाम (Result) - बैकएंड हिस्ट्री से मैच करने के लिए
+        let resultEl = document.getElementById("det-result");
+        if (bet.gameResultNumber !== undefined && bet.gameResultColor) {
+            let bSmall = bet.gameResultNumber >= 5 ? "Big" : "Small";
+            resultEl.innerHTML = `${bet.gameResultNumber} <span style="color:${bet.gameResultColor.includes('Red') ? '#d32f2f':'#2aa453'}">${bet.gameResultColor}</span> ${bSmall}`;
+        } else {
+            resultEl.innerText = "Processing...";
+            resultEl.style.color = "#aaa";
+        }
+        
+        // 5. स्टेटस और विन/लूज़ डेकोरेशन
+        const statusEl = document.getElementById("det-status");
+        const payoutEl = document.getElementById("det-payout");
+        
+        if (bet.status === 'WIN') {
+            statusEl.innerText = "Success";
+            statusEl.style.color = "#2aa453";
+            let wonAmt = bet.winAmount ? bet.winAmount : (rawAmount * 1.96);
+            payoutEl.innerText = "+ ₹" + Number(wonAmt).toFixed(2);
+            payoutEl.style.color = "#2aa453";
+        } else if (bet.status === 'LOSS') {
+            statusEl.innerText = "Fail";
+            statusEl.style.color = "#d32f2f";
+            payoutEl.innerText = "- ₹" + finalAmount.toFixed(2);
+            payoutEl.style.color = "#d32f2f";
+        } else {
+            statusEl.innerText = "Pending";
+            statusEl.style.color = "#f3c343";
+            payoutEl.innerText = "Waiting...";
+            payoutEl.style.color = "#aaa";
+        }
+        
+        // 6. आर्डर लगाने का समय (Order Time)
+        let orderDate = bet.createdAt ? new Date(bet.createdAt) : new Date();
+        let formattedTime = orderDate.toISOString().replace('T', ' ').substring(0, 19);
+        document.getElementById("det-time").innerText = formattedTime;
+        
+        // पॉपअप शो करना
+        document.getElementById("betDetailOverlay").style.display = "flex";
+    } catch (e) {
+        console.error("Error displaying detailed receipt modal", e);
+    }
+}
+
+function closeBetDetailModal() {
+    document.getElementById("betDetailOverlay").style.display = "none";
+}
 
 socket.on('my_history_data', (data) => {
-  if (currentTab !== 'my') return;
-  
-  document.getElementById('table-head').innerHTML = `<tr><th>Period</th><th>Select</th><th>Amount</th><th>Result</th></tr>`;
-  const tbody = document.getElementById("history-rows");
-  tbody.innerHTML = "";
-  
-  if (!data.success || !data.bets || data.bets.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:20px;">No betting records found</td></tr>`;
-    return;
-  }
-  
-  // ✅ केवल शुरुआती 10 बेट्स ही स्क्रीन पर दिखाई देंगी
-  const limitedBets = data.bets.slice(0, 17);
-  
-  limitedBets.forEach(bet => {
-    let statusStyle = 'color: #aaa;';
-    if (bet.status === 'WIN') statusStyle = 'color: #2aa453; font-weight: bold;';
-    if (bet.status === 'LOSS') statusStyle = 'color: #d32f2f;';
+    if (currentTab !== 'my') return;
     
-    let resultText = bet.status;
-    if (bet.status === 'WIN') resultText = `Win (+₹${bet.winAmount.toFixed(2)})`;
+    // 1. टेबल हेडर को पूरी तरह साफ़ करना
+    const tableHead = document.getElementById('table-head');
+    if (tableHead) tableHead.innerHTML = ""; 
     
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${bet.period}</td><td style="font-weight: bold; color: #f3c343; text-transform: capitalize;">${bet.selectValue}</td><td>₹${bet.amount}</td><td style="${statusStyle}">${resultText}</td>`;
-    tbody.appendChild(tr);
-  });
+    const tbody = document.getElementById("history-rows");
+    tbody.innerHTML = "";
+    
+    if (!data.success || !data.bets || data.bets.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="color:#888; padding:20px; text-align:center;">No betting records found</td></tr>`;
+        return;
+    }
+    
+    // 2. एक मुख्य कंटेनर बनाना जो लिस्ट आइटम्स को संभालेगा
+    const listWrapper = document.createElement('div');
+    listWrapper.className = 'my-history-list-wrapper';
+    
+    const limitedBets = data.bets.slice(0, 17);
+    limitedBets.forEach(bet => {
+        // A. गोल गोटियों (Badge) का डायनामिक रंग सेट करना
+        let badgeStyle = "background-color: #333;";
+        let val = bet.selectValue ? bet.selectValue.toString().toLowerCase() : "";
+        
+        if (val === 'green' || val === '1' || val === '3' || val === '7' || val === '9') {
+            badgeStyle = "background: radial-gradient(circle at 30% 30%, #5cb85c, #2aa453);";
+        } else if (val === 'red' || val === '2' || val === '4' || val === '6' || val === '8') {
+            badgeStyle = "background: radial-gradient(circle at 30% 30%, #d9534f, #d32f2f);";
+        } else if (val === '0') {
+            badgeStyle = "background: linear-gradient(135deg, #9c27b0 50%, #d32f2f 50%);";
+        } else if (val === '5') {
+            badgeStyle = "background: linear-gradient(135deg, #9c27b0 50%, #2aa453 50%);";
+        } else if (val === 'violet') {
+            badgeStyle = "background-color: #9c27b0;";
+        } else if (val === 'big') {
+            badgeStyle = "background-color: #ff9800; border-radius: 8px;"; 
+        } else if (val === 'small') {
+            badgeStyle = "background-color: #2196f3; border-radius: 8px;";
+        }
+        
+        // B. स्टेटस बॉक्स और विन/लूज़ की टेक्स्ट सेटिंग
+        let statusClass = "fail";
+        let statusTitle = "Failed";
+        let payoutText = "-₹" + Number(bet.amount || 0).toFixed(2);
+        let payoutColor = "#d32f2f";
+        
+        if (bet.status === 'WIN') {
+            statusClass = "success";
+            statusTitle = "Succeed";
+            let wonAmt = bet.winAmount ? bet.winAmount : (Number(bet.amount) * 1.96);
+            payoutText = "+₹" + Number(wonAmt).toFixed(2);
+            payoutColor = "#2aa453";
+        } else if (bet.status !== 'LOSS') {
+            statusClass = "";
+            statusTitle = "Pending";
+            payoutText = "Waiting...";
+            payoutColor = "#f3c343";
+        }
+        
+        // C. टाइम और डेट को फॉर्मेट करना (YYYY-MM-DD HH:MM:SS)
+        let betDate = bet.createdAt ? new Date(bet.createdAt) : new Date();
+        let formattedTime = betDate.toISOString().replace('T', ' ').substring(0, 19);
+        
+        // D. नया कार्ड बनाना और उसमें पुराना क्लिक रसीद पॉपअप जोड़ना
+        const card = document.createElement('div');
+        card.className = 'my-history-card-item';
+        card.style.cursor = "pointer";
+        
+        card.addEventListener('click', () => {
+            if (typeof openBetDetailModal === 'function') {
+                openBetDetailModal(bet);
+            }
+        });
+        
+        card.innerHTML = `
+            <div class="my-history-badge" style="${badgeStyle}">${bet.selectValue}</div>
+            <div class="my-history-center-info">
+                <span class="my-history-period-id">${bet.period}</span>
+                <span class="my-history-order-time">${formattedTime}</span>
+            </div>
+            <div class="my-history-right-action">
+                <div class="my-history-status-box ${statusClass}">${statusTitle}</div>
+                <span class="my-history-payout-text" style="color: ${payoutColor}">${payoutText}</span>
+            </div>
+        `;
+        listWrapper.appendChild(card);
+    });
+    
+    // पूरे लिस्ट को मुख्य इतिहास वाले टेबल बॉक्स के अंदर धकेलना
+    const trWrapper = document.createElement('tr');
+    const tdWrapper = document.createElement('td');
+    tdWrapper.setAttribute('colspan', '4');
+    tdWrapper.style.padding = '0';
+    tdWrapper.appendChild(listWrapper);
+    trWrapper.appendChild(tdWrapper);
+    tbody.appendChild(trWrapper);
 });
+
 
 </script>
 </body>

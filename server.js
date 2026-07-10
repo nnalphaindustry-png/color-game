@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   balance: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
+  isFirstDepositDone: { type: Boolean, default: false },
   
   //   33  43    
   referredBy: { type: String, default: null },
@@ -558,13 +559,12 @@ io.on('connection', (socket) => {
     // 🔒 नया नियम: चेक करें कि यूज़र ने कभी डिपॉजिट किया है या नहीं
     const hasDeposited = await Deposit.findOne({ phone: phone, status: 'SUCCESS' });
     
-    // अगर यूज़र के पास सिर्फ बोनस का ₹70 है और उसने कभी रिचार्ज नहीं किया है, तो उसे रोकें
-    if (!hasDeposited && user.balance <= 70) {
-      return socket.emit('bet_response', { 
-        success: false, 
-        message: "First-time deposit is required to unlock your bonus and start playing! Please recharge now!" 
-      });
-    }
+    if (user.isFirstDepositDone === false) {
+    return socket.emit('bet_response', {
+        success: false,
+        message: "Betting Locked! Please complete your first deposit to activate your wallet and start playing."
+    });
+}
 
     // अगर सब सही है तो बैलेंस काटें और गेम लगाने दें
     user.balance -= betAmount;
@@ -675,7 +675,7 @@ try {
     if (action === "Success") {
         dep.status = 'SUCCESS';
         await dep.save();
-        
+        await User.updateOne({ phone: dep.phone }, { $set: { isFirstDepositDone: true } });
         //    
         await User.updateOne({ phone: dep.phone }, { $inc: { balance: dep.amount } });
 

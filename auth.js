@@ -62,46 +62,69 @@ function togglePassword(inputId) {
     }
 }
 
-//    -     
 async function handleRegister(event) {
     event.preventDefault();
     let phone = document.getElementById('reg-phone').value.trim();
     let pass = document.getElementById('reg-pass').value.trim();
     let confirmPass = document.getElementById('reg-confirm').value.trim();
+    
+    let inviteCode = "";
+    const inviteInput = document.getElementById('reg-invite');
+    if (inviteInput) {
+        inviteCode = inviteInput.value.trim();
+    }
+
     if (phone.length < 10) {
-        showAuthAlert("Invalid Number", "Please enter a valid 10-digit mobile number!", "");
+        showAuthAlert("Invalid Number", "Please enter a valid 10-digit mobile number!", "❌");
         return;
     }
     if (pass.length < 6) {
-        showAuthAlert("Weak Password", "Password must be at least 6 characters long!", "");
+        showAuthAlert("Weak Password", "Password must be at least 6 characters long!", "❌");
         return;
     }
     if (pass !== confirmPass) {
-        showAuthAlert("Mismatch Error", "Passwords do not match! Please check again.", "");
+        showAuthAlert("Mismatch Error", "Passwords do not match! Please check again.", "❌");
         return;
     }
+
     try {
         let response = await fetch(`${API_URL}/api/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, password: pass })
+            body: JSON.stringify({ phone, password: pass, ref: inviteCode })
         });
+        
         let data = await response.json();
         if (data.success) {
-            showAuthAlert("Success", "Registration Successful! Moving to Login Page.", "", () => {
+            showAuthAlert("Success", "Registration Successful! Moving to Login Page.", "✅", () => {
                 document.getElementById('register-form').reset();
                 showSection('login');
                 switchLoginTab('phone');
                 document.getElementById('login-user').value = phone;
             });
         } else {
-            showAuthAlert("Registration Failed", data.message || "Failed to create account.", "");
+            showAuthAlert("Registration Failed", data.message || "Failed to create account.", "❌");
         }
     } catch (error) {
-        //           
-        showAuthAlert("Server Error", "Unable to connect to the game server. Please check your Render server logs!", "");
+        showAuthAlert("Server Error", "Unable to connect to the game server. Please check your Render server logs!", "⚠️");
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    const inviteInput = document.getElementById('reg-invite');
+
+    if (inviteInput) {
+        if (refCode && refCode.trim() !== "" && refCode !== "null" && refCode !== "undefined") {
+            inviteInput.value = refCode;
+            inviteInput.readOnly = true;
+        } else {
+            inviteInput.value = "";
+            inviteInput.readOnly = false;
+        }
+    }
+});
 
 //    -     
 async function handleLogin(event) {

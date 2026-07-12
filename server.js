@@ -1142,6 +1142,15 @@ app.post('/api/user/spin-wheel', async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error!" });
     }
 });
+//      'User Cheating'      
+app.get('/api/admin/cheating-users', async (req, res) => {
+    try {
+        const cheaters = await User.find({ isCheater: true }).select('phone balance requiredWager cheatingLogs createdAt');
+        res.json({ success: true, data: cheaters });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Server error fetching cheaters list." });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colorgame')

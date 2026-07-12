@@ -41,39 +41,47 @@ document.addEventListener("DOMContentLoaded", () => {
     loadAllGameNotifications();
 });
 
-// सर्वर के डेटाबेस से सारे नोटिफिकेशन्स खींचने का फंक्शन
 function loadAllGameNotifications() {
     const listContainer = document.getElementById("user-notifications-list");
     if (!listContainer) return;
+    
+    //           
+    // (      - ,  'userPhone'  'phone')
+    const loggedUserPhone = localStorage.getItem("userPhone") || ""; 
 
-    fetch(`${NOTI_API_URL}/api/user/get-notices`)
+    // API      
+    fetch(`${NOTI_API_URL}/api/user/get-notices?phone=${loggedUserPhone}`)
     .then(res => res.json())
     .then(data => {
         if (data.success && data.history && data.history.length > 0) {
-            listContainer.innerHTML = ""; // लोडिंग टेक्स्ट हटाना
+            listContainer.innerHTML = ""; //   
             
-            // सारे नोटिफिकेशन्स को एक-एक करके लिस्ट में जोड़ना
             data.history.forEach(item => {
                 let dateObj = new Date(item.createdAt);
                 let dateStr = dateObj.toLocaleDateString();
                 let timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
+                
+                //       ,    (#ff5252) ,     (#dbb35e) 
+                let borderCol = item.isCheaterLog ? "#ff5252" : "#dbb35e";
+                let bgCol = item.isCheaterLog ? "rgba(255, 82, 82, 0.05)" : "#252525";
+                
                 let cardHtml = `
-                    <div class="noti-card">
-                        <div class="noti-message-txt">${item.message}</div>
-                        <div class="noti-time-row">📅 ${dateStr} | ⏰ ${timeStr}</div>
-                    </div>`;
+                <div class="noti-card" style="border-left: 4px solid ${borderCol}; background-color: ${bgCol}; transition: transform 0.2s;">
+                    <div class="noti-message-txt" style="color: ${item.isCheaterLog ? '#ffbcbc' : '#e0e0e0'}">${item.message}</div>
+                    <div class="noti-time-row" style="color: #777;"> ${dateStr} |  ${timeStr}</div>
+                </div>`;
                 listContainer.innerHTML += cardHtml;
             });
         } else {
-            listContainer.innerHTML = '<p style="text-align: center; color: #666; font-size: 13px; margin-top: 30px;">कोई सूचना या अपडेट उपलब्ध नहीं है।</p>';
+            listContainer.innerHTML = '<p style="text-align: center; color: #666; font-size: 13px; margin-top: 30px;">      </p>';
         }
     })
     .catch(err => {
         console.error("Notifications Page Error:", err);
-        listContainer.innerHTML = '<p style="text-align: center; color: #ff4d4d; font-size: 13px; margin-top: 30px;">इतिहास लोड करने में समस्या आई।</p>';
+        listContainer.innerHTML = '<p style="text-align: center; color: #ff4d4d; font-size: 13px; margin-top: 30px;">     </p>';
     });
 }
+
 </script>
 </body>
 </html>

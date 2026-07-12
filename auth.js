@@ -118,7 +118,8 @@ async function processLogin(event) {
             localStorage.setItem('user_phone', phone);
             
             // लॉगिन होने पर सुंदर-सुंदर "Success" पॉपअप खुलेगा
-            showAuthAlert("Welcome To Club", "Login Successful! Opening 91 GOA CLUB...", "✅", () => {
+            showAuthAlert("91 GOA CLUB", "Login Successful! Opening your game room...", "✅", () => {
+            	
                 window.location.href = "home.html";
             });
         } else {

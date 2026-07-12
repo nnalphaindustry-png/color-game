@@ -135,6 +135,34 @@ app.get('/api/balance/:phone', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error fetching balance!" });
     }
 });
+app.post('/api/deposit/submit', async (req, res) => {
+    try {
+        const { phone, amount, utrNumber } = req.body;
+
+        if (!utrNumber || utrNumber.trim().length !== 12) {
+            return res.json({ success: false, message: "Invalid UTR! Must be exactly 12 digits." });
+        }
+
+        const utrExists = await Deposit.findOne({ utrNumber: utrNumber.trim() });
+        if (utrExists) {
+            return res.json({ success: false, message: "This UTR Number has already been submitted!" });
+        }
+
+        const newDeposit = new Deposit({
+            phone: phone,
+            amount: Number(amount),
+            utrNumber: utrNumber.trim(),
+            status: 'PENDING'
+        });
+
+        await newDeposit.save();
+        res.json({ success: true, message: "Deposit request filed successfully! Waiting for admin approval." });
+
+    } catch (err) {
+        console.error("Deposit submission error:", err);
+        res.status(500).json({ success: false, message: "Server error during deposit submission!" });
+    }
+});
 
 // फाइलों के डायरेक्ट राउट्स
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

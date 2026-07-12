@@ -1,836 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RM GAME - Master Admin Panel</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-body { background-color: #121212; color: #e0e0e0; min-height: 100vh; overflow-x: hidden; }
-.admin-top-bar { background-color: #1e1e1e; border-bottom: 1px solid #2d2d2d; height: 55px; display: flex; align-items: center; padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; z-index: 900; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-.menu-toggle-btn { background: none; border: none; color: #dbb35e; font-size: 24px; cursor: pointer; margin-right: 15px; }
-.admin-title { font-size: 15px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px; }
-.admin-sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background-color: #1a1a1a; z-index: 1001; transition: left 0.3s ease-in-out; box-shadow: 4px 0 15px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
-.admin-sidebar.open { left: 0; }
-.sidebar-header { background: linear-gradient(135deg, #dbb35e, #c79a49); color: #201500; padding: 18px 15px; font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-.sidebar-links { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; }
-.sidebar-links button { background: none; border: none; color: #cccccc; padding: 14px 20px; text-align: left; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
-.sidebar-links button:hover { background-color: #252525; color: #dbb35e; border-left-color: #dbb35e; }
-.sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1000; }
-.sidebar-overlay.show { display: block; }
-.main-panel-content { padding: 75px 12px 20px 12px; margin: 0 auto; width: 100%; max-width: 500px; }
-.admin-section { display: none; flex-direction: column; gap: 15px; }
-.admin-section.active-view { display: flex; }
-.stats-grid-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
-.stat-mini-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 10px; padding: 12px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-.st-num { font-size: 16px; font-weight: bold; color: #ffffff; font-family: monospace; }
-.st-lbl { font-size: 10px; color: #888888; font-weight: 500; text-transform: uppercase; }
-.admin-card { background-color: #1e1e1e; border-radius: 12px; padding: 15px; border: 1px solid #2d2d2d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 12px; }
-.card-title { font-size: 13px; font-weight: bold; color: #dbb35e; border-left: 3px solid #dbb35e; padding-left: 8px; margin-bottom: 2px; text-align: left; }
-.form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
-.form-group.row-flex { display: flex; flex-direction: row; gap: 8px; align-items: center; }
-.form-group.row-flex input { flex: 1; margin-top: 0; }
-label { font-size: 11px; color: #aaa; font-weight: 500; }
-input, select { background-color: #121212; color: #ffffff; border: 1px solid #333333; padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none; width: 100%; }
-input:focus, select:focus { border-color: #dbb35e; }
-.bank-row-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 5px; }
-.bank-col { display: flex; flex-direction: column; gap: 4px; text-align: left; }
-.qr-upload-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 8px; }
-.qr-slot-box { background-color: #121212; border: 1px dashed #444444; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
-.qr-slot-box label { font-size: 11px; color: #dbb35e; font-weight: bold; }
-.qr-slot-box input[type="file"] { padding: 4px; font-size: 11px; background: none; border: none; }
-.qr-preview-frame { width: 70px; height: 70px; border: 1px solid #2d2d2d; border-radius: 6px; background-color: #1a1a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.qr-preview-frame img { width: 100%; height: 100%; object-fit: contain; }
-.btn { display: inline-block; border: none; padding: 10px 15px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; text-transform: uppercase; }
-.btn-save { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; width: 100%; }
-.btn-blue { background-color: #2196f3; color: white; white-space: nowrap; height: 38px; }
-.btn-green { background-color: #2aa453; color: white; }
-.btn-red { background-color: #d32f2f; color: white; }
-.btn-warn { background-color: #ff9800; color: #121212; }
-.admin-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; margin-top: 5px; min-width: 450px; }
-.admin-table th { background-color: #2d2d2d; color: #aaa; padding: 10px 6px; font-weight: 600; border-bottom: 2px solid #333; }
-.admin-table td { padding: 12px 6px; border-bottom: 1px solid #2d2d2d; color: #ddd; background-color: #161616; vertical-align: middle; }
-.action-btn-sm { border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; margin: 0 2px; text-transform: uppercase; }
-.act-approve { background-color: #2aa453; color: white; }
-.act-reject { background-color: #d32f2f; color: white; }
-.custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; pointer-events: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
-.custom-alert-box { width: 85%; max-width: 330px; background-color: #252525; border-radius: 16px; border: 1px solid #444; padding: 25px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: scale(0.8); transition: transform 0.2s ease; }
-.custom-alert-overlay.show { display: flex; pointer-events: auto; }
-.custom-alert-overlay.show .custom-alert-box { transform: scale(1); }
-.custom-alert-icon { font-size: 36px; margin-bottom: 12px; }
-.custom-alert-title { font-size: 18px; font-weight: bold; color: #dbb35e; margin-bottom: 8px; }
-.custom-alert-msg { font-size: 14px; color: #e0e0e0; line-height: 1.4; margin-bottom: 22px; }
-.custom-alert-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 11px 40px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; }
-/*  This class handles the automated screen transition triggers */
-.admin-section {
-    display: none;
-}
-.admin-section.active-view {
-    display: block !important;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 GOA CLUB - Admin C-Panel</title>
+    <!-- Premium Google Font -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
-</style>
+        body {
+            background-color: #0b0f19;
+            color: #f4f6fb;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            background: #111827;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #1f2937;
+        }
+
+        /* 1. Header Metrics Dashboard Grid */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #1f2937;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        .admin-title-txt {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff4e50, #f03e3e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .refresh-list-btn {
+            background: #1f2937;
+            color: #fff;
+            border: 1px solid #374151;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-list-btn:hover {
+            background: #374151;
+        }
+
+        /* 2. Responsive Table Grid Styles */
+        .table-responsive-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #1f2937;
+            background: #1f2937;
+        }
+
+        .deposit-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .deposit-table th {
+            background-color: #111827;
+            color: #9ca3af;
+            padding: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .deposit-table td {
+            padding: 16px;
+            color: #e5e7eb;
+            border-bottom: 1px solid #1f2937;
+            font-weight: 500;
+        }
+
+        .deposit-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 3. Action Badges and Approve Buttons */
+        .utr-highlight-txt {
+            font-family: monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: #38bdf8;
+            letter-spacing: 0.5px;
+        }
+
+        .amount-badge-txt {
+            color: #10b981;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .approve-action-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+            transition: transform 0.1s ease;
+        }
+
+        .approve-action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Status Pills styling */
+        .status-pill-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Empty State */
+        .no-data-alert-box {
+            padding: 40px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 15px;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
-<div class="admin-top-bar">
-<button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
-<div class="admin-title">RM Game Control Dashboard</div>
-</div>
-
-<div class="admin-sidebar" id="sidebarMenu">
-<div class="sidebar-header">
-🛡 Master Panel Menu
-<button onclick="toggleSidebar()" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
-</div>
-<div class="sidebar-links">
-<button onclick="switchAdminView('dashboard-view')">📊 Dashboard Overview</button>
-<button onclick="switchAdminView('per-day-check-view')"> Per Day Withdrawal Deposit Check</button>
-<button onclick="switchAdminView('game-control-view')">🎮 Game Control</button>
-<button onclick="switchAdminView('deposit-requests-view')">📥 Deposit Approvals</button>
-<button onclick="switchAdminView('withdraw-requests-view')">📤 Withdraw Manager</button>
-<button onclick="switchAdminView('user-management-view')">👤 Member Accounts</button>
-<!--           -->
-<button onclick="switchAdminView('announcement-alert-view')"> Send Notification</button>
-<!-- This button goes directly inside your sidebar links layout block -->
-<button onclick="switchAdminView('user-complaints-view')"> User Complaints</button>
-<button onclick="switchAdminView('gateway-updater-view')">💳 Bank & QR Settings</button>
-</div>
-</div>
-<div class="sidebar-overlay" id="menuOverlay" onclick="toggleSidebar()"></div>
-
-<div class="main-panel-content">
-<div id="dashboard-view" class="admin-section active-view">
-<div class="stats-grid-row">
-<div class="stat-mini-box"><span class="st-num" id="stat-total-users">0</span><span class="st-lbl">Total Users</span></div>
-<div class="stat-mini-box"><span class="st-num" id="stat-total-deposits" style="color:#2aa453;">₹0.00</span><span class="st-lbl">Total Deposit</span></div>
-<div class="stat-mini-box"><span class="st-num" id="stat-total-withdraws" style="color:#d32f2f;">₹0.00</span><span class="st-lbl">Total Withdraw</span></div>
-<div class="stat-mini-box"><span class="st-num" id="stat-active-bets">0</span><span class="st-lbl">Active Bets</span></div>
-</div>
-<div class="admin-card" style="margin-top: 15px;">
-<div class="card-title">👥 Registered Users List</div>
-<div style="overflow-x: auto;">
-<table class="admin-table">
-<thead>
-<tr><th>UID</th><th>Mobile Number</th><th>Wallet Balance</th><th>Status</th></tr>
-</thead>
-<tbody id="master-users-list-rows">
-<tr><td colspan="4" style="color:#888; padding:15px;">Loading users feed...</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="game-control-view" class="admin-section">
-<div class="admin-card">
-<div class="card-title">🎮 WinGo Auto-Profit & Control Desk</div>
-<div class="form-group">
-<label>Select Game Mode:</label>
-<select id="ctrl-mode-select">
-<option value="30s">WinGo 30sec</option>
-<option value="1m">WinGo 1 Min</option>
-<option value="3m">WinGo 3 Min</option>
-<option value="5m">WinGo 5 Min</option>
-</select>
-</div>
-<div class="form-group">
-<label>Execution Mode Policy:</label>
-<select id="game-control-type" onchange="toggleManualInputBox(this.value)">
-<option value="auto">Automatic (Auto-Profit Mode)</option>
-<option value="manual">Manual Force (Admin Chooses Winner)</option>
-</select>
-</div>
-<div class="form-group" id="manual-num-block" style="display: none;">
-<label>Forced Winning Number (0-9):</label>
-<input type="number" id="manual-target-number" min="0" max="9" placeholder="Enter number 0-9">
-</div>
-<button class="btn btn-save" onclick="updateGameControl()">Commit Game Directives</button>
-</div>
-</div>
-
-<div id="deposit-requests-view" class="admin-section">
-<div class="admin-card">
-<div class="card-title">📥 Pending Deposit UTR Requests</div>
-<div style="overflow-x: auto;">
-<table class="admin-table">
-<div class="form-group row-flex" style="margin-top: 10px; margin-bottom: 15px;">
-    <!--  :  ID     -->
-    <input type="text" id="admin-utr-search-input" placeholder="Enter 12-digit UTR to Search...">
-    
-    <!--  :  onclick="searchDepositByUTRDirect()"     -->
-    <button type="button" class="btn btn-blue" onclick="searchDepositByUTRDirect()">Search UTR</button>
-</div>
-
-<thead>
-<tr><th>User Phone</th><th>Amount</th><th>UTR Number</th><th>Action Panel</th></tr>
-</thead>
-<tbody id="deposit-request-rows">
-<tr><td colspan="4" style="color:#888; padding:15px;">No pending deposits found.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-
-<div id="withdraw-requests-view" class="admin-section">
-<div class="admin-card">
-<div class="card-title">📤 Pending Withdraw Payout Requests</div>
-<div style="overflow-x: auto;">
-<table class="admin-table">
-<thead>
-<tr><th>User Phone</th><th>Amount</th><th>Payout Details</th><th>Action Panel</th></tr>
-</thead>
-<tbody id="withdraw-request-rows">
-<tr><td colspan="4" style="color:#888; padding:15px;">No pending withdrawals found.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-
-<div id="user-management-view" class="admin-section">
-<div class="admin-card">
-<div class="card-title">👤 User Account Balance & Ban Control</div>
-<div class="form-group row-flex">
-<input type="text" id="search-user-phone" placeholder="Enter Mobile Number">
-<button class="btn btn-blue" onclick="manageUserAccount('search')">Search Profile</button>
-</div>
-<div id="user-stats-box" style="display:none; background:#121212; padding:12px; border-radius:8px; border:1px solid #333; margin-top:10px;">
-<p><strong>Phone:</strong> <span id="res-user-phone">-</span></p>
-<p><strong>Wallet:</strong> <span id="res-user-balance" style="color:#2aa453; font-weight:bold;">₹0.00</span></p>
-<p><strong>Status:</strong> <span id="res-user-status">-</span></p>
-<div class="form-group" style="margin-top:10px;">
-<label>Adjustment Amount (INR):</label>
-<input type="number" id="balance-modifier-amount" placeholder="Enter Value">
-</div>
-<div style="display:flex; gap:10px; margin-top:8px;">
-<button class="btn btn-green" style="flex:1;" onclick="manageUserAccount('add_balance')">Credit (+)</button>
-<button class="btn btn-red" style="flex:1;" onclick="manageUserAccount('deduct_balance')">Debit (-)</button>
-</div>
-<button class="btn btn-warn" style="width:100%; margin-top:10px; font-weight:bold;" id="ban-toggle-btn" onclick="manageUserAccount('ban')">Suspend Account</button>
-</div>
-</div>
-</div>
-
-<div id="gateway-updater-view" class="admin-section">
-<div class="admin-card">
-<div class="card-title">💳 System Payment & QR Settings</div>
-<div class="form-group">
-<label>Master Gateway UPI ID Handle:</label>
-<input type="text" id="admin-upi-id" placeholder="merchant@upi">
-</div>
-<div class="bank-row-inputs">
-<div class="bank-col"><label>Bank Name</label><input type="text" id="bank-name-field" placeholder="SBI, HDFC..."></div>
-<div class="bank-col"><label>Beneficiary Name</label><input type="text" id="bank-holder-field" placeholder="Holder Name"></div>
-<div class="bank-col"><label>Account Number</label><input type="text" id="bank-acc-field" placeholder="Account Number"></div>
-<div class="bank-col"><label>IFSC Code</label><input type="text" id="bank-ifsc-field" placeholder="IFSC Code"></div>
-</div>
-<label style="margin-top: 15px; display: block; font-weight: bold; color: #dbb35e;">📦 4 Separate QR Code Upload Slots</label>
-<div class="qr-upload-grid-4">
-<div class="qr-slot-box"><label>QR Code Slot 1</label><input type="file" id="qr-input-1" accept="image/*" onchange="processQrImage(1)"><div class="qr-preview-frame"><img id="qr-prev-1" src="" style="display:none;" alt="QR 1"></div></div>
-<div class="qr-slot-box"><label>QR Code Slot 2</label><input type="file" id="qr-input-2" accept="image/*" onchange="processQrImage(2)"><div class="qr-preview-frame"><img id="qr-prev-2" src="" style="display:none;" alt="QR 2"></div></div>
-<div class="qr-slot-box"><label>QR Code Slot 3</label><input type="file" id="qr-input-3" accept="image/*" onchange="processQrImage(3)"><div class="qr-preview-frame"><img id="qr-prev-3" src="" style="display:none;" alt="QR 3"></div></div>
-<div class="qr-slot-box"><label>QR Code Slot 4</label><input type="file" id="qr-input-4" accept="image/*" onchange="processQrImage(4)"><div class="qr-preview-frame"><img id="qr-prev-4" src="" style="display:none;" alt="QR 4"></div></div>
-</div>
-<button class="btn btn-save" style="margin-top:15px;" onclick="updateAdminGateways()">Commit Gateway Changes</button>
-</div>
-</div>
-</div>
-<!--  Live User Complaints Dashboard Management View Section -->
-<div id="user-complaints-view" class="admin-section">
-    <div class="admin-card" style="background-color: #252525; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #333;">
-        <div class="card-title" style="color: #dbb35e; font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;"> Active User Complaints & Support Tickets</div>
+    <div class="admin-wrapper">
         
-        <div style="overflow-x: auto; margin-top: 15px;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; background-color: #121212; color: #fff; font-size: 13px; border-radius: 8px; overflow: hidden;">
+        <!-- 1. Dashboard Header Section -->
+        <header class="admin-header">
+            <div>
+                <h1 class="admin-title-txt">91 GOA CLUB</h1>
+                <p style="font-size: 12px; color: #9ca3af; margin-top: 2px;">Live Deposit Approval Center (C-Panel)</p>
+            </div>
+            <!-- मैन्युअल लिस्ट रीफ्रेश करने का बटन -->
+            <button class="refresh-list-btn" onclick="loadPendingDepositsList();">🔄 Fetch Live List</button>
+        </header>
+
+        <!-- 2. Dynamic Live Requests Table Layout Grid -->
+        <div class="table-responsive-container">
+            <table class="deposit-table" id="requests-grid-table">
                 <thead>
-                    <tr style="background: linear-gradient(180deg, #dbb35e, #c79a49); color: #4a3200; font-weight: bold;">
-                        <th style="padding: 12px 10px;">User Phone</th>
-                        <th style="padding: 12px 10px;">Category</th>
-                        <th style="padding: 12px 10px;">Issue Description Details</th>
-                        <th style="padding: 12px 10px;">Date & Time</th>
-                        <th style="padding: 12px 10px;">Status</th>
+                    <tr>
+                        <th>PLAYER PHONE</th>
+                        <th>DEPOSIT AMOUNT</th>
+                        <th>12-DIGIT UTR NUMBER</th>
+                        <th>ORDER STATUS</th>
+                        <th>ACTION CONTROL</th>
                     </tr>
                 </thead>
-                <tbody id="admin-complaints-table-body">
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #666; padding: 20px;">Loading user complaints database timeline...</td>
-                    </tr>
+                <tbody id="pending-list-table-body">
+                    <!-- जावास्क्रिप्ट के ज़रिए लाइव रिक्वेस्ट्स यहाँ लोड होकर सड़ेंगी -->
                 </tbody>
             </table>
-        </div>
-    </div>
-</div>
-
-<!--         -->
-<div id="announcement-alert-view" class="admin-section">
-    <div class="admin-card">
-        <div class="card-title"> Announcement & Alert System</div>
-        
-        <!--      -->
-        <div class="form-group">
-            <label>Type New Update Message:</label>
-            <textarea id="admin-notice-input" rows="4" style="width: 100%; background-color: #121212; color: #fff; border: 1px solid #333; border-radius: 8px; padding: 10px; font-size: 13px; resize: none; outline: none; font-family: 'Segoe UI', Arial, sans-serif;" placeholder="      ..."></textarea>
-            <button class="btn btn-save" onclick="publishGameNotice()" style="margin-top: 10px;"> Send To All Game Users</button>
-        </div>
-
-        <!--     -->
-        <div style="margin-top: 15px;">
-            <label style="font-weight: bold; color: #dbb35e; display: block; margin-bottom: 8px;">Sent Alerts History</label>
-            <div id="admin-notice-list" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
-                <p style="color: #666; text-align: center; font-size: 12px; padding: 10px;">Loading history...</p>
-            </div>
-        </div>
-    </div>
-</div>
-<!--     ( dashboard-view)       -->
-<div id="per-day-check-view" style="display: none; padding: 20px;">
-    <div class="card" style="padding: 20px; background-color: #1a1a1a; border-radius: 12px; border: 1px solid #333;">
-        
-        <!--  (Date Selector) -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="color: #dbb35e; font-size: 16px; margin: 0; font-weight: bold;"> Daily Analytics By Date</h3>
-            <div>
-                <label style="color: #aaa; font-size: 13px; margin-right: 8px;">Select Date:</label>
-                <input type="date" id="stats-calendar-input" onchange="fetchDailyStatsByDate()" style="background-color: #252525; color: #fff; border: 1px solid #dbb35e; padding: 6px 12px; border-radius: 6px; cursor: pointer;">
-            </div>
-        </div>
-
-        <!--    -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-            <!--  1:  -->
-            <div style="background: linear-gradient(135deg, #1e3c23, #121212); border: 1px solid #2aa453; border-radius: 10px; padding: 20px; text-align: center;">
-                <p style="color: #2aa453; font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 0 0 8px 0;"> Total Deposit</p>
-                <h2 id="daily-box-deposit" style="color: #fff; font-size: 26px; margin: 0; font-weight: bold; font-family: monospace;">0.00</h2>
-            </div>
-            <!--  2:  -->
-            <div style="background: linear-gradient(135deg, #4a1c1c, #121212); border: 1px solid #d9534f; border-radius: 10px; padding: 20px; text-align: center;">
-                <p style="color: #d9534f; font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 0 0 8px 0;"> Total Withdrawal</p>
-                <h2 id="daily-box-withdraw" style="color: #fff; font-size: 26px; margin: 0; font-weight: bold; font-family: monospace;">0.00</h2>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-
-<!--  Full Complaint Message View Popup Modal -->
-<div id="complaint-details-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background-color: #252525; width: 100%; max-width: 360px; border-radius: 16px; border: 1px solid #dbb35e; padding: 20px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        <button onclick="closeComplaintPopup()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
-        
-        <div style="font-size: 32px; margin-bottom: 10px;"></div>
-        <h3 style="color: #dbb35e; font-size: 16px; margin-bottom: 5px; font-weight: bold;">User Ticket Details</h3>
-        <div id="popup-ticket-user-phone" style="font-size: 11px; color: #888; margin-bottom: 15px; font-weight: bold;">User: Loading...</div>
-        <!-- UTR     -->
-<div id="utr-search-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background-color: #252525; width: 100%; max-width: 360px; border-radius: 16px; border: 1px solid #dbb35e; padding: 25px 20px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        
-        <!--     (X) -->
-        <button onclick="closeUtrPopup()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
-        
-        <h3 style="color: #dbb35e; font-size: 16px; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px;"> UTR Request Found</h3>
-        
-        <!--       -->
-        <div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 15px; text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
-            <p style="font-size: 13px; color: #ddd;"><strong>Phone:</strong> <span id="utr-pop-phone" style="color: #dbb35e; font-weight: bold;">-</span></p>
-            <p style="font-size: 13px; color: #ddd;"><strong>Amount:</strong> <span id="utr-pop-amount" style="color: #2aa453; font-weight: bold;">0.00</span></p>
-            <p style="font-size: 13px; color: #ddd;"><strong>UTR Number:</strong> <span id="utr-pop-number" style="font-family: monospace; color: #fff;">-</span></p>
-        </div>
-        
-        <!--   (Approve / Reject) -->
-        <div style="display: flex; gap: 10px;">
-            <button id="utr-pop-approve-btn" class="btn btn-green" style="flex: 1;">Approve</button>
-            <button id="utr-pop-reject-btn" class="btn btn-red" style="flex: 1;">Reject</button>
-        </div>
-    </div>
-</div>
-
-        
-        <!--        -   -->
-        <div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; text-align: left; margin-bottom: 20px;">
-            <p id="popup-ticket-full-text" style="color: #e0e0e0; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-all;">No text loaded.</p>
-        </div>
-        
-        <button onclick="closeComplaintPopup()" style="background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 10px 30px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%;">Close Preview</button>
-    </div>
-</div>
-
-<div class="custom-alert-overlay" id="adminAlertOverlay">
-<div class="custom-alert-box">
-<div class="custom-alert-icon" id="admAlertIcon">⚠</div>
-<div class="custom-alert-title" id="admAlertTitle">Notification</div>
-<div class="custom-alert-msg" id="admAlertMessage">Message text.</div>
-<button class="custom-alert-btn" onclick="closeAdminAlert()">OK</button>
-</div>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
-<script>
-const API_BASE_URL = "https://color-game-1kc2.onrender.com";
-const socket = io(API_BASE_URL);
-
-let currentSearchedPhone = "";
-let qrBase64_1 = "", qrBase64_2 = "", qrBase64_3 = "", qrBase64_4 = "";
-let alertCallback = null;
-
-function showAdminPopup(title, message, icon = '⚠', callback = null) {
-    if(document.getElementById("admAlertIcon")) document.getElementById("admAlertIcon").innerText = icon;
-    if(document.getElementById("admAlertTitle")) document.getElementById("admAlertTitle").innerText = title;
-    if(document.getElementById("admAlertMessage")) document.getElementById("admAlertMessage").innerText = message;
-    
-    alertCallback = callback;
-    
-    if(document.getElementById("adminAlertOverlay")) document.getElementById("adminAlertOverlay").classList.add("show");
-}
-
-function closeAdminAlert() {
-    if(document.getElementById("adminAlertOverlay")) document.getElementById("adminAlertOverlay").classList.remove("show");
-    if(typeof alertCallback === 'function') alertCallback();
-}
-
-function toggleSidebar() {
-    document.getElementById("sidebarMenu").classList.toggle("open");
-    document.getElementById("menuOverlay").classList.toggle("show");
-}
-
-function switchAdminView(targetSectionId) {
-    document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active-view'));
-    const targetSection = document.getElementById(targetSectionId);
-    if (targetSection) targetSection.classList.add('active-view');
-    toggleSidebar();
-    
-    //      ( )
-    if (targetSectionId === 'dashboard-view' || targetSectionId === 'deposit-requests-view') {
-        loadGlobalDashboardStats();
-    }
-    
-    //           ( )
-    if (targetSectionId === 'user-complaints-view') {
-        if (typeof loadUserComplaintsDatabase === 'function') {
-            loadUserComplaintsDatabase();
-        }
-    }
-}
-
-
-function toggleManualInputBox(policyValue) {
-    document.getElementById("manual-num-block").style.display = (policyValue === "manual") ? "flex" : "none";
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    loadGlobalDashboardStats();
-});
-
-function loadGlobalDashboardStats() {
-    fetch(`${API_BASE_URL}/api/admin/dashboard-data`)
-    .then(res => { 
-        if(!res.ok) throw new Error("API Route not found"); 
-        return res.json(); 
-    })
-    .then(data => {
-        if (!data.success) return;
-        
-        document.getElementById("stat-total-users").innerText = data.totalUsers;
-        document.getElementById("stat-total-deposits").innerText = "₹" + data.totalDeposits.toFixed(2);
-        document.getElementById("stat-total-withdraws").innerText = "₹" + data.totalWithdraws.toFixed(2);
-        document.getElementById("stat-active-bets").innerText = data.activeBetsCount;
-
-        const userBody = document.getElementById("master-users-list-rows");
-        userBody.innerHTML = "";
-        if(data.users.length === 0) userBody.innerHTML = `<tr><td colspan="4">No users found.</td></tr>`;
-        data.users.forEach((user, index) => {
-            let uStatus = user.isBanned ? "<span style='color:#d32f2f;'>❌ BANNED</span>" : "<span style='color:#2aa453;'>🟢 ACTIVE</span>";
-            userBody.innerHTML += `<tr><td>${index+1}</td><td>${user.phone}</td><td style='color:#2aa453; font-weight:bold;'>₹${user.balance.toFixed(2)}</td><td>${uStatus}</td></tr>`;
-        });
-
-        const depBody = document.getElementById("deposit-request-rows");
-        depBody.innerHTML = "";
-        if(data.pendingDeposits.length === 0) depBody.innerHTML = `<tr><td colspan="4" style='color:#888;'>No pending deposits.</td></tr>`;
-        data.pendingDeposits.forEach(dep => {
-            depBody.innerHTML += `<tr><td>${dep.phone}</td><td>₹${dep.amount}</td><td style='font-family:monospace;'>${dep.utrNumber}</td><td>
-            <button class='action-btn-sm act-approve' onclick="processDepositRequest('${dep._id}', 'Success')">Approve</button>
-            <button class='action-btn-sm act-reject' onclick="processDepositRequest('${dep._id}', 'Reject')">Reject</button>
-            </td></tr>`;
-        });
-
-        const witBody = document.getElementById("withdraw-request-rows");
-        witBody.innerHTML = "";
-        if(data.pendingWithdraws.length === 0) witBody.innerHTML = `<tr><td colspan="4" style='color:#888;'>No pending withdrawals.</td></tr>`;
-        data.pendingWithdraws.forEach(wit => {
-            witBody.innerHTML += `<tr><td>${wit.phone}</td><td>₹${wit.amount}</td><td>Method: ${wit.method.toUpperCase()}<br>${wit.details}</td><td>
-            <button class='action-btn-sm act-approve' onclick="processWithdrawRequest('${wit._id}', 'Success')">Approve</button>
-            <button class='action-btn-sm act-reject' onclick="processWithdrawRequest('${wit._id}', 'Reject')">Reject</button>
-            </td></tr>`;
-        });
-    })
-    .catch((err) => console.log("Dashboard feed failure managed."));
-}
-function manageUserAccount(actionType) {
-    let phoneInput = document.getElementById("search-user-phone").value.trim();
-    let amount = document.getElementById("balance-modifier-amount").value;
-    let targetPhone = (actionType === "search") ? phoneInput : currentSearchedPhone;
-    
-    if (!targetPhone) {
-        showAdminPopup("Input Required", "Please enter a valid mobile number!", "📱");
-        return;
-    }
-    if ((actionType === "add_balance" || actionType === "deduct_balance") && (!amount || amount <= 0)) {
-        showAdminPopup("Input Required", "Please enter a valid amount greater than 0!", "💰");
-        return;
-    }
-    
-    fetch(`${API_BASE_URL}/api/admin/user-control`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: actionType, phone: targetPhone, amount: parseFloat(amount) })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (actionType === "search") {
-            if (data.success) {
-                currentSearchedPhone = data.phone;
-                document.getElementById("user-stats-box").style.display = "block";
-                document.getElementById("res-user-phone").innerText = data.phone;
-                document.getElementById("res-user-balance").innerText = "₹" + data.balance.toFixed(2);
-                document.getElementById("res-user-status").innerText = data.isBanned ? "❌ BANNED / SUSPENDED" : "🟢 ACTIVE";
-                document.getElementById("res-user-status").style.color = data.isBanned ? "#d32f2f" : "#2aa453";
-                document.getElementById("ban-toggle-btn").innerText = data.isBanned ? "Activate Account (Unban)" : "Suspend Account (Block)";
-            } else {
-                showAdminPopup("Failed", data.message || "User profile not found.", "❌");
-                document.getElementById("user-stats-box").style.display = "none";
-            }
-        } else {
-            showAdminPopup("Success", data.message || "Operation completed successfully!", "✅", () => {
-                manageUserAccount("search");
-                document.getElementById("balance-modifier-amount").value = "";
-                loadGlobalDashboardStats();
-            });
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-function updateGameControl() {
-    const mode = document.getElementById("ctrl-mode-select").value;
-    const controlMode = document.getElementById("game-control-type").value;
-    let inputField = document.getElementById("manual-target-number") || document.getElementById("manual-target-num");
-    const adminResult = inputField ? inputField.value.trim() : "";
-    
-    let requestBody = { mode, controlMode };
-    if (controlMode === "manual") {
-        if (adminResult === "" || isNaN(adminResult) || adminResult < 0 || adminResult > 9) {
-            showAdminPopup("Input Error", "Please enter a forced winning number between 0 and 9!", "🔢");
-            return;
-        }
-        requestBody.adminResult = parseInt(adminResult);
-    }
-    
-    fetch(`${API_BASE_URL}/api/admin/control-game`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-    })
-    .then(res => res.json())
-    .then(data => {
-        showAdminPopup("Directives Committed", data.message || "Manual round rules applied successfully!", "🎮");
-        if (inputField) inputField.value = "";
-    })
-    .catch(() => showAdminPopup("Error", "Failed to send command to server.", "❌"));
-}
-
-function processDepositRequest(requestId, action) {
-    fetch(`${API_BASE_URL}/api/admin/deposit-action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId, action })
-    })
-    .then(res => res.json())
-    .then(data => {
-        showAdminPopup("Deposit Ledger Panel", data.message || "Request updated successfully!", "📥");
-        loadGlobalDashboardStats();
-    })
-    .catch(() => showAdminPopup("Error", "Network connection lost.", "❌"));
-}
-
-function processWithdrawRequest(requestId, action) {
-    fetch(`${API_BASE_URL}/api/admin/withdraw-action`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId, action })
-    })
-    .then(res => res.json())
-    .then(data => {
-        showAdminPopup("Withdraw Payout Panel", data.message || "Request updated successfully!", "📤");
-        loadGlobalDashboardStats();
-    })
-    .catch(() => showAdminPopup("Error", "Network connection lost.", "❌"));
-}
-
-function processQrImage(slotNumber) {
-    const fileInput = document.getElementById(`qr-input-${slotNumber}`);
-    const previewImg = document.getElementById(`qr-prev-${slotNumber}`);
-    if (!fileInput.files || !fileInput.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        previewImg.src = e.target.result;
-        previewImg.style.display = "block";
-        if (slotNumber === 1) qrBase64_1 = e.target.result;
-        if (slotNumber === 2) qrBase64_2 = e.target.result;
-        if (slotNumber === 3) qrBase64_3 = e.target.result;
-        if (slotNumber === 4) qrBase64_4 = e.target.result;
-    };
-    reader.readAsDataURL(fileInput.files[0]);
-}
-
-function updateAdminGateways() {
-    let payload = {
-        upiId: document.getElementById("admin-upi-id").value,
-        bankDetails: {
-            bankName: document.getElementById("bank-name-field").value,
-            holderName: document.getElementById("bank-holder-field").value,
-            accNumber: document.getElementById("bank-acc-field").value,
-            ifscCode: document.getElementById("bank-ifsc-field").value
-        },
-        qrCodes: [qrBase64_1, qrBase64_2, qrBase64_3, qrBase64_4]
-    };
-    fetch(`${API_BASE_URL}/api/admin/update-gateway`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => showAdminPopup("Gateway System Settings", data.message || "Payment interfaces updated successfully!", "💳"))
-    .catch(() => showAdminPopup("Error", "Failed to write gateway config.", "❌"));
-}
-//    URL ( server.js     )
-const ADMIN_API_URL = "https://color-game-1kc2.onrender.com";
-
-//        
-document.addEventListener("DOMContentLoaded", () => {
-    loadNoticeHistory();
-});
-
-//        
-function publishGameNotice() {
-    const messageInput = document.getElementById("admin-notice-input");
-    const messageText = messageInput.value.trim();
-
-    if (!messageText) {
-        alert("     !");
-        return;
-    }
-
-    //    
-    fetch(`${ADMIN_API_URL}/api/admin/add-notice`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageText })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            alert(": " + data.message);
-            messageInput.value = ""; //   
-            loadNoticeHistory(); //    
-        } else {
-            alert(": " + data.message);
-        }
-    })
-    .catch(err => {
-        console.error("Notice Error:", err);
-        alert("     !");
-    });
-}
-
-//           
-function loadNoticeHistory() {
-    const listContainer = document.getElementById("admin-notice-list");
-    if (!listContainer) return;
-
-    fetch(`${ADMIN_API_URL}/api/user/get-notices`)
-    .then(res => res.json())
-    .then(data => {
-        if (data.success && data.history.length > 0) {
-            listContainer.innerHTML = "";
-            data.history.forEach(item => {
-                let dateObj = new Date(item.createdAt);
-                let dateStr = dateObj.toLocaleDateString();
-                let timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                let itemHtml = `
-                    <div style="background-color: #191919; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #333; text-align: left;">
-                        <p style="font-size: 13px; color: #fff; margin-bottom: 5px; line-height: 1.4;">${item.message}</p>
-                        <div style="font-size: 10px; color: #666; font-weight: bold;"> ${dateStr} |  ${timeStr}</div>
-                    </div>`;
-                listContainer.innerHTML += itemHtml;
-            });
-        } else {
-            listContainer.innerHTML = '<p style="color: #666; text-align: center; font-size: 13px; padding: 10px;">    </p>';
-        }
-    })
-    .catch(err => {
-        console.error("History Load Error:", err);
-        listContainer.innerHTML = '<p style="color: #ff4d4d; text-align: center; font-size: 13px; padding: 10px;">     </p>';
-    });
-}
-// This function pulls complaints and handles modal popup magnification events
-function loadUserComplaintsDatabase() {
-    const tableBody = document.getElementById("admin-complaints-table-body");
-    if (!tableBody) return;
-
-    fetch("https://color-game-1kc2.onrender.com/api/admin/get-complaints")
-    .then(async res => {
-        const responseText = await res.text();
-        
-        try {
-            const data = JSON.parse(responseText);
             
-            if (data.success && data.complaintsList && data.complaintsList.length > 0) {
-                tableBody.innerHTML = ""; 
-                
-                data.complaintsList.forEach(ticket => {
-                    let dateStr = new Date(ticket.createdAt).toLocaleDateString();
-                    let timeStr = new Date(ticket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            <!-- डेटा खाली होने पर दिखने वाला सुंदर मैसेज बॉक्स -->
+            <div id="empty-state-view" class="no-data-alert-box" style="display: none;">
+                🎉 All caught up! No pending deposit requests found.
+            </div>
+        </div>
 
-                    let badgeColor = "#252525";
-                    if(ticket.category === "Deposit Issue") badgeColor = "#ff9933";
-                    if(ticket.category === "Withdraw Issue") badgeColor = "#3399ff";
-                    if(ticket.category === "Password Issue") badgeColor = "#cc33ff";
-                    if(ticket.category === "Technical Issue") badgeColor = "#ff4d4d";
+    </div>
+        <!-- 3. Secure C-Panel Sync Engine JavaScript -->
+    <script>
+        const LIVE_SERVER_URL = "https://color-game-1kc2.onrender.com";
 
-                    // Escape quotes inside text messages to safely pass into function variables safely
-                    let safeMessage = ticket.message.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        document.addEventListener("DOMContentLoaded", function() {
+            // पेज खुलते ही लाइव पेंडिंग रिक्वेस्ट की लिस्ट लोड करना
+            loadPendingDepositsList();
+        });
 
-                    let rowHtml = `
-                        <tr style="border-bottom: 1px solid #222;">
-                            <td style="padding: 12px 10px; font-weight: bold; color: #dbb35e;">${ticket.phone}</td>
-                            <td style="padding: 12px 10px;">
-                                <span style="background-color: ${badgeColor}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
-                                    ${ticket.category}
-                                </span>
-                            </td>
-                            <!-- Added click listener and text wrap adjustments below -->
-                            <td style="padding: 12px 10px; color: #e0e0e0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" title="Click to view full message" onclick="revealComplaintPopup('${ticket.phone}', '${safeMessage}')">
-                                 <span style="text-decoration: underline;">${ticket.message}</span>
-                            </td>
-                            <td style="padding: 12px 10px; color: #777; font-size: 11px; font-weight: bold;"> ${dateStr}<br> ${timeStr}</td>
-                            <td style="padding: 12px 10px;">
-                                <span style="color: #ff9933; font-weight: bold;"> ${ticket.status}</span>
-                            </td>
-                        </tr>`;
-                    tableBody.innerHTML += rowHtml;
+        // १. डेटाबेस से सभी 'PENDING' रीचार्ज रिक्वेस्ट्स खींचकर टेबल में सजाने का फंक्शन
+        function loadPendingDepositsList() {
+            const tableBody = document.getElementById('pending-list-table-body');
+            const emptyView = document.getElementById('empty-state-view');
+            const mainTable = document.getElementById('requests-grid-table');
+
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #9ca3af;">⏳ Loading live database logs...</td></tr>`;
+            emptyView.style.display = "none";
+
+            fetch(`${LIVE_SERVER_URL}/api/admin/deposits/pending`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.success && res.data.length > 0) {
+                        tableBody.innerHTML = ""; // पुराना लोडिंग डेटा साफ करें
+                        
+                        // हर एक पेंडिंग रिक्वेस्ट को लूप चलाकर टेबल में एक सुंदर रो (Row) बनाना
+                        res.data.forEach(order => {
+                            const tableRowHTML = `
+                                <tr>
+                                    <td style="font-weight: 600;">📱 ${order.phone}</td>
+                                    <td><span class="amount-badge-txt">₹${Number(order.amount).toFixed(2)}</span></td>
+                                    <td><span class="utr-highlight-txt">${order.utrNumber}</span></td>
+                                    <td><span class="status-pill-pending">${order.status}</span></td>
+                                    <td>
+                                        <button class="approve-action-btn" onclick="processDepositApproval('${order.utrNumber}', ${order.amount}, '${order.phone}');">
+                                            ✅ Approve Pass
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.insertAdjacentHTML('beforeend', tableRowHTML);
+                        });
+                    } else {
+                        // अगर कोई पेंडिंग रिक्वेस्ट नहीं है तो खाली लुक दिखाएं
+                        tableBody.innerHTML = "";
+                        emptyView.style.display = "block";
+                    }
+                })
+                .catch(err => {
+                    console.error("Database connection error:", err);
+                    tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444;">❌ Failed to connect with Live Render Server!</td></tr>`;
                 });
-            } else {
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #555; padding: 25px;">No active support tickets found inside server database logs.</td></tr>`;
-            }
-        } catch (parseError) {
-            console.error("Text manipulation error log:", parseError);
-            if (responseText.includes("<!DOCTYPE") || responseText.includes("<html")) {
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff9933; padding: 25px; font-weight: bold;">Server Connection Pending: Please deploy your updated server.js file to Render first!</td></tr>`;
-            } else {
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4d4d; padding: 25px;">Data Parse Error: Unable to read server records stream.</td></tr>`;
-            }
         }
-    })
-    .catch(err => {
-        console.error("Pipeline connectivity error log:", err);
-        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff4d4d; padding: 25px;">Failed connection: Unable to fetch live complaints history from server!</td></tr>`;
-    });
-}
-function searchDepositByUTRDirect() {
-    let searchInput = document.getElementById("admin-utr-search-input");
-    if (!searchInput) return;
-    
-    let targetUTR = searchInput.value.trim().toLowerCase();
-    if (!targetUTR) {
-        showAdminPopup("Input Required", "Please enter a UTR number to search!", "");
-        return;
-    }
 
-    let tableBody = document.getElementById("deposit-request-rows");
-    if (!tableBody) return;
+        // २. हरे बटन पर क्लिक करते ही खिलाड़ी का असली बैलेंस बढ़ाने और आर्डर सक्सेसफुल करने का मुख्य फंक्शन
+        function processDepositApproval(utrNum, orderAmt, playerPhone) {
+            // सुरक्षा पुष्टीकरण पॉपअप
+            const isConfirmed = confirm(`Are you sure you want to APPROVE ₹${orderAmt} for player ${playerPhone}?\nUTR: ${utrNum}`);
+            if (!isConfirmed) return;
 
-    let rows = Array.from(tableBody.querySelectorAll("tr"));
-    let matchedRow = null;
+            // बटन को तुरंत डिसएबल करना ताकि डबल क्लिक से दो बार बैलेंस न बढ़े
+            event.target.disabled = true;
+            event.target.innerText = "⏳ Processing...";
 
-    // 1.  UTR       
-    rows.forEach(row => {
-        let tdElements = row.getElementsByTagName("td");
-        if (tdElements && tdElements.length >= 4) {
-            let utrText = tdElements[2].innerText.trim().toLowerCase(); // 3rd   UTR 
-            
-            if (utrText === targetUTR) {
-                matchedRow = row;
-            }
+            // बैकएंड सर्वर की अप्रूवल API को कॉल भेजना
+            fetch(`${LIVE_SERVER_URL}/api/admin/deposit/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ utrNumber: utrNum })
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    alert(`✅ Success! ₹${orderAmt} has been credited to ${playerPhone}.`);
+                    loadPendingDepositsList(); // लिस्ट को तुरंत रीफ्रेश करके साफ़ करें
+                } else {
+                    alert(`❌ Error: ${res.message}`);
+                    loadPendingDepositsList();
+                }
+            })
+            .catch(err => {
+                console.error("Approval Server error:", err);
+                alert("❌ Server Connection Failure! Check render logs.");
+                loadPendingDepositsList();
+            });
         }
-    });
-     // 2.    ,        
-    if (matchedRow) {
-        //       
-        rows.forEach(row => { row.style.backgroundColor = "#161616"; });
-
-        //        (Top Position)
-        tableBody.insertBefore(matchedRow, tableBody.firstChild);
-        
-        //    /          
-        matchedRow.style.backgroundColor = "#2d2615"; 
-        matchedRow.style.border = "2px solid #dbb35e";
-        
-        //          
-        matchedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-        //        
-        showAdminPopup("Not Found", "This UTR number does not exist in pending requests list!", "");
-    }
-}
-
-//         
-async function fetchDailyStatsByDate() {
-    let dateInput = document.getElementById("stats-calendar-input");
-    if (!dateInput) return;
-
-    let selectedDate = dateInput.value;
-    if (!selectedDate) return;
-
-    try {
-        let response = await fetch(`/api/admin/daily-stats?date=${selectedDate}`);
-        let data = await response.json();
-
-        if (data.success) {
-            document.getElementById("daily-box-deposit").innerText = "" + data.totalDeposit.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            document.getElementById("daily-box-withdraw").innerText = "" + data.totalWithdraw.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-        }
-    } catch (err) {
-        console.error("Error fetching daily stats:", err);
-    }
-}
-
-//           
-document.addEventListener("DOMContentLoaded", function() {
-    let dateInput = document.getElementById("stats-calendar-input");
-    if (dateInput) {
-        let today = new Date();
-        let yyyy = today.getFullYear();
-        let mm = String(today.getMonth() + 1).padStart(2, '0');
-        let dd = String(today.getDate()).padStart(2, '0');
-        dateInput.value = `${yyyy}-${mm}-${dd}`;
-        fetchDailyStatsByDate();
-    }
-});   
-
-
-//         ( )
-function revealComplaintPopup(userPhone, fullMessage) {
-    document.getElementById("popup-ticket-user-phone").innerText = "User Phone: " + userPhone;
-    document.getElementById("popup-ticket-full-text").innerText = fullMessage;
-    document.getElementById("complaint-details-popup").style.display = "flex";
-}
-
-//        ( )
-function closeComplaintPopup() {
-    document.getElementById("complaint-details-popup").style.display = "none";
-}
-
-
-</script>
+    </script>
 </body>
 </html>

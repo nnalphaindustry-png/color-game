@@ -960,26 +960,43 @@ app.post('/api/admin/add-notice', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर एरर आ गया!" });
     }
 });
-// 🔔 2. यूज़र्स के लिए सभी नोटिफिकेशन्स खींचने का रास्ता (GET API)
+//    +   API 
 app.get('/api/user/get-notices', async (req, res) => {
     try {
-        // डेटाबेस से सारे मैसेज निकालना (नया मैसेज सबसे ऊपर रहेगा)
-        const notices = await Notice.find().sort({ createdAt: -1 });
+        // 1.        (     )
+        //      Notice  ,     
+        let allNotices = [];
+        try {
+            const Notice = mongoose.model('Notice');
+            allNotices = await Notice.find().sort({ createdAt: -1 }).lean();
+        } catch(e) { allNotices = []; }
 
-        if (notices.length === 0) {
-            return res.json({ success: true, latest: null, history: [] });
+        // 2.         
+        // (         , : ?phone=9999999999)
+        const userPhone = req.query.phone;
+        let userCheatingNotices = [];
+
+        if (userPhone) {
+            const user = await User.findOne({ phone: userPhone }).select('cheatingLogs');
+            if (user && user.cheatingLogs && user.cheatingLogs.length > 0) {
+                userCheatingNotices = user.cheatingLogs.map(log => {
+                    return {
+                        message: ` SECURITY ALERT:\nSystem detected illegal opposite betting (${log.betType}) in Mode: ${log.gameMode.toUpperCase()} | Period: ${log.period}.\nAs per Fair Play Policy, a 12X turnover penalty on ${log.amount} has been added to your account.`,
+                        createdAt: log.createdAt,
+                        isCheaterLog: true //        
+                    };
+                });
+            }
         }
 
-        // सबसे नया मैसेज पॉपअप के लिए और बाकी इतिहास के लिए भेजना
-        res.json({
-            success: true,
-            latest: notices[0], // यह होमपेज पर ऑटोमैटिक पॉपअप खुलेगा
-            history: notices     // यह घंटी दबाने पर पूरी लिस्ट दिखाएगा
-        });
+        // 3.            (Sort) 
+        let combinedHistory = [...userCheatingNotices, ...allNotices];
+        combinedHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    } catch (error) {
-        console.error("Fetch Notice Error:", error);
-        res.status(500).json({ success: false, message: "डेटा लोड नहीं हो पाया!" });
+        res.json({ success: true, history: combinedHistory });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Server error fetching notifications." });
     }
 });
 

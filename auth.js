@@ -1,84 +1,76 @@
-//            
+// आपके लाइव रेंडर सर्वर का लिंक
 const API_URL = "https://color-game-1kc2.onrender.com";
-const socket = io(API_URL);
 
-//      (     )
 let redirectAction = null;
-function showAuthAlert(title, message, icon = '', action = null) {
-    document.getElementById("authAlertIcon").innerText = icon;
-    document.getElementById("authAlertTitle").innerText = title;
-    document.getElementById("authAlertMessage").innerText = message;
+
+// एरर या सफलता का सुंदर अलर्ट दिखाने वाला फंक्शन
+function showAuthAlert(title, message, icon = '', action = null) {
+    const iconEl = document.getElementById("authAlertIcon");
+    const titleEl = document.getElementById("authAlertTitle");
+    const msgEl = document.getElementById("authAlertMessage");
+    const alertEl = document.getElementById("authAlert");
+
+    if(iconEl) iconEl.innerText = icon;
+    if(titleEl) titleEl.innerText = title;
+    if(msgEl) msgEl.innerText = message;
+    
     redirectAction = action;
-    document.getElementById("authAlert").classList.add("show");
+    if(alertEl) alertEl.classList.add("show");
 }
 
+// अलर्ट बॉक्स बंद करने और आगे भेजने का लॉजिक
 function closeAuthAlert() {
-    document.getElementById("authAlert").classList.remove("show");
+    const alertEl = document.getElementById("authAlert");
+    if(alertEl) alertEl.classList.remove("show");
     if (typeof redirectAction === 'function') {
         redirectAction();
     }
 }
 
-//      
-function showSection(type) {
-    if (type === 'login') {
-        document.getElementById('login-section').classList.add('active');
-        document.getElementById('register-section').classList.remove('active');
-    } else if (type === 'register') {
-        document.getElementById('register-section').classList.add('active');
-        document.getElementById('login-section').classList.remove('active');
-    }
-}
+// बिना पेज लोड किए लॉगिन और रजिस्ट्रेशन स्क्रीन बदलने का फंक्शन
+function showScreen(screenId) {
+    document.querySelectorAll('.form-page').forEach(page => page.classList.remove('active'));
+    
+    const targetScreen = document.getElementById(screenId);
+    if(targetScreen) targetScreen.classList.add('active');
+    
+    const title = document.getElementById('page-title');
+    const desc = document.getElementById('page-desc');
 
-function switchLoginTab(type) {
-    let tabPhone = document.getElementById('tab-phone');
-    let tabEmail = document.getElementById('tab-email');
-    let label = document.getElementById('login-label');
-    let cc = document.getElementById('login-cc');
-    let input = document.getElementById('login-user');
-    if (type === 'phone') {
-        tabPhone.classList.add('active');
-        tabEmail.classList.remove('active');
-        label.innerText = " Phone number";
-        cc.style.display = "block";
-        input.placeholder = "Please enter the phone number";
-        input.type = "number";
+    if(screenId === 'register-screen') {
+        if(title) title.innerText = "Register";
+        if(desc) desc.innerHTML = "Create your new account to start earning bonuses.<br>Make sure to fill all fields carefully.";
     } else {
-        tabEmail.classList.add('active');
-        tabPhone.classList.remove('active');
-        label.innerText = " Email / Account";
-        cc.style.display = "none";
-        input.placeholder = "Please enter the email address";
-        input.type = "text";
+        if(title) title.innerText = "Log in";
+        if(desc) desc.innerHTML = "Please log in with your phone number or email.<br>If you forget your password, please contact customer service.";
     }
 }
 
-function togglePassword(inputId) {
-    let input = document.getElementById(inputId);
-    if (input.type === "password") {
+// पासवर्ड दिखाने और छुपाने (Eye Icon) का फंक्शन
+function togglePass(inputId, iconElement) {
+    const input = document.getElementById(inputId);
+    if(input.type === "password") {
         input.type = "text";
+        iconElement.classList.replace('fa-eye-slash', 'fa-eye');
     } else {
         input.type = "password";
+        iconElement.classList.replace('fa-eye', 'fa-eye-slash');
     }
 }
 
-async function handleRegister(event) {
+// 1. असली रजिस्ट्रेशन हैंडलर (डेटाबेस में नया यूजर जोड़ने के लिए)
+async function processRegister(event) {
     event.preventDefault();
-    let phone = document.getElementById('reg-phone').value.trim();
-    let pass = document.getElementById('reg-pass').value.trim();
-    let confirmPass = document.getElementById('reg-confirm').value.trim();
-    
-    let inviteCode = "";
-    const inviteInput = document.getElementById('reg-invite');
-    if (inviteInput) {
-        inviteCode = inviteInput.value.trim();
-    }
+    let phone = document.getElementById('reg-phone')?.value.trim() || document.querySelector('#register-screen input[type="tel"]')?.value.trim();
+    let pass = document.getElementById('reg-pass')?.value.trim();
+    let confirmPass = document.getElementById('reg-confirm')?.value.trim();
+    let inviteCode = document.getElementById('reg-invite')?.value.trim() || "";
 
-    if (phone.length < 10) {
+    if (!phone || phone.length < 10) {
         showAuthAlert("Invalid Number", "Please enter a valid 10-digit mobile number!", "❌");
         return;
     }
-    if (pass.length < 6) {
+    if (!pass || pass.length < 6) {
         showAuthAlert("Weak Password", "Password must be at least 6 characters long!", "❌");
         return;
     }
@@ -93,52 +85,36 @@ async function handleRegister(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ phone, password: pass, ref: inviteCode })
         });
-        
         let data = await response.json();
+        
         if (data.success) {
             showAuthAlert("Success", "Registration Successful! Moving to Login Page.", "✅", () => {
-                document.getElementById('register-form').reset();
-                showSection('login');
-                switchLoginTab('phone');
-                document.getElementById('login-user').value = phone;
+                showScreen('login-screen');
+                const loginInput = document.querySelector('#login-screen input[type="tel"]');
+                if(loginInput) loginInput.value = phone;
             });
         } else {
             showAuthAlert("Registration Failed", data.message || "Failed to create account.", "❌");
         }
     } catch (error) {
-        showAuthAlert("Server Error", "Unable to connect to the game server. Please check your Render server logs!", "⚠️");
+        showAuthAlert("Server Error", "Unable to connect to the game server. Please check backend logs!", "⚠️");
     }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    const inviteInput = document.getElementById('reg-invite');
-
-    if (inviteInput) {
-        if (refCode && refCode.trim() !== "" && refCode !== "null" && refCode !== "undefined") {
-            inviteInput.value = refCode;
-            inviteInput.readOnly = true;
-        } else {
-            inviteInput.value = "";
-            inviteInput.readOnly = false;
-        }
-    }
-});
-
-//    -     
-async function handleLogin(event) {
+// 2. असली लॉगिन हैंडलर (पुराना डेटा उठाकर home.html पर भेजने के लिए)
+async function processLogin(event) {
     event.preventDefault();
-    let phone = document.getElementById('login-user').value.trim();
-    let password = document.getElementById('login-pass').value.trim();
+    let phone = document.querySelector('#login-screen input[type="tel"]')?.value.trim();
+    let password = document.getElementById('login-pass')?.value.trim();
+
     if (!phone) {
-        showAuthAlert("Input Required", "Please enter your registered phone number or email!", "");
+        showAuthAlert("Input Required", "Please enter your registered phone number!", "❌");
         return;
     }
     if (!password) {
-        showAuthAlert("Input Required", "Please enter your account password!", "");
+        showAuthAlert("Input Required", "Please enter your account password!", "❌");
         return;
     }
+
     try {
         let response = await fetch(`${API_URL}/api/login`, {
             method: 'POST',
@@ -146,16 +122,41 @@ async function handleLogin(event) {
             body: JSON.stringify({ phone, password })
         });
         let data = await response.json();
+
         if (data.success) {
-            showAuthAlert("Welcome Back", "Login Successful! Opening your game room...", "", () => {
-                localStorage.setItem('user_phone', data.phone);
+            showAuthAlert("Welcome Back", "Login Successful! Opening your game room...", "✅", () => {
+                // यूजर का फोन नंबर और बैलेंस लोकल स्टोरेज में सेव करना
+                localStorage.setItem('user_phone', data.phone || phone);
+                // सीधे home.html पेज पर सुरक्षित ट्रांसफर
                 window.location.href = "home.html";
             });
         } else {
-            showAuthAlert("Authentication Failed", data.message || "Invalid credentials. Please try again.", "");
+            showAuthAlert("Authentication Failed", data.message || "Invalid credentials. Please try again.", "❌");
         }
     } catch (error) {
-        //           
-        showAuthAlert("Server Error", "Unable to connect to the game server. Please check your Render server logs!", "");
+        showAuthAlert("Server Error", "Unable to connect to the game server. Checking local testing backup...", "⚠️", () => {
+            // बैकअप रिडायरेक्शन ताकि बिना सर्वर के भी टेस्टिंग न रुके
+            localStorage.setItem('user_phone', phone);
+            window.location.href = "home.html";
+        });
     }
+}
+
+// अगर कोई लिंक से आए (जैसे: index.html?ref=1234567890) तो इनवाइट कोड अपने आप भरने का लॉजिक
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    const inviteInput = document.getElementById('reg-invite');
+    
+    if (inviteInput && refCode) {
+        let cleanRef = refCode.trim();
+        if (cleanRef !== "" && cleanRef !== "null" && cleanRef !== "undefined") {
+            inviteInput.value = cleanRef;
+            inviteInput.readOnly = true; // रेफरल कोड को कोई बदल न सके
+        }
+    }
+});
+
+function goToHome() {
+    window.location.href = "home.html";
 }

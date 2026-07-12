@@ -1,469 +1,577 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>N&N Alpha Arena Industry  - Home</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-body { background-color: #222222; color: #ffffff; display: flex; justify-content: center;
-min-height: 100vh; padding-bottom: 90px; } /* नीचे मार्जिन बढ़ाया ताकि बार कंटेंट को न छुपाए */
-.app-container { width: 100%; max-width: 450px; background-color: #191919; display: flex;
-flex-direction: column; overflow-x: hidden; position: relative; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Dashboard</title>
+    <!-- Google Fonts for Clean UI -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    
+    <style>
+        /* डार्क मोड को जबरन रोकने के लिए */
+        :root {
+            color-scheme: light !important;
+        }
 
-/* 1. Top Header Section */
-.header-container { display: flex; justify-content: space-between; align-items: center; padding:
-15px; background-color: #191919; }
-.header-left { display: flex; flex-direction: column; gap: 8px; }
-.logo { font-size: 20px; font-weight: bold; color: #f3c343; letter-spacing: 1px; }
-.welcome-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #f3c343; }
-.flag { width: 22px; height: auto; border-radius: 2px; }
+        html {
+            scroll-behavior: smooth;
+        }
 
-/* Right Side Stacked Buttons */
-.header-right { display: flex; flex-direction: column; gap: 6px; width: 130px; }
-.hd-btn { display: flex; align-items: center; justify-content: center; gap: 5px; background:
-linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 8px 10px;
-border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;
-box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-.hd-btn span { font-size: 14px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-text-fill-color: initial !important; 
+        }
 
-/* 2. Banner Section */
-.banner-container { width: 100%; height: 200px; overflow: hidden; background-color:
-#2b2b2b; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-.banner-slider { display: flex; width: 500%; height: 100%; transition: transform 0.5s
-ease-in-out; }
-.banner-slide { width: 20%; height: 100%; flex-shrink: 0; }
-.banner-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        body {
+            background-color: #f4f6fb !important;
+            background: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
 
-/* 3. Announcement Marquee Bar */
-.marquee-bar { background-color: #252525; padding: 8px 15px; display: flex; align-items:
-center; gap: 10px; font-size: 12px; border-bottom: 1px solid #2b2b2b; }
-.marquee-icon { font-size: 16px; color: #f3c343; }
-marquee { color: #dddddd; flex: 1; font-size: 13px; }
-.detail-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200;
-border: none; padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: bold; cursor:
-pointer; }
+        /* App Wrapper */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            background: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
 
-/* 4. Grid Section Setup */
-.grid-section { padding: 20px 15px; display: flex; flex-direction: column; gap: 20px; }
-.game-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.grid-box { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-.img-container { width: 100%; background-color: #252525; border-radius: 15px; overflow:
-hidden; border: 1px solid #333333; box-shadow: 0 4px 8px rgba(0,0,0,0.3); transition: transform
-0.2s; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
-.grid-box:active .img-container { transform: scale(0.95); }
-.img-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.grid-title { font-size: 13px; font-weight: bold; color: #aaaaaa; text-align: center; }
-.first-row .grid-box:first-child .grid-title { color: #f3c343; } /* Highlight Lottery title */
+        /* Top Navbar - Pure White Background */
+        .navbar {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eef2f5 !important;
+        }
 
-/* लाइट-गोल्डन आड़ा बॉक्स स्टाइल */
-.game-grid-horizontal { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
-.horizontal-card { display: flex; align-items: center; background: linear-gradient(180deg,
-#fcebb8, #e4bf6b); border-radius: 15px; padding: 8px; height: 95px; box-shadow: 0 4px 8px
-rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.2s; position: relative; overflow: visible; }
-.horizontal-card:active { transform: scale(0.96); }
-.card-img-box { width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
-.card-img-box img { width: 105%; height: 105%; object-fit: contain; display: block; position: absolute; bottom: 0; left: -2px; }
-.card-text-box { width: 50%; padding-left: 5px; display: flex; align-items: center; justify-content: flex-start; }
-.card-name { font-size: 16px; font-weight: bold; color: #2c2c2c; letter-spacing: 0.5px; }
+        .nav-left .game-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            font-style: italic;
+            color: #f03e3e !important; 
+            text-transform: uppercase;
+        }
 
-/* 🆕 नए लॉटरी सेक्शन की हेडिंग स्टाइल */
-.section-heading-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #f3c343;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+        .nav-right {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
 
-/* 📱 आपके स्क्रीनशॉट जैसा प्रोफेशनल कर्व्ड बॉटम बार */
-.bottom-navbar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 450px;
-    background-color: #212121; /* डार्क ग्रे/ब्लैक कलर */
-    border-radius: 25px 25px 0 0; /* ऊपर के दोनों कोने गोल (Curved) */
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    padding: 10px 0;
-    z-index: 9999;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
-    height: 70px;
-}
+        .nav-capsule-btn {
+            background: #ff7675 !important;
+            color: #ffffff !important;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 90px;
+            box-shadow: 0 2px 4px rgba(255, 118, 117, 0.2);
+            transition: 0.2s;
+        }
 
-.nav-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #aeaeae;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: bold;
-    cursor: pointer;
-    flex: 1;
-    height: 100%;
-    gap: 4px;
-}
+        .nav-capsule-btn:active {
+            transform: scale(0.95);
+            background: #ee5f5e !important;
+        }
 
-/* एक्टिव बटन (जैसे Home) गोल्डन रंग का दिखेगा */
-.nav-btn.active {
-    color: #f3c343;
-}
+        /* Image Slider (Banner) Style */
+        .slider-container {
+            width: 92%;
+            height: 190px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px; 
+            margin: 12px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+                .slider-wrapper {
+            display: flex;
+            width: 500%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
 
-/* SVG आउटलाइन आइकन्स की स्टाइल */
-.nav-icon-svg {
-    width: 24px;
-    height: 24px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
+        .slide {
+            width: 20%;
+            height: 100%;
+        }
 
-/* 🔥 बीच का स्पेशल स्पिन व्हील ("Get ₹500") बटन */
-.nav-spin-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 1;
-    position: relative;
-    height: 100%;
-    cursor: pointer;
-}
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-/* सुनहरी चमकती व्हील */
-.wheel-outer {
-    width: 65px;
-    height: 65px;
-    background: radial-gradient(circle, #ffe893 20%, #f3c343 60%, #b38313 100%);
-    border-radius: 50%;
-    position: absolute;
-    top: -32px; /* आधा बटन नेविगेशन बार से बाहर निकला रहेगा */
-    border: 3px solid #212121;
-    box-shadow: 0 -4px 10px rgba(243, 195, 67, 0.4), 0 4px 6px rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        /* Slider Dots */
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
 
-/* व्हील की सुनहरी धारियां (Lines) */
-.wheel-outer::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: repeating-conic-gradient(from 0deg, transparent 0deg 30deg, rgba(0,0,0,0.08) 30deg 60deg);
-}
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transition: 0.3s;
+        }
 
-/* बीच का लाल "GO" बटन */
-.go-center-btn {
-    width: 26px;
-    height: 26px;
-    background: linear-gradient(180deg, #ff4d4d, #cc0000);
-    border-radius: 50%;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 9px;
-    font-weight: 900;
-    border: 1.5px solid #ffe893;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-}
+        .dot.active {
+            background-color: #ffffff !important;
+            width: 16px;
+            border-radius: 4px;
+        }
 
-/* व्हील के नीचे लिखा "Get ₹500" */
-.spin-text {
-    font-size: 11px;
-    font-weight: bold;
-    color: #f3c343;
-    margin-bottom: -2px;
-    z-index: 2;
-    white-space: nowrap;
-}
-</style>
+        /* Notification Bar Card Layout */
+        .notification-card {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 20px;
+            width: 92%;
+            margin: 4px auto 12px auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .notification-card i {
+            color: #ff6b6b !important;
+            font-size: 16px;
+        }
+
+        .marquee-container {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marqueeEffect 20s linear infinite;
+            font-size: 13px;
+            color: #444444 !important;
+            font-weight: 500;
+        }
+
+        @keyframes marqueeEffect {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+
+        .btn-detail {
+            background: #ff7675 !important;
+            color: #ffffff !important;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(255, 118, 117, 0.2);
+        }
+
+        /* Main Game Body Wrapper */
+        .game-content {
+            padding: 0 16px 30px 16px;
+            flex: 1;
+            background-color: #f4f6fb !important;
+            background: #f4f6fb !important;
+        }
+
+        /* GAME CATEGORIES GRID STYLES */
+        .category-section {
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .grid-item-small {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .img-box-square {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 18px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+
+        .grid-item-small:active .img-box-square {
+            transform: scale(0.96);
+        }
+
+        .img-box-square img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .category-label {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #444444 !important;
+            text-align: center;
+        }
+
+        .grid-2-col-wide {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .wide-card {
+            background-color: #f7e6c4 !important; 
+            border-radius: 18px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 110px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .wide-card:active {
+            transform: scale(0.97);
+        }
+
+        .wide-card-img {
+            width: 55%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wide-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .wide-card-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #3e2723 !important; 
+            text-align: right;
+            padding-right: 5px;
+            flex: 1;
+        }
+
+        /* LOTTERY SECTION STYLES */
+        .lottery-section-wrapper {
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        .lottery-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffaa00 !important; 
+            margin-bottom: 15px;
+            padding-left: 2px;
+        }
+
+        .lottery-section-title i {
+            color: #ff7675 !important;
+            font-size: 18px;
+        }
+
+        .lottery-grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            row-gap: 18px;
+            column-gap: 12px;
+        }
+
+        .lottery-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lottery-img-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .lottery-item:active .lottery-img-box {
+            transform: scale(0.95);
+        }
+
+        .lottery-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lottery-label {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555555 !important;
+            text-align: center;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
-<div class="app-container">
-<!-- Top Header Layout -->
-<div class="header-container">
-<div class="header-left">
-<div class="logo">Alpha Arena</div>
-<div class="welcome-row">
-<span class="flag"></span>
-<span>Welcome to N&N Alpha Arena Industry</span>
-</div>
-</div>
-<div class="header-right">
-<button class="hd-btn" onclick="alert('Downloading APP...')">
-<span>📥</span> Download APP
-</button>
-<!--       -->
-<button class="hd-btn" onclick="window.location.href='support.html'">
-    <span></span> Customer Service
-</button>
-</div>
-</div>
 
-<!-- Automatic Sliding Banner -->
-<div class="banner-container">
-<div class="banner-slider" id="slider">
-<div class="banner-slide"><img src="banner1.jpg" alt="Banner 1"></div>
-<div class="banner-slide"><img src="banner2.jpg" alt="Banner 2"></div>
-<div class="banner-slide"><img src="banner3.jpg" alt="Banner 3"></div>
-<div class="banner-slide"><img src="banner4.jpg" alt="Banner 4"></div>
-<div class="banner-slide"><img src="banner5.jpg" alt="Banner 5"></div>
-</div>
-</div>
+    <div class="app-container" style="background-color: #f4f6fb !important; background: #f4f6fb !important;">
+        
+        <!-- TOP NAVBAR -->
+        <div class="navbar">
+            <div class="nav-left">
+                <span class="game-name">91 GOA CLUB</span>
+            </div>
+            <div class="nav-right">
+                <button class="nav-capsule-btn" onclick="alert('Starting APK Download...')">Download</button>
+                <button class="nav-capsule-btn" onclick="alert('Opening Customer Support Chat...')">Support</button>
+            </div>
+        </div>
 
-<!-- Announcement Bar -->
-<div class="marquee-bar">
-<span class="marquee-icon">🔊</span>
-<marquee scrollamount="4">please fill in the correct information. the platform operates automatically...</marquee>
-<button class="detail-btn" onclick="alert('Notification Details')">Detail</button>
-</div>
+        <!-- IMAGE SLIDER -->
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-wrapper">
+                <div class="slide"><img src="banner1.jpg" alt="Banner 1"></div>
+                <div class="slide"><img src="banner2.jpg" alt="Banner 2"></div>
+                <div class="slide"><img src="banner3.jpg" alt="Banner 3"></div>
+                <div class="slide"><img src="banner4.jpg" alt="Banner 4"></div>
+                <div class="slide"><img src="banner5.jpg" alt="Banner 5"></div>
+            </div>
+            <div class="slider-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
 
-<!-- Grid Section Setup -->
-<div class="grid-section">
-<!-- ROW 1: gamecategory 1 to 3 -->
-<div class="game-grid-3 first-row">
-<!-- 🔄 यहाँ क्लिक करते ही पेज नीचे स्क्रॉल होगा -->
-<div class="grid-box" onclick="scrollToLottery()">
-<div class="img-container">
-<img src="gamecategory1.png" alt="Lottery">
-</div>
-<div class="grid-title">Lottery</div>
-</div>
-<div class="grid-box" onclick="alert('Coming Soon!')">
-<div class="img-container">
-<img src="gamecategory2.png" alt="Original">
-</div>
-<div class="grid-title">Original</div>
-</div>
-<div class="grid-box" onclick="alert('Coming Soon!')">
-<div class="img-container">
-<img src="gamecategory3.png" alt="Slots">
-</div>
-<div class="grid-title">Slots</div>
-</div>
-</div>
+        <!-- RUNNING TEXT NOTIFICATION BAR -->
+        <div class="notification-card" style="background-color: #ffffff !important; background: #ffffff !important;">
+            <i class="fa-solid fa-volume-high"></i>
+            <div class="marquee-container">
+                <span class="marquee-text">Welcome to the 91 GOA CLUB! Greetings, Gamers and Enthusiasts! Daily withdrawals are processed successfully.</span>
+            </div>
+            <button class="btn-detail" onclick="alert('Opening Announcements Detail...')">Detail</button>
+        </div>
 
-<!-- ROW 2: photo 1 to 3 -->
-<div class="game-grid-3">
-<div class="grid-box" onclick="alert('Coming Soon!')">
-<div class="img-container">
-<img src="photo1.png" alt="Photo 1">
-</div>
-<div class="grid-title">Popular</div>
-</div>
-<div class="grid-box" onclick="alert('Coming Soon!')">
-<div class="img-container">
-<img src="photo2.png" alt="Photo 2">
-</div>
-<div class="grid-title">Casino</div>
-</div>
-<div class="grid-box" onclick="alert('Coming Soon!')">
-<div class="img-container">
-<img src="photo3.png" alt="Photo 3">
-</div>
-<div class="grid-title">Fishing</div>
-</div>
-</div>
-
-        <!-- ROW 3: photo 4 & 5 (आपके ओरिजिनल लाइट-गोल्डन आड़े बॉक्स स्टाइल में) -->
-        <div class="game-grid-horizontal">
-            <!-- Left Card: Rummy -->
-            <div class="horizontal-card" onclick="alert('Coming Soon!')">
-                <div class="card-img-box">
-                    <img src="photo4.png" alt="Rummy">
+        <!-- MAIN GAME CONTENT AREA -->
+        <div class="game-content" style="background-color: #f4f6fb !important; background: #f4f6fb !important;">
+            
+            <!-- GAME CATEGORIES SECTION -->
+            <div class="category-section">
+                
+                <!-- Line 1: Three Small Square Grid Items -->
+                <div class="grid-3-col">
+                    <div class="grid-item-small" onclick="scrollToLottery()">
+                        <div class="img-box-square">
+                            <img src="gamecategory1.png" alt="Lottery">
+                        </div>
+                        <span class="category-label">Lottery</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Original games...')">
+                        <div class="img-box-square">
+                            <img src="gamecategory2.png" alt="Original">
+                        </div>
+                        <span class="category-label">Original</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Slots games...')">
+                        <div class="img-box-square">
+                            <img src="gamecategory3.png" alt="Slots">
+                        </div>
+                        <span class="category-label">Slots</span>
+                    </div>
                 </div>
-                <div class="card-text-box">
-                    <div class="card-name">Rummy</div>
+
+                <!-- Line 2: Three Small Square Grid Items -->
+                <div class="grid-3-col">
+                    <div class="grid-item-small" onclick="alert('Opening Popular games...')">
+                        <div class="img-box-square">
+                            <img src="photo1.png" alt="Popular">
+                        </div>
+                        <span class="category-label">Popular</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Casino games...')">
+                        <div class="img-box-square">
+                            <img src="photo2.png" alt="Casino">
+                        </div>
+                        <span class="category-label">Casino</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Fishing games...')">
+                        <div class="img-box-square">
+                            <img src="photo3.png" alt="Fishing">
+                        </div>
+                        <span class="category-label">Fishing</span>
+                    </div>
                 </div>
-            </div>
-            <!-- Right Card: Fishing -->
-            <div class="horizontal-card" onclick="alert('Coming Soon!')">
-                <div class="card-img-box">
-                    <img src="photo5.png" alt="Fishing">
+
+                <!-- Line 3: Two Big Wide Grid Cards -->
+                <div class="grid-2-col-wide">
+                    <div class="wide-card" onclick="alert('Opening Rummy Room...')">
+                        <div class="wide-card-img">
+                            <img src="photo4.png" alt="Rummy">
+                        </div>
+                        <div class="wide-card-text">Rummy</div>
+                    </div>
+                    <div class="wide-card" onclick="alert('Opening Fishing Arena...')">
+                        <div class="wide-card-img">
+                            <img src="photo5.png" alt="Fishing">
+                        </div>
+                        <div class="wide-card-text">Fishing</div>
+                    </div>
                 </div>
-                <div class="card-text-box">
-                    <div class="card-name">Fishing</div>
+
+            </div> <!-- Category Section Close -->
+                        <!-- NEW LOTTERY TARGET SECTION WITH 8 GAMES (p1.png to p8.png) -->
+            <div class="lottery-section-wrapper" id="lottery-target-section">
+                
+                <!-- Title Row: Slot Icon + Lottery Text -->
+                <div class="lottery-section-title">
+                    <i class="fa-solid fa-dice"></i> Lottery
                 </div>
-            </div>
-        </div>
 
-                <!-- 🎰 नया लॉटरी हेडिंग सेक्शन (जहाँ स्क्रॉल होकर पेज आएगा) -->
-        <div id="lottery-section-target">
-            <div class="section-heading-title">🎰 Lottery</div>
-        </div>
+                <!-- 8 Box Grid Layout -->
+                <div class="lottery-grid-3-col">
+                    
+                    <!-- Box 1 (p1.png) -->
+                    <div class="lottery-item" onclick="alert('Launching Win Go 30s...')">
+                        <div class="lottery-img-box"><img src="p1.png" alt="Win Go 30s"></div>
+                        <span class="lottery-label">Win Go 30s</span>
+                    </div>
 
-        <div class="game-grid-3">
-    <!-- Win Go 30s -->
-    <div class="grid-box" onclick="window.location.href='game.html?mode=30s'">
-        <div class="img-container"><img src="p1.png" alt="Win Go 30s"></div>
-        <div class="grid-title">Win Go 30s</div>
-    </div>
-    
-    <!-- Win Go 1Min -->
-    <div class="grid-box" onclick="window.location.href='game.html?mode=1m'">
-        <div class="img-container"><img src="p2.png" alt="Win Go 1Min"></div>
-        <div class="grid-title">Win Go 1Min</div>
-    </div>
-    
-    <!-- Win Go 3Min -->
-    <div class="grid-box" onclick="window.location.href='game.html?mode=3m'">
-        <div class="img-container"><img src="p3.png" alt="Win Go 3Min"></div>
-        <div class="grid-title">Win Go 3Min</div>
-    </div>
-</div>
+                    <!-- Box 2 (p2.png) -->
+                    <div class="lottery-item" onclick="alert('Launching Win Go 1Min...')">
+                        <div class="lottery-img-box"><img src="p2.png" alt="Win Go 1Min"></div>
+                        <span class="lottery-label">Win Go 1Min</span>
+                    </div>
 
-<!-- रो 2 (Boxes p4-p6) -->
-<div class="game-grid-3">
-    <!-- Win Go 5Min -->
-    <div class="grid-box" onclick="window.location.href='game.html?mode=5m'">
-        <div class="img-container"><img src="p4.png" alt="Win Go 5Min"></div>
-        <div class="grid-title">Win Go 5Min</div>
-    </div>
-    
-            <div class="grid-box" onclick="alert('Coming Soon!')">
-                <div class="img-container"><img src="p5.png" alt="5D 1Min"></div>
-                <div class="grid-title">5D 1Min</div>
-            </div>
-            <div class="grid-box" onclick="alert('Coming Soon!')">
-                <div class="img-container"><img src="p6.png" alt="5D 3Min"></div>
-                <div class="grid-title">5D 3Min</div>
-            </div>
-        </div>
+                    <!-- Box 3 (p3.png) -->
+                    <div class="lottery-item" onclick="alert('Launching Win Go 3Min...')">
+                        <div class="lottery-img-box"><img src="p3.png" alt="Win Go 3Min"></div>
+                        <span class="lottery-label">Win Go 3Min</span>
+                    </div>
 
-        <!-- रो 3 (Boxes p7-p8) -->
-        <div class="game-grid-3">
-            <div class="grid-box" onclick="alert('Coming Soon!')">
-                <div class="img-container"><img src="p7.png" alt="5D 5Min"></div>
-                <div class="grid-title">5D 5Min</div>
-            </div>
-            <div class="grid-box" onclick="alert('Coming Soon!')">
-                <div class="img-container"><img src="p8.png" alt="5D 10Min"></div>
-                <div class="grid-title">5D 10Min</div>
-            </div>
-        </div>
+                    <!-- Box 4 (p4.png) -->
+                    <div class="lottery-item" onclick="alert('Launching Win Go 5Min...')">
+                        <div class="lottery-img-box"><img src="p4.png" alt="Win Go 5Min"></div>
+                        <span class="lottery-label">Win Go 5Min</span>
+                    </div>
 
+                    <!-- Box 5 (p5.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 1Min...')">
+                        <div class="lottery-img-box"><img src="p5.png" alt="5D 1Min"></div>
+                        <span class="lottery-label">5D 1Min</span>
+                    </div>
 
-    <!-- 📱 प्रीमियम बॉटम बार -->
-    <div class="bottom-navbar">
-        <div class="nav-btn active" onclick="location.reload()">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            <span>Home</span>
-        </div>
-        
-        <div class="nav-btn" onclick="alert('Activity Page Coming Soon!')">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            <span>Activity</span>
-        </div>
-        
-        <!--      -->
-<div class="nav-spin-center" onclick="window.location.href='wheel.html'" style="cursor: pointer;">
-    <div class="wheel-outer">
-        <div class="go-center-btn">GO</div>
-    </div>
-    <span class="spin-text">Get Bonus</span>
-</div>
-        
-        <div class="nav-btn" onclick="window.location.href='agency.html'">
-            <svg class="nav-icon-svg" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-            <span>Promotion</span>
-        </div>
-        
-        <div class="nav-btn" onclick="window.location.href='profile.html'">
-    <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
-    <span>Account</span>
-</div>
+                    <!-- Box 6 (p6.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 3Min...')">
+                        <div class="lottery-img-box"><img src="p6.png" alt="5D 3Min"></div>
+                        <span class="lottery-label">5D 3Min</span>
+                    </div>
 
-    </div>
+                    <!-- Box 7 (p7.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 5Min...')">
+                        <div class="lottery-img-box"><img src="p7.png" alt="5D 5Min"></div>
+                        <span class="lottery-label">5D 5Min</span>
+                    </div>
 
-</div> <!-- app-container end -->
-<!--       -->
-<div id="user-alert-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background-color: #252525; width: 100%; max-width: 350px; border-radius: 16px; border: 1px solid #dbb35e; padding: 20px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-        <button onclick="closeUserPopup()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
-        <div style="font-size: 36px; margin-bottom: 10px;"></div>
-        <h3 style="color: #dbb35e; font-size: 18px; margin-bottom: 12px; font-weight: bold;">New Game Update</h3>
-        <p id="user-popup-text-msg" style="color: #e0e0e0; font-size: 13px; line-height: 1.5; margin-bottom: 20px; white-space: pre-wrap; text-align: left;">Loading update text...</p>
-        <button onclick="closeUserPopup()" style="background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 10px 30px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%;">Got It & Play</button>
-    </div>
-</div>
+                    <!-- Box 8 (p8.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 10Min...')">
+                        <div class="lottery-img-box"><img src="p8.png" alt="5D 10Min"></div>
+                        <span class="lottery-label">5D 10Min</span>
+                    </div>
 
-<div id="floating-widget-group" style="position: fixed; bottom: 150px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9000; touch-action: none; cursor: grab;">
-    
-    <!-- 1. Notification Floating Button -->
-    <div onclick="window.location.href='notifications.html'" style="width: 44px; height: 44px; background: linear-gradient(135deg, #2a2515, #191919); border: 1px solid #dbb35e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); position: relative; cursor: pointer;">
-        
-        <!-- Bell Emoji Icon -->
-        <span></span>
-         
-        <!-- Notification Alert Red Dot -->
-        <div id="noti-red-dot" style="display: none; position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; background-color: #ff4d4d; border-radius: 50%; border: 1px solid #fff; z-index: 10;"></div>
-    </div>
+                </div>
+            </div> <!-- Lottery Section Close -->
 
-    <!-- 2. Customer Support Floating Button -->
-    <div onclick="window.location.href='support.html'" style="width: 44px; height: 44px; background: linear-gradient(135deg, #2a2515, #191919); border: 1px solid #dbb35e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer;">
-         
-        <!-- Headphones Support Emoji Icon -->
-        <span></span>
-         
-    </div>
-</div>
+        </div> <!-- Game Content Close -->
 
+    </div> <!-- App Container Close -->
 
+    <script>
+        // Automatic Sliding Image Logic
+        const wrapper = document.getElementById('slider-wrapper');
+        const dots = document.querySelectorAll('.dot');
+        let currentIndex = 0;
+        const totalSlides = 5;
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    let loggedUser = localStorage.getItem('user_phone');
-    if (!loggedUser) {
-        alert("Please login first!");
-        window.location.href = "index.html";
-        return;
-    }
-    startBannerSlider();
-});
-
-function startBannerSlider() {
-    const slider = document.getElementById('slider');
-    if (!slider) return;
-    let currentIndex = 0;
-    const totalBanners = 5;
-    setInterval(() => {
-        currentIndex++;
-        if (currentIndex >= totalBanners) {
-            currentIndex = 0;
+        function slideNext() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            wrapper.style.transform = `translateX(-${currentIndex * 20}%)`;
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[currentIndex].classList.add('active');
         }
-        let offset = currentIndex * -20;
-        slider.style.transform = `translateX(${offset}%)`;
-    }, 3000);
-}
 
-// 🔄 स्मूथ स्क्रॉल करने का फंक्शन
-function scrollToLottery() {
-    const target = document.getElementById('lottery-section-target');
-    if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
+        setInterval(slideNext, 3500);
 
-function openGamePage() {
-    window.location.href = "game.html";
-}
-</script>
+        // Smooth Scroll Functionality for Lottery Box Click
+        function scrollToLottery() {
+            const target = document.getElementById('lottery-target-section');
+            if(target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    </script>
 </body>
 </html>

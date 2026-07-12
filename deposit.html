@@ -392,7 +392,7 @@
 
             // 2. लाइव रेंडर सर्वर डेटाबेस से प्लेयर का बिल्कुल असली बैलेंस खींचना
             function syncLiveWallet() {
-                fetch(`https://onrender.com{userPhone}`)
+                fetch(`https://color-game-1kc2.onrender.com{userPhone}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && balanceDisplay) {

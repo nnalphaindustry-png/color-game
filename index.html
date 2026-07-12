@@ -35,7 +35,7 @@ color: #1a202c !important;
 <h2 id="page-title" style="font-size: 22px; font-weight: 700; margin: 0 0 5px 0; color: #ffffff;">Log in</h2>
 <p id="page-desc" style="font-size: 11px; color: #ffffff; margin: 0; line-height: 1.4; opacity: 0.95;">Please log in with your phone number.<br>If you forget your password, please contact customer service.</p>
 </div>
-<!-- मुख्य सफ़ेद बॉडी क्षेत्र -->
+<!-- मुख्य सफ़ेद BODY क्षेत्र -->
 <div style="padding: 20px; flex: 1; background-color: #ffffff; background: #ffffff;">
 <!-- एरर/सफलता दिखाने वाला अलर्टबॉक्स -->
 <div id="alert-box" style="display: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 15px;"></div>
@@ -44,8 +44,8 @@ color: #1a202c !important;
 <div style="flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 700; color: #ff4757; border-bottom: 2px solid #ff4757;" id="tab-phone">Phone Number</div>
 <div style="flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 600; color: #718096; opacity: 0.5;">Email Login</div>
 </div>
-<!-- मुख्य फॉर्म क्षेत्र -->
-<form id="auth-form" style="background-color: #ffffff;" onsubmit="if(isLoginMode){processLogin(event)}else{processRegister(event)}">
+<!-- मुख्य फॉर्म क्षेत्र (यहाँ processRegister को बदलकर processRegistration कर दिया गया है जो auth.js से मैच करता है) -->
+<form id="auth-form" style="background-color: #ffffff;" onsubmit="if(isLoginMode){processLogin(event)}else{processRegistration(event)}">
 <!-- 1. नाम (सिर्फ रजिस्ट्रेशन के समय खुलेगा) -->
 <div id="name-group" style="display: none; margin-bottom: 12px;">
 <label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Full Name</label>
@@ -53,6 +53,7 @@ color: #1a202c !important;
 <input type="text" id="fullname" placeholder="Please enter full name" autocomplete="off" style="width: 100%; border: none; outline: none; font-size: 14px; color: #2d3748; background: transparent;">
 </div>
 </div>
+
 <!-- 2. मोबाइल नंबर -->
 <div style="margin-bottom: 12px;">
 <label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Phone number</label>

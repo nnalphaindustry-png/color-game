@@ -13,15 +13,25 @@ const io = socketIo(server, {
 });
 
 app.use(express.json());
-app.use(cors());
+// लाइन 16 से 24 की जगह यह पूरा ब्लॉक पेस्ट करें
+const corsOptions = {
+    origin: "*", 
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+    credentials: true
+};
+app.use(cors(corsOptions));
 
-// लोकल फोन प्रिव्यूअर ऐप और डार्क मोड एनवायरनमेंट से डेटा लोड करने के लिए कस्टमाइज्ड हेडर्स
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
     next();
 });
+
 
 app.use(express.static(path.join(__dirname, '')));
 

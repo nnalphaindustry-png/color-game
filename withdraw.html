@@ -41,16 +41,22 @@ input:focus { border-color: #3399ff; }
 <div class="page-title">Withdrawal</div>
 <div style="width:20px;"></div>
 </div>
+<!--      (     ) -->
+<div class="balance-card" style="background: linear-gradient(135deg, #1e1e1e, #252525); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); margin-bottom: 20px;">
+    <div class="bal-lbl" style="font-size: 12px; color: #888; text-transform: uppercase;">Withdrawable Balance</div>
+    <div class="bal-num" id="user-wallet-balance" style="font-size: 24px; font-weight: bold; color: #3399ff; margin-top: 5px; font-family: monospace;">0.00</div>
+</div>
+
 <!--      -->
 <div class="turnover-summary-box" style="background: linear-gradient(135deg, #1e1e1e, #222222); border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); text-align: left;">
-  <h4 style="color: #f3c343; font-size: 13px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;"> Withdrawal Turnover Status</h4>
+  <h4 style="color: #f3c343; font-size: 13px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase;"> Withdrawal Turnover Status</h4>
   <div style="display: flex; justify-content: space-between; font-size: 13px; color: #aaa; margin-bottom: 8px;">
     <span>Remaining Bet Needed:</span>
     <span id="turnover-remaining-display" style="font-weight: bold; color: #ff5252; font-family: monospace;">0.00</span>
   </div>
   <div style="display: flex; justify-content: space-between; font-size: 13px; color: #aaa; align-items: center;">
     <span>Withdrawal Status:</span>
-    <span id="withdraw-status-badge" style="font-weight: bold; padding: 3px 10px; border-radius: 6px; font-size: 11px; letter-spacing: 0.5px;">CHECKING...</span>
+    <span id="withdraw-status-badge" style="font-weight: bold; padding: 3px 10px; border-radius: 6px; font-size: 11px; background-color: #333; color: #fff;">CHECKING...</span>
   </div>
 </div>
 
@@ -95,6 +101,23 @@ input:focus { border-color: #3399ff; }
 <button class="btn-submit" onclick="submitWithdrawal('bank')">Request Withdrawal</button>
 </div>
 </div>
+<!--   -    -->
+<div id="custom-alert-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #1e1e1e; border: 1px solid #333; border-radius: 16px; width: 100%; max-width: 360px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: popScale 0.3s ease-out;">
+    <div style="font-size: 45px; color: #ff5252; margin-bottom: 15px;"></div>
+    <h3 id="custom-alert-title" style="color: #fff; font-size: 18px; margin-bottom: 10px; font-weight: bold;">Alert</h3>
+    <p id="custom-alert-msg" style="color: #aaa; font-size: 13px; line-height: 1.6; margin-bottom: 22px; padding: 0 10px;"></p>
+    <button onclick="closeCustomAlert()" style="background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; width: 100%; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 10px rgba(243, 195, 67, 0.2);">OK, Understood</button>
+  </div>
+</div>
+
+<style>
+@keyframes popScale {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+</style>
+
 <script>
 let currentMethod = "upi";
 let userCurrentBalance = 0;
@@ -116,28 +139,39 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!res.ok) { throw new Error("Invalid Server Response"); }
         return res.json();
     })
-    .then(data => {
-        if(data.success) {
-            userCurrentBalance = parseFloat(data.balance);
-            document.getElementById("user-wallet-balance").innerText = "₹" + userCurrentBalance.toFixed(2);
-                    //          
-        const remainingWager = parseFloat(data.requiredWager) || 0;
-        document.getElementById("turnover-remaining-display").innerText = "" + remainingWager.toFixed(2);
+.then(data => {
+    if(data.success) {
+        console.log("Full Server Response Data:", data);
+        userCurrentBalance = parseFloat(data.balance);
         
+        // 1.       (     )
+        document.getElementById("user-wallet-balance").innerText = "₹" + userCurrentBalance.toFixed(2);
+        
+        // 2.            
+        const remainingWager = parseFloat(data.requiredWager) || 0;
+        const turnoverElem = document.getElementById("turnover-remaining-display");
         const statusBadge = document.getElementById("withdraw-status-badge");
-        if (remainingWager > 0) {
-            statusBadge.innerText = "LOCKED";
-            statusBadge.style.backgroundColor = "rgba(211, 47, 47, 0.2)";
-            statusBadge.style.color = "#ff5252";
-            statusBadge.style.border = "1px solid #d32f2f";
-        } else {
-            statusBadge.innerText = "UNLOCKED";
-            statusBadge.style.backgroundColor = "rgba(42, 164, 83, 0.2)";
-            statusBadge.style.color = "#2aa453";
-            statusBadge.style.border = "1px solid #2aa453";
+        
+        if (turnoverElem) {
+            turnoverElem.innerText = "" + remainingWager.toFixed(2);
         }
+        
+        if (statusBadge) {
+            if (remainingWager > 0) {
+                statusBadge.innerText = "LOCKED";
+                statusBadge.style.backgroundColor = "rgba(211, 47, 47, 0.2)";
+                statusBadge.style.color = "#ff5252";
+                statusBadge.style.border = "1px solid #d32f2f";
+            } else {
+                statusBadge.innerText = "UNLOCKED";
+                statusBadge.style.backgroundColor = "rgba(42, 164, 83, 0.2)";
+                statusBadge.style.color = "#2aa453";
+                statusBadge.style.border = "1px solid #2aa453";
+            }
         }
-    })
+    }
+})
+
     .catch(err => {
         console.log("Balance sync delayed safely.");
     });
@@ -153,12 +187,14 @@ function switchWithdrawMethod(type) {
 
 function submitWithdrawal(type) {
     const amountVal = parseInt(document.getElementById("withdraw-amount").value);
+    
     if (isNaN(amountVal) || amountVal < 100) {
-        alert("Error: Minimum withdrawal limit is ₹100!");
+        showCustomAlert("Error: Minimum withdrawal limit is 100!");
         return;
     }
+    
     if (amountVal > userCurrentBalance) {
-        alert("Error: Insufficient wallet balance!");
+        showCustomAlert("Error: Insufficient wallet balance!");
         return;
     }
     
@@ -166,7 +202,7 @@ function submitWithdrawal(type) {
     if (type === 'upi') {
         const upiId = document.getElementById("user-upi-id").value.trim();
         if (!upiId.includes('@')) {
-            alert("Error: Please enter a valid UPI ID!");
+            showCustomAlert("Error: Please enter a valid UPI ID!");
             return;
         }
         targetDetails = upiId;
@@ -175,14 +211,14 @@ function submitWithdrawal(type) {
         const bAcc = document.getElementById("bank-account").value.trim();
         const bHolder = document.getElementById("bank-holder").value.trim();
         const bIfsc = document.getElementById("bank-ifsc").value.trim();
+        
         if (!bName || !bAcc || !bHolder || bIfsc.length < 11) {
-            alert("Error: Please fill all bank account details correctly!");
+            showCustomAlert("Error: Please fill all bank account details correctly!");
             return;
         }
         targetDetails = `Bank: ${bName} | Acc: ${bAcc} | Holder: ${bHolder} | IFSC: ${bIfsc}`;
     }
     
-    // 🔗 विथड्रॉल सबमिशन को भी सीधे लाइव सर्वर लिंक से कनेक्ट कर दिया गया है
     fetch(`${API_BASE_URL}/api/user/submit-withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -202,27 +238,58 @@ function submitWithdrawal(type) {
             const mainContainer = document.getElementById("withdrawMainContainer");
             mainContainer.innerHTML = `
                 <div class="status-overlay" style="margin-top: 80px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px;">
-                    <div class="status-icon" style="font-size: 55px; color: #3399ff;">⏳</div>
-                    <h2 style="color: #ffffff; font-size: 20px;">Withdrawal Request Submitted</h2>
+                    <div class="status-icon" style="font-size: 55px; color: #3399ff;"></div>
+                    <h2 style="color: #fff; font-size: 20px;">Withdrawal Request Submitted</h2>
                     <p style="color: #aaa; font-size: 14px; padding: 0 20px; line-height: 1.6; margin-top: 5px;">
-                        Your withdrawal request for <strong style="color: #3399ff;">₹${amountVal}</strong> has been sent to review.<br>
+                        Your withdrawal request for <strong style="color: #3399ff;">${amountVal}</strong> has been sent to review.<br>
                         Payout Channel: <strong style="color: #fff;">${type.toUpperCase()} Transfer</strong>
                     </p>
                     <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; font-size: 12px; color: #dbb35e; border: 1px dashed #333; width: 90%; margin-top: 15px; line-height: 1.5; text-align: left;">
-                        📢 <strong>Security Logic:</strong> As per game regulations, this amount has been safely frozen from your active balance. The request will instantly process once approved from the control panel.
+                         <strong>Security Logic:</strong> As per game regulations, this amount has been safely frozen from your active balance. The request will instantly process once approved from the control panel.
                     </div>
                     <button class="btn-submit" style="background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 13px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 85%; margin-top: 25px;" onclick="window.location.href='home.html'">Back to Dashboard</button>
                 </div>
             `;
         } else {
-            alert(data.message || "Withdrawal submission failed!");
+            showCustomAlert(data.message || "Withdrawal submission failed!");
         }
     })
     .catch(err => {
         console.error(err);
-        alert("Connection failure. Unable to submit request to Render server.");
+        showCustomAlert("Connection failure. Unable to submit request to Render server.");
     });
 }
+
+function showCustomAlert(message) {
+    const modal = document.getElementById("custom-alert-modal");
+    const titleElem = document.getElementById("custom-alert-title");
+    const msgElem = document.getElementById("custom-alert-msg");
+    
+    if(modal && msgElem && titleElem) {
+        //         ()  
+        let cleanMessage = message.replace(/[^\x00-\x7F]+/g, "");
+        msgElem.innerText = cleanMessage;
+        
+        //         (Title)   
+        if (cleanMessage.toLowerCase().includes("locked") || cleanMessage.toLowerCase().includes("wager")) {
+            titleElem.innerText = "Withdrawal Locked!";
+            titleElem.style.color = "#ff5252"; //     
+        } else if (cleanMessage.toLowerCase().includes("insufficient") || cleanMessage.toLowerCase().includes("limit")) {
+            titleElem.innerText = "Invalid Request";
+            titleElem.style.color = "#f3c343"; //      
+        } else {
+            titleElem.innerText = "Notification";
+            titleElem.style.color = "#fff";
+        }
+        
+        modal.style.display = "flex";
+    }
+}
+function closeCustomAlert() {
+    const modal = document.getElementById("custom-alert-modal");
+    if(modal) modal.style.display = "none";
+}
+
 </script>
 </body>
 </html>

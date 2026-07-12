@@ -163,6 +163,59 @@ app.post('/api/deposit/submit', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during deposit submission!" });
     }
 });
+// === १. सभी पेंडिंग डिपॉजिट रिक्वेस्ट की लिस्ट देखने का एडमिन रूट ===
+app.get('/api/admin/deposits/pending', async (req, res) => {
+    try {
+        // डेटाबेस से केवल 'PENDING' स्टेटस वाले सभी रीचार्ज ढूँढना
+        const pendingRequests = await Deposit.find({ status: 'PENDING' }).sort({ createdAt: -1 });
+        res.json({ success: true, data: pendingRequests });
+    } catch (err) {
+        console.error("Pending list fetch error:", err);
+        res.status(500).json({ success: false, message: "Server error fetching pending list!" });
+    }
+});
+
+// === २. डिपॉजिट को अप्रूव (PASS) करके खिलाड़ी का बैलेंस बढ़ाने का मुख्य रूट ===
+app.post('/api/admin/deposit/approve', async (req, res) => {
+    try {
+        const { utrNumber } = req.body;
+
+        // १. पहले चेक करें कि यह रीचार्ज रिक्वेस्ट डेटाबेस में है या नहीं
+        const depositRequest = await Deposit.findOne({ utrNumber: utrNumber });
+        if (!depositRequest) {
+            return res.json({ success: false, message: "No deposit request found with this UTR!" });
+        }
+
+        // २. चेक करें कि यह पहले से अप्रूव्ड तो नहीं है (डबल बैलेंस रोकने के लिए सुरक्षा चेक)
+        if (depositRequest.status !== 'PENDING') {
+            return res.json({ success: false, message: `This request is already ${depositRequest.status}!` });
+        }
+
+        // ३. मुख्य काम: खिलाड़ी के अकाउंट को ढूंढकर उसका लाइव बैलेंस बढ़ाना
+        const user = await User.findOne({ phone: depositRequest.phone });
+        if (!user) {
+            return res.json({ success: false, message: "The user who requested this deposit no longer exists!" });
+        }
+
+        // प्लेयर के पुराने बैलेंस में नया अमाउंट जोड़ना
+        user.balance = Number(user.balance) + Number(depositRequest.amount);
+        await user.save();
+
+        // 8. डिपॉजिट रिक्वेस्ट का स्टेटस पेंडिंग से बदलकर SUCCESS करना
+        depositRequest.status = 'SUCCESS';
+        await depositRequest.save();
+
+        res.json({ 
+            success: true, 
+            message: `Deposit of ₹${depositRequest.amount} approved! User balance updated successfully.`,
+            newBalance: user.balance
+        });
+
+    } catch (err) {
+        console.error("Deposit approval error:", err);
+        res.status(500).json({ success: false, message: "Server error during approval processing!" });
+    }
+});
 
 // फाइलों के डायरेक्ट राउट्स
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

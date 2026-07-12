@@ -41,10 +41,19 @@ input:focus { border-color: #3399ff; }
 <div class="page-title">Withdrawal</div>
 <div style="width:20px;"></div>
 </div>
-<div class="balance-card">
-<div class="bal-lbl">Withdrawable Balance</div>
-<div class="bal-num" id="user-wallet-balance">0.00</div>
+<!--      -->
+<div class="turnover-summary-box" style="background: linear-gradient(135deg, #1e1e1e, #222222); border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); text-align: left;">
+  <h4 style="color: #f3c343; font-size: 13px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;"> Withdrawal Turnover Status</h4>
+  <div style="display: flex; justify-content: space-between; font-size: 13px; color: #aaa; margin-bottom: 8px;">
+    <span>Remaining Bet Needed:</span>
+    <span id="turnover-remaining-display" style="font-weight: bold; color: #ff5252; font-family: monospace;">0.00</span>
+  </div>
+  <div style="display: flex; justify-content: space-between; font-size: 13px; color: #aaa; align-items: center;">
+    <span>Withdrawal Status:</span>
+    <span id="withdraw-status-badge" style="font-weight: bold; padding: 3px 10px; border-radius: 6px; font-size: 11px; letter-spacing: 0.5px;">CHECKING...</span>
+  </div>
 </div>
+
 <div class="amount-view-box">
 <div class="form-group">
 <label>Enter Withdrawal Amount (Min 100):</label>
@@ -111,6 +120,22 @@ document.addEventListener("DOMContentLoaded", () => {
         if(data.success) {
             userCurrentBalance = parseFloat(data.balance);
             document.getElementById("user-wallet-balance").innerText = "₹" + userCurrentBalance.toFixed(2);
+                    //          
+        const remainingWager = parseFloat(data.requiredWager) || 0;
+        document.getElementById("turnover-remaining-display").innerText = "" + remainingWager.toFixed(2);
+        
+        const statusBadge = document.getElementById("withdraw-status-badge");
+        if (remainingWager > 0) {
+            statusBadge.innerText = "LOCKED";
+            statusBadge.style.backgroundColor = "rgba(211, 47, 47, 0.2)";
+            statusBadge.style.color = "#ff5252";
+            statusBadge.style.border = "1px solid #d32f2f";
+        } else {
+            statusBadge.innerText = "UNLOCKED";
+            statusBadge.style.backgroundColor = "rgba(42, 164, 83, 0.2)";
+            statusBadge.style.color = "#2aa453";
+            statusBadge.style.border = "1px solid #2aa453";
+        }
         }
     })
     .catch(err => {

@@ -586,6 +586,66 @@ io.on('connection', (socket) => {
       phone, period: currentPeriod, mode, selectValue, amount: betAmount, socketId: socket.id
     });
     await newBet.save();
+            // =========================================================================
+        //     (CHEATING)   (12X PENALTY)
+        // =========================================================================
+        try {
+            // 1.            
+            const userOldBets = await Bet.find({ phone: phone, period: currentPeriod, mode: mode });
+
+            if (userOldBets && userOldBets.length > 1) {
+                let isOppositeBet = false;
+                let cheatingGroupType = "";
+
+                //            
+                for (let i = 0; i < userOldBets.length; i++) {
+                    for (let j = i + 1; j < userOldBets.length; j++) {
+                        const b1 = userOldBets[i].selectValue;
+                        const b2 = userOldBets[j].selectValue;
+
+                        // )    (Big + Small)
+                        if ((b1 === 'big' && b2 === 'small') || (b1 === 'small' && b2 === 'big')) {
+                            isOppositeBet = true;
+                            cheatingGroupType = "BIG + SMALL";
+                            break;
+                        }
+                        // )    (Red + Green)
+                        if ((b1 === 'red' && b2 === 'green') || (b1 === 'green' && b2 === 'red')) {
+                            isOppositeBet = true;
+                            cheatingGroupType = "RED + GREEN";
+                            break;
+                        }
+                    }
+                    if (isOppositeBet) break;
+                }
+
+                // 2.     12      
+                if (isOppositeBet) {
+                    user.isCheater = true;
+                    
+                    //       12   
+                    const penaltyAmount = betAmount * 12;
+                    user.requiredWager += penaltyAmount;
+                    
+                    //           
+                    if (!user.cheatingLogs) user.cheatingLogs = [];
+                    user.cheatingLogs.push({
+                        period: currentPeriod,
+                        gameMode: mode,
+                        betType: cheatingGroupType,
+                        amount: betAmount
+                    });
+
+                    //           
+                    await user.save();
+                    console.log(` CHEATER CAUGHT! User ${phone} penalized with ${penaltyAmount} in Period ${currentPeriod}`);
+                }
+            }
+        } catch (cheatErr) {
+            console.error("Cheating detection background error:", cheatErr);
+        }
+        // =========================================================================
+        
 
     socket.emit('bet_response', { success: true, message: "Bet placed successfully!", newBalance: user.balance });
   } catch (err) {

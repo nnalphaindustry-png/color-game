@@ -127,7 +127,12 @@ const NoticeSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now // सर्वर अपने आप लाइव टाइम नोट करेगा
+    },
+        target: {
+        type: String,
+        default: "all"
     }
+    
 });
 
 // मॉडल को एक्सपोर्ट करना
@@ -937,68 +942,68 @@ app.post('/api/agency/transfer-to-main', async (req, res) => {
   }
 });
 
-// 📝 1. एडमिन पैनल से नया मैसेज भेजने का रास्ता (POST API)
 app.post('/api/admin/add-notice', async (req, res) => {
     try {
-        const { message, imageUrl } = req.body;
-        
+        //    ,    (all   )   
+        const { message, imageUrl, target } = req.body;
+
         if (!message) {
-            return res.status(400).json({ success: false, message: "मैसेज लिखना जरूरी है!" });
+            return res.status(400).json({ success: false, message: "    !" });
         }
 
-        // नया नोटिस डेटाबेस में सुरक्षित करना
+        //      target    
         const newNotice = new Notice({
             message,
-            imageUrl: imageUrl || null
+            imageUrl: imageUrl || null,
+            target: target || "all" //       'all' 
         });
 
         await newNotice.save();
-        res.json({ success: true, message: "नया अलर्ट गेम में लाइव हो गया है!" });
+        res.json({ success: true, message: "Notice added successfully!" });
 
     } catch (error) {
         console.error("Notice Error:", error);
-        res.status(500).json({ success: false, message: "सर्वर एरर आ गया!" });
+        res.status(500).json({ success: false, message: "Server error posting notice." });
     }
 });
-//    +   API 
+
 app.get('/api/user/get-notices', async (req, res) => {
     try {
-        // 1.        (     )
-        //      Notice  ,     
-        let allNotices = [];
-        try {
-            const Notice = mongoose.model('Notice');
-            allNotices = await Notice.find().sort({ createdAt: -1 }).lean();
-        } catch(e) { allNotices = []; }
+        const userPhone = req.query.phone; //       
+        
+        //   1:        'all'           
+        let findQuery = { target: "all" };
+        if (userPhone && userPhone !== "null" && userPhone !== "") {
+            findQuery = { $or: [{ target: "all" }, { target: userPhone }] };
+        }
 
-        // 2.         
-        // (         , : ?phone=9999999999)
-        const userPhone = req.query.phone;
+        const dbNotices = await Notice.find(findQuery).sort({ createdAt: -1 }).lean();
+        
+        //   2:         (     )
         let userCheatingNotices = [];
-
-        if (userPhone) {
+        if (userPhone && userPhone !== "null" && userPhone !== "") {
             const user = await User.findOne({ phone: userPhone }).select('cheatingLogs');
             if (user && user.cheatingLogs && user.cheatingLogs.length > 0) {
-                userCheatingNotices = user.cheatingLogs.map(log => {
-                    return {
-                        message: ` SECURITY ALERT:\nSystem detected illegal opposite betting (${log.betType}) in Mode: ${log.gameMode.toUpperCase()} | Period: ${log.period}.\nAs per Fair Play Policy, a 12X turnover penalty on ${log.amount} has been added to your account.`,
-                        createdAt: log.createdAt,
-                        isCheaterLog: true //        
-                    };
-                });
+                userCheatingNotices = user.cheatingLogs.map(log => ({
+                    message: ` SECURITY ALERT:\nSystem detected illegal opposite betting (${log.betType}) in Mode: ${log.gameMode.toUpperCase()} | Period: ${log.period}.\nA 12X turnover penalty on ${log.amount} has been added.`,
+                    createdAt: log.createdAt,
+                    target: userPhone,
+                    isCheaterLog: true
+                }));
             }
         }
 
-        // 3.            (Sort) 
-        let combinedHistory = [...userCheatingNotices, ...allNotices];
+        //   3:               
+        let combinedHistory = [...userCheatingNotices, ...dbNotices];
         combinedHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         res.json({ success: true, history: combinedHistory });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: "Server error fetching notifications." });
+        console.error("Fetch notices error:", err);
+        res.status(500).json({ success: false, message: "Error fetching filtered notices." });
     }
 });
+
 
 // 📥 1. API Route for Users to Submit a New Complaint Ticket (POST API)
 app.post('/api/user/submit-complaint', async (req, res) => {

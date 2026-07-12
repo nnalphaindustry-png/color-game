@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   balance: { type: Number, default: 0 },
+  requiredWager: { type: Number, default: 0 }, 
   createdAt: { type: Date, default: Date.now },
   isFirstDepositDone: { type: Boolean, default: false },
   
@@ -174,7 +175,8 @@ app.get('/api/balance/:phone', async (req, res) => {
     try {
         const user = await User.findOne({ phone: req.params.phone });
         if (!user) return res.json({ success: false, message: "User not found!" });
-        res.json({ success: true, balance: user.balance });
+        res.json({ success: true, balance: user.balance, requiredWager: user.requiredWager || 0 });
+          
     } catch (err) {
         res.status(500).json({ success: false, message: "Server error!" });
     }
@@ -329,7 +331,13 @@ app.post('/api/user/submit-withdraw', async (req, res) => {
         if (isNaN(withdrawAmount) || withdrawAmount < 100) return res.json({ success: false, message: "Minimum withdrawal limit is 100!" });
         const user = await User.findOne({ phone });
         if (!user || user.balance < withdrawAmount) return res.json({ success: false, message: "Insufficient wallet balance!" });
-        
+        if (user.requiredWager > 0) {
+    return res.json({ 
+        success: false, 
+        message: `Withdrawal Locked! You must place bets worth ${user.requiredWager.toFixed(2)} more before withdrawing.` 
+    });
+}
+
         user.balance -= withdrawAmount;
         await user.save();
         const newWithdraw = new Withdraw({ phone, amount: withdrawAmount, method, details, status: 'PENDING' });
@@ -568,6 +576,9 @@ io.on('connection', (socket) => {
 
     // अगर सब सही है तो बैलेंस काटें और गेम लगाने दें
     user.balance -= betAmount;
+    if (user.requiredWager > 0) {
+    user.requiredWager = Math.max(0, user.requiredWager - betAmount);
+}
     await user.save();
 
     const currentPeriod = gameStates[mode].period;
@@ -677,7 +688,7 @@ try {
         await dep.save();
         await User.updateOne({ phone: dep.phone }, { $set: { isFirstDepositDone: true } });
         //    
-        await User.updateOne({ phone: dep.phone }, { $inc: { balance: dep.amount } });
+        await User.updateOne({ phone: dep.phone }, { $inc: { balance: dep.amount, requiredWager: dep.amount } });
 
         // === [     ] ===
         const allowedAmounts = [300, 500, 1000, 5000, 10000];

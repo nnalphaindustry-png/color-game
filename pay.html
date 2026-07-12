@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 GOA CLUB - Secure Payment</title>
+    <!-- Premium Gaming Font -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f4f6fb;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        .gateway-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background: #ffffff;
+            padding: 20px 16px;
+            position: relative;
+        }
+
+        /* 1. Header Row styling */
+        .gateway-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        /* 2. Amount Display Box styling */
+        .order-summary-card {
+            background: linear-gradient(135deg, #1a1a1a, #333333);
+            border-radius: 20px;
+            padding: 24px;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .summary-label {
+            font-size: 13px;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-top: 6px;
+            color: #ff4d4d;
+        }
+
+        /* 3. Automatic Apps Trigger Block */
+        .apps-redirect-box {
+            background: #f8f9fa;
+            border: 1px dashed #ced4da;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .loading-pulse {
+            width: 12px;
+            height: 12px;
+            background-color: #f03e3e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite ease-in-out;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.5; }
+        }
+
+        .redirect-txt {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .manual-pay-btn {
+            background: #212529;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        /* 4. UTR submission block styling */
+        .utr-submission-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            padding: 20px 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .card-heading {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .utr-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f1f3f5;
+            border-radius: 12px;
+            padding: 0 16px;
+            height: 52px;
+            margin-bottom: 16px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .utr-input-wrapper:focus-within {
+            border-color: #f03e3e;
+            background: #fff;
+        }
+
+        .real-utr-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+            letter-spacing: 1px;
+        }
+
+        .submit-payment-btn {
+            width: 100%;
+            height: 48px;
+            background: linear-gradient(135deg, #ff4e50, #f03e3e);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(240, 62, 62, 0.25);
+        }
+
+        /* 5. Custom Error Modal styling */
+        .custom-popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .custom-popup-box {
+            background: #ffffff;
+            width: 85%; max-width: 340px;
+            padding: 28px 24px; border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body>
+    <div class="gateway-container">
+        
+        <!-- 1. Header navigation title -->
+        <header class="gateway-header">
+            <h1 class="header-title">UPG Gateway</h1>
+            <div style="font-size: 12px; color: #888; font-weight: 500;">Secure 256-bit</div>
+        </header>
+
+        <!-- 2. Dynamic Order Amount Display Card -->
+        <div class="order-summary-card">
+            <span class="summary-label">ORDER AMOUNT</span>
+            <div class="summary-amount" id="order-amount-display">₹0.00</div>
+            <div style="font-size: 11px; opacity: 0.6; margin-top: 4px;" id="order-id-display">Order ID: GOA-Loading...</div>
+        </div>
+
+                <!-- 3. Dynamic Click-to-Pay Activation Button Card -->
+        <div class="apps-redirect-box" style="background: #fff5f5; border: 1px solid #ffe3e3; border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 24px;">
+            <p style="font-size: 13px; color: #495057; font-weight: 500; margin-bottom: 14px;">Click the button below to pay securely via UPI apps</p>
+            
+            <!-- इस "Pay Now" बटन के पीछे आपका जादुई लिंक छुपा रहेगा -->
+            <button class="action-submit-recharge-btn" id="gateway-pay-trigger-btn" onclick="activatePermanentUPILink();" style="width: 100%; height: 50px; background: linear-gradient(135deg, #ff4e50, #f03e3e); color: #fff; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(240, 62, 62, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <span>Pay Now</span>
+            </button>
+            
+            <p style="font-size: 11px; color: #888; margin-top: 12px;">Supported: Slice, PhonePe, Paytm, Google Pay & FamPay</p>
+        </div>
+        
+        <!-- 4. 12-Digit UTR Submission Panel Form -->
+        <div class="utr-submission-card">
+            <div class="card-heading">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Input 12-Digit UTR Number</span>
+            </div>
+            <p style="font-size: 12px; color: #666; margin-bottom: 12px; line-height: 1.4;">After completing payment inside the app, copy the 12-digit UTR/Ref No. and paste it below to claim your money.</p>
+            
+            <div class="utr-input-wrapper">
+                <input type="number" id="user-utr-input" class="real-utr-input" placeholder="Enter 12-digit UTR here" oninput="if(this.value.length > 12) this.value = this.value.slice(0,12);">
+            </div>
+
+            <button class="submit-payment-btn" onclick="submitUTRToDatabase();">Submit Payment</button>
+        </div>
+    </div>
+
+    <!-- 5. Premium Custom Modal Popup (For Error/Success alerts without ugly boxes) -->
+    <div id="gateway-alert-modal" class="custom-popup-overlay">
+        <div class="custom-popup-box">
+            <div id="popup-icon-wrap" style="width: 65px; height: 65px; background: #fff0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;">
+                <!-- SVG Icon replaces dynamically inside Script -->
+            </div>
+            <h3 id="popup-title-txt" style="margin: 0 0 10px; font-size: 19px; color: #212529; font-weight: 600;">Alert</h3>
+            <p id="popup-body-txt" style="margin: 0 0 24px; font-size: 14px; color: #6c757d; line-height: 1.5; font-weight: 400;">Message body here.</p>
+            <button id="popup-action-btn" style="width: 100%; height: 44px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 22px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;">OK</button>
+        </div>
+    </div>
+                <!-- 6. Secure Gateway Logic Engine JavaScript -->
+    <script>
+        // आपकी स्लाइस यूपीआई आईडी कॉन्फ़िगरेशन
+        const MY_SLICE_UPI = "9992788757@slc";
+        const MERCHANT_NAME = "91GOACLUB";
+
+        let selectedAmount = 0;
+        let generatedOrderId = "";
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. URL से अमाउंट वैल्यू रीड करना
+            const urlParams = new URLSearchParams(window.location.search);
+            selectedAmount = urlParams.get('amount');
+
+            // अगर अमाउंट गलत है तो वापस भेजें
+            if (!selectedAmount || selectedAmount < 100) {
+                alert("Invalid Order Amount! Minimum is ₹100.");
+                window.location.href = "deposit.html";
+                return;
+            }
+
+            // स्क्रीन पर ऑर्डर का अमाउंट सजाना
+            document.getElementById('order-amount-display').innerText = "₹" + Number(selectedAmount).toFixed(2);
+            
+            // रैंडम ऑर्डर आईडी जनरेट करना
+            generatedOrderId = "GOA" + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('order-id-display').innerText = "Order ID: " + generatedOrderId;
+        });
+
+        // 2. जब यूजर लाल "Pay Now" बटन पर क्लिक करेगा, तब यह लिंक तुरंत एक्टिवेट होगा
+        function activatePermanentUPILink() {
+            if (!selectedAmount || selectedAmount < 100) {
+                alert("Invalid amount detected.");
+                return;
+            }
+
+            // हमेशा काम करने वाला परमानेंट यूपीआई इंटेंट लिंक तैयार हुआ
+            const permanentUpiLink = `upi://pay?pa=${MY_SLICE_UPI}&pn=${MERCHANT_NAME}&am=${selectedAmount}&cu=INR`;
+            
+            console.log("Activating Intent Link: ", permanentUpiLink);
+            
+            // यह लाइन यूजर को सीधे स्लाइस/फोनपे/गूगल पे ऐप्स के पॉपअप पर फेंक देगी
+            window.location.href = permanentUpiLink;
+        }
+
+        // 3. UTR नंबर को सर्वर और सी-पैनल पर भेजने का फंक्शन
+        function submitUTRToDatabase() {
+            const utrValue = document.getElementById('user-utr-input').value;
+            const userPhone = localStorage.getItem('user_phone'); // लॉगिन प्लेयर का मोबाइल नंबर
+
+            if (!userPhone) {
+                alert("Your session expired! Please login again.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            if (!utrValue || utrValue.length !== 12) {
+                alert("Please enter a valid 12-digit UTR Number!");
+                return;
+            }
+
+            // लाइव रेंडर बैकएंड सर्वर की एपीआई को यूटीआर डेटा सेंड करना
+            fetch('https://onrender.com', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: userPhone,
+                    amount: Number(selectedAmount),
+                    utrNumber: utrValue
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Deposit Request Submitted! Your money is safe. Admin will approve it shortly.");
+                    window.location.href = "profile.html"; // रिक्वेस्ट जाते ही प्रोफाइल पर वापसी
+                } else {
+                    alert(data.message); // अगर यूटीआर डुप्लिकेट होगा तो एरर शो करेगा
+                }
+            })
+            .catch(err => {
+                console.error("Server connection error:", err);
+                alert("Connection failed! If balance doesn't update, contact support with UTR: " + utrValue);
+            });
+        }
+    </script>
+    
+    </body>
+</html>

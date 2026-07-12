@@ -1,271 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>N&N Alpha Arena Industry - Deposit Module</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-body { background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 40px; }
-.app-container { width: 100%; max-width: 450px; background-color: #191919; display: flex; flex-direction: column; overflow-x: hidden; position: relative; padding: 15px; }
-.header-container { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2d2d2d; margin-bottom: 15px; }
-.back-btn { background: none; border: none; color: #f3c343; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; }
-.page-title { font-size: 18px; font-weight: bold; color: #ffffff; flex: 1; text-align: center; margin-right: 30px; }
-.balance-card { background: linear-gradient(135deg, #1e1e1e, #252525); border: 1px solid #333; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.4); margin-bottom: 20px; }
-.bal-lbl { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-.bal-num { font-size: 24px; font-weight: bold; color: #f3c343; margin-top: 5px; font-family: monospace; }
-.section-title { font-size: 14px; color: #dbb35e; font-weight: bold; margin-bottom: 12px; border-left: 3px solid #dbb35e; padding-left: 8px; }
-.input-box-wrapper { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-input { background-color: #121212; color: #fff; border: 1px solid #333; padding: 12px; border-radius: 8px; font-size: 15px; outline: none; width: 100%; transition: border-color 0.2s; }
-input:focus { border-color: #f3c343; }
-.chips-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
-.chip { background-color: #121212; border: 1px solid #333; color: #ddd; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; cursor: pointer; font-weight: 600; }
-.chip:active { background-color: #2a2a2a; }
-.method-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-.method-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 10px; padding: 12px 5px; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: bold; color: #aaa; }
-.method-box.active-method { background: linear-gradient(180deg, #fcebb8, #e4bf6b); color: #4a3200; border-color: #f3c343; box-shadow: 0 2px 8px rgba(243, 195, 67, 0.2); }
-.payment-inner-box { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 12px; padding: 15px; display: none; flex-direction: column; gap: 12px; }
-.payment-inner-box.show-box { display: flex; }
-.info-display-box { background-color: #121212; border: 1px solid #2d2d2d; border-radius: 8px; padding: 12px; font-size: 14px; color: #ddd; display: flex; flex-direction: column; gap: 4px; position: relative; text-align: left; }
-.copy-btn { position: absolute; right: 10px; top: 12px; background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
-.qr-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; margin: 5px 0; }
-.qr-img { width: 165px; height: 165px; border: 2px solid #dbb35e; padding: 5px; background: white; border-radius: 8px; }
-.selected-amt-alert { font-size: 15px; color: #f3c343; font-weight: bold; text-align: center; margin: 5px 0; background: rgba(243,195,67,0.1); padding: 8px; border-radius: 6px; }
-.btn-submit { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 14px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; box-shadow: 0 3px 6px rgba(0,0,0,0.3); }
-.btn-submit:active { transform: scale(0.98); }
-.custom-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px); }
-.custom-alert-box { width: 85%; max-width: 330px; background-color: #252525; border-radius: 16px; border: 1px solid #444; padding: 25px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); transform: scale(0.8); transition: transform 0.2s ease; }
-.custom-alert-overlay.show { display: flex; }
-.custom-alert-overlay.show .custom-alert-box { transform: scale(1); }
-.custom-alert-icon { font-size: 36px; margin-bottom: 12px; }
-.custom-alert-title { font-size: 18px; font-weight: bold; color: #f3c343; margin-bottom: 8px; }
-.custom-alert-msg { font-size: 14px; color: #e0e0e0; line-height: 1.4; margin-bottom: 22px; }
-.custom-alert-btn { background: linear-gradient(180deg, #fbe29a, #cda24d); color: #4a3200; border: none; padding: 11px 40px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 GOA CLUB - Deposit</title>
+    <!-- Premium Google Font -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-shadow: none;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f4f6fb;
+            color: #333;
+            display: flex;
+            justify-content: center;
+        }
+
+        .deposit-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background: #f7f9fc;
+            padding-bottom: 100px;
+            position: relative;
+        }
+
+        /* 1. Header Area styling */
+        .deposit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-arrow-btn {
+            font-size: 22px;
+            cursor: pointer;
+            color: #333;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .header-title-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .history-link-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            text-decoration: none;
+        }
+
+        /* 2. Balance Card Styling */
+        .wallet-balance-card {
+            margin: 16px;
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #ff4e50, #f03e3e);
+            border-radius: 20px;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(240, 62, 62, 0.25);
+        }
+
+        .wallet-label-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .balance-amount-display {
+            font-size: 32px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* 3. Payment Grid Styling */
+        .payment-methods-section {
+            padding: 0 16px;
+            margin-bottom: 20px;
+        }
+
+        .methods-grid-box {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .method-item-chip {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
+        }
+
+        .method-item-chip.active {
+            border-color: #f03e3e;
+            background: #fff5f5;
+        }
+
+        .method-icon-wrap {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .method-label-txt {
+            font-size: 11px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        /* 4. Chips Selection Styling */
+        .amount-selection-panel {
+            background: #fff;
+            margin: 16px;
+            padding: 20px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .panel-heading-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 16px;
+        }
+
+        .amount-chips-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quick-amount-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 4px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        .quick-amount-box.selected {
+            background: #fff5f5;
+            border-color: #f03e3e;
+            color: #f03e3e;
+        }
+
+        .custom-input-box-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f1f3f5;
+            border-radius: 12px;
+            padding: 0 16px;
+            height: 50px;
+        }
+
+        .currency-symbol-txt {
+            color: #f03e3e;
+            font-weight: 600;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+
+        .real-amount-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* 5. Instructions Styling */
+        .recharge-rules-panel {
+            background: #fff;
+            margin: 16px;
+            padding: 20px 16px;
+            border-radius: 20px;
+        }
+
+        .single-rule-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .rule-bullet-point {
+            color: #f03e3e;
+        }
+
+        /* 6. Sticky Footer Buttons styling */
+        .bottom-action-deposit-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 999;
+        }
+
+        .action-submit-recharge-btn {
+            background: linear-gradient(135deg, #ff4e50, #f03e3e);
+            color: #fff;
+            border: none;
+            padding: 0 32px;
+            height: 46px;
+            border-radius: 23px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-<div class="app-container" id="depositMainContainer">
-<div id="screen-amount-select" style="display: flex; flex-direction: column; width: 100%;">
-<div class="header-container">
-<button class="back-btn" onclick="window.location.href='home.html'"></button>
-<div class="page-title">Deposit Funds</div>
-</div>
-<div class="balance-card">
-<div class="bal-lbl">Available Balance</div>
-<div class="bal-num" id="user-wallet-balance">0.00</div>
-</div>
-<div class="section-title">Enter Deposit Amount</div>
-<div class="input-box-wrapper">
-<input type="number" id="main-amount-input" placeholder="Enter amount (Min 100)" min="100">
-<div class="chips-row">
-<div class="chip" onclick="setQuickAmount(100)">100</div>
-<div class="chip" onclick="setQuickAmount(500)">500</div>
-<div class="chip" onclick="setQuickAmount(1000)">1000</div>
-</div>
-</div>
-<button class="btn-submit" style="margin-top: 15px;" onclick="goToPaymentScreen()">Next (Proceed)</button>
+    <div class="deposit-container">
+        
+        <!-- 1. Top Navigation Bar -->
+                <header class="deposit-header" style="position: relative; z-index: 999999;">
+            <div class="back-arrow-btn" 
+                 onclick="window.location.href='profile .html';" 
+                 style="font-size: 24px; cursor: pointer; color: #333; font-weight: 700; padding: 10px; display: inline-block; -webkit-tap-highlight-color: transparent; position: relative; z-index: 1000000;">
+                 ❮
+            </div>
+            <h1 class="header-title-text" style="font-size: 18px; font-weight: 600; color: #222;">Deposit</h1>
+            <div class="history-link-text" style="font-size: 13px; font-weight: 500; color: #666; cursor: pointer;">Deposit history</div>
+        </header>
+        
+
+        <!-- 2. Wallet Live Balance Card -->
+        <div class="wallet-balance-card">
+            <div class="wallet-label-row">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                <span>Balance</span>
+            </div>
+            <div class="balance-amount-display" id="display-wallet-balance">₹0.00</div>
+        </div>
+
+        <!-- 3. Gateway Payment Selection Options -->
+        <section class="payment-methods-section">
+            <div class="methods-grid-box">
+                <div class="method-item-chip active" onclick="selectPaymentMethod(this, 'UPI-QR')">
+                    <div class="method-icon-wrap">⚡</div>
+                    <div class="method-label-txt">UPI-QR</div>
+                </div>
+                <div class="method-item-chip" onclick="selectPaymentMethod(this, 'NOW UPI')">
+                    <div class="method-icon-wrap">💎</div>
+                    <div class="method-label-txt">NOW UPI</div>
+                </div>
+                <div class="method-item-chip" onclick="selectPaymentMethod(this, 'Online Pay')">
+                    <div class="method-icon-wrap">💳</div>
+                    <div class="method-label-txt">Online Pay</div>
+                </div>
+                <div class="method-item-chip" onclick="selectPaymentMethod(this, 'QR Pay')">
+                    <div class="method-icon-wrap">🔳</div>
+                    <div class="method-label-txt">QR Pay</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Fast Recharge Amount Selection Chips & Box -->
+        <section class="amount-selection-panel">
+            <div class="panel-heading-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                <span>Deposit amount</span>
+            </div>
+
+            <div class="amount-chips-grid">
+                <div class="quick-amount-box" onclick="fillAmount(100, this)">₹ 100</div>
+                <div class="quick-amount-box" onclick="fillAmount(300, this)">₹ 300</div>
+                <div class="quick-amount-box" onclick="fillAmount(500, this)">₹ 500</div>
+                <div class="quick-amount-box" onclick="fillAmount(1000, this)">₹ 1K</div>
+                <div class="quick-amount-box" onclick="fillAmount(2000, this)">₹ 2K</div>
+                <div class="quick-amount-box" onclick="fillAmount(5000, this)">₹ 5K</div>
+                <div class="quick-amount-box" onclick="fillAmount(10000, this)">₹ 10K</div>
+                <div class="quick-amount-box" onclick="fillAmount(20000, this)">₹ 20K</div>
+                <div class="quick-amount-box" onclick="fillAmount(50000, this)">₹ 50K</div>
+            </div>
+
+            <div class="custom-input-box-wrapper">
+                <span class="currency-symbol-txt">₹</span>
+                <input type="number" id="deposit-amount-input" class="real-amount-input" placeholder="₹100.00 - ₹50,000.00" min="100" max="50000">
+            </div>
+        </section>
+
+        <!-- 5. Instructions Panel -->
+        <section class="recharge-rules-panel">
+            <div class="panel-heading-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <span>Recharge instructions</span>
+            </div>
+            <div style="margin-top: 12px;">
+                <div class="single-rule-row">
+                    <span class="rule-bullet-point">♦</span>
+                    <p>If the transfer time is up, please fill out the deposit form again.</p>
+                </div>
+                <div class="single-rule-row">
+                    <span class="rule-bullet-point">♦</span>
+                    <p>The transfer amount must match the order you created, otherwise the money cannot be credited successfully.</p>
+                </div>
+                <div class="single-rule-row">
+                    <span class="rule-bullet-point">♦</span>
+                    <p>If you transfer the wrong amount, our company will not be responsible for the lost amount!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Bottom Sticky Summary Actions Bar -->
+        <footer class="bottom-action-deposit-bar">
+            <div>
+                <span style="font-size: 11px; color: #888;">Recharge Method:</span><br>
+                <span id="selected-method-summary" style="font-size: 13px; font-weight: 600; color: #222;">UPI-QR</span>
+            </div>
+            <button class="action-submit-recharge-btn" onclick="initiateDepositAction()">Deposit</button>
+        </footer>
+    </div>
+    <!-- 8. Premium Custom Error Popup UI -->
+<div id="error-alert-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 1000000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+    <div id="error-modal-box" style="background: #ffffff; width: 85%; max-width: 340px; padding: 28px 24px; border-radius: 24px; text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.25); transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        
+        <!-- Cross / Error Icon -->
+        <div style="width: 65px; height: 65px; background: #fff0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        </div>
+
+        <!-- Text Info -->
+        <h3 style="margin: 0 0 10px; font-family: 'Poppins', sans-serif; font-size: 19px; color: #212529; font-weight: 600;">Invalid Amount</h3>
+        <p id="error-modal-msg" style="margin: 0 0 24px; font-family: 'Poppins', sans-serif; font-size: 14px; color: #6c757d; line-height: 1.5; font-weight: 400;">Please enter a valid amount! Minimum deposit is ₹100.</p>
+        
+        <!-- Action Button -->
+        <button onclick="closeErrorModal();" style="width: 100%; height: 44px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 22px; color: #fff; font-size: 14px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; box-shadow: 0 4px 12px rgba(240, 62, 62, 0.25);">OK</button>
+    </div>
 </div>
 
-<div id="screen-payment-gateway" style="display: none; flex-direction: column; width: 100%;">
-<div class="header-container">
-<button class="back-btn" onclick="backToAmountSelect()"></button>
-<div class="page-title">Payment Options</div>
-</div>
-<div class="selected-amt-alert">Amount to Pay: <span id="gateway-amount-title">0</span></div>
-<div class="section-title" style="margin-top: 10px;">Select Channel</div>
-<div class="method-grid">
-<div class="method-box active-method" id="m-upi" onclick="switchGatewayMethod('upi')"> UPI</div>
-<div class="method-box" id="m-qr" onclick="switchGatewayMethod('qr')"> QR Code</div>
-<div class="method-box" id="m-bank" onclick="switchGatewayMethod('bank')"> Bank</div>
-</div>
+        <!-- 7. Wallet & UI Interactivity Controller Script -->
+    <script>
+        let currentSelectedMethod = "UPI-QR";
 
-<div id="box-upi" class="payment-inner-box show-box">
-<label style="font-weight: bold; color: #dbb35e;">Copy Admin UPI ID:</label>
-<div class="info-display-box">
-<span id="b-upi-id">merchant@upi</span>
-<button class="copy-btn" onclick="copyTextData('b-upi-id')">COPY</button>
-</div>
-</div>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. ब्राउज़र की लोकल स्टोरेज से 'user_phone' उठाएं
+            const userPhone = localStorage.getItem('user_phone');
+            const balanceDisplay = document.getElementById('display-wallet-balance');
 
-<div id="box-qr" class="payment-inner-box">
-<div class="qr-container">
-<label style="font-weight: bold; color: #dbb35e;">Scan QR Code via GPay/PhonePe</label>
-<img class="qr-img" id="b-qr-img" src="https://wikimedia.org" alt="Admin QR">
-<p style="font-size: 11px; color: #888; margin-top: 3px;">Take a screenshot to scan from gallery</p>
-</div>
-</div>
+            if (!userPhone) {
+                if (balanceDisplay) balanceDisplay.innerText = "₹0.00";
+                return;
+            }
 
-<div id="box-bank" class="payment-inner-box">
-<label style="font-weight: bold; color: #dbb35e;">Transfer to Admin Account:</label>
-<div class="info-display-box"><label>Bank Name</label><span id="b-name">SBI Bank</span></div>
-<div class="info-display-box">
-<label>Account Number</label><span id="b-acc">30214589745</span>
-<button class="copy-btn" onclick="copyTextData('b-acc')">COPY</button>
-</div>
-<div class="info-display-box"><label>Beneficiary Name</label><span id="b-holder">Alpha Arena Admin</span></div>
-<div class="info-display-box">
-<label>IFSC Code</label><span id="b-ifsc">SBIN0001234</span>
-<button class="copy-btn" onclick="copyTextData('b-ifsc')">COPY</button>
-</div>
-</div>
+            // 2. लाइव रेंडर सर्वर डेटाबेस से प्लेयर का बिल्कुल असली बैलेंस खींचना
+            function syncLiveWallet() {
+                fetch(`https://onrender.com{userPhone}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && balanceDisplay) {
+                            balanceDisplay.innerText = "₹" + Number(data.balance).toFixed(2);
+                        }
+                    })
+                    .catch(err => console.error("Wallet Sync Error:", err));
+            }
 
-<div class="section-title" style="margin-top: 20px;">Confirm Transaction</div>
-<div class="input-box-wrapper" style="gap: 6px; display: flex; flex-direction: column;">
-<label>Enter 12-Digit UTR / Transaction Ref ID:</label>
-<input type="text" id="final-utr-input" maxlength="12" placeholder="Enter 12-digit transaction number">
-</div>
-<button class="btn-submit" style="margin-top: 5px;" onclick="submitFinalDepositRequest()">Submit Payment Request</button>
-</div>
-</div>
-
-<div class="custom-alert-overlay" id="appAlert">
-<div class="custom-alert-box">
-<div class="custom-alert-icon" id="alertIcon"></div>
-<div class="custom-alert-title" id="alertTitle">Notification</div>
-<div class="custom-alert-msg" id="alertMessage">Content text...</div>
-<button class="custom-alert-btn" onclick="closeAppAlert()">OK</button>
-</div>
-</div>
-<script>
-// 🔑 एडमिन की पेमेंट डिटेल्स (आप इसे यहाँ सीधे बदल सकते हैं)
-let adminUpiConfig = "9992788757@slc";
-let adminQrConfig = "scnr.jpg";
-let adminBankConfig = {
-    bankName: "UCO Bank Ltd",
-    holderName: "Ravi",
-    accNumber: "24880110021477",
-    ifscCode: "UCBA0002488"
-};
-
-// 🌐 रेंडर सर्वर का मुख्य लिंक (HTTPS के साथ फिक्स कर दिया गया है)
-const API_BASE_URL = "https://color-game-1kc2.onrender.com";
-let selectedGatewayMethod = "upi";
-let finalValidatedAmount = 0;
-const loggedInUserPhone = localStorage.getItem("user_phone");
-let postAlertCallback = null;
-
-function showPopup(title, message, icon = '⚠', callback = null) {
-    document.getElementById("alertIcon").innerText = icon;
-    document.getElementById("alertTitle").innerText = title;
-    document.getElementById("alertMessage").innerText = message;
-    postAlertCallback = callback;
-    document.getElementById("appAlert").classList.add("show");
-}
-
-function closeAppAlert() {
-    document.getElementById("appAlert").classList.remove("show");
-    if (typeof postAlertCallback === 'function') { postAlertCallback(); }
-}
-
-// 📡 पेज लोड होते ही लाइव बैलेंस सिंक करने का इंजन
-document.addEventListener("DOMContentLoaded", () => {
-    if (!loggedInUserPhone) {
-        document.getElementById("user-wallet-balance").innerText = "₹0.00";
-        showPopup("Session Error", "Please login first to add funds!", "🔒", () => {
-            window.location.href = "index.html";
+            syncLiveWallet(); // पेज लोड होते ही लाइव बैलेंस दिखाएं
         });
-        return;
-    }
-    
-    // 🔗 यहाँ पूरा लाइव HTTPS यूआरएल जोड़ दिया गया है जिससे "Failed to fetch" नहीं आएगा
-    fetch(`${API_BASE_URL}/api/balance/${loggedInUserPhone}`)
-    .then(res => {
-        if (!res.ok) { throw new Error("API route not found on server"); }
-        return res.json();
-    })
-    .then(data => {
-        if(data.success && data.balance !== undefined) {
-            document.getElementById("user-wallet-balance").innerText = "₹" + parseFloat(data.balance).toFixed(2);
-        }
-    })
-    .catch(err => {
-        console.log("Balance fetch sync delayed safely:", err.message);
-        document.getElementById("user-wallet-balance").innerText = "₹0.00";
-    });
-});
 
-function setQuickAmount(val) {
-    document.getElementById("main-amount-input").value = val;
-}
-
-function goToPaymentScreen() {
-    const amtInput = document.getElementById("main-amount-input").value;
-    finalValidatedAmount = parseInt(amtInput);
-    if (isNaN(finalValidatedAmount) || finalValidatedAmount < 100) {
-        showPopup("Validation Error", "Minimum deposit amount is ₹100! Please enter a valid value.", "💰");
-        return;
-    }
-    document.getElementById("gateway-amount-title").innerText = "₹" + finalValidatedAmount;
-    document.getElementById("b-upi-id").innerText = adminUpiConfig;
-    document.getElementById("b-qr-img").src = adminQrConfig;
-    document.getElementById("b-name").innerText = adminBankConfig.bankName;
-    document.getElementById("b-acc").innerText = adminBankConfig.accNumber;
-    document.getElementById("b-holder").innerText = adminBankConfig.holderName;
-    document.getElementById("b-ifsc").innerText = adminBankConfig.ifscCode;
-    
-    document.getElementById("screen-amount-select").style.display = "none";
-    document.getElementById("screen-payment-gateway").style.display = "flex";
-}
-
-function backToAmountSelect() {
-    document.getElementById("screen-payment-gateway").style.display = "none";
-    document.getElementById("screen-amount-select").style.display = "flex";
-}
-
-function switchGatewayMethod(methodKey) {
-    selectedGatewayMethod = methodKey;
-    document.querySelectorAll('.method-box').forEach(box => box.classList.remove('active-method'));
-    document.querySelectorAll('.payment-inner-box').forEach(box => box.classList.remove('show-box'));
-    document.getElementById('m-' + methodKey).classList.add('active-method');
-    document.getElementById('box-' + methodKey).classList.add('show-box');
-}
-
-function copyTextData(elementId) {
-    const text = document.getElementById(elementId).innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        showPopup("Success", "Copied to clipboard: " + text, "📋");
-    });
-}
-
-function submitFinalDepositRequest() {
-    const utrValue = document.getElementById("final-utr-input").value.trim();
-    if (utrValue.length !== 12 || isNaN(utrValue)) {
-        showPopup("UTR Error", "Please enter a valid, complete 12-digit UTR / Transaction Reference ID!", "🔢");
-        return;
-    }
-    
-    // 🔗 यहाँ भी सबमिशन लिंक में पूरा HTTPS यूआरएल लगा दिया गया है
-    fetch(`${API_BASE_URL}/api/user/submit-deposit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            phone: loggedInUserPhone,
-            amount: finalValidatedAmount,
-            utr: utrValue
-        })
-    })
-    .then(res => {
-        if (!res.ok) { throw new Error("Deposit route failure"); }
-        return res.json();
-    })
-    .then(data => {
-        if (data.success) {
-            showPopup("Request Submitted", "Your deposit request has been submitted successfully! Pending approval.", "✅", () => {
-                document.getElementById("main-amount-input").value = "";
-                document.getElementById("final-utr-input").value = "";
-                document.getElementById("screen-payment-gateway").style.display = "none";
-                document.getElementById("screen-amount-select").style.display = "flex";
-                location.reload();
+        // 3. चिप्स पर क्लिक करने पर इनपुट बॉक्स को ऑटो-फिल करना
+         Ried
+        function fillAmount(value, element) {
+            document.getElementById('deposit-amount-input').value = value;
+            
+            document.querySelectorAll('.quick-amount-box').forEach(box => {
+                box.classList.remove('selected');
             });
-        } else {
-            showPopup("Submission Failed", data.message || "Failed to process request.", "❌");
+            element.classList.add('selected');
         }
-    })
-    .catch(err => {
-        console.error(err);
-        showPopup("Connection Failure", "Unable to connect to the server. Please check your Render server log state!", "📡");
-    });
+
+        // 4. पेमेंट मेथड बदलने का लॉजिक
+        function selectPaymentMethod(element, methodName) {
+            document.querySelectorAll('.method-item-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            currentSelectedMethod = methodName;
+            document.getElementById('selected-method-summary').innerText = methodName;
+        }
+
+        function initiateDepositAction() {
+    const amountVal = document.getElementById('deposit-amount-input').value;
+    const modalOverlay = document.getElementById('error-alert-modal');
+    const modalBox = document.getElementById('error-modal-box');
+    const modalMsg = document.getElementById('error-modal-msg');
+    
+    // 1. पहला चेक: अगर रकम खाली है या 100 से कम है तो सुंदर एरर पॉपअप दिखाओ
+    if(!amountVal || amountVal < 100) {
+        if (modalMsg) modalMsg.innerHTML = "Please enter a valid amount!<br>Minimum deposit is ₹100.";
+        document.querySelector('#error-alert-modal h3').innerText = "Invalid Amount";
+        document.querySelector('#error-alert-modal svg').parentElement.style.background = "#fff0f0";
+        document.querySelector('#error-alert-modal svg').outerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+        document.querySelector('#error-alert-modal button').setAttribute("onclick", "closeErrorModal();");
+        
+        modalOverlay.style.display = "flex";
+        setTimeout(() => { modalOverlay.style.opacity = "1"; modalBox.style.transform = "scale(1)"; }, 10);
+        return;
+    }
+
+    // 2. दूसरा मुख्य चेक: केवल "NOW UPI" सिलेक्ट होने पर ही pay.html पर भेजो
+    if (currentSelectedMethod === "NOW UPI") {
+        // यह लाइन प्लेयर को अमाउंट के साथ आपके पेमेंट पन्ने pay.html पर फेंक देगी
+        window.location.href = `pay.html?amount=${amountVal}`;
+    } else {
+        // अगर खिलाड़ी ने UPI-QR या कोई और बॉक्स चुना है, तो सुंदर चेतावनी पॉपअप दिखाओ
+        if (modalMsg) modalMsg.innerHTML = "This channel is under maintenance.<br>Please select <b>NOW UPI</b> to recharge!";
+        document.querySelector('#error-alert-modal h3').innerText = "Channel Offline";
+        document.querySelector('#error-alert-modal svg').parentElement.style.background = "#fff0f0";
+        document.querySelector('#error-alert-modal svg').outerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+        document.querySelector('#error-alert-modal button').setAttribute("onclick", "closeErrorModal();");
+        
+        modalOverlay.style.display = "flex";
+        setTimeout(() => { modalOverlay.style.opacity = "1"; modalBox.style.transform = "scale(1)"; }, 10);
+    }
 }
-</script>
+
+function goToPaymentGateway(amount) {
+    // अगर प्लेयर ने "NOW UPI" चुना हुआ है
+    if (currentSelectedMethod === "NOW UPI") {
+        window.location.href = `pay_intent.html?amount=${amount}`;
+    } else {
+        alert("This channel is under maintenance. Please use NOW UPI!");
+    }
+}
+
+function showErrorModal(overlay, box) {
+    overlay.style.display = "flex";
+    setTimeout(() => {
+        overlay.style.opacity = "1";
+        box.style.transform = "scale(1)";
+    }, 10);
+}
+
+function closeErrorModal() {
+    const overlay = document.getElementById('error-alert-modal');
+    const box = document.getElementById('error-modal-box');
+    box.style.transform = "scale(0.7)";
+    overlay.style.opacity = "0";
+    setTimeout(() => { overlay.style.display = "none"; }, 200);
+}
+
+    </script>
 </body>
 </html>

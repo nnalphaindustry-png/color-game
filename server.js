@@ -63,24 +63,47 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// === LOGIN ROUTE ===
+// === UPDATED LOGIN ROUTE WITH USER CHECK ===
 app.post('/api/login', async (req, res) => {
     try {
         const { phone, password } = req.body;
-        const user = await User.findOne({ phone: phone.trim(), password: password.trim() });
-        if (!user) {
-            return res.json({ success: false, message: "Invalid phone number or password!" });
+        if (!phone || !password) {
+            return res.json({ success: false, message: "Please fill all fields!" });
         }
+
+        const cleanPhone = phone.trim();
+
+        // 1. पहले चेक करें कि इस नंबर से कोई अकाउंट बना भी है या नहीं
+        const userExists = await User.findOne({ phone: cleanPhone });
+        
+        if (!userExists) {
+            // अगर डेटाबेस में नंबर नहीं मिला, तो यह विशिष्ट मैसेज भेजें
+            return res.json({ 
+                success: false, 
+                message: "No account found with this number. Please register first!" 
+            });
+        }
+
+        // 2. अगर अकाउंट है, तो पासवर्ड मैच करके देखें
+        if (userExists.password !== password.trim()) {
+            return res.json({ 
+                success: false, 
+                message: "Invalid password! Please try again." 
+            });
+        }
+        
+        // 3. सब कुछ सही होने पर लॉगिन सफल करें
         res.json({ 
             success: true, 
-            phone: user.phone, 
-            balance: user.balance, 
+            phone: userExists.phone, 
+            balance: userExists.balance, 
             message: "Login successful!" 
         });
     } catch (err) {
         res.status(500).json({ success: false, message: "Server error during login!" });
     }
 });
+
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 

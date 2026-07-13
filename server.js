@@ -22,6 +22,29 @@ const userSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
+// === 1. गेम के परिणाम का स्कीमा ===
+const gameResultSchema = new mongoose.Schema({
+    gameMode: { type: String, required: true }, // '30s', '1m', '3m', '5m'
+    periodId: { type: String, required: true, unique: true },
+    winningNumber: { type: Number, required: true },
+    winningColor: { type: String, required: true }, // 'Red', 'Green', 'Violet', 'Red-Violet', 'Green-Violet'
+    winningSize: { type: String, required: true }, // 'Big' या 'Small'
+    createdAt: { type: Date, default: Date.now }
+});
+const GameResult = mongoose.model('GameResult', gameResultSchema);
+
+// === 2. यूजर की बेट (सट्टे) का स्कीما ===
+const betSchema = new mongoose.Schema({
+    phone: { type: String, required: true },
+    gameMode: { type: String, required: true },
+    periodId: { type: String, required: true },
+    betOn: { type: String, required: true }, // रंग (Red), नंबर (0-9), या आकार (Big/Small)
+    amount: { type: Number, required: true },
+    status: { type: String, default: "Pending" }, // Pending, Win, Loss
+    winAmount: { type: Number, default: 0 },
+    createdAt: { type: Date, default: Date.now }
+});
+const Bet = mongoose.model('Bet', betSchema);
 
 // === LIVE DATABASE STATUS ROUTE ===
 // इसे ब्राउज़र में खोलकर आप चेक कर सकते हैं कि डेटाबेस कनेक्टेड है या नहीं
@@ -127,6 +150,145 @@ app.get('/api/balance/:phone', async (req, res) => {
 // === MOVE THIS TO THE BOTTOM OF SERVER.JS ===
 app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// === लाइव गेम स्टेट जानने का रास्ता ===
+app.get('/api/game-state/30s', (req, res) => {
+    res.json({
+        success: true,
+        periodId: currentPeriod30s,
+        timeRemaining: timeRemaining30s
+    });
+});
+
+// वैश्विक वेरिएबल (Global Variables) ताकि फ्रंटएंड लाइव टाइमर देख सके
+let currentPeriod30s = "";
+let timeRemaining30s = 30;
+
+function start30sGameEngine() {
+    // हर दिन और समय के आधार पर एक यूनीक पीरियड आईडी बनाना
+    const generatePeriodId = () => {
+        const now = new Date();
+        const dateStr = now.getFullYear() + 
+                        String(now.getMonth() + 1).padStart(2, '0') + 
+                        String(now.getDate()).padStart(2, '0');
+        // कुल सेकंड्स को 30 से भाग देकर चक्र का नंबर निकालना
+        const totalHalfMinutes = Math.floor((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 30);
+        return dateStr + String(totalHalfMinutes).padStart(4, '0');
+    };
+
+    currentPeriod30s = generatePeriodId();
+
+    // हर 1 सेकंड में चलने वाली घड़ी
+    setInterval(async () => {
+        timeRemaining30s--;
+
+        if (timeRemaining30s <= 0) {
+            // === समय समाप्त! विजेता चुनने का वक्त (00 सेकंड) ===
+            const finishedPeriod = currentPeriod30s;
+            
+            // 1. नए चक्र की तुरंत शुरुआत ताकि टाइमर न रुके
+            timeRemaining30s = 30;
+            currentPeriod30s = generatePeriodId();
+
+            try {
+                // 2. इस पीरियड की सभी बेट्स को डेटाबेस से निकालना
+                const allBets = await Bet.find({ periodId: finishedPeriod, gameMode: '30s' });
+
+                // 3. 0 से 9 तक के सभी नंबरों का शुरुआती हिसाब ₹0 रखना
+                let numberAmounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+
+                // 4. यूजर्स की बेट के अनुसार हर नंबर पर लगा कुल पैसा जोड़ना
+                allBets.forEach(bet => {
+                    const target = bet.betOn;
+                    // अगर सीधे नंबर पर बेट है
+                    if (!isNaN(target)) {
+                        numberAmounts[target] += bet.amount;
+                    }
+                    // अगर रंग पर बेट है, तो उस रंग में आने वाले सभी नंबरों पर पैसा जोड़ना
+                    else if (target === 'Green') { [1, 3, 7, 9].forEach(n => numberAmounts[n] += bet.amount); }
+                    else if (target === 'Red') { [2, 4, 6, 8].forEach(n => numberAmounts[n] += bet.amount); }
+                    else if (target === 'Violet') { [0, 5].forEach(n => numberAmounts[n] += bet.amount); }
+                    // अगर Big/Small पर बेट है
+                    else if (target === 'Small') { [0, 1, 2, 3, 4].forEach(n => numberAmounts[n] += bet.amount); }
+                    else if (target === 'Big') { [5, 6, 7, 8, 9].forEach(n => numberAmounts[n] += bet.amount); }
+                });
+
+                // 5. वह नंबर ढूँढना जिसपर सबसे कम पैसा लगा है (LOWEST AMOUNT SYSTEM)
+                let winningNumber = 0;
+                let minAmount = Infinity;
+
+                for (let i = 0; i <= 9; i++) {
+                    if (numberAmounts[i] < minAmount) {
+                        minAmount = numberAmounts[i];
+                        winningNumber = i;
+                    }
+                }
+
+                // 6. जीतने वाले नंबर के आधार पर उसका सही रंग और आकार तय करना
+                let winningColor = "Red";
+                if ([1, 3, 7, 9].includes(winningNumber)) winningColor = "Green";
+                else if (winningNumber === 0) winningColor = "Red-Violet";
+                else if (winningNumber === 5) winningColor = "Green-Violet";
+
+                const winningSize = winningNumber >= 5 ? "Big" : "Small";
+
+                // 7. इस नतीजे को रिजल्ट टेबल में हमेशा के लिए सेव करना
+                const newResult = new GameResult({
+                    gameMode: '30s',
+                    periodId: finishedPeriod,
+                    winningNumber,
+                    winningColor,
+                    winningSize
+                });
+                await newResult.save();
+
+                // 8. जीतने वाले यूजर्स को पैसा बांटना (Payout Logic)
+                for (let bet of allBets) {
+                    let isWin = false;
+                    let multiplier = 2; // डिफ़ॉल्ट दोगुना पैसा (रंगों के लिए)
+
+                    if (bet.betOn == winningNumber) {
+                        isWin = true;
+                        multiplier = 9; // नंबर जीतने पर 9 गुना पैसा
+                    } else if (bet.betOn === 'Green' && ['Green', 'Green-Violet'].includes(winningColor)) {
+                        isWin = true;
+                        if (winningColor === 'Green-Violet') multiplier = 1.5; // हाफ विन रूल
+                    } else if (bet.betOn === 'Red' && ['Red', 'Red-Violet'].includes(winningColor)) {
+                        isWin = true;
+                        if (winningColor === 'Red-Violet') multiplier = 1.5;
+                    } else if (bet.betOn === 'Violet' && ['Red-Violet', 'Green-Violet'].includes(winningColor)) {
+                        isWin = true;
+                        multiplier = 4.5;
+                    } else if (bet.betOn === winningSize) {
+                        isWin = true;
+                        multiplier = 2;
+                    }
+
+                    if (isWin) {
+                        const winAmount = bet.amount * multiplier;
+                        bet.status = "Win";
+                        bet.winAmount = winAmount;
+                        await bet.save();
+
+                        // यूजर के वॉलेट में पैसे बढ़ाना
+                        await User.findOneAndUpdate({ phone: bet.phone }, { $inc: { balance: winAmount } });
+                    } else {
+                        bet.status = "Loss";
+                        await bet.save();
+                    }
+                }
+
+                console.log(`Period ${finishedPeriod} Done. Winner: ${winningNumber} (${winningColor})`);
+
+            } catch (err) {
+                console.error("Error in game engine execution:", err);
+            }
+        }
+    }, 1000);
+}
+
+// सर्वर स्टार्ट होने पर इंजन को चालू करना
+start30sGameEngine();
 
 
 const PORT = process.env.PORT || 3000;

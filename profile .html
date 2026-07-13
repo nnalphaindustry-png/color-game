@@ -1,396 +1,357 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>गोवा क्लब - प्रोफाइल</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: sans-serif;
-        }
-        body {
-            background-color: #f4f6fb;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .profile-container {
-            width: 100%;
-            max-width: 450px;
-            background-color: #f4f6fb;
-            min-height: 100vh;
-            position: relative;
-            padding-bottom: 40px;
-        }
-        .profile-header-card {
-            background: linear-gradient(180deg, #ff4d4d, #f03e3e);
-            padding: 30px 16px 50px 16px;
-            border-bottom-left-radius: 35px;
-            border-bottom-right-radius: 35px;
-            color: #ffffff;
-        }
-        .profile-main-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .profile-avatar-box {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 2px solid #ffffff;
-            background-color: #fff;
-        }
-        .profile-avatar-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .profile-text-details {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .profile-name-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .user-name-text {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .vip-badge {
-            background-color: #ced4da;
-            color: #495057;
-            padding: 2px 12px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-        }
-        .uid-text-row {
-            font-size: 14px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        .login-time-row {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 400;
-        }
-        .balance-container {
-            width: 92%;
-            background: #ffffff;
-            border-radius: 24px;
-            margin: -30px auto 20px auto;
-            padding: 24px 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .balance-left-box {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .balance-title {
-            font-size: 14px;
-            color: #8a99a8;
-            font-weight: 500;
-        }
-        .live-balance-amount {
-            font-size: 28px;
-            font-weight: 700;
-            color: #000000;
-        }
-        .wallet-enter-btn {
-            background-color: #eb3b3b;
-            color: #ffffff;
-            padding: 10px 22px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-        }
-        .account-actions-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            width: 92%;
-            margin: 15px auto;
-            background: #ffffff;
-            padding: 20px 14px;
-            border-radius: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-        }
-        .action-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-        .action-icon-wrapper {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .action-svg {
-            width: 26px;
-            height: 26px;
-        }
-        .action-item:nth-child(1) .action-icon-wrapper { background-color: #ffe3e3; } 
-        .action-item:nth-child(1) .action-svg { fill: #f03e3e; }
-        .action-item:nth-child(2) .action-icon-wrapper { background-color: #fff0d6; } 
-        .action-item:nth-child(2) .action-svg { fill: #ff922b; }
-        .action-item:nth-child(3) .action-icon-wrapper { background-color: #e3fafc; } 
-        .action-item:nth-child(3) .action-svg { fill: #15aabf; }
-        .action-item:nth-child(4) .action-icon-wrapper { background-color: #ebfbee; } 
-        .action-item:nth-child(4) .action-svg { fill: #40c057; }
-        .action-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #333333;
-            text-align: center;
-        }
-
-        /* 2 कॉलम हिस्ट्री ग्रिड */
-        .history-grid-2-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            width: 92%;
-            margin: 15px auto;
-        }
-        .history-item-card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.01);
-        }
-        .history-icon-box {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .history-text-box {
-            display: flex;
-            flex-direction: column;
-        }
-        .history-main-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #333333;
-        }
-        .history-sub-title {
-            font-size: 11px;
-            color: #8e9aa7;
-            margin-top: 2px;
-        }
-
-        /* लिस्ट मेनू ऑप्शन्स */
-        .options-list-container {
-            width: 92%;
-            background-color: #ffffff;
-            border-radius: 20px;
-            margin: 15px auto;
-            padding: 6px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.01);
-        }
-        .list-row-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 16px;
-            cursor: pointer;
-        }
-        .list-row-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .list-icon-box {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .list-label-text {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333333;
-        }
-        .list-row-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #8e9aa7;
-            font-size: 14px;
-        }
-        .arrow-svg {
-            width: 16px;
-            height: 16px;
-            fill: #b5c3d0;
-        }
-
-        /* सर्विस सेंटर ग्रिड */
-        .service-center-container {
-            width: 92%;
-            background-color: #ffffff;
-            border-radius: 24px;
-            margin: 15px auto;
-            padding: 20px 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.01);
-        }
-        .service-center-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #333333;
-            margin-bottom: 18px;
-            padding-left: 4px;
-        }
-        .service-grid-3-col {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            row-gap: 20px;
-            column-gap: 10px;
-        }
-        .service-grid-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .service-icon-box {
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .service-label-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: #495057;
-            text-align: center;
-        }
-
-        /* लॉगआउट बटन */
-        .logout-btn-container {
-            width: 92%;
-            margin: 25px auto 10px auto;
-        }
-        .logout-action-btn {
-            width: 100%;
-            background-color: #ffffff;
-            border: 1px solid #ebedf2;
-            color: #f03e3e;
-            padding: 14px;
-            border-radius: 50px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.01);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 GOA CLUB - Profile</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+body {
+    background-color: #f4f6fb;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+.profile-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #f4f6fb;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 40px;
+}
+.profile-header-card {
+    background: linear-gradient(180deg, #ff4d4d, #f03e3e);
+    padding: 30px 16px 50px 16px;
+    border-bottom-left-radius: 35px;
+    border-bottom-right-radius: 35px;
+    color: #ffffff;
+}
+.profile-main-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.profile-avatar-box {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ffffff;
+    background-color: #fff;
+}
+.profile-avatar-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-text-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.user-name-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.vip-badge {
+    background-color: #ced4da;
+    color: #495057;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+.uid-text-row {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+.login-time-row {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+}
+.balance-container {
+    width: 92%;
+    background: #ffffff;
+    border-radius: 24px;
+    margin: -30px auto 20px auto;
+    padding: 24px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.balance-left-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.balance-title {
+    font-size: 14px;
+    color: #8a99a8;
+    font-weight: 500;
+}
+.live-balance-amount {
+    font-size: 28px;
+    font-weight: 700;
+    color: #000000;
+}
+.wallet-enter-btn {
+    background-color: #eb3b3b;
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+.account-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    width: 92%;
+    margin: 15px auto;
+    background: #ffffff;
+    padding: 20px 14px;
+    border-radius: 24px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+.action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.action-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.action-svg {
+    width: 26px;
+    height: 26px;
+}
+.action-item:nth-child(1) .action-icon-wrapper { background-color: #ffe3e3; }
+.action-item:nth-child(1) .action-svg { fill: #f03e3e; }
+.action-item:nth-child(2) .action-icon-wrapper { background-color: #fff0d6; }
+.action-item:nth-child(2) .action-svg { fill: #ff922b; }
+.action-item:nth-child(3) .action-icon-wrapper { background-color: #e3fafc; }
+.action-item:nth-child(3) .action-svg { fill: #15aabf; }
+.action-item:nth-child(4) .action-icon-wrapper { background-color: #ebfbee; }
+.action-item:nth-child(4) .action-svg { fill: #40c057; }
+.action-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333333;
+    text-align: center;
+}
+.history-grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 92%;
+    margin: 15px auto;
+}
+.history-item-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.01);
+}
+.history-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.history-text-box {
+    display: flex;
+    flex-direction: column;
+}
+.history-main-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333333;
+}
+.history-sub-title {
+    font-size: 11px;
+    color: #8e9aa7;
+    margin-top: 2px;
+}
+.options-list-container {
+    width: 92%;
+    background-color: #ffffff;
+    border-radius: 20px;
+    margin: 15px auto;
+    padding: 6px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.01);
+}
+.list-row-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px;
+    cursor: pointer;
+}
+.list-row-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.list-icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.list-label-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333333;
+}
+.list-row-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #8e9aa7;
+    font-size: 14px;
+}
+.arrow-svg {
+    width: 16px;
+    height: 16px;
+    fill: #b5c3d0;
+}
+.service-center-container {
+    width: 92%;
+    background-color: #ffffff;
+    border-radius: 24px;
+    margin: 15px auto;
+    padding: 20px 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.01);
+}
+.service-center-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 18px;
+    padding-left: 4px;
+}
+.service-grid-3-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 20px;
+    column-gap: 10px;
+}
+.service-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.service-icon-box {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.service-label-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    text-align: center;
+}
+.logout-btn-container {
+    padding: 24px 16px;
+    margin-top: 15px;
+    position: relative;
+    z-index: 9999;
+}
+</style>
 </head>
 <body>
 <div class="profile-container">
-<!-- 1. टॉप प्रोफाइल हेडर कार्ड -->
-<div class="profile-header-card" style="padding-top: 15px;">
-    
-    <!-- सुरक्षित बैक बटन रो (डिज़ाइन को बिना बिगाड़े) -->
-    <div style="margin-bottom: 15px; padding: 0 4px;">
-        <a href="home.html" style="color: #ffffff; text-decoration: none; font-size: 26px; font-weight: bold; display: inline-block; cursor: pointer; line-height: 1;">&lt;</a>
-    </div>
-
-    <div class="profile-main-info">
-        <div class="profile-avatar-box">
-            <img src="profile.jpg" alt="Profile">
+    <!-- 1. टॉप प्रोफाइल हेडर कार्ड -->
+    <div class="profile-header-card" style="padding-top: 15px;">
+        <div style="margin-bottom: 15px; padding: 0 4px;">
+            <a href="home.html" style="color: #ffffff; text-decoration: none; font-size: 26px; font-weight: bold; display: inline-block; cursor: pointer; line-height: 1;">&lt;</a>
         </div>
-        <div class="profile-text-details">
-            <div class="profile-name-row">
-                <span class="user-name-text" id="real-user-phone">Loading...</span>
-                <span class="vip-badge">VIPO</span>
+        <div class="profile-main-info">
+            <div class="profile-avatar-box">
+                <img src="profile.jpg" alt="Profile">
             </div>
-            <div class="uid-text-row">
-                UID 1780616
-            </div>
-            <div class="login-time-row">
-                Last login: 2026-07-12 17:25:31
+            <div class="profile-text-details">
+                <div class="profile-name-row">
+                    <span class="user-name-text" id="real-user-phone">Loading...</span>
+                    <span class="vip-badge">VIP0</span>
+                </div>
+                <div class="uid-text-row">UID 1780616</div>
+                <div class="login-time-row">Last login: Live Verified</div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- 2. टोटल बैलेंस कार्ड -->
     <div class="balance-container">
         <div class="balance-left-box">
             <div class="balance-title">Total balance</div>
             <div class="live-balance-amount" id="real-wallet-balance">₹0.00</div>
-            
         </div>
-        <button class="wallet-enter-btn" onclick="alert('वॉलेट खुल रहा है...')">Enter wallet</button>
+        <button class="wallet-enter-btn">Enter wallet</button>
     </div>
 
     <!-- 3. चार मुख्य शॉर्टकट बटन ग्रिड -->
     <div class="account-actions-grid">
-        <div class="action-item" onclick="alert('ARWallet खुल रहा है...')">
+        <div class="action-item" onclick="alert('ARWallet opening...')">
             <div class="action-icon-wrapper">
-                <svg class="action-svg" viewBox="0 0 24 24">
-                    <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5 0.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                </svg>
+                <svg class="action-svg" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
             </div>
             <span class="action-label">ARWallet</span>
         </div>
-        <div class="action-item" onclick="window.location.href='deposit.html';" style="cursor: pointer;">
-    <div class="action-icon-wrapper">
-        <svg class="action-svg" viewBox="0 0 24 24">
-            <path d="M19.36 7.04L18 5.67l-5.64 5.64v-8.31h-2v8.31L4.72 5.67 3.36 7.04l7.64 7.64zm-14.72 9.32h14.72v2H4.64z"/>
-        </svg>
-    </div>
-    <span class="action-label">Deposit</span>
-</div>
-
-        <div class="action-item" onclick="alert('Withdraw खुल रहा है...')">
+        <div class="action-item" onclick="window.location.href='deposit.html';">
             <div class="action-icon-wrapper">
-                <svg class="action-svg" viewBox="0 0 24 24">
-                    <path d="M5 4h14v2H5zm0 10h4v6h6v-6h4l-7-7-7 7z"/>
-                </svg>
+                <svg class="action-svg" viewBox="0 0 24 24"><path d="M19.36 7.04L18 5.67 5.64 5.64v-8.31h-2v8.31L4.72 5.67 3.36 7.04 17.64 7.64zm-14.72 9.32h14.72v2H4.64z"/></svg>
+            </div>
+            <span class="action-label">Deposit</span>
+        </div>
+        <div class="action-item" onclick="alert('Withdraw opening...')">
+            <div class="action-icon-wrapper">
+                <svg class="action-svg" viewBox="0 0 24 24"><path d="M5 4h14v2H5zm0 10h4v6h6v-6h4l-7-7-7 7z"/></svg>
             </div>
             <span class="action-label">Withdraw</span>
         </div>
-        <div class="action-item" onclick="alert('VIP क्लब खुल रहा है...')">
+        <div class="action-item" onclick="alert('VIP Club opening...')">
             <div class="action-icon-wrapper">
-                <svg class="action-svg" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5v-5l-10 5-10-5v5z"/>
-                </svg>
+                <svg class="action-svg" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5v-5l-10 5-10-5v5z"/></svg>
             </div>
             <span class="action-label">VIP</span>
         </div>
@@ -398,7 +359,7 @@
 
     <!-- 4. दो कॉलम वाली हिस्ट्री ग्रिड -->
     <div class="history-grid-2-col">
-        <div class="history-item-card" onclick="alert('Game History खुल रही है...')">
+        <div class="history-item-card" onclick="alert('Game History opening...')">
             <div class="history-icon-box" style="background-color: #e8f2ff;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="#3b82f6"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
             </div>
@@ -407,212 +368,146 @@
                 <span class="history-sub-title">My game history</span>
             </div>
         </div>
-        <div class="history-item-card" onclick="alert('Transaction History खुल रही है...')">
+        <div class="history-item-card" onclick="alert('Transaction History opening...')">
             <div class="history-icon-box" style="background-color: #e6f9f3;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="#10b981"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
             </div>
             <div class="history-text-box">
                 <span class="history-main-title">Transaction</span>
-                <span class="history-sub-title">My transaction history</span>
-            </div>
-        </div>
-        <div class="history-item-card" onclick="alert('Deposit History खुल रही है...')">
-            <div class="history-icon-box" style="background-color: #fff0f0;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm3-4H6V8h12v4z"/></svg>
-            </div>
-            <div class="history-text-box">
-                <span class="history-main-title">Deposit</span>
-                <span class="history-sub-title">My deposit history</span>
-            </div>
-        </div>
-        <div class="history-item-card" onclick="alert('Withdraw History खुल रही है...')">
-            <div class="history-icon-box" style="background-color: #fff4eb;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="#f97316"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9z"/></svg>
-            </div>
-            <div class="history-text-box">
-                <span class="history-main-title">Withdraw</span>
-                <span class="history-sub-title">My withdraw history</span>
+                <span class="history-sub-title">My transactions</span>
             </div>
         </div>
     </div>
-        <!-- 5. वर्टिकल लिस्ट मेनू ऑप्शन्स -->
+
     <div class="options-list-container">
-        
-        <!-- नोटिफिकेशन विकल्प -->
-        <div class="list-row-option" onclick="alert('Notification पेज खुल रहा है...')">
+        <div class="list-row-option" onclick="alert('Notification opening...')">
             <div class="list-row-left">
-                <div class="list-icon-box" style="background-color: #ffeaea;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d4d"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+                <div class="list-icon-box" style="background-color: #ffeaea;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d4d"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1h-2z"/></svg></div>
                 <span class="list-label-text">Notification</span>
             </div>
             <div class="list-row-right">
                 <svg class="arrow-svg" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
             </div>
         </div>
+    </div>
 
-        <!-- गिफ्ट्स विकल्प -->
-        <div class="list-row-option" onclick="alert('Gifts पेज खुल रहा है...')">
-            <div class="list-row-left">
-                <div class="list-icon-box" style="background-color: #ffeaea;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d4d"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.65-.5-.65C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h16v6z"/></svg></div>
-                <span class="list-label-text">Gifts</span>
-            </div>
-            <div class="list-row-right">
-                <svg class="arrow-svg" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-            </div>
-        </div>
-
-        <!-- गेम स्टेटिस्टिक्स विकल्प -->
-        <div class="list-row-option" onclick="alert('Game statistics पेज खुल रहा है...')">
-            <div class="list-row-left">
-                <div class="list-icon-box" style="background-color: #ffeaea;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d4d"><path d="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z"/></svg></div>
-                <span class="list-label-text">Game statistics</span>
-            </div>
-            <div class="list-row-right">
-                <svg class="arrow-svg" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-            </div>
-        </div>
-
-        <!-- भाषा विकल्प -->
-        <div class="list-row-option" onclick="alert('Language सेटिंग खुल रही है...')">
-            <div class="list-row-left">
-                <div class="list-icon-box" style="background-color: #ffeaea;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d4d"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.42 3.47 1.63 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14c-.16-.64-.26-1.31-.26-2s.1-1.36.26-2h3.38c-.04.66-.07 1.32-.07 2s.03 1.34.07 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.42-3.47-1.63-4.33-3.56zm2.95-8H5.08c.86-1.93 2.49-3.14 4.33-3.56-.6 1.11-1.06 2.31-1.38 3.56zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.04-.66-.06-1.32-.06-2s.02-1.34.06-2h4.68c.04.66.06 1.32.06 2s-.02 1.34-.06 2zm2.28 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.86 1.93-2.49 3.14-4.33 3.56zM16.36 14c.04-.66.07-1.32.07-2s-.03-1.34-.07-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/></svg></div>
-                <span class="list-label-text">Language</span>
-            </div>
-            <div class="list-row-right">
-                <span style="font-size: 13px; color: #8e9aa7;">English</span>
-                <svg class="arrow-svg" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    <div class="service-center-container">
+        <div class="service-center-title">Service center</div>
+        <div class="service-grid-3-col">
+            <div class="service-grid-item" onclick="alert('Settings opening...')">
+                <div class="service-icon-box"><svg width="32" height="32" viewBox="0 0 24 24" fill="#ff6b6b"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.17.42.42.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.07-3-3s1.07-3 3-3 3 1.07 3 3-1.07 3-3 3z"/></svg></div>
+                <span class="service-label-text">Settings</span>
             </div>
         </div>
     </div>
 
-    <!-- 6. सर्विस सेंटर ग्रिड ब्लॉक -->
-    <div class="service-center-container">
-        <div class="service-center-title">Service center</div>
-        <div class="service-grid-3-col">
-            <div class="service-grid-item" onclick="alert('Settings खुल रही है...')">
-                <div class="service-icon-box"><svg width="32" height="32" viewBox="0 0 24 24" fill="#ff6b6b"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19 1.65-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l-.38 2.65c-.03.24.17.42.42.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.07-3-3s1.07-3 3-3 3 1.07 3 3-1.07 3-3 3z"/></svg></div>
-                                                                <!-- Settings Icon Label (Line 490 completed) -->
-                        <span class="service-label-text" style="font-family: 'Poppins', sans-serif; font-size: 13px; color: #444; margin-top: 6px; font-weight: 500;">Settings</span>
-                    </div>
-                </div>
-            </div>
+    <div class="logout-btn-container">
+        <button class="logout-action-btn" id="logout-btn" style="width: 100%; height: 50px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 25px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(240, 62, 62, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Log Out</span>
+        </button>
+    </div>
+</div>
 
-            <!-- 7. Premium Luxury Logout Button (यह बटन वापस आ गया है) -->
-            <div class="logout-btn-container" style="padding: 24px 16px; margin-top: 15px; position: relative; z-index: 9999;">
-                <button class="logout-action-btn" id="logout-btn" 
-                        style="width: 100%; height: 50px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 25px; color: #fff; font-size: 16px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; box-shadow: 0 4px 15px rgba(240, 62, 62, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>Log Out</span>
-                </button>
-            </div>
-
-        </div> <!-- Closing main profile-container -->
-
-        <!-- 8. Animated Premium Custom Confirmation Popup UI -->
-        <div id="logout-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 100000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
-            <div id="logout-modal-box" style="background: #ffffff; width: 85%; max-width: 340px; padding: 28px 24px; border-radius: 24px; text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.25); transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                
-                <!-- Warning Icon -->
-                <div style="width: 65px; height: 65px; background: #fff0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-
-                <!-- Text Info -->
-                <h3 style="margin: 0 0 10px; font-family: 'Poppins', sans-serif; font-size: 19px; color: #212529; font-weight: 600;">Log Out</h3>
-                <p style="margin: 0 0 24px; font-family: 'Poppins', sans-serif; font-size: 14px; color: #6c757d; line-height: 1.5; font-weight: 400;">Are you sure you want to log out from 91 GOA CLUB?</p>
-                
-                <!-- Action Buttons Grid -->
-                <div style="display: flex; gap: 12px;">
-                    <button id="modal-cancel-btn" style="flex: 1; height: 44px; background: #f1f3f5; border: none; border-radius: 22px; color: #495057; font-size: 14px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer;">Cancel</button>
-                    <button id="modal-confirm-btn" style="flex: 1; height: 44px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 22px; color: #fff; font-size: 14px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; box-shadow: 0 4px 12px rgba(240, 62, 62, 0.25);">Yes, Out</button>
-                </div>
-            </div>
+<!-- एनिमेटेड लॉगआउट पॉपअप बॉक्स -->
+<div id="logout-confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 100000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+    <div id="logout-modal-box" style="background: #ffffff; width: 85%; max-width: 340px; padding: 28px 24px; border-radius: 24px; text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.25); transform: scale(0.7); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <div style="width: 65px; height: 65px; background: #fff0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f03e3e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         </div>
+        <h3 style="margin: 0 0 10px; font-size: 19px; color: #212529; font-weight: 600;">Log Out</h3>
+        <p style="margin: 0 0 24px; font-size: 14px; color: #6c757d; line-height: 1.5;">Are you sure you want to log out from Goa Club?</p>
+        <div style="display: flex; gap: 12px;">
+            <button id="modal-cancel-btn" style="flex: 1; height: 44px; background: #f1f3f5; border: none; border-radius: 22px; color: #495057; font-size: 14px; font-weight: 600; cursor: pointer;">Cancel</button>
+            <button id="modal-confirm-btn" style="flex: 1; height: 44px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 22px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(240, 62, 62, 0.25);">Yes, Out</button>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const userPhone = localStorage.getItem('user_phone');
+    const nameTextElement = document.getElementById('real-user-phone');
+    const balanceElement = document.getElementById('real-wallet-balance');
 
-                <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const userPhone = localStorage.getItem('user_phone');
-        const nameTextElement = document.getElementById('real-user-phone');
-        const balanceElement = document.getElementById('real-wallet-balance');
+    // सुरक्षा कवच
+    if (!userPhone) {
+        window.location.href = "index.html";
+        return;
+    }
 
-        if (!userPhone) {
-            if (nameTextElement) nameTextElement.innerText = "GUEST USER";
-            if (balanceElement) balanceElement.innerText = "₹0.00";
-        } else {
-            if (nameTextElement) nameTextElement.innerText = userPhone;
+    if (nameTextElement) nameTextElement.innerText = userPhone;
+    
+    // नए सर्वर से सीधे बैलेंस लोड करना
+    fetchLiveBalance(userPhone, balanceElement);
+
+    const walletBtn = document.querySelector('.wallet-enter-btn');
+    if (walletBtn) {
+        walletBtn.addEventListener('click', function() {
             fetchLiveBalance(userPhone, balanceElement);
-        }
-
-        const walletBtn = document.querySelector('.wallet-enter-btn');
-        if (walletBtn) {
-            walletBtn.removeAttribute('onclick');
-            walletBtn.addEventListener('click', function() {
-                if (userPhone) {
-                    fetchLiveBalance(userPhone, balanceElement);
-                }
-            });
-        }
-
-        const mainLogoutBtn = document.getElementById('logout-btn');
-        const modalOverlay = document.getElementById('logout-confirm-modal');
-        const modalBox = document.getElementById('logout-modal-box');
-        const cancelBtn = document.getElementById('modal-cancel-btn');
-        const confirmBtn = document.getElementById('modal-confirm-btn');
-
-        if (mainLogoutBtn && modalOverlay && modalBox) {
-            mainLogoutBtn.addEventListener('click', function() {
-                modalOverlay.style.display = "flex";
-                setTimeout(() => {
-                    modalOverlay.style.opacity = "1";
-                    modalBox.style.transform = "scale(1)";
-                }, 10);
-            });
-        }
-
-        if (cancelBtn && modalOverlay && modalBox) {
-            cancelBtn.addEventListener('click', function() {
-                modalBox.style.transform = "scale(0.7)";
-                modalOverlay.style.opacity = "0";
-                setTimeout(() => { 
-                    modalOverlay.style.display = "none"; 
-                }, 200);
-            });
-        }
-
-        if (confirmBtn && modalOverlay && modalBox) {
-            confirmBtn.addEventListener('click', function() {
-                localStorage.removeItem('user_phone');
-                modalBox.style.transform = "scale(0.7)";
-                modalOverlay.style.opacity = "0";
-                setTimeout(() => {
-                    modalOverlay.style.display = "none";
-                    window.location.href = "index.html";
-                }, 200);
-            });
-        }
-    });
-
-    function fetchLiveBalance(phone, element) {
-        if (!phone || !element) return;
-
-        fetch(`https://color-game-1kc2.onrender.com{userPhone}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Server not responding properly");
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success && data.balance !== undefined) {
-                element.innerText = "₹" + Number(data.balance).toFixed(2);
-            } else if (data.balance !== undefined) {
-                element.innerText = "₹" + Number(data.balance).toFixed(2);
-            }
-        })
-        .catch(err => {
-            console.log("सर्वर कनेक्शन स्थापित करने में समस्या:", err);
         });
     }
-</script>
 
-    </body>
+    // --- लॉगआउट पॉपअप हैंडलर ---
+    const mainLogoutBtn = document.getElementById('logout-btn');
+    const modalOverlay = document.getElementById('logout-confirm-modal');
+    const modalBox = document.getElementById('logout-modal-box');
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+    const confirmBtn = document.getElementById('modal-confirm-btn');
+
+    if (mainLogoutBtn && modalOverlay && modalBox) {
+        mainLogoutBtn.addEventListener('click', function() {
+            modalOverlay.style.display = "flex";
+            setTimeout(() => {
+                modalOverlay.style.opacity = "1";
+                modalBox.style.transform = "scale(1)";
+            }, 10);
+        });
+    }
+
+    if (cancelBtn && modalOverlay && modalBox) {
+        cancelBtn.addEventListener('click', function() {
+            modalBox.style.transform = "scale(0.7)";
+            modalOverlay.style.opacity = "0";
+            setTimeout(() => {
+                modalOverlay.style.display = "none";
+            }, 200);
+        });
+    }
+
+    if (confirmBtn && modalOverlay && modalBox) {
+        confirmBtn.addEventListener('click', function() {
+            localStorage.removeItem('user_phone');
+            modalBox.style.transform = "scale(0.7)";
+            modalOverlay.style.opacity = "0";
+            setTimeout(() => {
+                modalOverlay.style.display = "none";
+                window.location.href = "index.html";
+            }, 200);
+        });
+    }
+});
+
+// नए सर्वर से बैलेंस फेच करने का क्लीन फंक्शन
+function fetchLiveBalance(phone, element) {
+    if (!phone || !element) return;
+
+    fetch(`https://color-game-1kc2.onrender.com{phone}`)
+    .then(response => {
+        if (!response.ok) throw new Error("Server Error");
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.success && data.balance !== undefined) {
+            element.innerText = "₹" + Number(data.balance).toFixed(2);
+        } else {
+            element.innerText = "₹0.00";
+        }
+    })
+    .catch(err => {
+        element.innerText = "₹0.00";
+        console.log("Connection Error:", err);
+    });
+}
+</script>
+</body>
 </html>

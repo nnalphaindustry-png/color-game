@@ -13,9 +13,9 @@ const io = socketIo(server, {
 });
 
 app.use(express.json());
-// लाइन 16 से 24 की जगह यह पूरा ब्लॉक पेस्ट करें
+// === लाइन 17 से 33 की जगह यह साफ कोड डालें ===
 const corsOptions = {
-    origin: "*", 
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
     credentials: true
@@ -24,14 +24,14 @@ app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
     }
     next();
 });
-
+// === इसके तुरंत बाद आपकी लाइन 36 (app.use(express.static...)) शुरू होगी ===
 
 app.use(express.static(path.join(__dirname, '')));
 

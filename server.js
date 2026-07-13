@@ -134,22 +134,27 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// === अपनी server.js में इस रूट को वेरीफाई या रिप्लेस कर लें ===
+// === अपनी server.js के लाइन 138 से 154 वाले हिस्से को इससे बदल दो ===
 app.get('/api/balance/:phone', async (req, res) => {
+    // हर रिक्वेस्ट को पास करने के लिए रिस्पॉन्स हेडर्स को यहीं लॉक कर देते हैं
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    
     try {
         const user = await User.findOne({ phone: req.params.phone });
         if (!user) {
             return res.json({ success: false, message: "User not found!" });
         }
-        // फ्रंटएंड को success: true के साथ बैलेंस भेजना
-        res.json({ 
-            success: true, 
-            balance: user.balance, 
-            requiredWager: user.requiredWager || 0 
+        
+        // सीधे बिना किसी तामझाम के डेटा वापस भेजना
+        return res.json({
+            success: true,
+            balance: Number(user.balance || 0),
+            requiredWager: Number(user.requiredWager || 0)
         });
     } catch (err) {
         console.error("Balance fetching server error:", err);
-        res.status(500).json({ success: false, message: "Server error fetching balance!" });
+        return res.status(500).json({ success: false, message: "Server error" });
     }
 });
 

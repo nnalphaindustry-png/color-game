@@ -14,25 +14,28 @@ app.use(cors({ origin: "*", credentials: true }));
 
 app.use(express.static(path.join(__dirname, '')));
 
-// === UPDATED USER SCHEMA ===
+// === USER SCHEMA ===
 const userSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    inviteCode: { type: String, default: "" }, // इनवाइट कोड सेव करने के लिए
+    inviteCode: { type: String, default: "" },
     balance: { type: Number, default: 70 }, 
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
 
-// === AUTH MIDDLEWARE ===
-const requireAuth = (req, res, next) => {
-    const phone = req.headers['x-user-phone'] || req.body.phone || req.query.phone;
-    if (!phone) {
-        return res.status(401).json({ success: false, message: "Unauthorized! Please login first." });
+// === LIVE DATABASE STATUS ROUTE ===
+// इसे ब्राउज़र में खोलकर आप चेक कर सकते हैं कि डेटाबेस कनेक्टेड है या नहीं
+app.get('/api/db-status', (req, res) => {
+    const states = ["Disconnected", "Connected", "Connecting", "Disconnecting"];
+    const statusNum = mongoose.connection.readyState; // मोंगोडीबी की स्थिति जांचें
+    
+    if (statusNum === 1) {
+        return res.json({ success: true, status: states[statusNum], message: "Database is fully connected!" });
+    } else {
+        return res.json({ success: false, status: states[statusNum], message: "Database is NOT connected!" });
     }
-    req.userPhone = phone.trim();
-    next();
-};
+});
 
 // === REGISTER ROUTE ===
 app.post('/api/register', async (req, res) => {
@@ -41,16 +44,13 @@ app.post('/api/register', async (req, res) => {
         if (!phone || !password || !confirmPassword) {
             return res.json({ success: false, message: "Required fields are missing!" });
         }
-
         if (password !== confirmPassword) {
             return res.json({ success: false, message: "Passwords do not match!" });
         }
-
         const exists = await User.findOne({ phone: phone.trim() });
         if (exists) {
             return res.json({ success: false, message: "This phone number is already registered!" });
         }
-
         const newUser = new User({
             phone: phone.trim(),
             password: password.trim(),
@@ -68,11 +68,9 @@ app.post('/api/login', async (req, res) => {
     try {
         const { phone, password } = req.body;
         const user = await User.findOne({ phone: phone.trim(), password: password.trim() });
-        
         if (!user) {
             return res.json({ success: false, message: "Invalid phone number or password!" });
         }
-        
         res.json({ 
             success: true, 
             phone: user.phone, 
@@ -81,19 +79,6 @@ app.post('/api/login', async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ success: false, message: "Server error during login!" });
-    }
-});
-
-// === LIVE BALANCE ROUTE ===
-app.get('/api/balance/:phone', requireAuth, async (req, res) => {
-    try {
-        const user = await User.findOne({ phone: req.params.phone.trim() });
-        if (!user) {
-            return res.json({ success: false, message: "User not found!" });
-        }
-        res.json({ success: true, balance: Number(user.balance || 0) });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Server error fetching balance!" });
     }
 });
 

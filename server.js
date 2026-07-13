@@ -186,47 +186,48 @@ app.get('/api/admin/deposits/pending', async (req, res) => {
     }
 });
 
-// === २. डिपॉजिट को अप्रूव (PASS) करके खिलाड़ी का बैलेंस बढ़ाने का मुख्य रूट ===
+// === अपनी server.js में पुराने approve रूट को इस कोड से बदलें ===
 app.post('/api/admin/deposit/approve', async (req, res) => {
     try {
         const { utrNumber } = req.body;
 
-        // १. पहले चेक करें कि यह रीचार्ज रिक्वेस्ट डेटाबेस में है या नहीं
-        const depositRequest = await Deposit.findOne({ utrNumber: utrNumber });
-        if (!depositRequest) {
-            return res.json({ success: false, message: "No deposit request found with this UTR!" });
+        // 1. पहले वो डिपॉजिट रिक्वेस्ट ढूंढो जो पेंडिंग हो
+        const depositOrder = await Deposit.findOne({ utrNumber: utrNumber });
+        if (!depositOrder) {
+            return res.json({ success: false, message: "Deposit request order not found!" });
         }
 
-        // २. चेक करें कि यह पहले से अप्रूव्ड तो नहीं है (डबल बैलेंस रोकने के लिए सुरक्षा चेक)
-        if (depositRequest.status !== 'PENDING') {
-            return res.json({ success: false, message: `This request is already ${depositRequest.status}!` });
+        if (depositOrder.status === 'SUCCESS') {
+            return res.json({ success: false, message: "This order is already approved!" });
         }
 
-        // ३. मुख्य काम: खिलाड़ी के अकाउंट को ढूंढकर उसका लाइव बैलेंस बढ़ाना
-        const user = await User.findOne({ phone: depositRequest.phone });
-        if (!user) {
-            return res.json({ success: false, message: "The user who requested this deposit no longer exists!" });
+        // 2. यूजर के वॉलेट में पैसे बढ़ाओ ($inc का इस्तेमाल करके)
+        const playerPhone = depositOrder.phone;
+        const depositAmount = Number(depositOrder.amount);
+
+        const userUpdate = await User.findOneAndUpdate(
+            { phone: playerPhone },
+            { $inc: { balance: depositAmount } }, // यह सीधे पुराने बैलेंस में अमाउंट प्लस कर देगा
+            { new: true } // अपडेटेड डेटा रिटर्न करेगा
+        );
+
+        if (!userUpdate) {
+            return res.json({ success: false, message: "User account not found to credit balance!" });
         }
 
-        // प्लेयर के पुराने बैलेंस में नया अमाउंट जोड़ना
-        user.balance = Number(user.balance) + Number(depositRequest.amount);
-        await user.save();
+        // 3. डिपॉजिट का स्टेटस SUCCESS करो
+        depositOrder.status = 'SUCCESS';
+        await depositOrder.save();
 
-        // 8. डिपॉजिट रिक्वेस्ट का स्टेटस पेंडिंग से बदलकर SUCCESS करना
-        depositRequest.status = 'SUCCESS';
-        await depositRequest.save();
-
-        res.json({ 
-            success: true, 
-            message: `Deposit of ₹${depositRequest.amount} approved! User balance updated successfully.`,
-            newBalance: user.balance
-        });
+        console.log(`✅ Success! credited ₹${depositAmount} to ${playerPhone}`);
+        res.json({ success: true, message: `Successfully approved & credited ₹${depositAmount}!` });
 
     } catch (err) {
-        console.error("Deposit approval error:", err);
-        res.status(500).json({ success: false, message: "Server error during approval processing!" });
+        console.error("Approval critical error:", err);
+        res.status(500).json({ success: false, message: "Internal server error during approval" });
     }
 });
+
 
 // फाइलों के डायरेक्ट राउट्स
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

@@ -13,7 +13,7 @@ const io = socketIo(server, {
 });
 
 app.use(express.json());
-// === लाइन 17 से 33 की जगह यह साफ कोड डालें ===
+// === अपनी server.js में लाइन 17 से 33 की जगह सिर्फ इतना पेस्ट करें ===
 const corsOptions = {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -31,7 +31,6 @@ app.use((req, res, next) => {
     }
     next();
 });
-// === इसके तुरंत बाद आपकी लाइन 36 (app.use(express.static...)) शुरू होगी ===
 
 app.use(express.static(path.join(__dirname, '')));
 

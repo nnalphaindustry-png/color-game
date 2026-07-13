@@ -528,90 +528,91 @@
             </div>
         </div>
 
-                <!-- लाइव वॉलेट कनेक्शन और कन्फर्मेशन पॉपअप कंट्रोल स्क्रिप्ट -->
-        <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // 1. ब्राउज़र की तिजोरी (auth.js) से लॉगिन प्लेयर का नंबर निकालना
-            const userPhone = localStorage.getItem('user_phone');
-            const nameTextElement = document.getElementById('real-user-phone');
-            const balanceElement = document.getElementById('real-wallet-balance');
+                <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const userPhone = localStorage.getItem('user_phone');
+        const nameTextElement = document.getElementById('real-user-phone');
+        const balanceElement = document.getElementById('real-wallet-balance');
 
-            // अगर ब्राउज़र की मेमोरी खाली है (कोई लॉगिन नहीं है)
-            if (!userPhone) {
-                if (nameTextElement) nameTextElement.innerText = "GUEST USER";
-                if (balanceElement) balanceElement.innerText = "₹0.00";
-            } else {
-                // नंबर मिलते ही उसे स्क्रीन पर तुरंत नाम की जगह छाप देना
-                if (nameTextElement) nameTextElement.innerText = userPhone;
+        if (!userPhone) {
+            if (nameTextElement) nameTextElement.innerText = "GUEST USER";
+            if (balanceElement) balanceElement.innerText = "₹0.00";
+        } else {
+            if (nameTextElement) nameTextElement.innerText = userPhone;
+            fetchLiveBalance(userPhone, balanceElement);
+        }
+
+        const walletBtn = document.querySelector('.wallet-enter-btn');
+        if (walletBtn) {
+            walletBtn.removeAttribute('onclick');
+            walletBtn.addEventListener('click', function() {
+                if (userPhone) {
+                    fetchLiveBalance(userPhone, balanceElement);
+                }
+            });
+        }
+
+        const mainLogoutBtn = document.getElementById('logout-btn');
+        const modalOverlay = document.getElementById('logout-confirm-modal');
+        const modalBox = document.getElementById('logout-modal-box');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        const confirmBtn = document.getElementById('modal-confirm-btn');
+
+        if (mainLogoutBtn && modalOverlay && modalBox) {
+            mainLogoutBtn.addEventListener('click', function() {
+                modalOverlay.style.display = "flex";
+                setTimeout(() => {
+                    modalOverlay.style.opacity = "1";
+                    modalBox.style.transform = "scale(1)";
+                }, 10);
+            });
+        }
+
+        if (cancelBtn && modalOverlay && modalBox) {
+            cancelBtn.addEventListener('click', function() {
+                modalBox.style.transform = "scale(0.7)";
+                modalOverlay.style.opacity = "0";
+                setTimeout(() => { 
+                    modalOverlay.style.display = "none"; 
+                }, 200);
+            });
+        }
+
+        if (confirmBtn && modalOverlay && modalBox) {
+            confirmBtn.addEventListener('click', function() {
+                localStorage.removeItem('user_phone');
+                modalBox.style.transform = "scale(0.7)";
+                modalOverlay.style.opacity = "0";
+                setTimeout(() => {
+                    modalOverlay.style.display = "none";
+                    window.location.href = "index.html";
+                }, 200);
+            });
+        }
+    });
+
+    function fetchLiveBalance(phone, element) {
+        if (!phone || !element) return;
+
+        fetch(`https://color-game-1kc2.onrender.com{userPhone}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Server not responding properly");
             }
-
-            // 2. आपके लाइव रेंडर सर्वर डेटाबेस से बिल्कुल असली पैसा (Real Money) खींचने का इंजन
-            function fetchLiveBalance() {
-                if (!userPhone) return;
-
-                fetch(`https://color-game-1kc2.onrender.com{userPhone}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error("Server not responding");
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success && balanceElement) {
-                            // डेटाबेस में जितना भी असली पैसा होगा, वह यहाँ सटीक रूप से दिखेगा (जैसे वेलकम बोनस ₹70.00)
-                            balanceElement.innerText = "₹" + Number(data.balance).toFixed(2);
-                        }
-                    })
-                    .catch(err => {
-                        console.log("सर्वर कनेक्शन स्थापित करने में समस्या:", err);
-                    });
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.balance !== undefined) {
+                element.innerText = "₹" + Number(data.balance).toFixed(2);
+            } else if (data.balance !== undefined) {
+                element.innerText = "₹" + Number(data.balance).toFixed(2);
             }
-
-            // पेज लोड होते ही तुरंत लाइव सर्वर से असली डेटा खींचना
-            fetchLiveBalance();
-
-            // रीफ्रेश करने के लिए वॉलेट बटन पर क्लिक करने का सपोर्ट
-            const walletBtn = document.querySelector('.wallet-enter-btn');
-            if (walletBtn) {
-                walletBtn.removeAttribute('onclick'); // पुराना Static Alert हटाना
-                walletBtn.addEventListener('click', fetchLiveBalance);
-            }
-
-            // --- कन्फर्मेशन पॉपअप और लॉगआउट बटन्स का सुरक्षित काम ---
-            const mainLogoutBtn = document.getElementById('logout-btn');
-            const modalOverlay = document.getElementById('logout-confirm-modal');
-            const modalBox = document.getElementById('logout-modal-box');
-            const cancelBtn = document.getElementById('modal-cancel-btn');
-            const confirmBtn = document.getElementById('modal-confirm-btn');
-
-            if (mainLogoutBtn && modalOverlay && modalBox) {
-                mainLogoutBtn.addEventListener('click', function() {
-                    modalOverlay.style.display = "flex";
-                    setTimeout(() => {
-                        modalOverlay.style.opacity = "1";
-                        modalBox.style.transform = "scale(1)";
-                    }, 10);
-                });
-            }
-
-            if (cancelBtn && modalOverlay && modalBox) {
-                cancelBtn.addEventListener('click', function() {
-                    modalBox.style.transform = "scale(0.7)";
-                    modalOverlay.style.opacity = "0";
-                    setTimeout(() => { modalOverlay.style.display = "none"; }, 200);
-                });
-            }
-
-            if (confirmBtn && modalOverlay && modalBox) {
-                confirmBtn.addEventListener('click', function() {
-                    localStorage.removeItem('user_phone'); // मेमोरी साफ
-                    modalBox.style.transform = "scale(0.7)";
-                    modalOverlay.style.opacity = "0";
-                    setTimeout(() => {
-                        modalOverlay.style.display = "none";
-                        window.location.href = "index.html"; // लॉगिन गेटवे पर वापसी
-                    }, 200);
-                });
-            }
+        })
+        .catch(err => {
+            console.log("सर्वर कनेक्शन स्थापित करने में समस्या:", err);
         });
-        </script>
+    }
+</script>
+
     </body>
 </html>

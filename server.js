@@ -134,16 +134,25 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// यूजर का लाइव बैलेंस खींचने का रूट जो home.html पर काम आएगा
+// === अपनी server.js में इस रूट को वेरीफाई या रिप्लेस कर लें ===
 app.get('/api/balance/:phone', async (req, res) => {
     try {
         const user = await User.findOne({ phone: req.params.phone });
-        if (!user) return res.json({ success: false, message: "User not found!" });
-        res.json({ success: true, balance: user.balance, requiredWager: user.requiredWager || 0 });
+        if (!user) {
+            return res.json({ success: false, message: "User not found!" });
+        }
+        // फ्रंटएंड को success: true के साथ बैलेंस भेजना
+        res.json({ 
+            success: true, 
+            balance: user.balance, 
+            requiredWager: user.requiredWager || 0 
+        });
     } catch (err) {
+        console.error("Balance fetching server error:", err);
         res.status(500).json({ success: false, message: "Server error fetching balance!" });
     }
 });
+
 app.post('/api/deposit/submit', async (req, res) => {
     try {
         // फ्रंटएंड से utrNumber या utrnumber दोनों में से जो भी आए, उसे उठा लो

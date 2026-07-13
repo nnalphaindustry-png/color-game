@@ -195,89 +195,90 @@
     </div>
         <!-- 3. Secure C-Panel Sync Engine JavaScript -->
     <script>
-        const LIVE_SERVER_URL = "https://color-game-1kc2.onrender.com";
+        const LIVE_SERVER_URL = "https://color-game-1kc2.onrender.com{userPhone";
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // पेज खुलते ही लाइव पेंडिंग रिक्वेस्ट की लिस्ट लोड करना
-            loadPendingDepositsList();
-        });
+// ===  :         ===
+document.addEventListener("DOMContentLoaded", function() {
+    const adminPin = prompt("Enter Admin Secure PIN to access C-Panel:");
+    if (adminPin !== "1234") { // "1234"     / 
+        alert(" Access Denied! Invalid PIN.");
+        document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:#ef4444;'>Unauthorized Access!</h1>";
+        return;
+    }
+    //         
+    loadPendingDepositsList();
+});
 
-        // १. डेटाबेस से सभी 'PENDING' रीचार्ज रिक्वेस्ट्स खींचकर टेबल में सजाने का फंक्शन
-        function loadPendingDepositsList() {
-            const tableBody = document.getElementById('pending-list-table-body');
-            const emptyView = document.getElementById('empty-state-view');
-            const mainTable = document.getElementById('requests-grid-table');
+function loadPendingDepositsList() {
+    const tableBody = document.getElementById('pending-list-table-body');
+    const emptyView = document.getElementById('empty-state-view');
+    
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #9ca3af;"> Loading live database logs...</td></tr>`;
+    emptyView.style.display = "none";
 
-            tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #9ca3af;">⏳ Loading live database logs...</td></tr>`;
-            emptyView.style.display = "none";
-
-            fetch(`${LIVE_SERVER_URL}/api/admin/deposits/pending`)
-                .then(response => response.json())
-                .then(res => {
-                    if (res.success && res.data.length > 0) {
-                        tableBody.innerHTML = ""; // पुराना लोडिंग डेटा साफ करें
-                        
-                        // हर एक पेंडिंग रिक्वेस्ट को लूप चलाकर टेबल में एक सुंदर रो (Row) बनाना
-                        res.data.forEach(order => {
-                            const tableRowHTML = `
-                                <tr>
-                                    <td style="font-weight: 600;">📱 ${order.phone}</td>
-                                    <td><span class="amount-badge-txt">₹${Number(order.amount).toFixed(2)}</span></td>
-                                    <td><span class="utr-highlight-txt">${order.utrNumber}</span></td>
-                                    <td><span class="status-pill-pending">${order.status}</span></td>
-                                    <td>
-                                        <button class="approve-action-btn" onclick="processDepositApproval('${order.utrNumber}', ${order.amount}, '${order.phone}');">
-                                            ✅ Approve Pass
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                            tableBody.insertAdjacentHTML('beforeend', tableRowHTML);
-                        });
-                    } else {
-                        // अगर कोई पेंडिंग रिक्वेस्ट नहीं है तो खाली लुक दिखाएं
-                        tableBody.innerHTML = "";
-                        emptyView.style.display = "block";
-                    }
-                })
-                .catch(err => {
-                    console.error("Database connection error:", err);
-                    tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444;">❌ Failed to connect with Live Render Server!</td></tr>`;
-                });
-        }
-
-        // २. हरे बटन पर क्लिक करते ही खिलाड़ी का असली बैलेंस बढ़ाने और आर्डर सक्सेसफुल करने का मुख्य फंक्शन
-        function processDepositApproval(utrNum, orderAmt, playerPhone) {
-            // सुरक्षा पुष्टीकरण पॉपअप
-            const isConfirmed = confirm(`Are you sure you want to APPROVE ₹${orderAmt} for player ${playerPhone}?\nUTR: ${utrNum}`);
-            if (!isConfirmed) return;
-
-            // बटन को तुरंत डिसएबल करना ताकि डबल क्लिक से दो बार बैलेंस न बढ़े
-            event.target.disabled = true;
-            event.target.innerText = "⏳ Processing...";
-
-            // बैकएंड सर्वर की अप्रूवल API को कॉल भेजना
-            fetch(`${LIVE_SERVER_URL}/api/admin/deposit/approve`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ utrNumber: utrNum })
-            })
-            .then(response => response.json())
-            .then(res => {
-                if (res.success) {
-                    alert(`✅ Success! ₹${orderAmt} has been credited to ${playerPhone}.`);
-                    loadPendingDepositsList(); // लिस्ट को तुरंत रीफ्रेश करके साफ़ करें
-                } else {
-                    alert(`❌ Error: ${res.message}`);
-                    loadPendingDepositsList();
-                }
-            })
-            .catch(err => {
-                console.error("Approval Server error:", err);
-                alert("❌ Server Connection Failure! Check render logs.");
-                loadPendingDepositsList();
+    fetch(`${LIVE_SERVER_URL}/api/admin/deposits/pending`)
+    .then(response => response.json())
+    .then(res => {
+        if (res.success && res.data.length > 0) {
+            tableBody.innerHTML = ""; 
+            res.data.forEach(order => {
+                //  onclick  'this'           
+                const tableRowHTML = `
+                <tr>
+                    <td style="font-weight: 600;"> ${order.phone}</td>
+                    <td><span class="amount-badge-txt">${Number(order.amount).toFixed(2)}</span></td>
+                    <td><span class="utr-highlight-txt">${order.utrNumber}</span></td>
+                    <td><span class="status-pill-pending">${order.status}</span></td>
+                    <td>
+                        <button class="approve-action-btn" onclick="processDepositApproval(this, '${order.utrNumber}', ${order.amount}, '${order.phone}');">
+                             Approve Pass
+                        </button>
+                    </td>
+                </tr>`;
+                tableBody.insertAdjacentHTML('beforeend', tableRowHTML);
             });
+        } else {
+            tableBody.innerHTML = "";
+            emptyView.style.display = "block";
         }
+    })
+    .catch(err => {
+        console.error("Database connection error:", err);
+        tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ef4444;"> Failed to connect with Live Render Server!</td></tr>`;
+    });
+}
+
+// buttonRef         
+function processDepositApproval(buttonRef, utrNum, orderAmt, playerPhone) {
+    const isConfirmed = confirm(`Are you sure you want to APPROVE ${orderAmt} for player ${playerPhone}?\nUTR: ${utrNum}`);
+    if (!isConfirmed) return;
+
+    //       
+    buttonRef.disabled = true;
+    buttonRef.innerText = " Processing...";
+
+    fetch(`${LIVE_SERVER_URL}/api/admin/deposit/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ utrNumber: utrNum })
+    })
+    .then(response => response.json())
+    .then(res => {
+        if (res.success) {
+            alert(` Success! ${orderAmt} has been credited to ${playerPhone}.`);
+            loadPendingDepositsList(); 
+        } else {
+            alert(` Error: ${res.message}`);
+            loadPendingDepositsList();
+        }
+    })
+    .catch(err => {
+        console.error("Approval Server error:", err);
+        alert(" Server Connection Failure! Check render logs.");
+        loadPendingDepositsList();
+    });
+}
+
     </script>
 </body>
 </html>

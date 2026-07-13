@@ -13,7 +13,7 @@ const io = socketIo(server, {
 });
 
 app.use(express.json());
-// === अपनी server.js में लाइन 17 से 33 की जगह सिर्फ इतना पेस्ट करें ===
+app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

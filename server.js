@@ -333,6 +333,38 @@ app.post('/api/place-bet', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर त्रुटि! बेट नहीं लग पाई।" });
     }
 });
+// =======================================================
+// ➕ यहाँ से नया लाइव टाइमर का API रास्ता शुरू होता है
+// =======================================================
+app.get('/api/game-state/30s', (req, res) => {
+    try {
+        // अगर किसी वजह से पीरियड आईडी नहीं बनी है, तो तुरंत नई आईडी बनाना
+        if (!currentPeriod30s) {
+            const now = new Date();
+            const dateStr = now.getFullYear() + 
+                            String(now.getMonth() + 1).padStart(2, '0') + 
+                            String(now.getDate()).padStart(2, '0');
+            const totalHalfMinutes = Math.floor((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 30);
+            currentPeriod30s = dateStr + String(totalHalfMinutes).padStart(4, '0');
+        }
+
+        // फ्रंटएंड को साफ़-सुथरा JSON डेटा भेजना
+        return res.status(200).json({
+            success: true,
+            periodId: String(currentPeriod30s),
+            timeRemaining: Number(timeRemaining30s)
+        });
+    } catch (error) {
+        console.error("Timer API Error:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "सर्वर टाइमर एरर" 
+        });
+    }
+});
+// =======================================================
+// ➖ लाइव टाइमर का API रास्ता यहाँ समाप्त होता है
+// =======================================================
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)

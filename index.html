@@ -1,185 +1,174 @@
 <!DOCTYPE html>
-<html lang="en" style="color-scheme: light !important; background-color: #ffffff !important;">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="color-scheme" content="light">
-<title>91 GOA CLUB - Welcome</title>
-<style>
-/* प्रिव्यूअर ऐप के डार्क मोड और किसी भी गलत कलर टिनट को साफ करने का मास्टर हैक */
-html, body {
-background-color: #ffffff !important; 
-background: #ffffff !important;
-color: #1a202c !important;
-margin: 0 !important;
-padding: 0 !important;
-height: 100% !important;
-width: 100% !important;
-font-family: sans-serif !important;
-}
-/* ज़बरदस्ती सफेदी बनाए रखने का स्पेशल फ़िल्टर */
-@media (prefers-color-scheme: dark) {
-.force-white-container {
-background-color: #ffffff !important;
-color: #1a202c !important;
-}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 GOA CLUB - Login & Register</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+        .main-container { width: 100%; max-width: 450px; background-color: #ffffff; min-height: 100vh; position: relative; padding-bottom: 40px; }
+        .header-banner { background: linear-gradient(180deg, #ff4d4d, #f03e3e); padding: 40px 20px; color: white; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .header-banner h1 { font-size: 28px; margin-bottom: 5px; letter-spacing: 1px; }
+        .tab-container { display: flex; justify-content: space-around; margin: 20px 0; border-bottom: 2px solid #f1f3f5; }
+        .tab-btn { font-size: 16px; font-weight: 600; padding: 10px 20px; border: none; background: none; cursor: pointer; color: #8e9aa7; width: 50%; text-align: center; outline: none; }
+        .tab-btn.active { color: #f03e3e; border-bottom: 3px solid #f03e3e; }
+        .form-box { padding: 0 24px; display: none; }
+        .form-box.active { display: block; }
+        .input-group { margin-bottom: 18px; }
+        .input-group label { display: block; font-size: 14px; color: #333; margin-bottom: 8px; font-weight: 600; }
+        .input-group input { width: 100%; height: 48px; border: 1px solid #ced4da; border-radius: 12px; padding: 0 15px; font-size: 15px; background-color: #f8f9fa; outline: none; }
+        .input-group input:focus { border-color: #f03e3e; background-color: #fff; }
+        .action-btn { width: 100%; height: 48px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 24px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(240, 62, 62, 0.2); }
+        .extra-links-container { display: flex; justify-content: space-between; margin-top: 20px; padding: 0 5px; }
+        .extra-link { font-size: 14px; color: #f03e3e; text-decoration: none; font-weight: 500; cursor: pointer; }
+        .extra-link:hover { text-decoration: underline; }
+        .footer-links { text-align: center; margin-top: 35px; font-size: 14px; color: #6c757d; }
+    </style>
 </head>
 <body>
-<!-- पूरे मोबाइल स्क्रीन को कवर करने वाला मुख्य कंटेनर -->
-<div class="force-white-container" style="max-width: 480px; margin: 0 auto; background-color: #ffffff; background: #ffffff; min-height: 100vh; display: flex; flex-direction: column;">
-<!-- ऊपर का चमकीला लाल बैनर (91 GOA CLUB नाम के साथ) -->
-<div style="background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%); padding: 25px 20px; text-align: left; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;">
-<div style="text-align: center; font-size: 26px; font-weight: 900; letter-spacing: 1px; margin-bottom: 12px; font-style: italic; color: #ffffff;">91 GOA CLUB</div>
-<h2 id="page-title" style="font-size: 22px; font-weight: 700; margin: 0 0 5px 0; color: #ffffff;">Log in</h2>
-<p id="page-desc" style="font-size: 11px; color: #ffffff; margin: 0; line-height: 1.4; opacity: 0.95;">Please log in with your phone number.<br>If you forget your password, please contact customer service.</p>
-</div>
-<!-- मुख्य सफ़ेद BODY क्षेत्र -->
-<div style="padding: 20px; flex: 1; background-color: #ffffff; background: #ffffff;">
-<!-- एरर/सफलता दिखाने वाला अलर्टबॉक्स -->
-<div id="alert-box" style="display: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; margin-bottom: 15px;"></div>
-<!-- नेविगेशन टैब पट्टी -->
-<div style="display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; background-color: #ffffff;">
-<div style="flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 700; color: #ff4757; border-bottom: 2px solid #ff4757;" id="tab-phone">Phone Number</div>
-<div style="flex: 1; text-align: center; padding: 10px 0; font-size: 14px; font-weight: 600; color: #718096; opacity: 0.5;">Email Login</div>
-</div>
-<!-- मुख्य फॉर्म क्षेत्र (यहाँ processRegister को बदलकर processRegistration कर दिया गया है जो auth.js से मैच करता है) -->
-<form id="auth-form" style="background-color: #ffffff;" onsubmit="if(isLoginMode){processLogin(event)}else{processRegistration(event)}">
-<!-- 1. नाम (सिर्फ रजिस्ट्रेशन के समय खुलेगा) -->
-<div id="name-group" style="display: none; margin-bottom: 12px;">
-<label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Full Name</label>
-<div style="background-color: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;">
-<input type="text" id="fullname" placeholder="Please enter full name" autocomplete="off" style="width: 100%; border: none; outline: none; font-size: 14px; color: #2d3748; background: transparent;">
-</div>
-</div>
 
-<!-- 2. मोबाइल नंबर -->
-<div style="margin-bottom: 12px;">
-<label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Phone number</label>
-<div style="background-color: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center;">
-<span style="font-size: 14px; font-weight: 600; color: #4a5568; margin-right: 10px; padding-right: 10px; border-right: 1px solid #e2e8f0;">+91 ⌵</span>
-<input type="tel" id="phone" required placeholder="Please enter phone number" maxlength="10" autocomplete="off" style="width: 100%; border: none; outline: none; font-size: 14px; color: #2d3748; background: transparent;">
-</div>
-</div>
-<!-- 3. पासवर्ड -->
-<div style="margin-bottom: 12px;">
-<label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Password</label>
-<div style="background-color: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; position: relative;">
-<input type="password" id="password" required placeholder="Please enter password" autocomplete="off" style="width: 90%; border: none; outline: none; font-size: 14px; color: #2d3748; background: transparent;">
-<i class="fa-regular fa-eye-slash" style="position: absolute; right: 12px; color: #a0aec0; cursor: pointer; z-index: 10;" onclick="togglePass('password', this)"></i>
-</div>
-</div>
-<!-- 4. कन्फर्म पासवर्ड -->
-<div id="confirm-group" style="display: none; margin-bottom: 12px;">
-<label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Confirm Password</label>
-<div style="background-color: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; position: relative;">
-<input type="password" id="confirm-password" placeholder="Please re-enter password" autocomplete="off" style="width: 90%; border: none; outline: none; font-size: 14px; color: #2d3748; background: transparent;">
-<i class="fa-regular fa-eye-slash" style="position: absolute; right: 12px; color: #a0aec0; cursor: pointer; z-index: 10;" onclick="togglePass('confirm-password', this)"></i>
-</div>
-</div>
-<!-- 5. इनवाइट कोड -->
-<div id="refer-group" style="display: none; margin-bottom: 12px;">
-<label style="font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 5px; display: block;">Invite Code</label>
-<div style="background-color: #f7f9fc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px;">
-<input type="text" id="refer-code" placeholder="Please enter invite code" autocomplete="off" style="width: 100%; border: none; outline: none; font-size: 14px; color: #2d3748; background: transparent;">
-</div>
-</div>
-<!-- मुख्य लाल बटन -->
-<button type="submit" id="submit-btn" style="width: 100%; background: linear-gradient(90deg, #ff6b6b 0%, #ff4757 100%); color: #ffffff; border: none; padding: 11px; font-size: 15px; font-weight: 700; border-radius: 25px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.2);">Log in</button>
-<!-- रजिस्ट्रेशन स्विच बटन (इसमें मुख्य लॉजिक वापस जोड़ दिया है) -->
-<button type="button" id="toggle-btn" style="width: 100%; background-color: #ffffff; color: #ff4757; border: 1px solid #ff4757; padding: 10px; font-size: 15px; font-weight: 700; border-radius: 25px; cursor: pointer; margin-top: 12px;">Register</button>
-</form>
-<!-- नीचे के हेल्प लिंक्स -->
-<div style="display: flex; justify-content: space-around; margin-top: 25px; background-color: #ffffff;">
-<div style="text-align: center; color: #718096; font-size: 11px; font-weight: 600; cursor: pointer;">
-<span style="font-size: 18px; display: block; margin-bottom: 2px;">🔒</span>Forgot password
-</div>
-<div style="text-align: center; color: #718096; font-size: 11px; font-weight: 600; cursor: pointer;">
-<span style="font-size: 18px; display: block; margin-bottom: 2px;">💬</span>Customer Service
-</div>
-</div>
-</div>
-</div>
-<!-- प्रीमियम एनिमेटेड कस्टमाइज्ड अलर्ट पॉपअप बॉक्स ढांचा -->
-<div id="custom-auth-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s ease-in-out;">
-    <div style="background: #ffffff !important; background-color: #ffffff !important; width: 85%; max-width: 340px; padding: 25px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: scale(0.8); transition: all 0.3s ease-in-out;" id="modal-card">
-        <div id="modal-icon" style="font-size: 45px; margin-bottom: 12px; display: inline-block; width: 70px; height: 75px; line-height: 75px; text-align: center;">❌</div>
-        <h3 id="modal-title" style="font-size: 19px; font-weight: 700; color: #222222 !important; margin-bottom: 8px;">Error</h3>
-        <p id="modal-message" style="font-size: 13px; color: #666666 !important; line-height: 1.5; margin-bottom: 20px; padding: 0 5px;">Please check your details.</p>
-        <button onclick="closeCustomModal()" style="width: 100%; background: linear-gradient(90deg, #ff6b6b 0%, #ff4757 100%) !important; color: #ffffff !important; border: none; padding: 11px; font-size: 14px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.2);">OK</button>
+<div class="main-container">
+    <div class="header-banner">
+        <h1>91 GOA CLUB</h1>
+        <p>Welcome to premium color game</p>
+    </div>
+
+    <div class="tab-container">
+        <button id="tab-login" class="tab-btn active" onclick="switchTab('login')">Log In</button>
+        <button id="tab-register" class="tab-btn" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form" class="form-box active">
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="number" id="login-phone" placeholder="Enter your phone number">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter your password">
+        </div>
+        <button class="action-btn" onclick="handleLogin()">Log In</button>
+
+        <!--  : Forgot Password  Customer Service -->
+        <div class="extra-links-container">
+            <a class="extra-link" onclick="alert('Please contact Customer Support to reset your password.')"> Forgot password</a>
+            <a class="extra-link" onclick="alert('Redirecting to Customer Support Telegram/LiveChat...')"> Customer Service</a>
+        </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="register-form" class="form-box">
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="number" id="reg-phone" placeholder="Enter new phone number">
+        </div>
+        <div class="input-group">
+            <label>Set Password</label>
+            <input type="password" id="reg-password" placeholder="Enter strong password">
+        </div>
+        <!--  : Confirm Password -->
+        <div class="input-group">
+            <label>Confirm Password</label>
+            <input type="password" id="reg-confirm-password" placeholder="Confirm your password">
+        </div>
+        <!--  : Invite Code -->
+        <div class="input-group">
+            <label>Invite Code</label>
+            <input type="text" id="reg-invite" placeholder="Enter invite code (Optional)">
+        </div>
+        <button class="action-btn" onclick="handleRegister()">Register</button>
+    </div>
+
+    <div class="footer-links">
+        <p> Secure Database Connection</p>
     </div>
 </div>
 
 <script>
-    let modalRedirectAction = null;
-    let isLoginMode = true; // ग्लोबल वेरिएबल
+    const BACKEND_URL = "https://onrender.com";
 
-    // वह मुख्य फिक्स्ड लॉजिक जो आपके 'auth.js' की अनुपस्थिति में भी फॉर्म स्विचिंग चालू रखेगा
-    const toggleBtn = document.getElementById('toggle-btn');
-    const nameGroup = document.getElementById('name-group');
-    const confirmGroup = document.getElementById('confirm-group');
-    const referGroup = document.getElementById('refer-group');
-    const pageTitle = document.getElementById('page-title');
-    const pageDesc = document.getElementById('page-desc');
-    const submitBtn = document.getElementById('submit-btn');
+    function switchTab(type) {
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
 
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            isLoginMode = !isLoginMode;
-            if (isLoginMode) {
-                if(pageTitle) pageTitle.innerText = "Log in";
-                if(pageDesc) pageDesc.innerHTML = "Please log in with your phone number.<br>If you forget your password, please contact customer service.";
-                if(nameGroup) nameGroup.style.display = "none";
-                if(confirmGroup) confirmGroup.style.display = "none";
-                if(referGroup) referGroup.style.display = "none";
-                if(submitBtn) submitBtn.innerText = "Log in";
-                toggleBtn.innerText = "Register";
-            } else {
-                if(pageTitle) pageTitle.innerText = "Register";
-                if(pageDesc) pageDesc.innerHTML = "Create an account to start earning bonuses.<br>Make sure to fill all fields carefully.";
-                if(nameGroup) nameGroup.style.display = "block";
-                if(confirmGroup) confirmGroup.style.display = "block";
-                if(referGroup) referGroup.style.display = "block";
-                if(submitBtn) submitBtn.innerText = "Create Account";
-                toggleBtn.innerText = "Back to Log in";
+        if(type === 'login') {
+            tabLogin.classList.add('active');
+            tabRegister.classList.remove('active');
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+        } else {
+            tabRegister.classList.add('active');
+            tabLogin.classList.remove('active');
+            registerForm.classList.add('active');
+            loginForm.classList.remove('active');
+        }
+    }
+
+    function handleRegister() {
+        const phone = document.getElementById('reg-phone').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+        const confirmPassword = document.getElementById('reg-confirm-password').value.trim();
+        const inviteCode = document.getElementById('reg-invite').value.trim();
+
+        if(!phone || !password || !confirmPassword) {
+            alert("Please fill all required fields!");
+            return;
+        }
+
+        if(password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        fetch(`${BACKEND_URL}/api/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, password, confirmPassword, inviteCode })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if(data.success) {
+                switchTab('login');
             }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Registration failed! Check server connection.");
         });
     }
 
-    function openCustomModal(title, message, icon, action = null) {
-        document.getElementById("modal-title").innerText = title;
-        document.getElementById("modal-message").innerText = message;
-        document.getElementById("modal-icon").innerText = icon;
-        modalRedirectAction = action;
+    function handleLogin() {
+        const phone = document.getElementById('login-phone').value.trim();
+        const password = document.getElementById('login-password').value.trim();
 
-        const mainLayout = document.getElementById("custom-auth-modal");
-        const cardLayout = document.getElementById("modal-card");
-        
-        if(mainLayout && cardLayout) {
-            mainLayout.style.opacity = "1";
-            mainLayout.style.pointerEvents = "auto";
-            cardLayout.style.transform = "scale(1)";
+        if(!phone || !password) {
+            alert("Please fill all fields!");
+            return;
         }
-    }
 
-    function closeCustomModal() {
-        const mainLayout = document.getElementById("custom-auth-modal");
-        const cardLayout = document.getElementById("modal-card");
-        
-        if(mainLayout && cardLayout) {
-            mainLayout.style.opacity = "0";
-            mainLayout.style.pointerEvents = "none";
-            cardLayout.style.transform = "scale(0.8)";
-        }
-        if (typeof modalRedirectAction === 'function') {
-            modalRedirectAction();
-        }
+        fetch(`${BACKEND_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if(data.success) {
+                localStorage.setItem('user_phone', data.phone);
+                window.location.href = "profile.html"; 
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Login failed! Server is not responding.");
+        });
     }
 </script>
-
-<!-- बाहरी auth.js फ़ाइल कनेक्शन -->
-<script src="auth.js"></script>
 </body>
 </html>

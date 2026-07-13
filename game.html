@@ -307,30 +307,25 @@
         }
         
 
-                // सर्वर से हर सेकंड लाइव टाइमर और पीरियड आईडी सिंक करने का फ़ंक्शन
-        function startLocalTimerEngine() {
+           function startLocalTimerEngine() {
             if (localTimerInterval) clearInterval(localTimerInterval);
-
             localTimerInterval = setInterval(() => {
                 fetch(`${BACKEND_URL}/api/game-sync`)
-                    .then(res => res.json())
-                    .then(resData => {
+                    .then(res => res.json()).then(resData => {
                         if (resData.success && resData.data[currentSelectedMode]) {
                             const activeGameData = resData.data[currentSelectedMode];
-                            
-                            // 1. स्क्रीन पर लाइव पीरियड आईडी डालना
                             document.getElementById('current-period-id').innerText = activeGameData.currentPeriod;
-                            
-                            // 2. स्क्रीन पर लाइव काउंटडाउन समय डालना
                             updateTimerDisplayOnScreen(activeGameData.timeLeft);
                             
-                            // 3. आखिरी 5 सेकंड में दांव लॉक करने का लॉजिक (भविष्य के लिए)
-                            timeLeftForLast5Seconds(activeGameData.timeLeft);
+                            // अगर सर्वर का टाइमर बिल्कुल 1 या 0 पर है, तो तुरंत डेटा रीफ़्रेश करें
+                            if (activeGameData.timeLeft === 1 || activeGameData.timeLeft === activeGameData.duration) {
+                                setTimeout(() => { fetchLiveBalance(); renderHistoryTablesData(); }, 1500); // 1.5 सेकंड का डिले परिणाम घोषित होने के लिए
+                            }
                         }
-                    })
-                    .catch(err => console.error("Timer Sync Error:", err));
+                    }).catch(err => console.error("Timer Sync Error:", err));
             }, 1000);
         }
+        
         
         function updateTimerDisplayOnScreen(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60;
@@ -398,45 +393,31 @@
             renderHistoryTablesData();
         }
 
-        function renderHistoryTablesData() {
-            const currentPage = (currentActiveTab === "game") ? gameCurrentPage : myCurrentPage;
-            document.getElementById('pageNumberDisplay').innerText = `${currentPage}/${maxTotalPages}`;
-            document.getElementById('btnPrevPage').disabled = (currentPage === 1);
-            document.getElementById('btnNextPage').disabled = (currentPage === maxTotalPages);
-
+                function renderHistoryTablesData() {
+            const phone = localStorage.getItem('user_phone'); if (!phone) return;
             if (currentActiveTab === "game") {
-                let html = "";
-                for (let i = 1; i <= 10; i++) {
-                    let pId = `202607130005${2039 - i - ((gameCurrentPage-1)*10)}`;
-                    let num = (i + gameCurrentPage) % 10;
-                    let size = num >= 5 ? "Big" : "Small";
-                    let isSplit = (num === 0 || num === 5);
-                    let cls = isSplit ? (num===0?"num-0-split":"num-5-split") : (num%2===0?"num-r":"num-g");
-                    
-                    let dotHtml = "";
-                    if (num === 0 || num === 5) {
-                        dotHtml = `<span class="table-dot-v"></span>`;
-                    } else if (num % 2 === 0) {
-                        dotHtml = `<span class="table-dot-r"></span>`;
-                    } else {
-                        dotHtml = `<span class="table-dot-g"></span>`;
-                    }
-                    
-                    html += `<tr><td>${pId}</td><td><span class="row-circle ${cls}">${num}</span></td><td>${size}</td><td>${dotHtml}</td></tr>`;
-                }
-                document.getElementById('gameHistoryTableBody').innerHTML = html;
+                fetch(`${BACKEND_URL}/api/game-history/${currentSelectedMode}`).then(res => res.json()).then(resData => {
+                    if (!resData.success) return; let html = "";
+                    resData.data.forEach(row => {
+                        let isSplit = row.resultColor.includes('-'); let cls = isSplit ? (row.resultNumber===0?"num-0-split":"num-5-split") : (row.resultColor==="Red"?"num-r":"num-g");
+                        let dotCls = row.resultColor.includes('Violet') ? "table-dot-v" : (row.resultColor==="Red"?"table-dot-r":"table-dot-g");
+                        html += `<tr><td>${row.periodId}</td><td><span class="row-circle ${cls}">${row.resultNumber}</span></td><td>${row.resultSize}</td><td><span class="${dotCls}"></span></td></tr>`;
+                    });
+                    document.getElementById('gameHistoryTableBody').innerHTML = html || "<tr><td colspan='4'>No Data</td></tr>";
+                });
             } else {
-                let html = "";
-                for (let i = 1; i <= 10; i++) {
-                    let pId = `202607130005${2039 - i - ((myCurrentPage-1)*10)}`;
-                    let amt = 10 * i * myCurrentPage;
-                    let statusClass = i % 2 === 0 ? "status-win" : "status-loss";
-                    let statusText = i % 2 === 0 ? "+₹" + (amt * 1.9).toFixed(2) : "-₹" + amt.toFixed(2);
-                    html += `<tr><td>${pId}</td><td><span class="row-rect btn-bs-big">Big</span></td><td>₹${amt}</td><td class="${statusClass}">${statusText}</td></tr>`;
-                }
-                document.getElementById('myHistoryTableBody').innerHTML = html;
+                fetch(`${BACKEND_URL}/api/my-history/${currentSelectedMode}/${phone}`).then(res => res.json()).then(resData => {
+                    if (!resData.success) return; let html = "";
+                    resData.data.forEach(row => {
+                        let statusClass = row.status === "Win" ? "status-win" : "status-loss";
+                        let statusText = row.status === "Win" ? `+₹${row.winAmount.toFixed(2)}` : `-₹${row.betAmount.toFixed(2)}`;
+                        html += `<tr><td>${row.periodId}</td><td><span class="row-rect btn-bs-big">${row.selectValue}</span></td><td>₹${row.betAmount}</td><td class="${statusClass}">${statusText}</td></tr>`;
+                    });
+                    document.getElementById('myHistoryTableBody').innerHTML = html || "<tr><td colspan='4'>No Data</td></tr>";
+                });
             }
         }
+        
 
         document.addEventListener("DOMContentLoaded", () => { fetchLiveBalance(); generateDummyPeriodId(); startLocalTimerEngine(); renderHistoryTablesData(); });
     </script>

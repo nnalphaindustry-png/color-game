@@ -158,6 +158,44 @@ app.get('/api/game-sync', (req, res) => {
     });
     res.json({ success: true, data: syncData });
 });
+// === 1. हर राउंड ख़त्म होने पर यूज़र्स का पैसा सेटल करने का फ़ंक्शन ===
+async function settleUserBets(mode, periodId, winNum, winColor, winSize) {
+    try {
+        const pendingBets = await Bet.find({ gameMode: mode, periodId: periodId, status: "Pending" });
+        
+        for (let bet of pendingBets) {
+            let isWin = false; let multiplier = 2; // डिफ़ॉल्ट 2 गुना मुनाफा
+            
+            // जीतने की शर्तें चेक करें
+            if (bet.selectValue === winColor || bet.selectValue === winSize || bet.selectValue === winNum.toString()) {
+                isWin = true;
+                if (!isNaN(bet.selectValue)) multiplier = 9; // नंबर सही होने पर 9 गुना पैसा
+            } else if ((winColor === "Red-Violet" && (bet.selectValue === "Red" || bet.selectValue === "Violet")) ||
+                       (winColor === "Green-Violet" && (bet.selectValue === "Green" || bet.selectValue === "Violet"))) {
+                isWin = true; multiplier = 1.5; // हाफ कलर विन पर 1.5 गुना
+            }
+
+            if (isWin) {
+                bet.winAmount = bet.betAmount * multiplier; bet.status = "Win";
+                await User.findOneAndUpdate({ phone: bet.phone }, { $inc: { balance: bet.winAmount } });
+            } else {
+                bet.status = "Loss";
+            }
+            await bet.save();
+        }
+    } catch (err) { console.error("Settlement Error:", err); }
+}
+
+// === 2. असली गेम हिस्ट्री और माई हिस्ट्री भेजने का API रूट्स ===
+app.get('/api/game-history/:mode', async (req, res) => {
+    const list = await Period.find({ gameMode: req.params.mode }).sort({ createdAt: -1 }).limit(10);
+    res.json({ success: true, data: list });
+});
+
+app.get('/api/my-history/:mode/:phone', async (req, res) => {
+    const list = await Bet.find({ gameMode: req.params.mode, phone: req.params.phone }).sort({ createdAt: -1 }).limit(10);
+    res.json({ success: true, data: list });
+});
 
 // === 1. चारों गेम्स की लाइव स्थिति और पूल को ट्रैक करने का ग्लोबल ऑब्जेक्ट ===
 const liveGames = {

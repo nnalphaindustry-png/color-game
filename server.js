@@ -146,13 +146,15 @@ app.get('/api/balance/:phone', async (req, res) => {
 });
 app.post('/api/deposit/submit', async (req, res) => {
     try {
-        const { phone, amount, utrNumber } = req.body;
+        // फ्रंटएंड से utrNumber या utrnumber दोनों में से जो भी आए, उसे उठा लो
+        const { phone, amount, utrNumber, utrnumber } = req.body;
+        const finalUTR = (utrNumber || utrnumber || "").toString().trim();
 
-        if (!utrNumber || utrNumber.trim().length !== 12) {
-            return res.json({ success: false, message: "Invalid UTR! Must be exactly 12 digits." });
+        if (!finalUTR || finalUTR.length !== 12) {
+            return res.status(400).json({ success: false, message: "Invalid UTR! Must be exactly 12 digits." });
         }
 
-        const utrExists = await Deposit.findOne({ utrNumber: utrNumber.trim() });
+        const utrExists = await Deposit.findOne({ utrNumber: finalUTR });
         if (utrExists) {
             return res.json({ success: false, message: "This UTR Number has already been submitted!" });
         }

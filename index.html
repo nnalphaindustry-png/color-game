@@ -22,8 +22,27 @@
         .action-btn { width: 100%; height: 48px; background: linear-gradient(135deg, #ff4d4d, #f03e3e); border: none; border-radius: 24px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(240, 62, 62, 0.2); }
         .extra-links-container { display: flex; justify-content: space-between; margin-top: 20px; padding: 0 5px; }
         .extra-link { font-size: 14px; color: #f03e3e; text-decoration: none; font-weight: 500; cursor: pointer; }
-        .extra-link:hover { text-underline-position: under; text-decoration: underline; }
+        .extra-link:hover { text-decoration: underline; }
         .footer-links { text-align: center; margin-top: 35px; font-size: 14px; color: #6c757d; }
+
+        /*     */
+        .custom-popup {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+        }
+        .custom-popup.show { bottom: 40px; }
     </style>
 </head>
 <body>
@@ -52,8 +71,8 @@
         <button class="action-btn" onclick="handleLogin()">Log In</button>
 
         <div class="extra-links-container">
-            <a class="extra-link" onclick="alert('Please contact Customer Support to reset your password.')"> Forgot password</a>
-            <a class="extra-link" onclick="alert('Redirecting to Customer Support Telegram/LiveChat...')"> Customer Service</a>
+            <a class="extra-link" onclick="showPopup('Please contact Support to reset password.')"> Forgot password</a>
+            <a class="extra-link" onclick="showPopup('Redirecting to Live Support...')"> Customer Service</a>
         </div>
     </div>
 
@@ -83,8 +102,21 @@
     </div>
 </div>
 
+<!--   -->
+<div id="toast-popup" class="custom-popup">Message Status</div>
+
 <script>
-    const BACKEND_URL = "https://onrender.com";
+    const BACKEND_URL = "https://color-game-1kc2.onrender.com";
+
+    //    
+    function showPopup(text) {
+        const popup = document.getElementById('toast-popup');
+        popup.innerText = text;
+        popup.classList.add('show');
+        setTimeout(() => {
+            popup.classList.remove('show');
+        }, 3000);
+    }
 
     function switchTab(type) {
         const tabLogin = document.getElementById('tab-login');
@@ -112,11 +144,11 @@
         const inviteCode = document.getElementById('reg-invite').value.trim();
 
         if(!phone || !password || !confirmPassword) {
-            alert("Please fill all required fields!");
+            showPopup("Please fill all required fields!");
             return;
         }
         if(password !== confirmPassword) {
-            alert("Passwords do not match!");
+            showPopup("Passwords do not match!");
             return;
         }
 
@@ -127,14 +159,14 @@
         })
         .then(res => res.json())
         .then(data => {
-            alert(data.message);
+            showPopup(data.message);
             if(data.success) {
-                switchTab('login');
+                setTimeout(() => { switchTab('login'); }, 1500);
             }
         })
         .catch(err => {
             console.error(err);
-            alert("Registration failed! Check server connection.");
+            showPopup("Registration failed! Check server.");
         });
     }
 
@@ -143,7 +175,7 @@
         const password = document.getElementById('login-password').value.trim();
 
         if(!phone || !password) {
-            alert("Please fill all fields!");
+            showPopup("Please fill all fields!");
             return;
         }
 
@@ -154,16 +186,17 @@
         })
         .then(res => res.json())
         .then(data => {
-            alert(data.message);
+            showPopup(data.message);
             if(data.success) {
                 localStorage.setItem('user_phone', data.phone);
-                //     home.html      
-                window.location.href = "home.html"; 
+                setTimeout(() => {
+                    window.location.href = "home.html"; 
+                }, 1500);
             }
         })
         .catch(err => {
             console.error(err);
-            alert("Login failed! Server is not responding.");
+            showPopup("Login failed! Server error.");
         });
     }
 </script>

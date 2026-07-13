@@ -783,6 +783,13 @@ function changeTab(element, tabName) {
     }
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const sessionUser = localStorage.getItem('user_phone');
+    if (!sessionUser) {
+        window.location.href = "index.html"; // अगर यूजर बिना लॉगिन के सीधे आएगा तो बाहर फेंक देगा
+    }
+});
+
 
     </script>
 </body>

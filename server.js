@@ -11,11 +11,8 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
 });
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
-    origin: "*",
+    origin: "*", // सभी डोमेन और लोकल स्टोरेज को अनुमति दें
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
     credentials: true

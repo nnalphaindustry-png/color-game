@@ -12,7 +12,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", credentials: true }));
 
-app.use(express.static(path.join(__dirname, '')));
 
 // === USER SCHEMA ===
 const userSchema = new mongoose.Schema({
@@ -125,7 +124,10 @@ app.get('/api/balance/:phone', async (req, res) => {
 });
 
 
+// === MOVE THIS TO THE BOTTOM OF SERVER.JS ===
+app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)

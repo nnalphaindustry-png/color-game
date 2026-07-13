@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
+const periodSchema = new mongoose.Schema({ gameMode: String, periodId: String, resultNumber: Number, resultColor: String, resultSize: String, createdAt: { type: Date, default: Date.now } });
+const Period = mongoose.model('Period', periodSchema);
+const betSchema = new mongoose.Schema({ phone: String, gameMode: String, periodId: String, selectValue: String, betAmount: Number, winAmount: { type: Number, default: 0 }, status: { type: String, default: "Pending" }, createdAt: { type: Date, default: Date.now } });
+const Bet = mongoose.model('Bet', betSchema);
 
 // === LIVE DATABASE STATUS ROUTE ===
 // इसे ब्राउज़र में खोलकर आप चेक कर सकते हैं कि डेटाबेस कनेक्टेड है या नहीं

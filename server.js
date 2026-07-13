@@ -173,12 +173,13 @@ app.post('/api/deposit/submit', async (req, res) => {
             return res.json({ success: false, message: "This UTR Number has already been submitted!" });
         }
 
-        const newDeposit = new Deposit({
-            phone: phone,
-            amount: Number(amount),
-            utrNumber: utrNumber.trim(),
-            status: 'PENDING'
-        });
+        // इसे बदलें (Corrected Code)
+const newDeposit = new Deposit({
+    phone: phone,
+    amount: Number(amount),
+    utrNumber: finalUTR, // <--- utrNumber.trim() की जगह finalUTR लिखें
+    status: 'PENDING'
+});
 
         await newDeposit.save();
         res.json({ success: true, message: "Deposit request filed successfully! Waiting for admin approval." });

@@ -128,6 +128,33 @@ app.get('/api/balance/:phone', async (req, res) => {
 app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
+// ... आपका पुराना कोड ...
+
+// === यूज़र का सट्टा (Bet) सबमिट करने का रूट ===
+app.post('/api/place-bet', async (req, res) => {
+    try {
+        const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
+        const user = await User.findOne({ phone });
+        if (!user) return res.status(404).json({ success: false, message: "यूज़र नहीं मिला!" });
+        if (user.balance < betAmount) return res.status(400).json({ success: false, message: "अपर्याप्त बैलेंस!" });
+        
+        user.balance -= betAmount;
+        await user.save();
+        
+        const newBet = new Bet({ phone, gameMode, periodId, selectValue, betAmount, status: "Pending" });
+        await newBet.save();
+        
+        res.json({ success: true, message: "दांव सफलतापूर्वक लग गया!", newBalance: user.balance });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "सर्ver एरर!" });
+    }
+});
+
+// यह आपका सबसे नीचे वाला पोर्ट कनेक्शन है, इसके ऊपर ही कोड पेस्ट करना है
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)

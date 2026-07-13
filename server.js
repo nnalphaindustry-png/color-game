@@ -103,6 +103,26 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during login!" });
     }
 });
+// === NEW SECURE CONNECTION FOR PROFILE BALANCE ===
+app.get('/api/balance/:phone', async (req, res) => {
+    try {
+        const cleanPhone = req.params.phone.trim();
+        // नए डेटाबेस (goa_club_db) में यूज़र को खोजना
+        const user = await User.findOne({ phone: cleanPhone });
+        
+        if (!user) {
+            return res.json({ success: false, message: "User not found in new database!" });
+        }
+        
+        // सीधे नए डेटाबेस का रियल बैलेंस फ्रंटएंड को भेजना
+        res.json({
+            success: true,
+            balance: Number(user.balance || 0)
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Server error fetching balance!" });
+    }
+});
 
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

@@ -365,6 +365,39 @@ app.get('/api/game-state/30s', (req, res) => {
 // =======================================================
 // ➖ लाइव टाइमर का API रास्ता यहाँ समाप्त होता है
 // =======================================================
+// =======================================================
+// ➕ यहाँ से स्वचालित गेम इंजन शुरू होता है (सिर्फ पेस्ट करें)
+// =======================================================
+let currentPeriod30s = "";
+let timeRemaining30s = 30; 
+
+function start30sGameEngine() {
+    const generatePeriodId = () => {
+        const now = new Date();
+        const dateStr = now.getFullYear() + 
+                        String(now.getMonth() + 1).padStart(2, '0') + 
+                        String(now.getDate()).padStart(2, '0');
+        const totalHalfMinutes = Math.floor((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 30);
+        return dateStr + String(totalHalfMinutes).padStart(4, '0');
+    };
+
+    currentPeriod30s = generatePeriodId();
+
+    setInterval(async () => {
+        timeRemaining30s--;
+
+        if (timeRemaining30s <= 0) {
+            timeRemaining30s = 30; 
+            currentPeriod30s = generatePeriodId(); 
+            console.log(`नया गेम चक्र शुरू: ${currentPeriod30s}`);
+        }
+    }, 1000);
+}
+
+start30sGameEngine();
+// =======================================================
+// ➖ स्वचालित गेम इंजन यहाँ समाप्त होता है
+// =======================================================
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)

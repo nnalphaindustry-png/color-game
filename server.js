@@ -174,15 +174,15 @@ app.post('/api/deposit/submit', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during deposit submission!" });
     }
 });
-// === १. सभी पेंडिंग डिपॉजिट रिक्वेस्ट की लिस्ट देखने का एडमिन रूट ===
+// === टेस्टिंग के लिए: यह रूट डेटाबेस का सारा डेटा खींचकर दिखाएगा ===
 app.get('/api/admin/deposits/pending', async (req, res) => {
     try {
-        // डेटाबेस से केवल 'PENDING' स्टेटस वाले सभी रीचार्ज ढूँढना
-        const pendingRequests = await Deposit.find({ status: 'PENDING' }).sort({ createdAt: -1 });
+        // यहाँ से { status: 'PENDING' } हटा दिया है ताकि सारा पुराना डेटा भी दिखे
+        const pendingRequests = await Deposit.find({}).sort({ createdAt: -1 });
         res.json({ success: true, data: pendingRequests });
     } catch (err) {
         console.error("Pending list fetch error:", err);
-        res.status(500).json({ success: false, message: "Server error fetching pending list!" });
+        res.status(500).json({ success: false, message: "Server error fetching list" });
     }
 });
 

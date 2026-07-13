@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Dashboard</title>
+    <!-- Google Fonts for Clean UI -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    
+    <style>
+        /* डार्क मोड को जबरन रोकने के लिए */
+        :root {
+            color-scheme: light !important;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-text-fill-color: initial !important; 
+        }
+
+        body {
+            background-color: #f4f6fb !important;
+            background: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* App Wrapper */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            background: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        /* Top Navbar - Pure White Background */
+        .navbar {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eef2f5 !important;
+        }
+
+        .nav-left .game-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            font-style: italic;
+            color: #f03e3e !important; 
+            text-transform: uppercase;
+        }
+
+        .nav-right {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .nav-capsule-btn {
+            background: #ff7675 !important;
+            color: #ffffff !important;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 90px;
+            box-shadow: 0 2px 4px rgba(255, 118, 117, 0.2);
+            transition: 0.2s;
+        }
+
+        .nav-capsule-btn:active {
+            transform: scale(0.95);
+            background: #ee5f5e !important;
+        }
+
+        /* Image Slider (Banner) Style */
+        .slider-container {
+            width: 92%;
+            height: 190px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px; 
+            margin: 12px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+        }
+                .slider-wrapper {
+            display: flex;
+            width: 500%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            width: 20%;
+            height: 100%;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Slider Dots */
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .dot.active {
+            background-color: #ffffff !important;
+            width: 16px;
+            border-radius: 4px;
+        }
+
+        /* Notification Bar Card Layout */
+        .notification-card {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 20px;
+            width: 92%;
+            margin: 4px auto 12px auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .notification-card i {
+            color: #ff6b6b !important;
+            font-size: 16px;
+        }
+
+        .marquee-container {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marqueeEffect 20s linear infinite;
+            font-size: 13px;
+            color: #444444 !important;
+            font-weight: 500;
+        }
+
+        @keyframes marqueeEffect {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+
+        .btn-detail {
+            background: #ff7675 !important;
+            color: #ffffff !important;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(255, 118, 117, 0.2);
+        }
+
+        /* Main Game Body Wrapper */
+        .game-content {
+            padding: 0 16px 30px 16px;
+            flex: 1;
+            background-color: #f4f6fb !important;
+            background: #f4f6fb !important;
+        }
+
+        /* GAME CATEGORIES GRID STYLES */
+        .category-section {
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .grid-item-small {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .img-box-square {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 18px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s;
+        }
+
+        .grid-item-small:active .img-box-square {
+            transform: scale(0.96);
+        }
+
+        .img-box-square img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .category-label {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #444444 !important;
+            text-align: center;
+        }
+
+        .grid-2-col-wide {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .wide-card {
+            background-color: #f7e6c4 !important; 
+            border-radius: 18px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 110px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .wide-card:active {
+            transform: scale(0.97);
+        }
+
+        .wide-card-img {
+            width: 55%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wide-card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .wide-card-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #3e2723 !important; 
+            text-align: right;
+            padding-right: 5px;
+            flex: 1;
+        }
+
+        /* LOTTERY SECTION STYLES */
+        .lottery-section-wrapper {
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        .lottery-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffaa00 !important; 
+            margin-bottom: 15px;
+            padding-left: 2px;
+        }
+
+        .lottery-section-title i {
+            color: #ff7675 !important;
+            font-size: 18px;
+        }
+
+        .lottery-grid-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            row-gap: 18px;
+            column-gap: 12px;
+        }
+
+        .lottery-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .lottery-img-box {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .lottery-item:active .lottery-img-box {
+            transform: scale(0.95);
+        }
+
+        .lottery-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lottery-label {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555555 !important;
+            text-align: center;
+            white-space: nowrap;
+        }
+        /* --- PREMIUM BOTTOM NAVIGATION BAR --- */
+.bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px; /* आपके गेम स्क्रीन की चौड़ाई के बराबर */
+    height: 65px;
+    background: #ffffff !important;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #eaeef3 !important;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.06);
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom); /* नए मोबाइल स्क्रीन्स के लिए */
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #8e9aa7 !important; /* डिफ़ॉल्ट हल्का ग्रे रंग */
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+/* गेमिंग ऐप जैसा प्रीमियम आइकॉन स्टाइल */
+.bottom-nav-item i {
+    font-size: 20px;
+    margin-bottom: 4px;
+    transition: transform 0.2s ease;
+}
+
+/* बटन दबाने पर हल्का सा छोटा होने का इफ़ेक्ट */
+.bottom-nav-item:active i {
+    transform: scale(0.88);
+}
+
+/* एक्टिव (चयनित) ऑप्शन का लाल रंग (91 Goa Theme) */
+.bottom-nav-item.active {
+    color: #f03e3e !important;
+}
+
+.bottom-nav-item.active i {
+    color: #f03e3e !important;
+}
+/* --- UPDATED PREMIUM BOTTOM NAVIGATION BAR --- */
+.bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 450px;
+    height: 68px;
+    background-color: #ffffff !important;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    border-top: 1px solid #eef2f5 !important;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.07);
+    z-index: 9999;
+    padding-bottom: 6px;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #7c8e9f !important;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    flex: 1;
+    height: 55px;
+    transition: all 0.2s ease;
+}
+
+/* बड़ा सेंटर व्हील कंटेनर */
+.bottom-nav-item.center-wheel-btn {
+    height: 85px;
+    justify-content: flex-start;
+    position: relative;
+    top: -8px;
+}
+
+/* नॉर्मल SVG आइकन्स का लुक */
+.nav-svg-icon {
+    width: 23px;
+    height: 23px;
+    fill: #7c8e9f !important;
+    margin-bottom: 4px;
+    transition: transform 0.2s ease, fill 0.2s ease;
+}
+
+/* नया सुपर प्रीमियम स्पिन व्हील स्टाइल */
+.large-spin-wheel {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 3px;
+    filter: drop-shadow(0 4px 8px rgba(240, 62, 62, 0.35));
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* बटन दबाने पर और एक्टिव होने पर रोटेशन और ज़ूम इफ़ेक्ट */
+.bottom-nav-item:active .large-spin-wheel {
+    transform: scale(0.9) rotate(180deg);
+}
+
+.bottom-nav-item:active .nav-svg-icon {
+    transform: scale(0.88);
+}
+
+/* एक्टिव होने पर टेक्स्ट का लाल रंग (DG Club / 91 Goa Theme) */
+.bottom-nav-item.active {
+    color: #f03e3e !important;
+}
+
+.bottom-nav-item.active .nav-svg-icon {
+    fill: #f03e3e !important;
+}
+
+/* गेम का आखरी हिस्सा बार के पीछे न छुपे */
+.game-content {
+    padding: 0 16px 95px 16px !important;
+}
+    </style>
+</head>
+<body>
+
+    <div class="app-container" style="background-color: #f4f6fb !important; background: #f4f6fb !important;">
+        
+        <!-- TOP NAVBAR -->
+        <div class="navbar">
+            <div class="nav-left">
+                <span class="game-name">91 GOA CLUB</span>
+            </div>
+            <div class="nav-right">
+                <button class="nav-capsule-btn" onclick="alert('Starting APK Download...')">Download</button>
+                <button class="nav-capsule-btn" onclick="alert('Opening Customer Support Chat...')">Support</button>
+            </div>
+        </div>
+
+        <!-- IMAGE SLIDER -->
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-wrapper">
+                <div class="slide"><img src="banner1.jpg" alt="Banner 1"></div>
+                <div class="slide"><img src="banner2.jpg" alt="Banner 2"></div>
+                <div class="slide"><img src="banner3.jpg" alt="Banner 3"></div>
+                <div class="slide"><img src="banner4.jpg" alt="Banner 4"></div>
+                <div class="slide"><img src="banner5.jpg" alt="Banner 5"></div>
+            </div>
+            <div class="slider-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+
+        <!-- RUNNING TEXT NOTIFICATION BAR -->
+        <div class="notification-card" style="background-color: #ffffff !important; background: #ffffff !important;">
+            <i class="fa-solid fa-volume-high"></i>
+            <div class="marquee-container">
+                <span class="marquee-text">Welcome to the 91 GOA CLUB! Greetings, Gamers and Enthusiasts! Daily withdrawals are processed successfully.</span>
+            </div>
+            <button class="btn-detail" onclick="alert('Opening Announcements Detail...')">Detail</button>
+        </div>
+
+        <!-- MAIN GAME CONTENT AREA -->
+        <div class="game-content" style="background-color: #f4f6fb !important; background: #f4f6fb !important;">
+            
+            <!-- GAME CATEGORIES SECTION -->
+            <div class="category-section">
+                
+                <!-- Line 1: Three Small Square Grid Items -->
+                <div class="grid-3-col">
+                    <div class="grid-item-small" onclick="scrollToLottery()">
+                        <div class="img-box-square">
+                            <img src="gamecategory1.png" alt="Lottery">
+                        </div>
+                        <span class="category-label">Lottery</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Original games...')">
+                        <div class="img-box-square">
+                            <img src="gamecategory2.png" alt="Original">
+                        </div>
+                        <span class="category-label">Original</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Slots games...')">
+                        <div class="img-box-square">
+                            <img src="gamecategory3.png" alt="Slots">
+                        </div>
+                        <span class="category-label">Slots</span>
+                    </div>
+                </div>
+
+                <!-- Line 2: Three Small Square Grid Items -->
+                <div class="grid-3-col">
+                    <div class="grid-item-small" onclick="alert('Opening Popular games...')">
+                        <div class="img-box-square">
+                            <img src="photo1.png" alt="Popular">
+                        </div>
+                        <span class="category-label">Popular</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Casino games...')">
+                        <div class="img-box-square">
+                            <img src="photo2.png" alt="Casino">
+                        </div>
+                        <span class="category-label">Casino</span>
+                    </div>
+                    <div class="grid-item-small" onclick="alert('Opening Fishing games...')">
+                        <div class="img-box-square">
+                            <img src="photo3.png" alt="Fishing">
+                        </div>
+                        <span class="category-label">Fishing</span>
+                    </div>
+                </div>
+
+                <!-- Line 3: Two Big Wide Grid Cards -->
+                <div class="grid-2-col-wide">
+                    <div class="wide-card" onclick="alert('Opening Rummy Room...')">
+                        <div class="wide-card-img">
+                            <img src="photo4.png" alt="Rummy">
+                        </div>
+                        <div class="wide-card-text">Rummy</div>
+                    </div>
+                    <div class="wide-card" onclick="alert('Opening Fishing Arena...')">
+                        <div class="wide-card-img">
+                            <img src="photo5.png" alt="Fishing">
+                        </div>
+                        <div class="wide-card-text">Fishing</div>
+                    </div>
+                </div>
+
+            </div> <!-- Category Section Close -->
+                        <!-- NEW LOTTERY TARGET SECTION WITH 8 GAMES (p1.png to p8.png) -->
+            <div class="lottery-section-wrapper" id="lottery-target-section">
+                
+                <!-- Title Row: Slot Icon + Lottery Text -->
+                <div class="lottery-section-title">
+                    <i class="fa-solid fa-dice"></i> Lottery
+                </div>
+
+                <!-- 8 Box Grid Layout -->
+                <div class="lottery-grid-3-col">
+                    
+                            <!-- Box 1 (p1.png) -->
+        <a href="game.html?mode=30s" class="lottery-item" style="text-decoration: none;">
+            <div class="lottery-img-box"><img src="p1.png" alt="Win Go 30s"></div>
+            <span class="lottery-label">Win Go 30s</span>
+        </a>
+
+        <!-- Box 2 (p2.png) -->
+        <a href="game.html?mode=1m" class="lottery-item" style="text-decoration: none;">
+            <div class="lottery-img-box"><img src="p2.png" alt="Win Go 1Min"></div>
+            <span class="lottery-label">Win Go 1Min</span>
+        </a>
+
+        <!-- Box 3 (p3.png) -->
+        <a href="game.html?mode=3m" class="lottery-item" style="text-decoration: none;">
+            <div class="lottery-img-box"><img src="p3.png" alt="Win Go 3Min"></div>
+            <span class="lottery-label">Win Go 3Min</span>
+        </a>
+
+        <!-- Box 4 (p4.png) -->
+        <a href="game.html?mode=5m" class="lottery-item" style="text-decoration: none;">
+            <div class="lottery-img-box"><img src="p4.png" alt="Win Go 5Min"></div>
+            <span class="lottery-label">Win Go 5Min</span>
+        </a>
+
+
+                    <!-- Box 5 (p5.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 1Min...')">
+                        <div class="lottery-img-box"><img src="p5.png" alt="5D 1Min"></div>
+                        <span class="lottery-label">5D 1Min</span>
+                    </div>
+
+                    <!-- Box 6 (p6.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 3Min...')">
+                        <div class="lottery-img-box"><img src="p6.png" alt="5D 3Min"></div>
+                        <span class="lottery-label">5D 3Min</span>
+                    </div>
+
+                    <!-- Box 7 (p7.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 5Min...')">
+                        <div class="lottery-img-box"><img src="p7.png" alt="5D 5Min"></div>
+                        <span class="lottery-label">5D 5Min</span>
+                    </div>
+
+                    <!-- Box 8 (p8.png) -->
+                    <div class="lottery-item" onclick="alert('Launching 5D 10Min...')">
+                        <div class="lottery-img-box"><img src="p8.png" alt="5D 10Min"></div>
+                        <span class="lottery-label">5D 10Min</span>
+                    </div>
+
+                </div>
+            </div> <!-- Lottery Section Close -->
+
+        </div> <!-- Game Content Close -->
+
+    </div> <!-- App Container Close -->
+<!-- BOTTOM NAVIGATION BAR (UPDATED PREMIUM ICONS) -->
+<div class="bottom-navbar">
+    <!-- 1. Home Option -->
+    <div class="bottom-nav-item active" onclick="changeTab(this, 'Home')">
+        <svg class="nav-svg-icon" viewBox="0 0 24 24">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5zM12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5z"/>
+        </svg>
+        <span>Home</span>
+    </div>
+    
+    <!-- 2. Activity Option -->
+    <div class="bottom-nav-item" onclick="changeTab(this, 'Activity')">
+        <svg class="nav-svg-icon" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM17 12h-2V9h-2v5H9v3h8v-5z"/>
+        </svg>
+        <span>Activity</span>
+    </div>
+    
+    <!-- 3. Get Bonus Option (नया एचडी डिज़ाइन व्हील - बिना टेक्स्ट के) -->
+    <div class="bottom-nav-item center-wheel-btn" onclick="changeTab(this, 'Get Bonus')">
+        <svg class="large-spin-wheel" viewBox="0 0 100 100">
+            <!-- आउटर गोल्डन रिंग और रेड बॉर्डर -->
+            <circle cx="50" cy="50" r="46" fill="#f03e3e" stroke="#ffd54f" stroke-width="3"/>
+            <!-- बॉर्डर की प्रीमियम लाइट्स -->
+            <circle cx="50" cy="8" r="2" fill="#fff"/><circle cx="92" cy="50" r="2" fill="#fff"/>
+            <circle cx="50" cy="92" r="2" fill="#fff"/><circle cx="8" cy="50" r="2" fill="#fff"/>
+            <circle cx="21" cy="21" r="2" fill="#fff"/><circle cx="79" cy="21" r="2" fill="#fff"/>
+            <circle cx="21" cy="79" r="2" fill="#fff"/><circle cx="79" cy="79" r="2" fill="#fff"/>
+            <!-- इनर व्हील बैकग्राउंड -->
+            <circle cx="50" cy="50" r="40" fill="#ffd54f"/>
+            <!-- रंगीन प्रीमियम सेक्टर्स (8 खानों का सटीक चक्र) -->
+            <path d="M50,50 L50,10 A40,40 0 0,1 78.28,21.72 Z" fill="#e53935"/>
+            <path d="M50,50 L78.28,21.72 A40,40 0 0,1 90,50 Z" fill="#fff"/>
+            <path d="M50,50 L90,50 A40,40 0 0,1 78.28,78.28 Z" fill="#e53935"/>
+            <path d="M50,50 L78.28,78.28 A40,40 0 0,1 50,90 Z" fill="#fff"/>
+            <path d="M50,50 L50,90 A40,40 0 0,1 21.72,78.28 Z" fill="#e53935"/>
+            <path d="M50,50 L21.72,78.28 A40,40 0 0,1 10,50 Z" fill="#fff"/>
+            <path d="M50,50 L10,50 A40,40 0 0,1 21.72,21.72 Z" fill="#e53935"/>
+            <path d="M50,50 L21.72,21.72 A40,40 0 0,1 50,10 Z" fill="#fff"/>
+            <!-- सेंटर कोर और विनर पॉइंटर एरो -->
+            <circle cx="50" cy="50" r="14" fill="#ffffff" stroke="#ffb300" stroke-width="2.5"/>
+            <polygon points="50,26 42,42 58,42" fill="#e53935"/>
+            <circle cx="50" cy="50" r="4" fill="#ffb300"/>
+        </svg>
+        <span>Get Bonus</span>
+    </div>
+    
+    <!-- 4. Promotion Option (नया प्रीमियम लाउडस्पीकर/माइक आइकॉन) -->
+    <div class="bottom-nav-item" onclick="changeTab(this, 'Promotion')">
+        <svg class="nav-svg-icon" viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v16l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12zm-3-5h-2V9h2v2zm-4 0h-2V7h2v4zm-4 0H7V8h2v3z"/>
+        </svg>
+        <span>Promotion</span>
+    </div>
+    
+    <!-- 5. Account Option -->
+<div class="bottom-nav-item" onclick="window.location.href='profile .html';">
+    <svg class="nav-svg-icon" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+    </svg>
+    <span>Account</span>
+</div>
+
+
+    <script>
+// ऑटोमैटिक बैनर स्लाइडर लॉजिक (पुराना वाला)
+const wrapper = document.getElementById('slider-wrapper');
+const dots = document.querySelectorAll('.dot');
+let currentIndex = 0;
+const totalSlides = 5;
+function slideNext() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    if(wrapper) wrapper.style.transform = `translateX(-${currentIndex * 20}%)`;
+    dots.forEach(dot => dot.classList.remove('active'));
+    if(dots[currentIndex]) dots[currentIndex].classList.add('active');
+}
+setInterval(slideNext, 3500);
+
+// लॉटरी सेक्शन पर स्मूथ स्क्रोल करने का फ़ंक्शन (FIXED)
+function scrollToLottery() {
+    const target = document.getElementById('lottery-target-section');
+    if(target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// बॉटम नेविगेशन बार के बटन स्विच करने का लॉजिक
+function changeTab(element, tabName) {
+    const items = document.querySelectorAll('.bottom-nav-item');
+    items.forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+    
+    // अगर यूजर होम या किसी भी बटन से लॉटरी पर जाना चाहे या लॉटरी फंक्शन ट्रिगर करना चाहे
+    if(tabName === 'Home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const sessionUser = localStorage.getItem('user_phone');
+    if (!sessionUser) {
+        window.location.href = "index.html"; // अगर यूजर बिना लॉगिन के सीधे आएगा तो बाहर फेंक देगा
+    }
+});
+
+
+    </script>
+</body>
+</html>

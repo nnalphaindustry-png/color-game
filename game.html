@@ -306,27 +306,30 @@
                 });
         }
         
-
-           function startLocalTimerEngine() {
+        function startLocalTimerEngine() {
             if (localTimerInterval) clearInterval(localTimerInterval);
             localTimerInterval = setInterval(() => {
                 fetch(`${BACKEND_URL}/api/game-sync`)
                     .then(res => res.json()).then(resData => {
                         if (resData.success && resData.data[currentSelectedMode]) {
                             const activeGameData = resData.data[currentSelectedMode];
+                            
+                            // 1. सर्वर की असली लाइव पीरियड आईडी स्क्रीन पर दिखाएं
                             document.getElementById('current-period-id').innerText = activeGameData.currentPeriod;
+                            
+                            // 2. सर्वर का असली लाइव टाइम दिखाएं
                             updateTimerDisplayOnScreen(activeGameData.timeLeft);
                             
-                            // अगर सर्वर का टाइमर बिल्कुल 1 या 0 पर है, तो तुरंत डेटा रीफ़्रेश करें
+                            // 3. राउंड खत्म होने पर (जब 30 या 60 सेकंड पर टाइमर वापस रीसेट हो) डेटा रीफ़्रेश करें
                             if (activeGameData.timeLeft === 1 || activeGameData.timeLeft === activeGameData.duration) {
-                                setTimeout(() => { fetchLiveBalance(); renderHistoryTablesData(); }, 1500); // 1.5 सेकंड का डिले परिणाम घोषित होने के लिए
+                                setTimeout(() => { fetchLiveBalance(); renderHistoryTablesData(); }, 1500);
                             }
                         }
                     }).catch(err => console.error("Timer Sync Error:", err));
             }, 1000);
         }
         
-        
+           
         function updateTimerDisplayOnScreen(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60;
             const mStr = minutes.toString().padStart(2, '0'); const sStr = seconds.toString().padStart(2, '0');

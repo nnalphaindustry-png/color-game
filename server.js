@@ -221,28 +221,35 @@ function resetPool(mode) {
     liveGames[mode].currentPeriod = timestamp + randomId;
 }
 
-// === 2. मुख्य "LOW-BET WIN" लॉजिक (कम पैसे वाले को जिताना) ===
 async function calculateGameResult(mode) {
-    const pool = liveGames[mode].pools; let minPayout = Infinity; let bestNumbers = [];
+    const game = liveGames[mode]; const pool = game.pools;
+    let minPayout = Infinity; let bestNumbers = [];
     
-    // 0 से 9 हर नंबर पर कुल लायबिलिटी की गणना करें
     for (let num = 0; num <= 9; num++) {
-        let currentPayout = pool[num.toString()];
-        if (num === 0 || num === 5) currentPayout += pool["Violet"];
-        if ([1,3,7,9].includes(num)) currentPayout += pool["Green"];
-        if ([2,4,6,8].includes(num)) currentPayout += pool["Red"];
-        if (num >= 5) currentPayout += pool["Big"]; else currentPayout += pool["Small"];
-
+        let currentPayout = pool[num.toString()] || 0;
+        if (num === 0 || num === 5) currentPayout += (pool["Violet"] || 0);
+        if ([1,3,7,9].includes(num)) currentPayout += (pool["Green"] || 0);
+        if ([2,4,6,8].includes(num)) currentPayout += (pool["Red"] || 0);
+        if (num >= 5) currentPayout += (pool["Big"] || 0); else currentPayout += (pool["Small"] || 0);
         if (currentPayout < minPayout) { minPayout = currentPayout; bestNumbers = [num]; }
         else if (currentPayout === minPayout) { bestNumbers.push(num); }
     }
-    // सबसे कम पैसे वाले नंबरों में से कोई एक रैंडम चुन लें
     const finalNumber = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
-    console.log(`[Result] Mode: ${mode}, Period: ${liveGames[mode].currentPeriod}, Winner Number: ${finalNumber}`);
-    
-    // यहाँ बाद में हम यूज़र्स के पेंडिंग दांव (Bets) को जिताने/हारने की गणना जोड़ेंगे
-    resetPool(mode);
+    const finalColor = finalNumber === 0 ? "Red-Violet" : (finalNumber === 5 ? "Green-Violet" : ([1,3,7,9].includes(finalNumber) ? "Green" : "Red"));
+    const finalSize = finalNumber >= 5 ? "Big" : "Small";
+
+    // असली परिणाम को डेटाबेस में सेव करना
+    const newPeriod = new Period({ gameMode: mode, periodId: game.currentPeriod, resultNumber: finalNumber, resultColor: finalColor, resultSize: finalSize });
+    await newPeriod.save();
+
+    // यूज़र्स के दांव का निपटारा (Settle) करना
+    if (typeof settleUserBets === 'function') {
+        await settleUserBets(mode, game.currentPeriod, finalNumber, finalColor, finalSize);
+    }
+
+    resetPool(mode); // अगला राउंड शुरू करने के लिए पूल खाली और नया पीरियड आईडी सेट करें
 }
+
 
 // === 3. बैकग्राउंड setInterval टाइमर इंजन ===
 function startServerTimerEngine() {

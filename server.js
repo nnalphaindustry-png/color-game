@@ -150,16 +150,6 @@ app.get('/api/balance/:phone', async (req, res) => {
 // === MOVE THIS TO THE BOTTOM OF SERVER.JS ===
 app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-
-// === लाइव गेम स्टेट जानने का रास्ता ===
-app.get('/api/game-state/30s', (req, res) => {
-    res.json({
-        success: true,
-        periodId: currentPeriod30s,
-        timeRemaining: timeRemaining30s
-    });
-});
-
 // वैश्विक वेरिएबल (Global Variables) ताकि फ्रंटएंड लाइव टाइमर देख सके
 let currentPeriod30s = "";
 let timeRemaining30s = 30;
@@ -290,6 +280,59 @@ function start30sGameEngine() {
 // सर्वर स्टार्ट होने पर इंजन को चालू करना
 start30sGameEngine();
 
+// === यूजर द्वारा बेट लगाने का सुरक्षित रास्ता ===
+app.post('/api/place-bet', async (req, res) => {
+    try {
+        const { phone, gameMode, betOn, amount } = req.body;
+
+        // 1. जरूरी डेटा की जांच करना
+        if (!phone || !gameMode || !betOn || !amount || amount <= 0) {
+            return res.json({ success: false, message: "गलत डेटा या अमाउंट!" });
+        }
+
+        // 2. यूजर को डेटाबेस में खोजना
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) {
+            return res.json({ success: false, message: "यूजर नहीं मिला!" });
+        }
+
+        // 3. 5 सेकंड का लॉक रूल चेक करना
+        // अगर 30 सेकंड वाले गेम में टाइमर 5 सेकंड या उससे कम है, तो बेट रिजेक्ट करें
+        if (gameMode === '30s' && timeRemaining30s <= 5) {
+            return res.json({ success: false, message: "समय समाप्त! बेटिंग बंद हो चुकी है।" });
+        }
+
+        // 4. बैलेंस की जांच करना
+        if (user.balance < amount) {
+            return res.json({ success: false, message: "बैलेंस कम है! कृपया डिपॉजिट करें।" });
+        }
+
+        // 5. यूजर के वॉलेट से पैसे काटना
+        user.balance -= amount;
+        await user.save();
+
+        // 6. डेटाबेस में बेट का रिकॉर्ड सेव करना
+        const newBet = new Bet({
+            phone: phone.trim(),
+            gameMode,
+            periodId: currentPeriod30s, // यह ऑटोमैटिक लाइव पीरियड आईडी उठा लेगा
+            betOn,
+            amount
+        });
+        await newBet.save();
+
+        // 7. सफलता का मैसेज और नया बैलेंस फ्रंटएंड को भेजना
+        res.json({
+            success: true,
+            message: "बेट सफलतापूर्वक लग गई!",
+            newBalance: user.balance
+        });
+
+    } catch (err) {
+        console.error("Bet placement error:", err);
+        res.status(500).json({ success: false, message: "सर्वर त्रुटि! बेट नहीं लग पाई।" });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)

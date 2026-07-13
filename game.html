@@ -286,35 +286,52 @@
                 }).catch(err => { if(icon) icon.classList.remove('fa-spin'); });
         }
 
-        function switchMode(mode, event) {
+                function switchMode(mode, event) {
             currentSelectedMode = mode; 
             const tabs = document.querySelectorAll('.mode-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             event.currentTarget.classList.add('active');
+            
             const titleMap = { "30s": "WinGo 30sec", "1m": "WinGo 1 Min", "3m": "WinGo 3 Min", "5m": "WinGo 5 Min" };
             document.getElementById('display-mode-title').innerText = titleMap[mode];
-            if (mode === "30s") timeLeftForSelectedMode = 30;
-            else if (mode === "1m") timeLeftForSelectedMode = 60;
-            else if (mode === "3m") timeLeftForSelectedMode = 180;
-            else if (mode === "5m") timeLeftForSelectedMode = 300;
-            generateDummyPeriodId(); updateTimerDisplayOnScreen(timeLeftForSelectedMode);
-            gameCurrentPage = 1; myCurrentPage = 1; renderHistoryTablesData();
+            
+            // मोड बदलते ही तुरंत एक बार मैन्युअल सिंक कॉल करें
+            fetch(`${BACKEND_URL}/api/game-sync`)
+                .then(res => res.json())
+                .then(resData => {
+                    if (resData.success && resData.data[mode]) {
+                        document.getElementById('current-period-id').innerText = resData.data[mode].currentPeriod;
+                        updateTimerDisplayOnScreen(resData.data[mode].timeLeft);
+                    }
+                });
         }
+        
 
+                // सर्वर से हर सेकंड लाइव टाइमर और पीरियड आईडी सिंक करने का फ़ंक्शन
         function startLocalTimerEngine() {
             if (localTimerInterval) clearInterval(localTimerInterval);
+
             localTimerInterval = setInterval(() => {
-                if (timeLeftForSelectedMode <= 0) {
-                    if (currentSelectedMode === "30s") timeLeftForSelectedMode = 30;
-                    else if (currentSelectedMode === "1m") timeLeftForSelectedMode = 60;
-                    else if (currentSelectedMode === "3m") timeLeftForSelectedMode = 180;
-                    else if (currentSelectedMode === "5m") timeLeftForSelectedMode = 300;
-                    generateDummyPeriodId();
-                } else { timeLeftForSelectedMode--; }
-                updateTimerDisplayOnScreen(timeLeftForSelectedMode);
+                fetch(`${BACKEND_URL}/api/game-sync`)
+                    .then(res => res.json())
+                    .then(resData => {
+                        if (resData.success && resData.data[currentSelectedMode]) {
+                            const activeGameData = resData.data[currentSelectedMode];
+                            
+                            // 1. स्क्रीन पर लाइव पीरियड आईडी डालना
+                            document.getElementById('current-period-id').innerText = activeGameData.currentPeriod;
+                            
+                            // 2. स्क्रीन पर लाइव काउंटडाउन समय डालना
+                            updateTimerDisplayOnScreen(activeGameData.timeLeft);
+                            
+                            // 3. आखिरी 5 सेकंड में दांव लॉक करने का लॉजिक (भविष्य के लिए)
+                            timeLeftForLast5Seconds(activeGameData.timeLeft);
+                        }
+                    })
+                    .catch(err => console.error("Timer Sync Error:", err));
             }, 1000);
         }
-
+        
         function updateTimerDisplayOnScreen(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60;
             const mStr = minutes.toString().padStart(2, '0'); const sStr = seconds.toString().padStart(2, '0');

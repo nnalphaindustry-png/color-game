@@ -150,11 +150,77 @@ app.post('/api/place-bet', async (req, res) => {
     }
 });
 
-// यह आपका सबसे नीचे वाला पोर्ट कनेक्शन है, इसके ऊपर ही कोड पेस्ट करना है
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// === लाइव टाइमर और पीरियड आईडी सिंक करने का रूट ===
+app.get('/api/game-sync', (req, res) => {
+    const syncData = {};
+    Object.keys(liveGames).forEach(mode => {
+        syncData[mode] = { timeLeft: liveGames[mode].timeLeft, currentPeriod: liveGames[mode].currentPeriod };
+    });
+    res.json({ success: true, data: syncData });
 });
+
+// === 1. चारों गेम्स की लाइव स्थिति और पूल को ट्रैक करने का ग्लोबल ऑब्जेक्ट ===
+const liveGames = {
+    "30s": { duration: 30, timeLeft: 30, currentPeriod: "", pools: {} },
+    "1m":  { duration: 60, timeLeft: 60, currentPeriod: "", pools: {} },
+    "3m":  { duration: 180, timeLeft: 180, currentPeriod: "", pools: {} },
+    "5m":  { duration: 300, timeLeft: 300, currentPeriod: "", pools: {} }
+};
+
+// पूल डेटा को हर नया राउंड शुरू होने पर रीसेट करने का फ़ंक्शन
+function resetPool(mode) {
+    liveGames[mode].pools = {
+        "0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0,"9":0,
+        "Red":0,"Green":0,"Violet":0,"Big":0,"Small":0
+    };
+    const now = new Date();
+    const timestamp = now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + "0005";
+    const randomId = Math.floor(1000 + Math.random() * 9000);
+    liveGames[mode].currentPeriod = timestamp + randomId;
+}
+
+// === 2. मुख्य "LOW-BET WIN" लॉजिक (कम पैसे वाले को जिताना) ===
+async function calculateGameResult(mode) {
+    const pool = liveGames[mode].pools; let minPayout = Infinity; let bestNumbers = [];
+    
+    // 0 से 9 हर नंबर पर कुल लायबिलिटी की गणना करें
+    for (let num = 0; num <= 9; num++) {
+        let currentPayout = pool[num.toString()];
+        if (num === 0 || num === 5) currentPayout += pool["Violet"];
+        if ([1,3,7,9].includes(num)) currentPayout += pool["Green"];
+        if ([2,4,6,8].includes(num)) currentPayout += pool["Red"];
+        if (num >= 5) currentPayout += pool["Big"]; else currentPayout += pool["Small"];
+
+        if (currentPayout < minPayout) { minPayout = currentPayout; bestNumbers = [num]; }
+        else if (currentPayout === minPayout) { bestNumbers.push(num); }
+    }
+    // सबसे कम पैसे वाले नंबरों में से कोई एक रैंडम चुन लें
+    const finalNumber = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
+    console.log(`[Result] Mode: ${mode}, Period: ${liveGames[mode].currentPeriod}, Winner Number: ${finalNumber}`);
+    
+    // यहाँ बाद में हम यूज़र्स के पेंडिंग दांव (Bets) को जिताने/हारने की गणना जोड़ेंगे
+    resetPool(mode);
+}
+
+// === 3. बैकग्राउंड setInterval टाइमर इंजन ===
+function startServerTimerEngine() {
+    Object.keys(liveGames).forEach(mode => resetPool(mode));
+    
+    setInterval(() => {
+        Object.keys(liveGames).forEach(async (mode) => {
+            const game = liveGames[mode];
+            if (game.timeLeft <= 0) {
+                await calculateGameResult(mode);
+                game.timeLeft = game.duration;
+            } else {
+                game.timeLeft--;
+            }
+        });
+    }, 1000);
+}
+
+// सर्वर चलते ही टाइमर इंजन अपने आप चालू हो जाये
+startServerTimerEngine();
 
 const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI)

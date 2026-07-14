@@ -250,19 +250,33 @@ async function calculateGameResult(mode) {
     resetPool(mode); // अगला राउंड शुरू करने के लिए पूल खाली और नया पीरियड आईडी सेट करें
 }
 
+// १. नई ID बनाने के लिए एक नया छोटा फंक्शन जो इसी फाइल में ऊपर या नीचे कहीं भी रख दो
+function generateNewPeriodId(mode) {
+    const now = new Date();
+    const dateStr = now.getFullYear() + 
+                    (now.getMonth() + 1).toString().padStart(2, '0') + 
+                    now.getDate().toString().padStart(2, '0');
+    // 5 अंकों का एक सीरियल नंबर या रैंडम नंबर
+    const randomSec = Math.floor(10000 + Math.random() * 90000);
+    liveGames[mode].currentPeriod = dateStr + randomSec;
+}
 
-// === 3. बैकग्राउंड setInterval टाइमर इंजन ===
+// २. अब पुराना startServerTimerEngine हटाकर इसे पेस्ट करो
 function startServerTimerEngine() {
-    Object.keys(liveGames).forEach(mode => resetPool(mode));
-    
+    Object.keys(liveGames).forEach(mode => {
+        resetPool(mode);
+        generateNewPeriodId(mode); // गेम शुरू होते ही सिर्फ एक बार पहली ID बनेगी
+    });
+
     setInterval(() => {
         Object.keys(liveGames).forEach(async (mode) => {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
-                await calculateGameResult(mode);
-                game.timeLeft = game.duration;
+                await calculateGameResult(mode); // पुराना राउंड खत्म, रिजल्ट निकला
+                generateNewPeriodId(mode);      // <--- यहाँ नया राउंड शुरू होते ही नई ID बनेगी!
+                game.timeLeft = game.duration;  // टाइमर फिर से रीस्टार्ट होगा
             } else {
-                game.timeLeft--;
+                game.timeLeft--; // जब तक टाइम बचा है, सिर्फ़ टाइम घटेगा, ID नहीं बदलेगी
             }
         });
     }, 1000);

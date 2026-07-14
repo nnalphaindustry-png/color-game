@@ -94,12 +94,13 @@ async function generateNewPeriodId(mode) {
 
 async function calculateGameResult(mode) {
   const game = liveGames[mode];
-  const activePeriod = game.currentPeriod;
+  // FIX 1: Strictly use the period ID belonging ONLY to this specific game mode
+  const activePeriod = game.currentPeriod; 
 
-  // 1. Get all pending bets for this round
+  // 1. Fetch All Pending Bets strictly for THIS game mode and THIS period ID
   const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
 
-  // 2. Calculate Total Income collected by company in this round
+  // 2. Calculate Total Income collected strictly in this game mode round
   let totalIncomingMoney = 0;
   pendingBets.forEach(bet => {
     totalIncomingMoney += Number(bet.betAmount);
@@ -107,6 +108,7 @@ async function calculateGameResult(mode) {
 
   // Array to store company's NET PROFIT for each candidate number (0 to 9)
   let candidateNetProfits = Array(10).fill(0);
+  const greenNumbersArray =;
 
   // 3. Loop through all 10 possible numbers to find company's net profit/loss
   for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {
@@ -114,13 +116,12 @@ async function calculateGameResult(mode) {
     let candidateColor = "Red";
     if (candidateNum === 0 || candidateNum === 5) {
       candidateColor = "Violet";
-    } else if ([1, 3, 7, 9].includes(candidateNum)) {
+    } else if (greenNumbersArray.includes(candidateNum)) {
       candidateColor = "Green";
     }
 
     let potentialPayoutToUsers = 0;
 
-    // Calculate how much we have to pay if this candidateNum wins
     pendingBets.forEach(bet => {
       const userSelection = String(bet.selectValue).trim();
       const amt = Number(bet.betAmount) * 0.98; // 2% trade fee deducted
@@ -138,7 +139,6 @@ async function calculateGameResult(mode) {
       }
     });
 
-    // Net Profit for company = Total Received - Total Given Out
     candidateNetProfits[candidateNum] = totalIncomingMoney - potentialPayoutToUsers;
   }
 
@@ -149,13 +149,12 @@ async function calculateGameResult(mode) {
   for (let i = 0; i <= 9; i++) {
     if (candidateNetProfits[i] > maxProfit) {
       maxProfit = candidateNetProfits[i];
-      safestNumbersPool = [i]; // New king of profit
+      safestNumbersPool = [i];
     } else if (candidateNetProfits[i] === maxProfit) {
-      safestNumbersPool.push(i); // Tie pool
+      safestNumbersPool.push(i);
     }
   }
 
-  // Final selection of the number that makes company richest
   const finalNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
   const num = Number(finalNumber);
 
@@ -164,15 +163,15 @@ async function calculateGameResult(mode) {
   let finalColor = "Red";
   if (num === 0 || num === 5) {
     finalColor = "Violet";
-  } else if ([1, 3, 7, 9].includes(num)) {
+  } else if (greenNumbersArray.includes(num)) {
     finalColor = "Green";
   } else {
     finalColor = "Red";
   }
 
-  // 6. Save round outcome into database periods history
+  // 6. Save round outcome into database periods history with explicit mode tag
   const newPeriod = new Period({
-    gameMode: mode,
+    gameMode: mode, // Strict filter check
     periodId: activePeriod,
     resultNumber: num,
     resultColor: finalColor,
@@ -180,7 +179,7 @@ async function calculateGameResult(mode) {
   });
   await newPeriod.save();
 
-  // 7. Strict Multi-Bet Distribution Engine (Guaranteed Win for correct entries)
+  // 7. Strict Multi-Bet Distribution Engine for users
   for (let bet of pendingBets) {
     let isWin = false;
     let multiplier = 0;
@@ -211,7 +210,6 @@ async function calculateGameResult(mode) {
       bet.winAmount = Number(winAmt.toFixed(2));
       bet.status = 'Win';
 
-      // Instantly add cash back to user wallet
       await User.findOneAndUpdate(
         { phone: bet.phone },
         { $inc: { balance: bet.winAmount } }
@@ -221,7 +219,7 @@ async function calculateGameResult(mode) {
       bet.status = 'Loss';
     }
 
-    await bet.save(); // Complete transaction
+    await bet.save();
   }
 }
 

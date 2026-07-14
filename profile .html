@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Full Profile</title>
+    <style>
+        :root { color-scheme: light !important; } * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; } body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; } .app-container { width: 100%; max-width: 450px; background-color: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); padding-bottom: 40px; }
+        .profile-header { background: linear-gradient(to bottom, #f03e3e, #ff6b6b); padding: 20px 20px 60px 20px; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; } .back-btn { display: inline-block; padding: 8px 0; margin-bottom: 15px; text-decoration: none; cursor: pointer; } .user-info-wrapper { display: flex; align-items: center; gap: 15px; } .avatar-box { width: 75px; height: 75px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7); overflow: hidden; background: #eee; } .avatar-box img { width: 100%; height: 100%; object-fit: cover; } .user-text-details { flex: 1; color: white; } .user-display-name { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; } .user-uid { font-size: 14px; opacity: 0.95; margin-top: 3px; } .user-status-tag { font-size: 11px; opacity: 0.8; margin-top: 2px; } .vip-badge { background: rgba(255, 255, 255, 0.25); color: white; padding: 4px 14px; border-radius: 15px; font-size: 12px; font-weight: 700; backdrop-filter: blur(5px); }
+        .balance-card { background: white; width: 90%; margin: -40px auto 20px auto; border-radius: 20px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; z-index: 10; position: relative; } .balance-label { font-size: 14px; color: #8a99a8; font-weight: 500; } .balance-amount { font-size: 28px; font-weight: 800; color: #222; margin-top: 5px; } .enter-wallet-btn { background-color: #f03e3e; color: white; border: none; padding: 10px 22px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(240, 62, 62, 0.2); }
+        .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 90%; margin: 15px auto 20px auto; background: white; padding: 16px 8px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); } .action-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; text-decoration: none; transition: transform 0.2s; } .action-item:active { transform: scale(0.94); } .action-icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; } .action-label { font-size: 12px; font-weight: 700; color: #111; } .bg-wallet { background-color: #ffeef0; color: #ff4d6d; } .bg-deposit { background-color: #fff6e6; color: #ffa600; } .bg-withdraw { background-color: #e6f9ff; color: #00b4d8; } .bg-vip { background-color: #e8fbe8; color: #2b9348; }
+        .history-section-wrapper { display: flex; flex-direction: column; gap: 10px; width: 90%; margin: 0 auto 15px auto; } .menu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .menu-box-card { background: white; padding: 12px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); cursor: pointer; transition: transform 0.2s; } .menu-box-card:active { transform: scale(0.95); } .menu-box-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; } .icon-blue { background-color: #eef2ff; color: #4f46e5; } .icon-green { background-color: #ecfdf5; color: #10b981; } .icon-orange { background-color: #fff6e6; color: #d97706; } .icon-red { background-color: #ffeef0; color: #dc2626; } .menu-box-text h4 { font-size: 13px; color: #222; font-weight: 700; } .menu-box-text p { font-size: 10px; color: #8a99a8; margin-top: 1px; }
+        .list-section-wrapper { display: flex; flex-direction: column; background: white; width: 90%; margin: 0 auto 15px auto; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); overflow: hidden; } .list-row-item { background: transparent; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: transform 0.2s; } .list-row-item:active { transform: scale(0.97); } .list-left-side { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: #333; } .list-arrow-right { display: flex; align-items: center; color: #ccc; }
+        .service-center-card { background: white; width: 90%; margin: 0 auto 15px auto; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); } .service-title { font-size: 16px; font-weight: 700; color: #222; margin-bottom: 16px; text-align: left; } .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 10px; } .service-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s; } .service-item:active { transform: scale(0.92); } .service-icon-box { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; color: #ff6b6b; } .service-label { font-size: 11px; font-weight: 600; color: #444; line-height: 1.2; } .logout-btn-box { width: 90%; margin: 20px auto 30px auto; } .logout-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid #f03e3e; color: #f03e3e; font-size: 15px; font-weight: 700; border-radius: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; } .logout-btn:active { background: #ffeef0; transform: scale(0.96); }
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: all 0.3s ease; } .custom-modal-overlay.active { opacity: 1; pointer-events: auto; } .custom-modal-box { background: white; width: 85%; max-width: 340px; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: scale(0.8); transition: all 0.3s ease; } .custom-modal-overlay.active .custom-modal-box { transform: scale(1); } .modal-icon-wrapper { width: 56px; height: 56px; background: #ffeef0; color: #f03e3e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto; } .modal-title { font-size: 18px; font-weight: 700; color: #222; margin-bottom: 8px; } .modal-desc { font-size: 13px; color: #666; line-height: 1.4; margin-bottom: 20px; } .modal-btn-group { display: flex; gap: 12px; } .modal-btn { flex: 1; padding: 10px; font-size: 14px; font-weight: 700; border-radius: 20px; cursor: pointer; border: none; transition: all 0.2s; } .btn-cancel { background: #f4f6fb; color: #666; } .btn-cancel:active { background: #e2e6f0; } .btn-confirm-logout { background: #f03e3e; color: white; box-shadow: 0 4px 10px rgba(240,62,62,0.2); } .btn-confirm-logout:active { background: #d63031; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <!-- लाल हेडर सेक्शन -->
+    <div class="profile-header">
+        <a href="home.html" class="back-btn" aria-label="Go Back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+        <div class="user-info-wrapper">
+            <div class="avatar-box">
+                <img src="profile.jpg" alt="Profile Picture" onerror="this.src='https://dicebear.com'">
+            </div>
+            <div class="user-text-details">
+                <div class="user-display-name" id="masked-phone">Loading...</div>
+                <div class="user-uid" id="user-uid">UID: ------</div>
+                <div class="user-status-tag">Last login: Live Verified</div>
+            </div>
+            <div class="vip-badge">VIP0</div>
+        </div>
+    </div>
+
+    <!-- टोटल लाइव बैलेंस कार्ड -->
+    <div class="balance-card">
+        <div>
+            <div class="balance-label">Total balance</div>
+            <div class="balance-amount" id="live-balance">₹0.00</div>
+        </div>
+        <button class="enter-wallet-btn" onclick="alert('Opening Wallet...')">Enter wallet</button>
+    </div>
+
+    <!-- 4 मोटे और बड़े क्विक एक्शन्स बटन्स -->
+    <div class="action-grid">
+        <div class="action-item" onclick="alert('Opening ARWallet...')">
+            <div class="action-icon-box bg-wallet">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M21 18C21 19.1 20.1 20 19 20H5C3.89 20 3 19.1 3 18V6C3 4.9 3.89 4 5 4H19C20.1 4 21 4.9 21 6V9H12C10.9 9 10 9.9 10 11V13C10 14.1 10.9 15 12 15H21V18ZM12 13H22V11H12V13ZM16 12C16 11.45 16.45 11 17 11C17.55 11 18 11.45 18 12C18 12.55 17.55 13 17 13C16.45 13 16 12.55 16 12Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <span class="action-label">ARWallet</span>
+        </div>
+        <div class="action-item" onclick="alert('Redirecting to Deposit Page...')">
+            <div class="action-icon-box bg-deposit">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M19 9H15V3H9V9H5L12 17L19 9ZM5 19V21H19V19H5Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <span class="action-label">Deposit</span>
+        </div>
+        <div class="action-item" onclick="alert('Redirecting to Withdrawal Page...')">
+            <div class="action-icon-box bg-withdraw">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M5 15H9V21H15V15H19L12 7L5 15ZM19 3H5V5H19V3Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <span class="action-label">Withdraw</span>
+        </div>
+        <div class="action-item" onclick="alert('Opening VIP Lounge...')">
+            <div class="action-icon-box bg-vip">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M12 2L2 9L12 16L22 9L12 2ZM12 18L4.5 12.75L2 14.5L12 21.5L22 14.5L19.5 12.75L12 18Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <span class="action-label">VIP</span>
+        </div>
+    </div>
+        <!-- 4 स्लिम हिस्ट्री रिकॉर्ड्स कार्ड -->
+    <div class="history-section-wrapper">
+        <div class="menu-row">
+            <div class="menu-box-card" onclick="alert('Opening Game History...')">
+                <div class="menu-box-icon icon-blue">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M4 6H20V8H4V6ZM4 11H20V13H4V11ZM4 16H20V18H4V16Z" fill="currentColor"/></svg>
+                </div>
+                <div class="menu-box-text">
+                    <h4>Game History</h4>
+                    <p>Betting records</p>
+                </div>
+            </div>
+            <div class="menu-box-card" onclick="alert('Opening Transaction Logs...')">
+                <div class="menu-box-icon icon-green">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/></svg>
+                </div>
+                <div class="menu-box-text">
+                    <h4>Transaction</h4>
+                    <p>My transactions</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-row">
+            <div class="menu-box-card" onclick="alert('Opening Withdraw History...')">
+                <div class="menu-box-icon icon-orange">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 12H17L12 17L7 12H11V7H13V12Z" fill="currentColor"/></svg>
+                </div>
+                <div class="menu-box-text">
+                    <h4>Withdraw Hst</h4>
+                    <p>Payout history</p>
+                </div>
+            </div>
+            <div class="menu-box-card" onclick="alert('Opening Deposit History...')">
+                <div class="menu-box-icon icon-red">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 7L17 12H13V17H11V12H7L12 7Z" fill="currentColor"/></svg>
+                </div>
+                <div class="menu-box-text">
+                    <h4>Deposit Hst</h4>
+                    <p>Recharge logs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- सिंगल बड़े सफ़ेद बॉक्स के अंदर चारों ऑप्शन्स बंद हैं -->
+    <div class="list-section-wrapper">
+        <div class="list-row-item" onclick="alert('Opening Notifications...')" style="border-bottom: 1px solid #f4f6fb;">
+            <div class="list-left-side">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org" style="color: #ff6b6b;"><path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" fill="currentColor"/></svg>
+                <span>Notification</span>
+            </div>
+            <div class="list-arrow-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" fill="currentColor"/></svg></div>
+        </div>
+        <div class="list-row-item" onclick="alert('Opening Gift Section...')" style="border-bottom: 1px solid #f4f6fb;">
+            <div class="list-left-side">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org" style="color: #ff7675;"><path d="M20 6H16.2C16.4 5.4 16.5 4.7 16.5 4C16.5 2.3 15.2 1 13.5 1C12.5 1 11.6 1.5 11 2.2C10.4 1.5 9.5 1 8.5 1C6.8 1 5.5 2.3 5.5 4C5.5 4.7 5.6 5.4 5.8 6H2C0.9 6 0 6.9 0 8V11C0 11.8 0.5 12.5 1.2 12.8C1.1 13.2 1 13.6 1 14V21C1 22.1 1.9 23 3 23H21C22.1 23 23 22.1 23 21V14C23 13.6 22.9 13.2 22.8 12.8C23.5 12.5 24 11.8 24 11V8C24 6.9 23.1 6 22 6H20ZM13.5 3C14 3 14.5 3.4 14.5 4C14.5 4.6 14 5 13.5 5H12.1C12.5 3.8 13 3 13.5 3ZM8.5 3C9 3 9.5 3.8 9.9 5H8.5C8 5 7.5 4.6 7.5 4C7.5 3.4 8 3 8.5 3ZM2 8H11V11H2V8ZM21 21H3V14H11V21H21V14H13V21H21V14H13V21H21ZM22 11H13V8H22V11Z" fill="currentColor"/></svg>
+                <span>Gifts</span>
+            </div>
+            <div class="list-arrow-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" fill="currentColor"/></svg></div>
+        </div>
+        <div class="list-row-item" onclick="alert('Opening Game Statistics...')" style="border-bottom: 1px solid #f4f6fb;">
+            <div class="list-left-side">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org" style="color: #ff6b6b;"><path d="M5 9.2h3V19H5zM10.5 5h3v14h-3zm5.5 8h3v6h-3z" fill="currentColor"/></svg>
+                <span>Game statistics</span>
+            </div>
+            <div class="list-arrow-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" fill="currentColor"/></svg></div>
+        </div>
+        <div class="list-row-item" onclick="alert('Opening Language Settings...')">
+            <div class="list-left-side">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org" style="color: #ff6b6b;"><path d="M11.99 2C6.47 2 2 6.48 2 12C2 17.52 6.47 22 11.99 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 11.99 2ZM18.92 8H15.91C15.58 6.16 15.02 4.42 14.26 2.85C16.32 3.66 17.97 5.56 18.92 8ZM12 4.04C12.56 5.25 13.01 6.57 13.3 8H10.7C10.99 6.57 11.44 5.25 12 4.04ZM3.51 14C3.18 13.36 3 12.69 3 12C3 11.31 3.18 10.64 3.51 10H7.03C6.95 10.66 6.9 11.32 6.9 12C6.9 12.68 6.95 13.34 7.03 14H3.51ZM4.11 16H6.94C7.3 17.65 7.84 19.19 8.56 20.57C6.71 19.67 5.24 18.04 4.11 16ZM6.94 8H4.11C5.24 5.96 6.71 4.33 8.56 3.43C7.84 4.81 7.3 6.35 6.94 8ZM12 19.96C11.44 18.75 10.99 17.43 10.7 16H13.3C13.01 17.43 12.56 18.75 12 19.96ZM14.26 21.15C15.02 19.58 15.58 17.84 15.91 16H18.92C17.97 18.44 16.32 20.34 14.26 21.15ZM16.97 14C17.05 13.34 17.1 12.68 17.1 12C17.1 11.32 17.05 10.66 16.97 10H20.49C20.82 10.64 21 11.31 21 12C21 12.69 20.82 13.36 20.49 14H16.97Z" fill="currentColor"/></svg>
+                <span>Language</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; color: #333; font-weight: 500;">English</span>
+                <div class="list-arrow-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" fill="currentColor"/></svg></div>
+            </div>
+        </div>
+    </div>
+        <!-- नया सर्विस सेंटर ग्रिड बॉक्स -->
+    <div class="service-center-card">
+        <div class="service-title">Service center</div>
+        <div class="service-grid">
+            <div class="service-item" onclick="alert('Opening Settings...')"><div class="service-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M19.14 12.94C19.18 12.63 19.2 12.32 19.2 12s-.02-.63-.06-.94l2.28-1.78c.21-.16.27-.45.14-.68l-2.16-3.74c-.13-.23-.41-.32-.64-.23l-2.69 1.08c-.56-.43-1.17-.78-1.84-1.06l-.41-2.86C13.72 1.54 13.5 1.36 13.25 1.36H8.75c-.25 0-.47.18-.5.42l-.41 2.86c-.67.28-1.28.63-1.84 1.06L3.31 4.62c-.23-.09-.51 0-.64.23L.51 8.6c-.13.23-.07.52.14.68l2.28 1.78c-.04.31-.06.63-.06.94s.02.63.06.94L.65 14.72c-.21.16-.27.45-.14.68l2.16 3.74c.13.23.41.32.64.23l2.69-1.08c.56.43 1.17.78 1.84 1.06l.41 2.86c.03.24.25.42.5.42h4.5c.25 0 .47-.18.5-.42l.41-2.86c.67-.28 1.28-.63 1.84-1.06l2.69 1.08c.23.09.51 0 .64-.23l2.16-3.74c.13-.23.07-.52-.14-.68l-2.28-1.78zM11 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="currentColor"/></svg></div><span class="service-label">Settings</span></div>
+            <div class="service-item" onclick="alert('Opening Feedback...')"><div class="service-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z" fill="currentColor"/></svg></div><span class="service-label">Feedback</span></div>
+            <div class="service-item" onclick="alert('Opening Announcements...')"><div class="service-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-9 13H9V9h2v6zm4 0h-2V9h2v6z" fill="currentColor"/></svg></div><span class="service-label">Announcement</span></div>
+            <div class="service-item" onclick="alert('Opening Customer Support Live Chat...')"><div class="service-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.96 3.59 9.07 8.38 9.89.57.1.62-.25.62-.55v-1.93c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.26 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .31.04.66.62.55C20.41 21.07 24 16.96 24 12c0-5.52-4.48-10-10-10z" fill="currentColor"/></svg></div><span class="service-label">Customer Support</span></div>
+            <div class="service-item" onclick="alert('Opening Beginner\'s Guide...')"><div class="service-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" fill="currentColor"/></svg></div><span class="service-label">Beginner's Guide</span></div>
+            <div class="service-item" onclick="alert('Opening About Us...')"><div class="service-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/></svg></div><span class="service-label">About us</span></div>
+        </div>
+    </div>
+
+    <!-- लॉगआउट बटन -->
+    <div class="logout-btn-box">
+        <button class="logout-btn" id="logout-trigger-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="currentColor"/></svg>
+            <span>Log out</span>
+        </button>
+    </div>
+
+    <!-- कस्टमाइज्ड सुंदर पॉप-अप (Modal Layout) -->
+    <div class="custom-modal-overlay" id="logout-modal">
+        <div class="custom-modal-box">
+            <div class="modal-icon-wrapper">
+                <svg width="28" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z" fill="currentColor"/></svg>
+            </div>
+            <div class="modal-title">Confirm Log Out</div>
+            <div class="modal-desc">Are you sure you want to log out from 91 Goa Club? You will need to login again to play.</div>
+            <div class="modal-btn-group">
+                <button class="modal-btn btn-cancel" id="btn-modal-cancel">Cancel</button>
+                <button class="modal-btn btn-confirm-logout" id="btn-modal-confirm">Log out</button>
+            </div>
+        </div>
+    </div>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // आपके लाइव ऑनरेंडर सर्वर का मुख्य URL
+    const SERVER_URL = "https://color-game-1kc2.onrender.com";
+    
+    // LocalStorage से लॉगिन किए हुए असली यूज़र का मोबाइल नंबर निकालें
+    const userPhone = localStorage.getItem('user_phone');
+    
+    // असली सुरक्षा चेक: अगर कोई बिना लॉगिन किए सीधा आएगा, तो यह उसे तुरंत बाहर लॉगिन/होमपेज पर फेंक देगा
+    if (!userPhone) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    const originalPhone = userPhone.trim();
+    
+    // असली यूज़र के मोबाइल नंबर को छुपाने (Masking) का लॉजिक (जैसे: 9876543210 -> 9876***210)
+    if(originalPhone.length >= 8) {
+        const masked = originalPhone.slice(0, 4) + "***" + originalPhone.slice(-3);
+        document.getElementById('masked-phone').innerText = masked;
+    } else {
+        document.getElementById('masked-phone').innerText = originalPhone;
+    }
+
+    // यूज़र के असली नंबर के आधार पर एक फिक्स यूनिक UID जेनरेट करना (ताकि रिफ्रेश करने पर बदले नहीं)
+    let hash = 0;
+    for (let i = 0; i < originalPhone.length; i++) { 
+        hash = originalPhone.charCodeAt(i) + ((hash << 5) - hash); 
+    }
+    const finalUID = Math.abs(100000 + (hash % 899999));
+    document.getElementById('user-uid').innerText = "UID: " + finalUID;
+        // आपके लाइव रेंडर डेटाबेस से असली यूज़र का वॉलेट बैलेंस लाइव खींचना
+    fetch(`${SERVER_URL}/api/balance/${originalPhone}`, { 
+        method: 'GET', 
+        mode: 'cors', 
+        headers: { 'Content-Type': 'application/json' } 
+    })
+    .then(response => response.json())
+    .then(resData => { 
+        if (resData.success) { 
+            // डेटाबेस में स्टोर असली बैलेंस यहाँ लाइव सेट होगा
+            document.getElementById('live-balance').innerText = "₹" + Number(resData.balance).toFixed(2); 
+        } 
+    })
+    .catch(err => { 
+        console.error("Live balance fetch error:", err); 
+    });
+
+    // कस्टमाइज्ड सुंदर पॉप-अप लॉजिक
+    const modalOverlay = document.getElementById('logout-modal');
+    const triggerBtn = document.getElementById('logout-trigger-btn');
+    const cancelBtn = document.getElementById('btn-modal-cancel');
+    const confirmBtn = document.getElementById('btn-modal-confirm');
+
+    // लॉगआउट बटन क्लिक पर कस्टमाइज्ड पॉप-अप खोलें
+    triggerBtn.addEventListener('click', function() {
+        modalOverlay.classList.add('active'); 
+    });
+
+    // कैंसिल क्लिक पर बंद करें
+    cancelBtn.addEventListener('click', function() {
+        modalOverlay.classList.remove('active'); 
+    });
+
+    // बाहर क्लिक पर बंद करें
+    modalOverlay.addEventListener('click', function(e) {
+        if(e.target === modalOverlay) { modalOverlay.classList.remove('active'); }
+    });
+
+    // कन्फर्म दबाने पर ही असली लॉगआउट हो और लोकल डेटा क्लियर हो
+    confirmBtn.addEventListener('click', function() {
+        localStorage.removeItem('user_phone'); 
+        window.location.href = "index.html"; 
+    });
+});
+</script>
+</body>
+</html>

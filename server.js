@@ -26,6 +26,12 @@ const periodSchema = new mongoose.Schema({ gameMode: String, periodId: String, r
 const Period = mongoose.model('Period', periodSchema);
 const betSchema = new mongoose.Schema({ phone: String, gameMode: String, periodId: String, selectValue: String, betAmount: Number, winAmount: { type: Number, default: 0 }, status: { type: String, default: "Pending" }, createdAt: { type: Date, default: Date.now } });
 const Bet = mongoose.model('Bet', betSchema);
+// पीरियड नंबर को लगातार 1, 2, 3 गिनने के लिए नया काउंटर कोड
+const counterSchema = new mongoose.Schema({
+    gameMode: { type: String, required: true, unique: true },
+    nextPeriodNumber: { type: Number, default: 1 } // यह नंबर 1 से शुरू होगा
+});
+const GameCounter = mongoose.model('GameCounter', counterSchema);
 
 // === LIVE DATABASE STATUS ROUTE ===
 // इसे ब्राउज़र में खोलकर आप चेक कर सकते हैं कि डेटाबेस कनेक्टेड है या नहीं
@@ -261,26 +267,32 @@ function generateNewPeriodId(mode) {
     liveGames[mode].currentPeriod = dateStr + randomSec;
 }
 
-// २. अब पुराना startServerTimerEngine हटाकर इसे पेस्ट करो
-function startServerTimerEngine() {
-    Object.keys(liveGames).forEach(mode => {
+async function startServerTimerEngine() {
+    // गेम शुरू होते ही सभी मोड्स के लिए पहली सीरियल आईडी बनाएं
+    for (let mode of Object.keys(liveGames)) {
         resetPool(mode);
-        generateNewPeriodId(mode); // गेम शुरू होते ही सिर्फ एक बार पहली ID बनेगी
-    });
+        await generateNewPeriodId(mode); 
+    }
 
     setInterval(() => {
         Object.keys(liveGames).forEach(async (mode) => {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
-                await calculateGameResult(mode); // पुराना राउंड खत्म, रिजल्ट निकला
-                generateNewPeriodId(mode);      // <--- यहाँ नया राउंड शुरू होते ही नई ID बनेगी!
-                game.timeLeft = game.duration;  // टाइमर फिर से रीस्टार्ट होगा
+                // १. पुराना राउंड ख़त्म, रिजल्ट कैलकुलेट करो
+                await calculateGameResult(mode); 
+                
+                // २. अगला सीरियल नंबर जनरेट करो (जैसे 0001 के बाद 0002)
+                await generateNewPeriodId(mode); 
+                
+                // ३. टाइमर को फिर से रीस्टार्ट करो
+                game.timeLeft = game.duration; 
             } else {
-                game.timeLeft--; // जब तक टाइम बचा है, सिर्फ़ टाइम घटेगा, ID नहीं बदलेगी
+                game.timeLeft--; // जब तक टाइम बचा है, सिर्फ सेकंड कम होंगे
             }
         });
     }, 1000);
 }
+
 
 // सर्वर चलते ही टाइमर इंजन अपने आप चालू हो जाये
 startServerTimerEngine();

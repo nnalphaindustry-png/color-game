@@ -94,7 +94,7 @@ async function generateNewPeriodId(mode) {
 
 async function calculateGameResult(mode) {
   const game = liveGames[mode];
-  // FIX 1: Strictly use the period ID belonging ONLY to this specific game mode
+  // Strictly use the period ID belonging ONLY to this specific game mode
   const activePeriod = game.currentPeriod; 
 
   // 1. Fetch All Pending Bets strictly for THIS game mode and THIS period ID
@@ -171,7 +171,7 @@ async function calculateGameResult(mode) {
 
   // 6. Save round outcome into database periods history with explicit mode tag
   const newPeriod = new Period({
-    gameMode: mode, // Strict filter check
+    gameMode: mode, 
     periodId: activePeriod,
     resultNumber: num,
     resultColor: finalColor,

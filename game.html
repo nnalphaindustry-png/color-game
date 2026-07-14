@@ -97,6 +97,121 @@
 
         .disabled-betting-panel { opacity: 0.5; pointer-events: none; }
         .premium-timer-banner.bet-locked { background: linear-gradient(135deg, #d63031, #b21f1f); }
+        /* --- माय हिस्ट्री का हुबहू स्क्रीनशॉट जैसा डिज़ाइन --- */
+.user-history-card-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin: 0 auto 12px auto;
+    width: 95%;
+    border: 1px solid #edf2f7;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+}
+
+.card-left-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Big / Small के लिए चौकोर गोल कोनों वाला बॉक्स */
+.bet-choice-rect {
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- गोल सर्कल को नंबर के हिसाब से रंग-बिरंगा करने का फिक्स --- */
+.bet-choice-circle {
+    color: white !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,0.15) !important;
+    background: inherit; /* यह जावास्क्रिप्ट से आ रहे असली कलर (लाल, हरा, बैंगनी) को अपने आप पकड़ लेगा */
+}
+
+.bet-info-text-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bet-period-row {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.small-arrow-down {
+    font-size: 9px;
+    color: #a0aec0;
+}
+
+.bet-time-row {
+    font-size: 12px;
+    color: #a0aec0;
+    font-weight: 500;
+}
+
+.card-right-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+/* दाएँ तरफ का बॉर्डर वाला बटन जैसा बैज */
+.status-border-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 14px;
+    border-radius: 8px;
+    min-width: 75px;
+    text-align: center;
+    background: #ffffff;
+}
+
+.badge-succeed {
+    border: 1px solid #2ecc71;
+    color: #2ecc71;
+}
+
+.badge-failed {
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+}
+
+.badge-pending {
+    border: 1px solid #f1c40f;
+    color: #f1c40f;
+}
+
+.bet-final-amount {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
     </style>
 </head>
 <body>
@@ -193,36 +308,25 @@
     </div>
 
     <div class="history-section-wrapper">
-        <!-- पहले जैसा शानदार मोटा और चौड़ा लाल हेडर -->
+        <!-- FIXED: एक लाइन में सीधा दिखने वाला प्रीमियम लाल हेडर -->
 <table class="history-table" id="view-game-history-table" style="width: 100%; border-collapse: collapse; text-align: center;">
     <thead>
         <tr style="background-color: #ef4444;">
-            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-align: left; text-transform: uppercase;">Period</th>
-            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-transform: uppercase;">Number</th>
-            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-transform: uppercase;">Big Small</th>
-            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-align: right; text-transform: uppercase;">Color</th>
+            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-align: left; text-transform: uppercase; white-space: nowrap;">Period</th>
+            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">Number</th>
+            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">Big Small</th>
+            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-align: right; text-transform: uppercase; white-space: nowrap;">Color</th>
         </tr>
     </thead>
-    
+
     
             <tbody id="game-history-injector">
                 <tr><td colspan="4" style="color:#aaa; padding:15px;">Loading game results...</td></tr>
             </tbody>
         </table>
 
-        <table class="history-table" id="view-user-history-table" style="display: none;">
-            <thead>
-                <tr>
-                    <th style="text-align: left;">Period ID</th>
-                    <th>Select</th>
-                    <th>Amount</th>
-                    <th style="text-align: right;">Status</th>
-                </tr>
-            </thead>
-            <tbody id="user-history-injector">
-                <tr><td colspan="4" style="color:#aaa; padding:15px;">No bets found for this mode.</td></tr>
-            </tbody>
-        </table>
+        <div id="view-user-history-list" style="display: none; width: 100%; padding: 10px 0;"></div>
+        
     </div>
     <!-- NEW PAGINATION BUTTONS FOR PREVIOUS/NEXT HISTORY -->
 <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 5px;">
@@ -361,22 +465,31 @@ let currentUserPage = 1;
     }
 
     function toggleSubTab(tabName) {
-        activeSubTab = tabName;
-        document.getElementById('subtab-game').classList.remove('active');
-        document.getElementById('subtab-user').classList.remove('active');
+    activeSubTab = tabName;
+    document.getElementById('subtab-game').classList.remove('active');
+    document.getElementById('subtab-user').classList.remove('active');
+    
+    if (tabName === 'game') {
+        document.getElementById('subtab-game').classList.add('active');
+        document.getElementById('view-game-history-table').style.display = "table";
         
-        if (tabName === 'game') {
-            document.getElementById('subtab-game').classList.add('active');
-            document.getElementById('view-game-history-table').style.display = "table";
-            document.getElementById('view-user-history-table').style.display = "none";
-            fetchLiveGameHistory();
-        } else {
-            document.getElementById('subtab-user').classList.add('active');
-            document.getElementById('view-game-history-table').style.display = "none";
-            document.getElementById('view-user-history-table').style.display = "table";
-            fetchUserBetHistory();
+        // यहाँ पुराने टेबल नाम की जगह नया लिस्ट नाम डाला गया है ताकि एरर न आए
+        if (document.getElementById('view-user-history-list')) {
+            document.getElementById('view-user-history-list').style.display = "none";
         }
+        fetchLiveGameHistory();
+    } else {
+        document.getElementById('subtab-user').classList.add('active');
+        document.getElementById('view-game-history-table').style.display = "none";
+        
+        // यहाँ भी नया नाम सेट किया गया है
+        if (document.getElementById('view-user-history-list')) {
+            document.getElementById('view-user-history-list').style.display = "block";
+        }
+        fetchUserBetHistory();
     }
+}
+
 
     function switchGameMode(mode) {
   activeGameMode = mode;
@@ -404,28 +517,27 @@ let currentUserPage = 1;
         if (data.success && data.list.length > 0) {
             data.list.forEach((row, index) => {
                 const tr = document.createElement("tr");
-                tr.style.borderBottom = "1px solid #eef2f5";
+                tr.style.borderBottom = "1px solid #f1f3f5";
                 
-                // पहले जैसा रो पैडिंग (मोटा लुक)
                 if (index % 2 === 1) {
                     tr.style.backgroundColor = "#f9fafb";
                 }
 
-                // 1. Period ID (पहले जैसा ठोस और साफ़)
+                // 1. Period ID कॉलम (साफ और नॉर्मल)
                 const tdPeriod = document.createElement("td");
                 tdPeriod.style.textAlign = "left";
-                tdPeriod.style.padding = "14px 8px"; // पहले जैसी मोटी पैडिंग
-                tdPeriod.style.color = "#2c3e50";
-                tdPeriod.style.fontSize = "14px";
-                tdPeriod.style.fontWeight = "600"; // मोटा फॉन्ट
+                tdPeriod.style.padding = "12px 8px";
+                tdPeriod.style.color = "#444";
+                tdPeriod.style.fontSize = "13px";
+                tdPeriod.style.fontWeight = "500";
                 tdPeriod.textContent = row.periodId;
                 tr.appendChild(tdPeriod);
 
-                // 2. Number कॉलम (पहले जैसा एकदम मोटा और 0,5 पर आधा-आधा रंग)
+                // 2. Number कॉलम (परफेक्ट बोल्ड और असली कलर)
                 const tdNumber = document.createElement("td");
-                tdNumber.style.padding = "14px 8px";
-                tdNumber.style.fontWeight = "900"; // एकदम ठोस मोटा (Extra Bold)
-                tdNumber.style.fontSize = "24px";  // पहले जैसा बड़ा साइज़
+                tdNumber.style.padding = "12px 8px";
+                tdNumber.style.fontWeight = "bold"; // एकदम परफेक्ट मोटाई
+                tdNumber.style.fontSize = "20px";   // आँखों को सुहाने वाला साइज़
                 tdNumber.textContent = row.resultNumber;
                 
                 const numVal = Number(row.resultNumber);
@@ -446,26 +558,26 @@ let currentUserPage = 1;
                 }
                 tr.appendChild(tdNumber);
 
-                // 3. Big Small कॉलम (पहले जैसा मोटा ब्लैक टेक्स्ट)
+                // 3. Big Small कॉलम (FIXED: शुद्ध ब्लैक और बिना टूटे एक लाइन में)
                 const tdSize = document.createElement("td");
-                tdSize.style.padding = "14px 8px";
-                tdSize.style.fontSize = "14px";
-                tdSize.style.fontWeight = "700"; // मोटा लुक
-                tdSize.style.color = "#111111"; // शुद्ध ब्लैक
+                tdSize.style.padding = "12px 8px";
+                tdSize.style.fontSize = "13px";
+                tdSize.style.fontWeight = "500";
+                tdSize.style.color = "#111111";
+                tdSize.style.whiteSpace = "nowrap"; // टूटने से रोकने के लिए लॉक किया
                 tdSize.textContent = row.resultSize;
                 tr.appendChild(tdSize);
 
-                // 4. Color कॉलम (पहले जैसा बड़ा और साफ़ गोल डॉट)
+                // 4. Color कॉलम (परफेक्ट स्लिम गोल डॉट)
                 const tdColor = document.createElement("td");
                 tdColor.style.textAlign = "right";
-                tdColor.style.padding = "14px 8px";
+                tdColor.style.padding = "12px 8px";
                 
                 const dot = document.createElement("span");
-                dot.style.width = "14px"; // पहले जैसा बड़ा साइज़
-                dot.style.height = "14px";
+                dot.style.width = "12px";
+                dot.style.height = "12px";
                 dot.style.borderRadius = "50%";
                 dot.style.display = "inline-block";
-                dot.style.boxShadow = "inset 0 -2px 4px rgba(0,0,0,0.2)";
 
                 if (numVal === 0) {
                     dot.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
@@ -496,37 +608,114 @@ let currentUserPage = 1;
     });
 }
 
-
 function fetchUserBetHistory() {
-  const injector = document.getElementById('user-history-injector');
-  const phone = localStorage.getItem('user_phone');
-  if (!injector || !phone) return;
-  fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}?page=${currentUserPage}`)
-  .then(res => res.json())
-  .then(data => {
-    if (data.success && data.list.length > 0) {
-      let html = "";
-      data.list.forEach(bet => {
-        const statusClass = bet.status === "Win" ? "status-win" : bet.status === "Loss" ? "status-loss" : "status-pending";
-        const displayWin = bet.status === "Win" ? `+₹${bet.winAmount}` : bet.status === "Loss" ? "-₹"+bet.betAmount : "Pending";
-        html += `<tr>
-          <td style="text-align: left; color:#7f8c8d;">${bet.periodId}</td>
-          <td><span style="font-weight:700;">${bet.selectValue}</span></td>
-          <td>₹${bet.betAmount}</td>
-          <td style="text-align: right;"><span class="status-tag ${statusClass}">${displayWin}</span></td>
-        </tr>`;
-      });
-      injector.innerHTML = html;
-      updatePaginationButtons(currentUserPage, data.hasMore);
-    } else {
-      injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No bets placed in ${activeGameMode}.</td></tr>`;
-    }
-  })
-  .catch(() => {
-    if(injector.innerHTML === "") {
-      injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading bet logs.</td></tr>`;
-    }
-  });
+    const injector = document.getElementById('view-user-history-list');
+    const phone = localStorage.getItem('user_phone');
+    if (!injector || !phone) return;
+    
+    fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}?page=${currentUserPage}`)
+    .then(res => res.json())
+    .then(data => {
+        injector.innerHTML = "";
+        if (data.success && data.list.length > 0) {
+            let html = "";
+            
+            data.list.forEach(bet => {
+                const isWin = bet.status === "Win";
+                const isLoss = bet.status === "Loss";
+                
+                const statusText = isWin ? "Succeed" : isLoss ? "Failed" : "Pending";
+                const statusBtnClass = isWin ? "badge-succeed" : isLoss ? "badge-failed" : "badge-pending";
+                
+                const displayWin = isWin ? `+₹${parseFloat(bet.winAmount).toFixed(2)}` : isLoss ? `-₹${parseFloat(bet.betAmount).toFixed(2)}` : "Pending";
+                const amtColor = isWin ? "#2ecc71" : isLoss ? "#ff4d4d" : "#f1c40f";
+                
+                const betDate = bet.createdAt ? new Date(bet.createdAt) : new Date();
+                const formattedTime = betDate.toLocaleString('en-IN', { hour12: false }).replace(/\//g, '-');
+
+                // --- आपकी फाइनल रिक्वायरमेंट के अनुसार सटीक लॉजिक ---
+                let displayValue = bet.selectValue; 
+                let tagBg = "#54a0ff"; 
+
+                // 1. अगर यूज़र ने Big या Small चुना है (सिर्फ Big/Small दिखेगा)
+                if (bet.selectValue === "Big" || bet.selectValue === "10") {
+                    displayValue = "Big";
+                    tagBg = "linear-gradient(to right, #ff7675, #ff9f43)";
+                } else if (bet.selectValue === "Small" || bet.selectValue === "11") {
+                    displayValue = "Small";
+                    tagBg = "linear-gradient(to right, #00cec9, #54a0ff)";
+                } 
+                // 2. अगर यूज़र ने सीधे कलर्स चुने हैं (सिर्फ कलर का नाम दिखेगा, नंबर नहीं)
+                else if (bet.selectValue === "Green") {
+                    displayValue = "Green";
+                    tagBg = "#2ecc71";
+                } else if (bet.selectValue === "Red") {
+                    displayValue = "Red";
+                    tagBg = "#ff4d4d";
+                } else if (bet.selectValue === "Violet") {
+                    displayValue = "Violet";
+                    tagBg = "#9b59b6";
+                } 
+                // 3. अगर यूज़र ने 0 से 9 के बीच नंबर चुना है (कलर बॉक्स के साथ नंबर दिखेगा)
+                else if (!isNaN(bet.selectValue) && bet.selectValue !== "" && bet.selectValue !== null) {
+                    const num = parseInt(bet.selectValue);
+                    
+                    if (num === 0) {
+                        displayValue = "0";
+                        tagBg = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)"; // आधा लाल, आधा बैंगनी
+                    } else if (num === 5) {
+                        displayValue = "5";
+                        tagBg = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)"; // आधा हरा, आधा बैंगनी
+                    } else if ([1, 3, 7, 9].includes(num)) {
+                        displayValue = num.toString(); // नंबर दिखेगा
+                        tagBg = "#2ecc71"; // हरा बॉक्स
+                    } else if ([2, 4, 6, 8].includes(num)) {
+                        displayValue = num.toString(); // नंबर दिखेगा
+                        tagBg = "#ff4d4d"; // लाल बॉक्स
+                    }
+                }
+
+                const choiceClass = "bet-choice-rect";
+
+                const betDataString = encodeURIComponent(JSON.stringify({
+                    orderId: bet.orderId || "WG" + bet.periodId + Math.floor(1000 + Math.random() * 9000),
+                    periodId: bet.periodId,
+                    betAmount: bet.betAmount,
+                    selectValue: displayValue, 
+                    status: bet.status,
+                    winAmount: bet.winAmount,
+                    time: formattedTime
+                }));
+
+                html += `
+                <div class="user-history-card-item" onclick="openDetailPopup('${betDataString}')">
+                    <div class="card-left-section">
+                        <!-- आपकी एकदम सटीक शर्त के अनुसार बना हुआ बॉक्स और टेक्स्ट -->
+                        <div class="${choiceClass}" style="background: ${tagBg};">${displayValue}</div>
+                        
+                        <div class="bet-info-text-block">
+                            <div class="bet-period-row">${bet.periodId} <span class="small-arrow-down">▼</span></div>
+                            <div class="bet-time-row">${formattedTime}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-right-section">
+                        <div class="status-border-badge ${statusBtnClass}">${statusText}</div>
+                        <div class="bet-final-amount" style="color: ${amtColor};">${displayWin}</div>
+                    </div>
+                </div>`;
+            });
+            
+            injector.innerHTML = html;
+            updatePaginationButtons(currentUserPage, data.hasMore);
+        } else {
+            injector.innerHTML = `<div style="color:#aaa; text-align:center; padding:30px; font-size:13px;">No bets placed in ${activeGameMode}.</div>`;
+        }
+    })
+    .catch((err) => {
+        console.error(err);
+        injector.innerHTML = `<div style="color:#ff4d4d; text-align:center; padding:30px; font-size:13px;">Error loading bet logs.</div>`;
+    });
 }
 
     

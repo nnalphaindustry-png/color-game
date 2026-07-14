@@ -108,7 +108,9 @@ async function calculateGameResult(mode) {
 
   // Array to store company's NET PROFIT for each candidate number (0 to 9)
   let candidateNetProfits = Array(10).fill(0);
-  const greenNumbersArray =;
+  
+  // FIX: Using string split to securely inject green numbers [1, 3, 7, 9] without system drops
+  const greenNumbersArray = "1,3,7,9".split(",").map(Number);
 
   // 3. Loop through all 10 possible numbers to find company's net profit/loss
   for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {

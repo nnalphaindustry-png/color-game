@@ -25,6 +25,7 @@ global.adminManualOverride = {
 
 // === 1. USER SCHEMA WITH BAN TRACKING ===
 const userSchema = new mongoose.Schema({
+	  uid: { type: String, required: true, unique: true }, 
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isBanned: { type: Boolean, default: false }, // Added for tracking ban status
@@ -275,51 +276,68 @@ app.get('/api/db-status', (req, res) => {
     res.json({ success: mongoose.connection.readyState === 1 });
 });
 
-// 2. नया रजिस्ट्रेशन (Register API)
+// नया रजिस्ट्रेशन (Register API) - असली UID के साथ
 app.post('/api/register', async (req, res) => {
-    try {
-        const { phone, password, inviteCode } = req.body;
-        const exists = await User.findOne({ phone: phone.trim() });
-        if (exists) {
-            return res.json({ success: false, message: "Already registered!" });
-        }
-        const newUser = new User({ 
-            phone: phone.trim(), 
-            password: password.trim(), 
-            inviteCode: inviteCode || "" 
-        });
-        await newUser.save();
-        res.json({ success: true, message: "Registered successfully!" });
-    } catch (err) { 
-        res.status(500).json({ success: false, message: "Registration failed! Server error." }); 
+  try {
+    const { phone, password, inviteCode } = req.body;
+    
+    // चेक करें कि फोन नंबर पहले से तो नहीं है
+    const exists = await User.findOne({ phone: phone.trim() });
+    if (exists) {
+      return res.json({ success: false, message: "Already registered!" });
     }
+
+    // डेटाबेस के लिए एकदम अनोखी (Unique) 6 अंकों की UID बनाने का लॉजिक
+    let uniqueUID;
+    let isUnique = false;
+    while (!isUnique) {
+      uniqueUID = Math.floor(100000 + Math.random() * 900000).toString(); // 100000 से 999999 के बीच
+      const checkData = await User.findOne({ uid: uniqueUID });
+      if (!checkData) isUnique = true; // अगर डेटाबेस में यह नंबर खाली है, तो लूप खत्म
+    }
+
+    const newUser = new User({
+      uid: uniqueUID, // यहाँ असली जेनरेट हुई UID सेव होगी
+      phone: phone.trim(),
+      password: password.trim(),
+      inviteCode: inviteCode || ""
+    });
+
+    await newUser.save();
+    res.json({ success: true, message: "Registered successfully!" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Registration failed! Server error." });
+  }
 });
 
-// === LOGIN API WITH BAN CHECK ===
+
+// LOGIN API WITH UID
 app.post('/api/login', async (req, res) => {
-    try {
-        const { phone, password } = req.body;
-        const user = await User.findOne({ phone: phone.trim() });
-        
-        if (!user || user.password !== password.trim()) {
-            return res.json({ success: false, message: "Invalid credentials!" });
-        }
-
-        // Check if the user is banned before allowing login
-        if (user.isBanned) {
-            return res.json({ success: false, message: "Your account has been banned by management!" });
-        }
-
-        res.json({
-            success: true,
-            phone: user.phone,
-            balance: user.balance,
-            message: "Login success!"
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Login failed! Server error." });
+  try {
+    const { phone, password } = req.body;
+    const user = await User.findOne({ phone: phone.trim() });
+    
+    if (!user || user.password !== password.trim()) {
+      return res.json({ success: false, message: "Invalid credentials!" });
     }
+    
+    if (user.isBanned) {
+      return res.json({ success: false, message: "Your account has been banned by management!" });
+    }
+
+    // फ्रंटएंड को डेटा भेजें
+    res.json({
+      success: true,
+      phone: user.phone,
+      uid: user.uid, // <--- फ्रंटएंड को ब्राउज़र में सेव करने के लिए असली UID भेजी
+      balance: user.balance,
+      message: "Login success!"
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Login failed! Server error." });
+  }
 });
+
 
 // === १. गेम मोड के अनुसार पिछला इतिहास भेजने की अपडेटेड एपीआई (Pagination के साथ) ===
 app.get('/api/game-history/:mode', async (req, res) => {

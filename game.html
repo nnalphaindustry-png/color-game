@@ -276,10 +276,12 @@
         syncTimerWithServer();
     }
 
+        // === परमानेंट इलाज: गेम हिस्ट्री टेबल बिना किसी लोडिंग लैग के तुरंत बदलेगी ===
     function fetchLiveGameHistory() {
         const injector = document.getElementById('game-history-injector');
         if (!injector) return;
 
+        // ध्यान दें: हमने यहाँ से लोडिंग टेक्स्ट हटा दिया है, अब यह बैकग्राउंड में तुरंत डेटा रिप्लेस करेगा
         fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}`)
             .then(res => res.json())
             .then(data => {
@@ -288,6 +290,7 @@
                     data.list.forEach(row => {
                         let colorStyle = row.resultColor === "Green" ? "background:#2ecc71;" : row.resultColor === "Red" ? "background:#ff4d4d;" : "background:linear-gradient(135deg,#ff4d4d 50%,#9b59b6 50%);";
                         const sizeTag = row.resultSize === "Big" ? '<span class="size-tag-text size-tag-big">Big</span>' : '<span class="size-tag-text size-tag-small">Small</span>';
+                        
                         html += `<tr>
                             <td style="text-align: left; color:#7f8c8d;">${row.periodId}</td>
                             <td><div class="history-badge-circle" style="${colorStyle}">${row.resultNumber}</div></td>
@@ -299,9 +302,15 @@
                 } else {
                     injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No results found for ${activeGameMode}.</td></tr>`;
                 }
+            })
+            .catch(() => {
+                if(injector.innerHTML === "") {
+                    injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading rows.</td></tr>`;
+                }
             });
     }
 
+    // === परमानेंट इलाज: यूज़र बेट हिस्ट्री टेबल बैकग्राउंड अपडेट लॉजिक ===
     function fetchUserBetHistory() {
         const injector = document.getElementById('user-history-injector');
         const phone = localStorage.getItem('user_phone');
@@ -315,6 +324,7 @@
                     data.list.forEach(bet => {
                         const statusClass = bet.status === "Win" ? "status-win" : bet.status === "Loss" ? "status-loss" : "status-pending";
                         const displayWin = bet.status === "Win" ? `+₹${bet.winAmount}` : bet.status === "Loss" ? "-₹"+bet.betAmount : "Pending";
+                        
                         html += `<tr>
                             <td style="text-align: left; color:#7f8c8d;">${bet.periodId}</td>
                             <td><span style="font-weight:700;">${bet.selectValue}</span></td>
@@ -326,32 +336,36 @@
                 } else {
                     injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No bets placed in ${activeGameMode}.</td></tr>`;
                 }
+            })
+            .catch(() => {
+                if(injector.innerHTML === "") {
+                    injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading bet logs.</td></tr>`;
+                }
             });
     }
-            // --- फ्रंटएंड सुधार: टिकट के अंदर पिछले 5 राउंड्स के नंबर और कलर्स एक साथ दिखाना ---
+    
+                // === परमानेंट इलाज: नया रिजल्ट सबसे पहले (बाईं तरफ) दिखाने का लॉजिक ===
     function fetchLastRoundResult() {
         const flexWrapper = document.getElementById('banner-results-flex-wrapper');
         if (!flexWrapper) return;
 
-        // गेम हिस्ट्री वाली एपीआई से पिछले 10 रिकॉर्ड्स खींचना
         fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.list && data.list.length > 0) {
                     let htmlElements = "";
                     
-                    // सिर्फ़ पहले 5 रिकॉर्ड्स लें (यानी सबसे ताज़ा 5 गेम)
+                    // सिर्फ़ सबसे ताज़ा 5 गेम के रिकॉर्ड लें
                     const recentFive = data.list.slice(0, 5);
                     
-                    // पुराने से नए के क्रम में दिखाने के लिए लिस्ट को उल्टा (Reverse) करेंगे
-                    recentFive.reverse().forEach(record => {
+                    // .reverse() हटा दिया है, जिससे सबसे नया रिज़ल्ट अब सबसे पहले (Left Side) दिखेगा
+                    recentFive.forEach(record => {
                         let bgStyle = "";
                         if (record.resultColor === "Green") {
                             bgStyle = "background: radial-gradient(circle at 35% 35%, #5cd68a, #2ecc71);";
                         } else if (record.resultColor === "Red") {
                             bgStyle = "background: radial-gradient(circle at 35% 35%, #ff7675, #e74c3c);";
                         } else {
-                            // 0 और 5 नंबर के लिए मिक्स ग्रेडिएंट
                             if(record.resultNumber === 0) {
                                 bgStyle = "background: linear-gradient(135deg, #e74c3c 50%, #9b59b6 50%);";
                             } else {
@@ -359,7 +373,6 @@
                             }
                         }
 
-                        // छोटे सुंदर गोले का HTML बनाना (20px आकार का परफेक्ट सर्कल)
                         htmlElements += `<div class="banner-number-circle" style="${bgStyle} width: 20px; height: 20px; font-size: 11px;">${record.resultNumber}</div>`;
                     });
                     

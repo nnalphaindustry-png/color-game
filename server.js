@@ -59,14 +59,37 @@ const liveGames = {
     "5m": { duration: 300, timeLeft: 300, currentPeriod: "" }
 };
 
-// नया पीरियड आईडी बनाने का फंक्शन
-function generateNewPeriodId(mode) {
+// === नया सीरियल पीरियड आईडी बनाने का सही फंक्शन ===
+async function generateNewPeriodId(mode) {
     const now = new Date();
     const dateStr = now.getFullYear() +
         (now.getMonth() + 1).toString().padStart(2, '0') +
         now.getDate().toString().padStart(2, '0');
-    const randomSec = Math.floor(10000 + Math.random() * 90000);
-    liveGames[mode].currentPeriod = dateStr + randomSec;
+
+    try {
+        // डेटाबेस से आज का सबसे आख़िरी पीरियड रिकॉर्ड ढूँढें
+        const lastRecord = await Period.findOne({ 
+            gameMode: mode, 
+            periodId: { $regex: '^' + dateStr } 
+        }).sort({ createdAt: -1 });
+
+        let nextCount = 1;
+        if (lastRecord) {
+            // अगर पुराना रिकॉर्ड है, तो आख़िरी के 3 डिजिट निकालकर उसमें 1 जोड़ें
+            const lastCountStr = lastRecord.periodId.slice(-3);
+            nextCount = parseInt(lastCountStr) + 1;
+        }
+
+        // काउंटर को 3 डिजिट का बनाएं (जैसे: 001, 002, 003)
+        const countStr = String(nextCount).padStart(3, '0');
+        liveGames[mode].currentPeriod = dateStr + countStr;
+
+    } catch (err) {
+        console.error("Period ID error:", err);
+        // बैकअप के लिए अगर कोई दिक्कत आए तो 3 डिजिट रैंडम
+        const randomSec = Math.floor(100 + Math.random() * 900);
+        liveGames[mode].currentPeriod = dateStr + randomSec;
+    }
 }
 
 // राउंड खत्म होने पर रिज़ल्ट निकालना और जीतने वालों को पैसे बांटना
@@ -129,10 +152,10 @@ async function calculateGameResult(mode) {
     }
 }
 
-// बैकएंड का टाइमर चालू करने का इंजन
+// === बैकएंड का टाइमर चालू करने का सही इंजन ===
 function startServerTimerEngine() {
-    Object.keys(liveGames).forEach(mode => {
-        generateNewPeriodId(mode);
+    Object.keys(liveGames).forEach(async (mode) => {
+        await generateNewPeriodId(mode);
     });
 
     setInterval(() => {
@@ -140,7 +163,7 @@ function startServerTimerEngine() {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
                 await calculateGameResult(mode);
-                generateNewPeriodId(mode);
+                await generateNewPeriodId(mode); // नए राउंड के लिए नंबर-वाइज़ आईडी बनाएं
                 game.timeLeft = game.duration;
             } else {
                 game.timeLeft--;

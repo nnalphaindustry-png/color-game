@@ -189,6 +189,7 @@
             showPopup(data.message);
             if(data.success) {
                 localStorage.setItem('user_phone', data.phone);
+                localStorage.setItem('user_uid', data.uid); 
                 setTimeout(() => {
                     window.location.href = "home.html"; 
                 }, 1500);

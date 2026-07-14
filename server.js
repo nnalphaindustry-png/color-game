@@ -413,6 +413,46 @@ app.post('/api/place-bet', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during betting." }); 
     }
 });
+// === ADMIN DASHBOARD STATS ROUTE ===
+app.get('/api/admin/stats', async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments();
+        
+        const allUsers = await User.find({}, 'balance');
+        let totalWalletBalance = 0;
+        allUsers.forEach(user => {
+            totalWalletBalance += (user.balance || 0);
+        });
+
+        const pendingBets = await Bet.find({ status: "Pending" });
+        let activeBetAmount = 0;
+        pendingBets.forEach(bet => {
+            activeBetAmount += Number(bet.betAmount || 0);
+        });
+
+        res.json({
+            success: true,
+            totalUsers,
+            totalWalletBalance: Number(totalWalletBalance.toFixed(2)),
+            activeBetAmount
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === ADMIN ALL USERS LIST ROUTE ===
+app.get('/api/admin/users-list', async (req, res) => {
+    try {
+        const users = await User.find({}).sort({ createdAt: -1 });
+        res.json({
+            success: true,
+            users
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // === STATIC FILES SERVING ===
 app.use(express.static(path.join(__dirname, '')));

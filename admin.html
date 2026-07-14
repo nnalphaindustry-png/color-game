@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Admin Panel</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #121212; color: #ffffff; font-family: sans-serif; overflow-x: hidden; }
+        .top-navbar { background-color: #1a1a1a; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #2d2d2d; position: fixed; top: 0; left: 0; width: 100%; z-index: 1001; }
+        .nav-toggle-btn { background: none; color: #ffffff; border: none; font-size: 24px; cursor: pointer; }
+        .app-brand-name { font-size: 20px; font-weight: bold; color: #ffc107; letter-spacing: 0.5px; }
+        .sidebar { height: 100vh; width: 250px; position: fixed; top: 0; left: -250px; background-color: #1a1a1a; border-right: 1px solid #2d2d2d; transition: all 0.3s ease; z-index: 1000; padding-top: 70px; }
+        .sidebar.open { left: 0; }
+        .menu-list { list-style: none; padding: 10px 0; }
+        .menu-item a { color: #b3b3b3; padding: 14px 20px; display: block; text-decoration: none; font-size: 15px; border-radius: 6px; margin: 4px 15px; transition: 0.2s; }
+        .menu-item a:hover, .menu-item a.active { color: #ffffff; background-color: #2a2a2a; }
+        .main-content-wrapper { padding: 90px 15px 30px 15px; transition: all 0.3s; }
+        .admin-page-view { display: none; }
+        .admin-page-view.active-view { display: block; }
+        .page-heading-title { font-size: 22px; font-weight: normal; margin-bottom: 20px; color: #ffffff; }
+        .box-grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+        .stat-box-card { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .box-label-text { color: #a0a0a0; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .box-value-number { font-size: 18px; font-weight: bold; }
+        .indicator-badge-icon { width: 35px; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        .blue-ind { background-color: rgba(13, 110, 253, 0.15); color: #0d6efd; }
+        .green-ind { background-color: rgba(25, 135, 84, 0.15); color: #198754; }
+        .red-ind { background-color: rgba(220, 53, 69, 0.15); color: #dc3545; }
+        .yellow-ind { background-color: rgba(255, 193, 7, 0.15); color: #ffc107; }
+        .data-table-card { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 15px; }
+        .data-table-title { color: #ffc107; font-size: 16px; margin-bottom: 15px; font-weight: normal; }
+        .table-scroll-area { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #2d2d2d; font-size: 13px; white-space: nowrap; }
+        th { background-color: #161616; color: #a0a0a0; font-weight: 600; }
+        tr:hover { background-color: #252525; }
+        .id-text-format { color: #0dcaf0; font-family: monospace; }
+        .balance-text-format { color: #198754; font-weight: bold; }
+        .muted-text-format { color: #747474; }
+        .placeholder-screen-view { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 40px 20px; text-align: center; color: #a0a0a0; }
+        @media (min-width: 769px) { .sidebar { left: 0; } .main-content-wrapper { margin-left: 250px; } .nav-toggle-btn { display: none; } .box-grid-layout { grid-template-columns: repeat(4, 1fr); } }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar Section -->
+    <header class="top-navbar">
+        <button class="nav-toggle-btn" onclick="toggleSidebarMenu()">☰</button>
+        <div class="app-brand-name">91 Goa Club</div>
+    </header>
+
+    <!-- Slide-bar Navigation Menu -->
+    <nav class="sidebar" id="appSidebar">
+        <ul class="menu-list">
+            <li class="menu-item"><a href="#" class="active" onclick="switchAdminPage(event, 'dashboard-page')">📊 Dashboard</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'user-list-page')">👥 User List Only</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'deposit-page')">💰 Deposit Approval</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'withdrawal-page')">💸 Withdrawal Approval</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'control-page')">🎮 Game Control</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Wrapper Area -->
+    <main class="main-content-wrapper">
+
+        <!-- PAGE 1: Dynamic Dashboard View -->
+        <div id="dashboard-page" class="admin-page-view active-view">
+            <h2 class="page-heading-title">Dashboard Overview</h2>
+            
+            <!-- 2x2 Grid Boxes for Mobile Screen -->
+            <div class="box-grid-layout">
+                <div class="stat-box-card">
+                    <div>
+                        <p class="box-label-text">Total Users</p>
+                        <h3 class="box-value-number" id="stat-total-users">0</h3>
+                    </div>
+                    <div class="indicator-badge-icon blue-ind">U</div>
+                </div>
+                <div class="stat-box-card">
+                    <div>
+                        <p class="box-label-text">Total Deposit</p>
+                        <h3 class="box-value-number" id="stat-total-deposit">₹0</h3>
+                    </div>
+                    <div class="indicator-badge-icon green-ind">D</div>
+                </div>
+                <div class="stat-box-card">
+                    <div>
+                        <p class="box-label-text">Total Withdrawal</p>
+                        <h3 class="box-value-number" id="stat-total-withdrawal">₹0</h3>
+                    </div>
+                    <div class="indicator-badge-icon red-ind">W</div>
+                </div>
+                <div class="stat-box-card">
+                    <div>
+                        <p class="box-label-text">Active Bets</p>
+                        <h3 class="box-value-number" id="stat-active-bets">₹0</h3>
+                    </div>
+                    <div class="indicator-badge-icon yellow-ind">B</div>
+                </div>
+            </div>
+
+            <!-- Table Block inside Dashboard -->
+            <div class="data-table-card">
+                <h5 class="data-table-title">Registered User List</h5>
+                <div class="table-scroll-area">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User ID (_id)</th>
+                                <th>Mobile Number</th>
+                                <th>Password</th>
+                                <th>Wallet Balance</th>
+                                <th>Join Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading database statistics...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: User List View -->
+        <div id="user-list-page" class="admin-page-view">
+            <h2 class="page-heading-title">Full User Records</h2>
+            <div class="placeholder-screen-view">यूजर लिस्ट का स्पेशल पेज यहाँ दिखाई देगा।</div>
+        </div>
+
+        <!-- PAGE 3: Deposit Approval View -->
+        <div id="deposit-page" class="admin-page-view">
+            <h2 class="page-heading-title">Deposit Verification</h2>
+            <div class="placeholder-screen-view">रिचार्ज रिक्वेस्ट (Deposit Requests) अप्रूव करने का नया पेज यहाँ लोड होगा।</div>
+        </div>
+
+        <!-- PAGE 4: Withdrawal View -->
+        <div id="withdrawal-page" class="admin-page-view">
+            <h2 class="page-heading-title">Withdrawal Requests</h2>
+            <div class="placeholder-screen-view">यूजर के विड्रॉल (Withdrawal Requests) पास या फेल करने का पेज यहाँ खुलेगा।</div>
+        </div>
+
+        <!-- PAGE 5: Game Control View -->
+        <div id="control-page" class="admin-page-view">
+            <h2 class="page-heading-title">Live Result Control Engine</h2>
+            <div class="placeholder-screen-view">गेम का अगला नंबर या कलर बदलने का (Manual Control) पेज यहाँ बनेगा।</div>
+        </div>
+
+        <!-- PAGE 6: Settings View -->
+        <div id="settings-page" class="admin-page-view">
+            <h2 class="page-heading-title">Global System Settings</h2>
+            <div class="placeholder-screen-view">गेम की जनरल सेटिंग्स बदलने का विकल्प यहाँ रहेगा।</div>
+        </div>
+
+    </main>
+        <script>
+        // आपके लाइव रेंडर सर्वर का असली लिंक यहाँ सेट कर दिया गया है
+        const SERVER_URL = "https://color-game-1kc2.onrender.com"; 
+
+        // मोबाइल स्क्रीन पर साइडबार मेनू खोलने और बंद करने के लिए फंक्शन
+        function toggleSidebarMenu() {
+            document.getElementById('appSidebar').classList.toggle('open');
+        }
+
+        // साइडबार के अलग-अलग पेजों पर जाने और पुराने पेज को छुपाने (Hide) का लॉजिक
+        function switchAdminPage(event, targetPageId) {
+            event.preventDefault();
+
+            // 1. स्क्रीन पर खुले हुए सभी पेजों को छुपाएं
+            const screens = document.querySelectorAll('.admin-page-view');
+            screens.forEach(screen => screen.classList.remove('active-view'));
+
+            // 2. मेनू लिंक्स से पुराना एक्टिव कलर हटाएं
+            const menuLinks = document.querySelectorAll('.menu-item a');
+            menuLinks.forEach(link => link.classList.remove('active'));
+
+            // 3. जो पेज चुना गया है, सिर्फ उसे स्क्रीन पर दिखाएं
+            document.getElementById(targetPageId).classList.add('active-view');
+
+            // 4. चुने हुए मेनू लिंक को हाइलाइट करें
+            event.target.classList.add('active');
+
+            // 5. मोबाइल व्यू में क्लिक होते ही साइडबार को अपने आप बंद कर दें
+            if (window.innerWidth <= 768) {
+                document.getElementById('appSidebar').classList.remove('open');
+            }
+        }
+
+        // लाइव रेंडर सर्वर और मोंगो-डीबी से असली डेटा खींचने का मुख्य फंक्शन
+        function syncNodeServerStats() {
+            // 1. ऊपर के 4 मुख्य बॉक्स (Stats) के लिए लाइव डेटा खींचना
+            fetch(`${SERVER_URL}/api/admin/stats`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
+                        document.getElementById('stat-total-deposit').innerText = '₹' + (data.totalWalletBalance || 0);
+                        document.getElementById('stat-active-bets').innerText = '₹' + (data.activeBetAmount || 0);
+                    }
+                })
+                .catch(err => console.log("Stats fetch pipeline error:", err));
+
+            // 2. नीचे की टेबल के लिए पंजीकृत यूज़र्स (User List) का असली डेटा खींचना
+            fetch(`${SERVER_URL}/api/admin/users-list`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.users) {
+                        let rows = '';
+                        data.users.forEach(user => {
+                            let formatJoinDate = new Date(user.createdAt).toLocaleDateString('en-IN');
+                            rows += `<tr>
+                                <td class="id-text-format">${user._id}</td>
+                                <td style="font-weight: bold;">${user.phone}</td>
+                                <td class="muted-text-format">${user.password}</td>
+                                <td class="balance-text-format">₹${user.balance.toFixed(2)}</td>
+                                <td>${formatJoinDate}</td>
+                            </tr>`;
+                        });
+                        document.getElementById('dashboard-table-body').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;">No users registered</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Server integration mismatch</td></tr>';
+                });
+        }
+
+        // पेज लोड होते ही डेटा सिंक शुरू करें और हर 5 सेकंड में ऑटो-रीफ्रेश करें
+        window.onload = function() {
+            syncNodeServerStats();
+            setInterval(syncNodeServerStats, 5000);
+        };
+    </script>
+</body>
+</html>
+    <script>
+        // आपके लाइव रेंडर सर्वर का असली लिंक यहाँ सेट कर दिया गया है
+        const SERVER_URL = "https://color-game-1kc2.onrender.com"; 
+
+        // मोबाइल स्क्रीन पर साइडबार मेनू खोलने और बंद करने के लिए फंक्शन
+        function toggleSidebarMenu() {
+            document.getElementById('appSidebar').classList.toggle('open');
+        }
+
+        // साइडबार के अलग-अलग पेजों पर जाने और पुराने पेज को छुपाने (Hide) का लॉजिक
+        function switchAdminPage(event, targetPageId) {
+            event.preventDefault();
+
+            // 1. स्क्रीन पर खुले हुए सभी पेजों को छुपाएं
+            const screens = document.querySelectorAll('.admin-page-view');
+            screens.forEach(screen => screen.classList.remove('active-view'));
+
+            // 2. मेनू लिंक्स से पुराना एक्टिव कलर हटाएं
+            const menuLinks = document.querySelectorAll('.menu-item a');
+            menuLinks.forEach(link => link.classList.remove('active'));
+
+            // 3. जो पेज चुना गया है, सिर्फ उसे स्क्रीन पर दिखाएं
+            document.getElementById(targetPageId).classList.add('active-view');
+
+            // 4. चुने हुए मेनू लिंक को हाइलाइट करें
+            event.target.classList.add('active');
+
+            // 5. मोबाइल व्यू में क्लिक होते ही साइडबार को अपने आप बंद कर दें
+            if (window.innerWidth <= 768) {
+                document.getElementById('appSidebar').classList.remove('open');
+            }
+        }
+
+        // लाइव रेंडर सर्वर और मोंगो-डीबी से असली डेटा खींचने का मुख्य फंक्शन
+        function syncNodeServerStats() {
+            // 1. ऊपर के 4 मुख्य बॉक्स (Stats) के लिए लाइव डेटा खींचना
+            fetch(`${SERVER_URL}/api/admin/stats`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
+                        document.getElementById('stat-total-deposit').innerText = '₹' + (data.totalWalletBalance || 0);
+                        document.getElementById('stat-active-bets').innerText = '₹' + (data.activeBetAmount || 0);
+                    }
+                })
+                .catch(err => console.log("Stats fetch pipeline error:", err));
+
+            // 2. नीचे की टेबल के लिए पंजीकृत यूज़र्स (User List) का असली डेटा खींचना
+            fetch(`${SERVER_URL}/api/admin/users-list`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.users) {
+                        let rows = '';
+                        data.users.forEach(user => {
+                            let formatJoinDate = new Date(user.createdAt).toLocaleDateString('en-IN');
+                            rows += `<tr>
+                                <td class="id-text-format">${user._id}</td>
+                                <td style="font-weight: bold;">${user.phone}</td>
+                                <td class="muted-text-format">${user.password}</td>
+                                <td class="balance-text-format">₹${user.balance.toFixed(2)}</td>
+                                <td>${formatJoinDate}</td>
+                            </tr>`;
+                        });
+                        document.getElementById('dashboard-table-body').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;">No users registered</td></tr>';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Server integration mismatch</td></tr>';
+                });
+        }
+
+        // पेज लोड होते ही डेटा सिंक शुरू करें और हर 5 सेकंड में ऑटो-रीफ्रेश करें
+        window.onload = function() {
+            syncNodeServerStats();
+            setInterval(syncNodeServerStats, 5000);
+        };
+    </script>
+</body>
+</html>

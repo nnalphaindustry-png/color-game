@@ -193,15 +193,17 @@
     </div>
 
     <div class="history-section-wrapper">
-        <table class="history-table" id="view-game-history-table">
-            <thead>
-                <tr>
-                    <th style="text-align: left;">Period ID</th>
-                    <th>Number</th>
-                    <th>Color</th>
-                    <th style="text-align: right;">Size</th>
-                </tr>
-            </thead>
+        <!-- FIXED: पैडिंग कम करके लाल पट्टी को एकदम पतला और स्लिम बनाया गया है -->
+<table class="history-table" id="view-game-history-table" style="width: 100%; border-collapse: collapse; text-align: center;">
+    <thead>
+        <tr style="background-color: #ef4444;">
+            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-align: left; text-transform: uppercase;">Period</th>
+            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-transform: uppercase;">Number</th>
+            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-transform: uppercase;">Big Small</th>
+            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-align: right; text-transform: uppercase;">Color</th>
+        </tr>
+    </thead>
+    
             <tbody id="game-history-injector">
                 <tr><td colspan="4" style="color:#aaa; padding:15px;">Loading game results...</td></tr>
             </tbody>
@@ -390,44 +392,106 @@ let currentUserPage = 1;
 
 
             function fetchLiveGameHistory() {
-  const injector = document.getElementById('game-history-injector');
-  if (!injector) return;
-  fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}?page=${currentGamePage}`)
-  .then(res => res.json())
-  .then(data => {
-    if (data.success && data.list.length > 0) {
-      let html = "";
-      data.list.forEach(row => {
-        let colorStyle = "";
-        if (row.resultNumber === 0) {
-          colorStyle = "background: linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%);";
-        } else if (row.resultNumber === 5) {
-          colorStyle = "background: linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%);";
-        } else if (row.resultColor === "Green") {
-          colorStyle = "background: #2ecc71;";
-        } else if (row.resultColor === "Red") {
-          colorStyle = "background: #ff4d4d;";
+    const injector = document.getElementById('game-history-injector');
+    if (!injector) return;
+    
+    fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}?page=${currentGamePage}`)
+    .then(res => res.json())
+    .then(data => {
+        injector.innerHTML = "";
+
+        if (data.success && data.list.length > 0) {
+            data.list.forEach((row, index) => {
+                const tr = document.createElement("tr");
+                tr.style.borderBottom = "1px solid #f1f3f5";
+
+                // 1. Period ID कॉलम
+                const tdPeriod = document.createElement("td");
+                tdPeriod.style.textAlign = "left";
+                tdPeriod.style.padding = "10px 4px";
+                tdPeriod.style.color = "#7f8c8d";
+                tdPeriod.style.fontSize = "13px";
+                tdPeriod.style.fontWeight = "400";
+                tdPeriod.textContent = row.periodId;
+                tr.appendChild(tdPeriod);
+
+                // 2. Number कॉलम (मोटा और 0, 5 पर आधा-आधा रंग का टेक्स्ट)
+                const tdNumber = document.createElement("td");
+                tdNumber.style.padding = "10px 4px";
+                tdNumber.style.fontWeight = "900"; // नंबर को थोड़ा मोटा (Bold) किया
+                tdNumber.style.fontSize = "19px";
+                tdNumber.textContent = row.resultNumber;
+                
+                // नंबर का रंग तय करने का नियम (0 और 5 को आधा-आधा टेक्स्ट कलर देना)
+                const numVal = Number(row.resultNumber);
+                if (numVal === 0) {
+                    tdNumber.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
+                    tdNumber.style.webkitBackgroundClip = "text";
+                    tdNumber.style.webkitTextFillColor = "transparent";
+                } else if (numVal === 5) {
+                    tdNumber.style.background = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)";
+                    tdNumber.style.webkitBackgroundClip = "text";
+                    tdNumber.style.webkitTextFillColor = "transparent";
+                } else if (row.resultColor === "Green") {
+                    tdNumber.style.color = "#2ecc71";
+                } else if (row.resultColor === "Red") {
+                    tdNumber.style.color = "#ff4d4d";
+                } else {
+                    tdNumber.style.color = "#9b59b6";
+                }
+                tr.appendChild(tdNumber);
+
+                // 3. Big Small कॉलम
+                const tdSize = document.createElement("td");
+                tdSize.style.padding = "10px 4px";
+                tdSize.style.fontSize = "13px";
+                tdSize.style.fontWeight = "400";
+                tdSize.style.color = "#2c3e50";
+                tdSize.textContent = row.resultSize;
+                tr.appendChild(tdSize);
+
+                // 4. Color कॉलम (आधा-आधा रंग का गोल डॉट)
+                const tdColor = document.createElement("td");
+                tdColor.style.textAlign = "right";
+                tdColor.style.padding = "10px 4px";
+                
+                const dot = document.createElement("span");
+                dot.style.width = "12px";
+                dot.style.height = "12px";
+                dot.style.borderRadius = "50%";
+                dot.style.display = "inline-block";
+                dot.style.boxShadow = "inset 0 -1px 3px rgba(0,0,0,0.15)";
+
+                if (numVal === 0) {
+                    dot.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
+                } else if (numVal === 5) {
+                    dot.style.background = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)";
+                } else if (row.resultColor === "Green") {
+                    dot.style.background = "#2ecc71";
+                } else if (row.resultColor === "Red") {
+                    dot.style.background = "#ff4d4d";
+                } else {
+                    dot.style.background = "#9b59b6";
+                }
+                
+                tdColor.appendChild(dot);
+                tr.appendChild(tdColor);
+
+                injector.appendChild(tr);
+            });
+            updatePaginationButtons(currentGamePage, data.hasMore);
+        } else {
+            injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No results found.</td></tr>`;
         }
-        const sizeTag = row.resultSize === "Big" ? '<span class="size-tag-text size-tag-big">Big</span>' : '<span class="size-tag-text size-tag-small">Small</span>';
-        html += `<tr>
-          <td style="text-align: left; color:#7f8c8d;">${row.periodId}</td>
-          <td><div class="history-badge-circle" style="${colorStyle}">${row.resultNumber}</div></td>
-          <td style="color:${row.resultColor==='Green'?'#2ecc71':'#ff4d4d'};">${row.resultColor}</td>
-          <td style="text-align: right;">${sizeTag}</td>
-        </tr>`;
-      });
-      injector.innerHTML = html;
-      updatePaginationButtons(currentGamePage, data.hasMore);
-    } else {
-      injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No results found for ${activeGameMode}.</td></tr>`;
-    }
-  })
-  .catch(() => {
-    if(injector.innerHTML === "") {
-      injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading rows.</td></tr>`;
-    }
-  });
+    })
+    .catch(() => {
+        if(injector.innerHTML === "") {
+            injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading rows.</td></tr>`;
+        }
+    });
 }
+
+
 
 function fetchUserBetHistory() {
   const injector = document.getElementById('user-history-injector');

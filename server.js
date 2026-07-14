@@ -550,15 +550,33 @@ app.post('/api/admin/delete-user', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-// === 1. GET LIVE BETS SUMMARY FOR TABLES ===
+// === FIX: UPGRADED LIVE BETS SUMMARY ROUTE USING EXACT ACTIVE VARIABLES ===
 app.get('/api/admin/live-bets-summary/:gameMode', async (req, res) => {
     try {
         const { gameMode } = req.params;
-        const latestPeriod = await Period.findOne({ gameMode }).sort({ createdAt: -1 });
-        if (!latestPeriod) return res.json({ success: false, message: "No active period found" });
+        
+        // Helper mapping to read the exact running timer states from your server memory
+        let activePeriodId = "";
+        if (gameMode === "30s" && global.activePeriod30s) activePeriodId = global.activePeriod30s;
+        else if (gameMode === "1m" && global.activePeriod1m) activePeriodId = global.activePeriod1m;
+        else if (gameMode === "3m" && global.activePeriod3m) activePeriodId = global.activePeriod3m;
+        else if (gameMode === "5m" && global.activePeriod5m) activePeriodId = global.activePeriod5m;
 
-        const activeBets = await Bet.find({ gameMode, periodId: latestPeriod.periodId, status: "Pending" });
+        // Fallback: If memory variables are not global, dynamically generate the active running period id sequence
+        if (!activePeriodId) {
+            const latestSavedPeriodObj = await Period.findOne({ gameMode }).sort({ createdAt: -1 });
+            if (!latestSavedPeriodObj) {
+                return res.json({ success: false, message: "No active game period configuration discovered" });
+            }
+            // Increment the database period by 1 to perfectly synchronize with the running game UI timer clock
+            const parseBaseNumber = BigInt(latestSavedPeriodObj.periodId);
+            activePeriodId = (parseBaseNumber + 1n).toString();
+        }
 
+        // Fetch all pending live bets matching the exact active synchronized period code status
+        const activeBets = await Bet.find({ gameMode, periodId: activePeriodId, status: "Pending" });
+
+        // Standard metrics calculator object structures
         let numberBets = { 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
         let colorBets = { red: 0, green: 0, violet: 0 };
         let sizeBets = { big: 0, small: 0 };
@@ -578,7 +596,7 @@ app.get('/api/admin/live-bets-summary/:gameMode', async (req, res) => {
 
         res.json({
             success: true,
-            currentPeriodId: latestPeriod.periodId,
+            currentPeriodId: activePeriodId, // Delivers the exact real-time matching game UI period sequence
             overrideStatus: global.adminManualOverride[gameMode] !== null ? `Manual (Number ${global.adminManualOverride[gameMode]})` : "Automatic",
             numberBets,
             colorBets,

@@ -193,16 +193,17 @@
     </div>
 
     <div class="history-section-wrapper">
-        <!-- FIXED: पैडिंग कम करके लाल पट्टी को एकदम पतला और स्लिम बनाया गया है -->
+        <!-- पहले जैसा शानदार मोटा और चौड़ा लाल हेडर -->
 <table class="history-table" id="view-game-history-table" style="width: 100%; border-collapse: collapse; text-align: center;">
     <thead>
         <tr style="background-color: #ef4444;">
-            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-align: left; text-transform: uppercase;">Period</th>
-            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-transform: uppercase;">Number</th>
-            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-transform: uppercase;">Big Small</th>
-            <th style="color: white; padding: 6px 8px; font-size: 14px; font-weight: 700; text-align: right; text-transform: uppercase;">Color</th>
+            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-align: left; text-transform: uppercase;">Period</th>
+            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-transform: uppercase;">Number</th>
+            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-transform: uppercase;">Big Small</th>
+            <th style="color: white; padding: 12px 8px; font-size: 14px; font-weight: 800; text-align: right; text-transform: uppercase;">Color</th>
         </tr>
     </thead>
+    
     
             <tbody id="game-history-injector">
                 <tr><td colspan="4" style="color:#aaa; padding:15px;">Loading game results...</td></tr>
@@ -403,26 +404,30 @@ let currentUserPage = 1;
         if (data.success && data.list.length > 0) {
             data.list.forEach((row, index) => {
                 const tr = document.createElement("tr");
-                tr.style.borderBottom = "1px solid #f1f3f5";
+                tr.style.borderBottom = "1px solid #eef2f5";
+                
+                // पहले जैसा रो पैडिंग (मोटा लुक)
+                if (index % 2 === 1) {
+                    tr.style.backgroundColor = "#f9fafb";
+                }
 
-                // 1. Period ID कॉलम
+                // 1. Period ID (पहले जैसा ठोस और साफ़)
                 const tdPeriod = document.createElement("td");
                 tdPeriod.style.textAlign = "left";
-                tdPeriod.style.padding = "10px 4px";
-                tdPeriod.style.color = "#7f8c8d";
-                tdPeriod.style.fontSize = "13px";
-                tdPeriod.style.fontWeight = "400";
+                tdPeriod.style.padding = "14px 8px"; // पहले जैसी मोटी पैडिंग
+                tdPeriod.style.color = "#2c3e50";
+                tdPeriod.style.fontSize = "14px";
+                tdPeriod.style.fontWeight = "600"; // मोटा फॉन्ट
                 tdPeriod.textContent = row.periodId;
                 tr.appendChild(tdPeriod);
 
-                // 2. Number कॉलम (मोटा और 0, 5 पर आधा-आधा रंग का टेक्स्ट)
+                // 2. Number कॉलम (पहले जैसा एकदम मोटा और 0,5 पर आधा-आधा रंग)
                 const tdNumber = document.createElement("td");
-                tdNumber.style.padding = "10px 4px";
-                tdNumber.style.fontWeight = "900"; // नंबर को थोड़ा मोटा (Bold) किया
-                tdNumber.style.fontSize = "19px";
+                tdNumber.style.padding = "14px 8px";
+                tdNumber.style.fontWeight = "900"; // एकदम ठोस मोटा (Extra Bold)
+                tdNumber.style.fontSize = "24px";  // पहले जैसा बड़ा साइज़
                 tdNumber.textContent = row.resultNumber;
                 
-                // नंबर का रंग तय करने का नियम (0 और 5 को आधा-आधा टेक्स्ट कलर देना)
                 const numVal = Number(row.resultNumber);
                 if (numVal === 0) {
                     tdNumber.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
@@ -441,26 +446,26 @@ let currentUserPage = 1;
                 }
                 tr.appendChild(tdNumber);
 
-                // 3. Big Small कॉलम
+                // 3. Big Small कॉलम (पहले जैसा मोटा ब्लैक टेक्स्ट)
                 const tdSize = document.createElement("td");
-                tdSize.style.padding = "10px 4px";
-                tdSize.style.fontSize = "13px";
-                tdSize.style.fontWeight = "400";
-                tdSize.style.color = "#2c3e50";
+                tdSize.style.padding = "14px 8px";
+                tdSize.style.fontSize = "14px";
+                tdSize.style.fontWeight = "700"; // मोटा लुक
+                tdSize.style.color = "#111111"; // शुद्ध ब्लैक
                 tdSize.textContent = row.resultSize;
                 tr.appendChild(tdSize);
 
-                // 4. Color कॉलम (आधा-आधा रंग का गोल डॉट)
+                // 4. Color कॉलम (पहले जैसा बड़ा और साफ़ गोल डॉट)
                 const tdColor = document.createElement("td");
                 tdColor.style.textAlign = "right";
-                tdColor.style.padding = "10px 4px";
+                tdColor.style.padding = "14px 8px";
                 
                 const dot = document.createElement("span");
-                dot.style.width = "12px";
-                dot.style.height = "12px";
+                dot.style.width = "14px"; // पहले जैसा बड़ा साइज़
+                dot.style.height = "14px";
                 dot.style.borderRadius = "50%";
                 dot.style.display = "inline-block";
-                dot.style.boxShadow = "inset 0 -1px 3px rgba(0,0,0,0.15)";
+                dot.style.boxShadow = "inset 0 -2px 4px rgba(0,0,0,0.2)";
 
                 if (numVal === 0) {
                     dot.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
@@ -490,7 +495,6 @@ let currentUserPage = 1;
         }
     });
 }
-
 
 
 function fetchUserBetHistory() {

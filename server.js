@@ -305,25 +305,24 @@ function generateNewPeriodId(mode) {
     liveGames[mode].currentPeriod = dateStr + randomSec;
 }
 
-// 💡 नया और फिक्स किया हुआ टाइमर इंजन
 async function startServerTimerEngine() {
-    // गेम शुरू होते ही सभी मोड्स के लिए पहली आईडी बनाएं
+    // गेम शुरू होते ही सभी मोड्स के लिए पहली सीरियल आईडी बनाएं
     for (let mode of Object.keys(liveGames)) {
-        // अगर ऊपर resetPoolOnly बना लिया है तो उसे लिखो, नहीं तो resetPool(mode) रहने दो
-        resetPool(mode); 
-        generateNewPeriodId(mode); 
+        resetPool(mode);
+        await generateNewPeriodId(mode); 
     }
 
     setInterval(() => {
         Object.keys(liveGames).forEach(async (mode) => {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
-                // १. पुराना राउंड ख़त्म, रिजल्ट कैलकुलेट होगा और डेटाबेस में सेव होगा
+                // १. पुराना राउंड ख़त्म, रिजल्ट कैलकुलेट करो
                 await calculateGameResult(mode); 
                 
-                // 💡 यहाँ से हमने दोबारा जनरेट करने वाली लाइन हटा दी है, क्योंकि नया पीरियड अब सिर्फ एक बार जनरेट होगा।
+                // २. अगला सीरियल नंबर जनरेट करो (जैसे 0001 के बाद 0002)
+                await generateNewPeriodId(mode); 
                 
-                // २. टाइमर को फिर से रीस्टार्ट करो
+                // ३. टाइमर को फिर से रीस्टार्ट करो
                 game.timeLeft = game.duration; 
             } else {
                 game.timeLeft--; // जब तक टाइम बचा है, सिर्फ सेकंड कम होंगे

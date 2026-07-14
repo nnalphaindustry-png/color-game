@@ -93,138 +93,134 @@ async function generateNewPeriodId(mode) {
 }
 
 async function calculateGameResult(mode) {
-  const game = liveGames[mode];
-  // Strictly use the period ID belonging ONLY to this specific game mode
-  const activePeriod = game.currentPeriod; 
+    const game = liveGames[mode];
+    // Strictly use the period ID belonging ONLY to this specific game mode
+    const activePeriod = game.currentPeriod;
 
-  // 1. Fetch All Pending Bets strictly for THIS game mode and THIS period ID
-  const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
+    // 1. Fetch All Pending Bets strictly for THIS game mode and THIS period ID
+    const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
 
-  // 2. Calculate Total Income collected strictly in this game mode round
-  let totalIncomingMoney = 0;
-  pendingBets.forEach(bet => {
-    totalIncomingMoney += Number(bet.betAmount);
-  });
-
-  // Array to store company's NET PROFIT for each candidate number (0 to 9)
-  let candidateNetProfits = Array(10).fill(0);
-  
-  // FIX: Using string split to securely inject green numbers [1, 3, 7, 9] without system drops
-  const greenNumbersArray = "1,3,7,9".split(",").map(Number);
-
-  // 3. Loop through all 10 possible numbers to find company's net profit/loss
-  for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {
-    const candidateSize = candidateNum >= 5 ? "Big" : "Small";
-    let candidateColor = "Red";
-    if (candidateNum === 0 || candidateNum === 5) {
-      candidateColor = "Violet";
-    } else if (greenNumbersArray.includes(candidateNum)) {
-      candidateColor = "Green";
-    }
-
-    let potentialPayoutToUsers = 0;
-
+    // 2. Calculate Total Income collected strictly in this game mode round
+    let totalIncomingMoney = 0;
     pendingBets.forEach(bet => {
-      const userSelection = String(bet.selectValue).trim();
-      const amt = Number(bet.betAmount) * 0.98; // 2% trade fee deducted
-
-      if (userSelection === String(candidateNum)) {
-        potentialPayoutToUsers += (amt * 9);
-      } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === candidateSize) {
-        potentialPayoutToUsers += (amt * 2);
-      } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === candidateColor) {
-        potentialPayoutToUsers += (amt * 2);
-      } else if ((userSelection === "Green" && candidateNum === 5) || (userSelection === "Red" && candidateNum === 0)) {
-        potentialPayoutToUsers += (amt * 1.5);
-      } else if (userSelection === "Violet" && (candidateNum === 0 || candidateNum === 5)) {
-        potentialPayoutToUsers += (amt * 4.5);
-      }
+        totalIncomingMoney += Number(bet.betAmount);
     });
 
-    candidateNetProfits[candidateNum] = totalIncomingMoney - potentialPayoutToUsers;
-  }
+    // Array to store company's NET PROFIT for each candidate number (0 to 9)
+    let candidateNetProfits = Array(10).fill(0);
 
-  // 4. Find the number(s) that give maximum net profit to the company
-  let maxProfit = -Infinity;
-  let safestNumbersPool = [];
+    // FIX: Using string split to securely inject green numbers [1, 3, 7, 9] without system drops
+    const greenNumbersArray = "1,3,7,9".split(",").map(Number);
 
-  for (let i = 0; i <= 9; i++) {
-    if (candidateNetProfits[i] > maxProfit) {
-      maxProfit = candidateNetProfits[i];
-      safestNumbersPool = [i];
-    } else if (candidateNetProfits[i] === maxProfit) {
-      safestNumbersPool.push(i);
-    }
-  }
+    // 3. Loop through all 10 possible numbers to find company's net profit/loss
+    for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {
+        const candidateSize = candidateNum >= 5 ? "Big" : "Small";
+        let candidateColor = "Red";
+        if (candidateNum === 0 || candidateNum === 5) {
+            candidateColor = "Violet";
+        } else if (greenNumbersArray.includes(candidateNum)) {
+            candidateColor = "Green";
+        }
 
-  const finalNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
-  const num = Number(finalNumber);
+        let potentialPayoutToUsers = 0;
 
-  // 5. Establish parameters for the winning number
-  const finalSize = num >= 5 ? "Big" : "Small";
-  let finalColor = "Red";
-  if (num === 0 || num === 5) {
-    finalColor = "Violet";
-  } else if (greenNumbersArray.includes(num)) {
-    finalColor = "Green";
-  } else {
-    finalColor = "Red";
-  }
+        pendingBets.forEach(bet => {
+            const userSelection = String(bet.selectValue).trim();
+            const amt = Number(bet.betAmount) * 0.98; // 2% trade fee deducted
 
-  // 6. Save round outcome into database periods history with explicit mode tag
-  const newPeriod = new Period({
-    gameMode: mode, 
-    periodId: activePeriod,
-    resultNumber: num,
-    resultColor: finalColor,
-    resultSize: finalSize
-  });
-  await newPeriod.save();
+            if (userSelection === String(candidateNum)) {
+                potentialPayoutToUsers += (amt * 9);
+            } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === candidateSize) {
+                potentialPayoutToUsers += (amt * 2);
+            } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === candidateColor) {
+                potentialPayoutToUsers += (amt * 2);
+            } else if ((userSelection === "Green" && candidateNum === 5) || (userSelection === "Red" && candidateNum === 0)) {
+                potentialPayoutToUsers += (amt * 1.5);
+            } else if (userSelection === "Violet" && (candidateNum === 0 || candidateNum === 5)) {
+                potentialPayoutToUsers += (amt * 4.5);
+            }
+        });
 
-  // 7. Strict Multi-Bet Distribution Engine for users
-// FIX: हर बेट को पूरी तरह से स्वतंत्र ब्लॉक में प्रोसेस करना ताकि मल्टी-बेट आपस में न टकराएं
-await Promise.all(pendingBets.map(async (bet) => {
-    let isWin = false;
-    let currentMultiplier = 0; // नाम बदलकर स्कोप सुरक्षित किया
-    const commissionRate = 0.02;
-    const tradeAmount = bet.betAmount * (1 - commissionRate);
-    const userSelection = String(bet.selectValue).trim();
-
-    if (userSelection === String(num)) {
-        isWin = true;
-        currentMultiplier = 9;
-    } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === finalSize) {
-        isWin = true;
-        currentMultiplier = 2;
-    } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalSize) { // यहाँ आपके लॉजिक अनुसार
-        isWin = true;
-        currentMultiplier = 2;
-    } else if ((userSelection === "Green" && num === 5) || (userSelection === "Red" && num === 0)) {
-        isWin = true;
-        currentMultiplier = 1.5;
-    } else if (userSelection === "Violet" && (num === 0 || num === 5)) {
-        isWin = true;
-        currentMultiplier = 4.5;
+        candidateNetProfits[candidateNum] = totalIncomingMoney - potentialPayoutToUsers;
     }
 
-    if (isWin) {
-        const winAmt = tradeAmount * currentMultiplier;
-        bet.winAmount = Number(winAmt.toFixed(2));
-        bet.status = 'Win';
-        
-        // यूजर के वॉलेट में पैसा जोड़ें
-        await User.findOneAndUpdate(
-            { phone: bet.phone },
-            { $inc: { balance: bet.winAmount } }
-        );
+    // 4. Find the number(s) that give maximum net profit to the company
+    let maxProfit = -Infinity;
+    let safestNumbersPool = [];
+    for (let i = 0; i <= 9; i++) {
+        if (candidateNetProfits[i] > maxProfit) {
+            maxProfit = candidateNetProfits[i];
+            safestNumbersPool = [i];
+        } else if (candidateNetProfits[i] === maxProfit) {
+            safestNumbersPool.push(i);
+        }
+    }
+
+    const finalNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
+    const num = Number(finalNumber);
+
+    // 5. Establish parameters for the winning number
+    const finalSize = num >= 5 ? "Big" : "Small";
+    let finalColor = "Red";
+    if (num === 0 || num === 5) {
+        finalColor = "Violet";
+    } else if (greenNumbersArray.includes(num)) {
+        finalColor = "Green";
     } else {
-        bet.winAmount = 0;
-        bet.status = 'Loss';
+        finalColor = "Red";
     }
-    
-    // बेट स्टेटस को डेटाबेस में अपडेट करें
-    await bet.save();
-}));
+
+    // 6. Save round outcome into database periods history with explicit mode tag
+    const newPeriod = new Period({
+        gameMode: mode,
+        periodId: activePeriod,
+        resultNumber: num,
+        resultColor: finalColor,
+        resultSize: finalSize
+    });
+    await newPeriod.save();
+
+    // 7. Strict Multi-Bet Distribution Engine for users (Fixed Loop structure)
+    await Promise.all(pendingBets.map(async (bet) => {
+        let isWin = false;
+        let currentMultiplier = 0;
+        const commissionRate = 0.02;
+        const tradeAmount = bet.betAmount * (1 - commissionRate);
+        const userSelection = String(bet.selectValue).trim();
+
+        if (userSelection === String(num)) {
+            isWin = true;
+            currentMultiplier = 9;
+        } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === finalSize) {
+            isWin = true;
+            currentMultiplier = 2;
+        } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalColor) {
+            isWin = true;
+            currentMultiplier = 2;
+        } else if ((userSelection === "Green" && num === 5) || (userSelection === "Red" && num === 0)) {
+            isWin = true;
+            currentMultiplier = 1.5;
+        } else if (userSelection === "Violet" && (num === 0 || num === 5)) {
+            isWin = true;
+            currentMultiplier = 4.5;
+        }
+
+        if (isWin) {
+            const winAmt = tradeAmount * currentMultiplier;
+            bet.winAmount = Number(winAmt.toFixed(2));
+            bet.status = 'Win';
+            
+            await User.findOneAndUpdate(
+                { phone: bet.phone },
+                { $inc: { balance: bet.winAmount } }
+            );
+        } else {
+            bet.winAmount = 0;
+            bet.status = 'Loss';
+        }
+        await bet.save();
+    }));
+}
 
 
 // === बैकएंड का टाइमर चालू करने का सही इंजन ===

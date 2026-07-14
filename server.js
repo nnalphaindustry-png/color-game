@@ -251,12 +251,14 @@ const liveGames = {
     "5m":  { duration: 300, timeLeft: 300, currentPeriod: "", pools: {} }
 };
 
-// पूल डेटा को हर नया राउंड शुरू होने पर रीसेट करने का फ़ंक्शन
-function resetPool(mode) {
+// पुराना resetPool हटाकर सिर्फ यह साफ फंक्शन रखो जो सिर्फ पैसे 0 करेगा, आईडी को हाथ नहीं लगाएगा
+function resetPoolOnly(mode) {
     liveGames[mode].pools = {
         "0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0,"9":0,
         "Red":0,"Green":0,"Violet":0,"Big":0,"Small":0
     };
+}
+
     const now = new Date();
     const timestamp = now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + "0005";
     const randomId = Math.floor(1000 + Math.random() * 9000);
@@ -288,8 +290,8 @@ async function calculateGameResult(mode) {
     if (typeof settleUserBets === 'function') {
         await settleUserBets(mode, game.currentPeriod, finalNumber, finalColor, finalSize);
     }
+resetPoolOnly(mode); 
 
-    resetPool(mode); // अगला राउंड शुरू करने के लिए पूल खाली और नया पीरियड आईडी सेट करें
 }
 
 // १. नई ID बनाने के लिए एक नया छोटा फंक्शन जो इसी फाइल में ऊपर या नीचे कहीं भी रख दो
@@ -303,24 +305,25 @@ function generateNewPeriodId(mode) {
     liveGames[mode].currentPeriod = dateStr + randomSec;
 }
 
+// 💡 नया और फिक्स किया हुआ टाइमर इंजन
 async function startServerTimerEngine() {
-    // गेम शुरू होते ही सभी मोड्स के लिए पहली सीरियल आईडी बनाएं
+    // गेम शुरू होते ही सभी मोड्स के लिए पहली आईडी बनाएं
     for (let mode of Object.keys(liveGames)) {
-        resetPool(mode);
-        await generateNewPeriodId(mode); 
+        // अगर ऊपर resetPoolOnly बना लिया है तो उसे लिखो, नहीं तो resetPool(mode) रहने दो
+        resetPool(mode); 
+        generateNewPeriodId(mode); 
     }
 
     setInterval(() => {
         Object.keys(liveGames).forEach(async (mode) => {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
-                // १. पुराना राउंड ख़त्म, रिजल्ट कैलकुलेट करो
+                // १. पुराना राउंड ख़त्म, रिजल्ट कैलकुलेट होगा और डेटाबेस में सेव होगा
                 await calculateGameResult(mode); 
                 
-                // २. अगला सीरियल नंबर जनरेट करो (जैसे 0001 के बाद 0002)
-                await generateNewPeriodId(mode); 
+                // 💡 यहाँ से हमने दोबारा जनरेट करने वाली लाइन हटा दी है, क्योंकि नया पीरियड अब सिर्फ एक बार जनरेट होगा।
                 
-                // ३. टाइमर को फिर से रीस्टार्ट करो
+                // २. टाइमर को फिर से रीस्टार्ट करो
                 game.timeLeft = game.duration; 
             } else {
                 game.timeLeft--; // जब तक टाइम बचा है, सिर्फ सेकंड कम होंगे

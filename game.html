@@ -154,11 +154,8 @@
                 <div class="how-to-play-btn"><i class="fa-solid fa-chart-simple"></i> How to play</div>
                 <div class="p-mode-name" id="display-mode-title">WinGo 30sec</div>
                 <div class="p-history-circles">
-                    <div class="mini-circle mc-red">8</div>
-                    <div class="mini-circle mc-green">7</div>
-                    <div class="mini-circle mc-green">9</div>
-                    <div class="mini-circle mc-green">5</div>
-                    <div class="mini-circle mc-green">7</div>
+                    <div class="p-history-circles" id="topMiniCirclesRow"></div>
+                    
                 </div>
             </div>
             <div class="p-timer-right">
@@ -286,7 +283,7 @@
                 }).catch(err => { if(icon) icon.classList.remove('fa-spin'); });
         }
 
-                function switchMode(mode, event) {
+                                        function switchMode(mode, event) {
             currentSelectedMode = mode; 
             const tabs = document.querySelectorAll('.mode-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
@@ -295,41 +292,66 @@
             const titleMap = { "30s": "WinGo 30sec", "1m": "WinGo 1 Min", "3m": "WinGo 3 Min", "5m": "WinGo 5 Min" };
             document.getElementById('display-mode-title').innerText = titleMap[mode];
             
-            // मोड बदलते ही तुरंत एक बार मैन्युअल सिंक कॉल करें
-            fetch(`${BACKEND_URL}/api/game-sync`)
-                .then(res => res.json())
-                .then(resData => {
-                    if (resData.success && resData.data[mode]) {
-                        document.getElementById('current-period-id').innerText = resData.data[mode].currentPeriod;
-                        updateTimerDisplayOnScreen(resData.data[mode].timeLeft);
-                    }
-                });
+            // क्लिक करते ही तुरंत बिना किसी देरी के नए मोड की हिस्ट्री लोड करें
+            renderHistoryTablesData();
+
+            // टाइमर इंजन को नए मोड के साथ तुरंत रीस्टार्ट कर दें, जिससे लैग पूरी तरह ख़त्म हो जाएगा
+            startLocalTimerEngine();
         }
         
-        function startLocalTimerEngine() {
-            if (localTimerInterval) clearInterval(localTimerInterval);
-            localTimerInterval = setInterval(() => {
-                fetch(`${BACKEND_URL}/api/game-sync`)
-                    .then(res => res.json()).then(resData => {
-                        if (resData.success && resData.data[currentSelectedMode]) {
-                            const activeGameData = resData.data[currentSelectedMode];
-                            
-                            // 1. सर्वर की असली लाइव पीरियड आईडी स्क्रीन पर दिखाएं
-                            document.getElementById('current-period-id').innerText = activeGameData.currentPeriod;
-                            
-                            // 2. सर्वर का असली लाइव टाइम दिखाएं
-                            updateTimerDisplayOnScreen(activeGameData.timeLeft);
-                            
-                            // 3. राउंड खत्म होने पर (जब 30 या 60 सेकंड पर टाइमर वापस रीसेट हो) डेटा रीफ़्रेश करें
-                            if (activeGameData.timeLeft === 1 || activeGameData.timeLeft === activeGameData.duration) {
-                                setTimeout(() => { fetchLiveBalance(); renderHistoryTablesData(); }, 1500);
-                            }
-                        }
-                    }).catch(err => console.error("Timer Sync Error:", err));
+                // 💡 नया सुधरा हुआ टाइमर इंजन (जो ऊपर और नीचे की ID को मैच कराएगा)
+let localTimeLeft = 30;
+
+function startLocalTimerEngine() {
+    if (localTimerInterval) clearInterval(localTimerInterval);
+
+    // यह फंक्शन सर्वर से सिर्फ एक बार टाइम और करंट पीरियड आईडी लाएगा
+    function syncWithServerOnce() {
+        fetch(`${BACKEND_URL}/api/game-sync`)
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.success && resData.data[currentSelectedMode]) {
+                const activeGameData = resData.data[currentSelectedMode];
+                
+                // ऊपर टाइमर के नीचे सटीक पीरियड आईडी दिखाओ
+                document.getElementById('current-period-id').innerText = activeGameData.currentPeriod;
+                
+                localTimeLeft = activeGameData.timeLeft;
+                updateTimerDisplayOnScreen(localTimeLeft);
+            }
+        }).catch(err => console.log("Sync error"));
+    }
+
+    // पहली बार तुरंत सिंक करो
+    syncWithServerOnce();
+
+    // अब हर सेकंड बिना किसी लैग के लोकल उल्टी गिनती चलाओ
+    localTimerInterval = setInterval(() => {
+        if (localTimeLeft <= 0) {
+            clearInterval(localTimerInterval);
+            document.getElementById('d-sec1').innerText = "0";
+            document.getElementById('d-sec2').innerText = "0";
+            
+            // 💡 मुख्य फिक्स: टाइमर 0 होते ही 1 सेकंड रुको ताकि बैकएंड रिजल्ट सेव कर ले, फिर नई ID और टेबल लाओ
+            setTimeout(() => {
+                fetchLiveBalance();
+                syncWithServerOnce(); // ऊपर नई ID आएगी
+                
+                setTimeout(() => {
+                    renderHistoryTablesData(); // नीचे की टेबल में भी वही सेम ID लोड होगी
+                }, 800); // 800ms का सटीक गैप ताकि आईडी मिसमैच न हो
+                
+                // अगले राउंड के लिए इंजन फिर चालू करो
+                startLocalTimerEngine();
             }, 1000);
+        } else {
+            updateTimerDisplayOnScreen(localTimeLeft);
+            localTimeLeft--;
         }
+    }, 1000);
+}
+
         
-           
         function updateTimerDisplayOnScreen(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60;
             const mStr = minutes.toString().padStart(2, '0'); const sStr = seconds.toString().padStart(2, '0');
@@ -337,12 +359,6 @@
             document.getElementById('d-min2').innerText = mStr.charAt(1);
             document.getElementById('d-sec1').innerText = sStr.charAt(0);
             document.getElementById('d-sec2').innerText = sStr.charAt(1);
-        }
-
-        function generateDummyPeriodId() {
-            const now = new Date(); const year = now.getFullYear();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0'); const date = now.getDate().toString().padStart(2, '0');
-            document.getElementById('current-period-id').innerText = `${year}${month}${date}00052039`;
         }
 
         function selectRandomNumber() { const randomNum = Math.floor(Math.random() * 10); openBetPopup(randomNum.toString()); }
@@ -396,17 +412,29 @@
             renderHistoryTablesData();
         }
 
-                function renderHistoryTablesData() {
+                                function renderHistoryTablesData() {
             const phone = localStorage.getItem('user_phone'); if (!phone) return;
             if (currentActiveTab === "game") {
                 fetch(`${BACKEND_URL}/api/game-history/${currentSelectedMode}`).then(res => res.json()).then(resData => {
-                    if (!resData.success) return; let html = "";
-                    resData.data.forEach(row => {
-                        let isSplit = row.resultColor.includes('-'); let cls = isSplit ? (row.resultNumber===0?"num-0-split":"num-5-split") : (row.resultColor==="Red"?"num-r":"num-g");
+                    if (!resData.success) return; let html = ""; let topCirclesHtml = "";
+                    
+                    resData.data.forEach((row, index) => {
+                        let isSplit = row.resultColor.includes('-'); 
+                        let cls = isSplit ? (row.resultNumber===0?"num-0-split":"num-5-split") : (row.resultColor==="Red"?"num-r":"num-g");
                         let dotCls = row.resultColor.includes('Violet') ? "table-dot-v" : (row.resultColor==="Red"?"table-dot-r":"table-dot-g");
+                        
+                        // 1. नीचे की मुख्य टेबल के लिए रो (Row) बनाना
                         html += `<tr><td>${row.periodId}</td><td><span class="row-circle ${cls}">${row.resultNumber}</span></td><td>${row.resultSize}</td><td><span class="${dotCls}"></span></td></tr>`;
+                        
+                        // 2. ऊपर के उन 5 छोटे गोलों के लिए ताज़ा रिजल्ट्स उठाना (सिर्फ पहले 5 रिकॉर्ड)
+                        if (index < 5) {
+                            let miniCls = isSplit ? (row.resultNumber===0?"num-0-split":"num-5-split") : (row.resultColor==="Red"?"mc-red":"mc-green");
+                            topCirclesHtml += `<div class="mini-circle ${miniCls}">${row.resultNumber}</div>`;
+                        }
                     });
+                    
                     document.getElementById('gameHistoryTableBody').innerHTML = html || "<tr><td colspan='4'>No Data</td></tr>";
+                    document.getElementById('topMiniCirclesRow').innerHTML = topCirclesHtml || "<div style='font-size:10px;'>No Data</div>";
                 });
             } else {
                 fetch(`${BACKEND_URL}/api/my-history/${currentSelectedMode}/${phone}`).then(res => res.json()).then(resData => {
@@ -420,9 +448,12 @@
                 });
             }
         }
+               document.addEventListener("DOMContentLoaded", () => {
+            fetchLiveBalance(); 
+            renderHistoryTablesData(); 
+            startLocalTimerEngine(); 
+        });
         
-
-        document.addEventListener("DOMContentLoaded", () => { fetchLiveBalance(); generateDummyPeriodId(); startLocalTimerEngine(); renderHistoryTablesData(); });
     </script>
 </body>
 </html>

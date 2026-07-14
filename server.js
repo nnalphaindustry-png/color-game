@@ -502,17 +502,29 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 // === ADMIN SEARCH USER ROUTE ===
-app.get('/api/admin/search-user/:phone', async (req, res) => {
-    try {
-        const user = await User.findOne({ phone: req.params.phone.trim() });
-        if (!user) {
-            return res.json({ success: false, message: "User not found!" });
-        }
-        res.json({ success: true, user });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+// === ADMIN SEARCH USER ROUTE (BY PHONE OR UID) ===
+app.get('/api/admin/search-user/:query', async (req, res) => {
+  try {
+    const searchQuery = req.params.query.trim();
+
+    // Mongoose का $or ऑपरेटर इस्तेमाल करके UID और Phone दोनों में एक साथ ढूंढें
+    const user = await User.findOne({
+      $or: [
+        { uid: searchQuery },
+        { phone: searchQuery }
+      ]
+    });
+
+    if (!user) {
+      return res.json({ success: false, message: "User not found with this Phone or UID!" });
     }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
+
 
 // === ADMIN UPDATE BALANCE ROUTE (ADD / DEDUCT) ===
 app.post('/api/admin/update-balance', async (req, res) => {

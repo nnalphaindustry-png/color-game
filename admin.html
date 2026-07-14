@@ -19,7 +19,7 @@
         .admin-page-view { display: none; }
         .admin-page-view.active-view { display: block; }
         .page-heading-title { font-size: 22px; font-weight: normal; margin-bottom: 20px; color: #ffffff; }
-        .box-grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
+                .box-grid-layout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px; }
         .stat-box-card { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
         .box-label-text { color: #a0a0a0; font-size: 11px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
         .box-value-number { font-size: 18px; font-weight: bold; }
@@ -38,17 +38,33 @@
         .clickable-row:hover { background-color: #2a2a2a; }
         .id-text-format { color: #0dcaf0; font-family: monospace; }
         .placeholder-screen-view { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 40px 20px; text-align: center; color: #a0a0a0; }
-        .popup-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .popup-modal-box { background-color: #1a1a1a; border: 1px solid #333333; border-radius: 12px; width: 100%; max-width: 450px; padding: 20px; position: relative; animation: fadeIn 0.3s ease; }
+        .popup-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 2000; align-items: center; justify-content: center; padding: 15px; overflow-y: auto; }
+        .popup-modal-box { background-color: #1a1a1a; border: 1px solid #333333; border-radius: 12px; width: 100%; max-width: 460px; padding: 20px; position: relative; animation: fadeIn 0.25s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .popup-close-btn { position: absolute; top: 15px; right: 15px; background: none; color: #888888; border: none; font-size: 22px; cursor: pointer; transition: color 0.2s; }
+        .popup-close-btn { position: absolute; top: 15px; right: 15px; background: none; color: #888888; border: none; font-size: 24px; cursor: pointer; transition: color 0.2s; z-index: 10; }
         .popup-close-btn:hover { color: #ffffff; }
-        .popup-header-title { color: #ffc107; font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; font-weight: bold; }
-        .popup-data-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222222; font-size: 14px; }
+        .popup-header-title { color: #ffc107; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; font-weight: bold; }
+        .popup-data-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222222; font-size: 14px; }
         .popup-data-label { color: #a0a0a0; }
-        .popup-data-value { font-weight: bold; color: #ffffff; }
+        .popup-data-value { font-weight: bold; color: #ffffff; word-break: break-all; text-align: right; padding-left: 10px; }
         .popup-value-highlight { color: #198754; font-weight: bold; }
         .popup-value-uid { color: #0dcaf0; font-family: monospace; }
+        .input-block-field { width: 100%; padding: 12px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px; font-size: 16px; outline: none; }
+        .input-block-field:focus { border-color: #ffc107; }
+        .submit-action-btn { padding: 12px 20px; background-color: #ffc107; color: #121212; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background-color 0.2s; }
+        .submit-action-btn:hover { background-color: #e0a800; }
+        .flex-input-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .action-buttons-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .modal-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; text-align: center; color: white; transition: opacity 0.2s; }
+        .modal-btn:hover { opacity: 0.9; }
+        .btn-green { background-color: #198754; }
+        .btn-red { background-color: #dc3545; }
+        .btn-orange { background-color: #ff9800; }
+        .btn-darkred { background-color: #7f0000; }
+        .toast-notification-box { display: none; position: fixed; top: 25px; left: 50%; transform: translateX(-50%); background-color: #1f2d1f; border: 1px solid #198754; color: #ffffff; padding: 14px 40px 14px 20px; border-radius: 8px; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.6); animation: slideDown 0.3s ease; min-width: 280px; max-width: 90%; }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 25px; opacity: 1; } }
+        .toast-close-icon { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); background: none; border: none; color: #a0a0a0; font-size: 18px; cursor: pointer; }
+        .toast-close-icon:hover { color: #ffffff; }
         @media (min-width: 769px) { .sidebar { left: 0; } .main-content-wrapper { margin-left: 250px; } .nav-toggle-btn { display: none; } .box-grid-layout { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
@@ -68,8 +84,8 @@
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'deposit-page')">💰 Deposit Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'withdrawal-page')">💸 Withdrawal Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'control-page')">🎮 Game Control</a></li>
-            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
         </ul>
     </nav>
 
@@ -80,7 +96,6 @@
         <div id="dashboard-page" class="admin-page-view active-view">
             <h2 class="page-heading-title">Dashboard Overview</h2>
             
-            <!-- 2x2 Grid Boxes for Mobile Screen -->
             <div class="box-grid-layout">
                 <div class="stat-box-card">
                     <div>
@@ -112,7 +127,6 @@
                 </div>
             </div>
 
-            <!-- Clean Table Block Inside Dashboard -->
             <div class="data-table-card">
                 <h5 class="data-table-title">Registered User List</h5>
                 <div class="table-scroll-area">
@@ -133,130 +147,133 @@
             </div>
         </div>
 
-        <!-- PAGE 2: User List View Placeholder -->
-        <div id="user-list-page" class="admin-page-view">
-            <h2 class="page-heading-title">Full User Records</h2>
-            <div class="placeholder-screen-view">User list custom page will be linked here.</div>
-        </div>
-
-        <!-- PAGE 3: Deposit Approval View Placeholder -->
-        <div id="deposit-page" class="admin-page-view">
-            <h2 class="page-heading-title">Deposit Verification</h2>
-            <div class="placeholder-screen-view">Deposit transactions request screen layout will be loaded here.</div>
-        </div>
-
-        <!-- PAGE 4: Withdrawal View Placeholder -->
-        <div id="withdrawal-page" class="admin-page-view">
-            <h2 class="page-heading-title">Withdrawal Requests</h2>
-            <div class="placeholder-screen-view">User payout clearance panel layout will open here.</div>
-        </div>
-
-        <!-- PAGE 5: Game Control View Placeholder -->
+        <!-- PLACEHOLDERS FOR OTHER PAGES -->
+        <div id="user-list-page" class="admin-page-view"><h2 class="page-heading-title">Full User Records</h2><div class="placeholder-screen-view">User list custom page will be linked here.</div></div>
+        <div id="deposit-page" class="admin-page-view"><h2 class="page-heading-title">Deposit Verification</h2><div class="placeholder-screen-view">Deposit transactions request screen layout will be loaded here.</div></div>
+        <div id="withdrawal-page" class="admin-page-view"><h2 class="page-heading-title">Withdrawal Requests</h2><div class="placeholder-screen-view">User payout clearance panel layout will open here.</div></div>
+        <div id="settings-page" class="admin-page-view"><h2 class="page-heading-title">Global System Settings</h2><div class="placeholder-screen-view">Global app maintenance options will remain here.</div></div>
+                <!-- PAGE 5: Master Live Result Control Engine -->
         <div id="control-page" class="admin-page-view">
-            <h2 class="page-heading-title">Live Result Control Engine</h2>
-            <div class="placeholder-screen-view">Manual result manipulation console will be created here.</div>
+            <h2 class="page-heading-title">Master Game Control Console</h2>
+            <div class="data-table-card" style="max-width: 650px; margin: 0 auto 30px auto;">
+                <h5 class="data-table-title" style="margin-bottom: 20px;">Manual Result Configuration</h5>
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">1. Select Game Mode</label>
+                    <select id="ctrl-game-mode" onchange="changeGameControlModeTrigger()" class="input-block-field">
+                        <option value="30s">30 Seconds Mode</option>
+                        <option value="1m">1 Minute Mode</option>
+                        <option value="3m">3 Minute Mode</option>
+                        <option value="5m">5 Minute Mode</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">2. Control Strategy Mode</label>
+                    <select id="ctrl-strategy-mode" onchange="toggleControlStrategyLayout()" class="input-block-field">
+                        <option value="auto">Automatic Mode (System Profit Engine)</option>
+                        <option value="manual">Manual Mode (Force Winner Number)</option>
+                    </select>
+                </div>
+                <div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 12px 15px; text-align: center; margin-bottom: 20px;">
+                    <label style="color: #a0a0a0; font-size: 13px; text-transform: uppercase; display: block; margin-bottom: 4px;">Active Live Round Tracker</label>
+                    <h4 id="ctrl-live-period-id" style="color: #ffc107; font-family: monospace; font-size: 20px; letter-spacing: 1px;">Loading Round...</h4>
+                </div>
+                <div id="manual-number-grid-panel" style="display: none; margin-bottom: 20px; border-top: 1px solid #2d2d2d; padding-top: 15px;">
+                    <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 12px; text-transform: uppercase;">3. Choose Target Winning Number (0-9)</label>
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                        <button onclick="lockForcedResultAction(0)" class="modal-btn" style="background-color: #7f00ff; padding: 12px 0;">0</button>
+                        <button onclick="lockForcedResultAction(1)" class="modal-btn" style="background-color: #198754; padding: 12px 0;">1</button>
+                        <button onclick="lockForcedResultAction(2)" class="modal-btn" style="background-color: #dc3545; padding: 12px 0;">2</button>
+                        <button onclick="lockForcedResultAction(3)" class="modal-btn" style="background-color: #198754; padding: 12px 0;">3</button>
+                        <button onclick="lockForcedResultAction(4)" class="modal-btn" style="background-color: #dc3545; padding: 12px 0;">4</button>
+                        <button onclick="lockForcedResultAction(5)" class="modal-btn" style="background-color: #7f00ff; padding: 12px 0;">5</button>
+                        <button onclick="lockForcedResultAction(6)" class="modal-btn" style="background-color: #dc3545; padding: 12px 0;">6</button>
+                        <button onclick="lockForcedResultAction(7)" class="modal-btn" style="background-color: #198754; padding: 12px 0;">7</button>
+                        <button onclick="lockForcedResultAction(8)" class="modal-btn" style="background-color: #dc3545; padding: 12px 0;">8</button>
+                        <button onclick="lockForcedResultAction(9)" class="modal-btn" style="background-color: #198754; padding: 12px 0;">9</button>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid #2d2d2d; padding-top: 15px; text-align: center;">
+                    <p style="font-size: 14px; color: #a0a0a0;">Active Strategy Target: <span id="ctrl-current-status-label" style="color: #ffc107; font-weight: bold;">Automatic Mode</span></p>
+                </div>
+            </div>
+
+            <!-- Upgraded 4-Row Grid Layout Block for Betting Pool Analyzer -->
+            <div class="data-table-card" style="max-width: 650px; margin: 0 auto;">
+                <h5 class="data-table-title" style="color: #0dcaf0; margin-bottom: 20px;">Live Betting Pool Analyzer (Real-time Amounts)</h5>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <div style="background-color: #2a1515; border: 1px solid #dc3545; border-radius: 6px; padding: 12px 5px; text-align: center;">
+                        <span style="color: #dc3545; font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">RED</span>
+                        <span id="pool-color-red" style="color: #ffffff; font-weight: bold; font-size: 15px;">₹0.00</span>
+                    </div>
+                    <div style="background-color: #152a1c; border: 1px solid #198754; border-radius: 6px; padding: 12px 5px; text-align: center;">
+                        <span style="color: #198754; font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">GREEN</span>
+                        <span id="pool-color-green" style="color: #ffffff; font-weight: bold; font-size: 15px;">₹0.00</span>
+                    </div>
+                    <div style="background-color: #22152a; border: 1px solid #7f00ff; border-radius: 6px; padding: 12px 5px; text-align: center;">
+                        <span style="color: #7f00ff; font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">VIOLET</span>
+                        <span id="pool-color-violet" style="color: #ffffff; font-weight: bold; font-size: 15px;">₹0.00</span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px;">
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #7f00ff; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 0</span><span id="pool-num-0" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #198754; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 1</span><span id="pool-num-1" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #dc3545; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 2</span><span id="pool-num-2" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #198754; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 3</span><span id="pool-num-3" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #dc3545; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 4</span><span id="pool-num-4" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                </div>
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px;">
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #7f00ff; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 5</span><span id="pool-num-5" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #dc3545; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 6</span><span id="pool-num-6" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #198754; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 7</span><span id="pool-num-7" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #dc3545; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 8</span><span id="pool-num-8" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                    <div style="background-color: #121212; border: 1px solid #333; border-radius: 6px; padding: 10px 2px; text-align: center;"><span style="color: #198754; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">Num 9</span><span id="pool-num-9" style="color: #ffffff; font-size: 13px; font-weight: bold;">₹0.00</span></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    <div style="background-color: #1c2331; border: 1px solid #0056b3; border-radius: 6px; padding: 12px 10px; text-align: center;"><span style="color: #0dcaf0; font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">BIG</span><span id="pool-size-big" style="color: #ffffff; font-weight: bold; font-size: 16px;">₹0.00</span></div>
+                    <div style="background-color: #2d251e; border: 1px solid #fd7e14; border-radius: 6px; padding: 12px 10px; text-align: center;"><span style="color: #fd7e14; font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">SMALL</span><span id="pool-size-small" style="color: #ffffff; font-weight: bold; font-size: 16px;">₹0.00</span></div>
+                </div>
+            </div>
         </div>
 
-        <!-- PAGE 6: Settings View Placeholder -->
-        <div id="settings-page" class="admin-page-view">
-            <h2 class="page-heading-title">Global System Settings</h2>
-            <div class="placeholder-screen-view">Global app maintenance options will remain here.</div>
-        </div>
-
-    </main>
-
-    <!-- Premium Custom Popup Modal Window Box Layout -->
-    <div class="popup-modal-overlay" id="userPopupModal">
-        <div class="popup-modal-box">
-            <button class="popup-close-btn" onclick="closeUserPopupModal()">&times;</button>
-            <div class="popup-header-title">User Account Details</div>
-            
-            <div class="popup-data-row">
-                <span class="popup-data-label">Mobile Number</span>
-                <span class="popup-data-value" id="pop-phone">-</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">User ID (UID)</span>
-                <span class="popup-data-value popup-value-uid" id="pop-uid">-</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">Wallet Balance</span>
-                <span class="popup-data-value popup-value-highlight" id="pop-balance">₹0.00</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">Secret Password</span>
-                <span class="popup-data-value" id="pop-password">-</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">Invite Code</span>
-                <span class="popup-data-value" id="pop-invite">-</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">Registration Date</span>
-                <span class="popup-data-value" id="pop-date">-</span>
-            </div>
-        </div>
-    </div>
-            <!-- PAGE 7: User Management Search View -->
+        <!-- PAGE 7: User Management Search View -->
         <div id="management-page" class="admin-page-view">
             <h2 class="page-heading-title">Search & Manage User</h2>
             <div class="data-table-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
                 <h5 class="data-table-title" style="margin-bottom: 20px;">Enter User Mobile Number</h5>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="search-phone-input" placeholder="e.g. 9876543210" style="flex: 1; padding: 12px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px; font-size: 16px;">
-                    <button onclick="searchUserByPhone()" style="padding: 12px 24px; background-color: #ffc107; color: #121212; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px;">Search</button>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <input type="text" id="search-phone-input" placeholder="e.g. 9876543210" class="input-block-field">
+                    <button onclick="searchUserByPhone()" class="submit-action-btn">Search User</button>
                 </div>
             </div>
         </div>
 
-    <!-- Advanced User Management Control Popup Modal -->
-    <div class="popup-modal-overlay" id="managementPopupModal">
-        <div class="popup-modal-box" style="max-width: 480px;">
-            <button class="popup-close-btn" onclick="closeManagementPopupModal()">&times;</button>
-            <div class="popup-header-title">Manage User Account</div>
-            
-            <div class="popup-data-row">
-                <span class="popup-data-label">Mobile Number</span>
-                <span class="popup-data-value" id="manage-pop-phone">-</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">Current Balance</span>
-                <span class="popup-data-value popup-value-highlight" id="manage-pop-balance">₹0.00</span>
-            </div>
-            <div class="popup-data-row">
-                <span class="popup-data-label">Account Status</span>
-                <span class="popup-data-value" id="manage-pop-status" style="color: #198754;">Active</span>
-            </div>
+    </main>
 
-            <!-- Balance Update Section -->
-            <div style="margin-top: 20px; border-top: 1px solid #2d2d2d; padding-top: 15px;">
-                <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 8px;">ADD / DEDUCT WALLET BALANCE</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="manage-balance-amount" placeholder="Enter Amount" style="flex: 1; padding: 10px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px;">
-                    <button onclick="updateUserBalanceAction('add')" style="padding: 10px 15px; background-color: #198754; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Add</button>
-                    <button onclick="updateUserBalanceAction('deduct')" style="padding: 10px 15px; background-color: #dc3545; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Deduct</button>
-                </div>
-            </div>
-
-            <!-- Danger Zone Actions (Ban & Delete) -->
-            <div style="margin-top: 20px; border-top: 1px solid #2d2d2d; padding-top: 15px; display: flex; gap: 10px;">
-                <button id="ban-action-btn" onclick="toggleUserBanStatusAction()" style="flex: 1; padding: 12px; background-color: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Ban User</button>
-                <button onclick="deleteUserPermanentlyAction()" style="flex: 1; padding: 12px; background-color: #7f0000; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Delete User</button>
-            </div>
-        </div>
-    </div>
-    
-            <script>
+    <div class="popup-modal-overlay" id="userPopupModal"><div class="popup-modal-box"><button class="popup-close-btn" onclick="closeUserPopupModal()">&times;</button><div class="popup-header-title">User Account Details</div><div class="popup-data-row"><span class="popup-data-label">Mobile Number</span><span class="popup-data-value" id="pop-phone">-</span></div><div class="popup-data-row"><span class="popup-data-label">User ID (UID)</span><span class="popup-data-value popup-value-uid" id="pop-uid">-</span></div><div class="popup-data-row"><span class="popup-data-label">Wallet Balance</span><span class="popup-data-value popup-value-highlight" id="pop-balance">₹0.00</span></div><div class="popup-data-row"><span class="popup-data-label">Secret Password</span><span class="popup-data-value" id="pop-password">-</span></div><div class="popup-data-row"><span class="popup-data-label">Invite Code</span><span class="popup-data-value" id="pop-invite">-</span></div><div class="popup-data-row"><span class="popup-data-label">Registration Date</span><span class="popup-data-value" id="pop-date">-</span></div></div></div>
+    <div class="popup-modal-overlay" id="managementPopupModal"><div class="popup-modal-box"><button class="popup-close-btn" onclick="closeManagementPopupModal()">&times;</button><div class="popup-header-title">Manage User Account</div><div class="popup-data-row"><span class="popup-data-label">Mobile Number</span><span class="popup-data-value" id="manage-pop-phone">-</span></div><div class="popup-data-row"><span class="popup-data-label">Current Balance</span><span class="popup-data-value popup-value-highlight" id="manage-pop-balance">₹0.00</span></div><div class="popup-data-row"><span class="popup-data-label">Account Status</span><span class="popup-data-value" id="manage-pop-status">-</span></div><div class="flex-input-container"><label style="color: #a0a0a0; font-size: 13px; text-transform: uppercase;">Add / Deduct Wallet Balance</label><input type="number" id="manage-balance-amount" placeholder="Enter Amount" class="input-block-field"><div class="action-buttons-row"><button onclick="updateUserBalanceAction('add')" class="modal-btn btn-green">Add Balance</button><button onclick="updateUserBalanceAction('deduct')" class="modal-btn btn-red">Deduct Balance</button></div></div><div style="margin-top: 25px; border-top: 1px solid #2d2d2d; padding-top: 15px; display: flex; flex-direction: column; gap: 10px;"><button id="ban-action-btn" onclick="toggleUserBanStatusAction()" class="modal-btn btn-orange">Ban User</button><button onclick="deleteUserPermanentlyAction()" class="modal-btn btn-darkred">Delete User Account</button></div></div></div>
+    <div class="toast-notification-box" id="globalToastAlert"><button class="toast-close-icon" onclick="hideGlobalToastAlert()">&times;</button><span id="toast-alert-message-text">Action completed successfully!</span></div>
+        <script>
         const SERVER_URL = "https://color-game-1kc2.onrender.com"; 
         let globalUsersCacheMemory = [];
         let activeManagedUserObject = null;
+        let toastAutoCloseTimerReference = null;
 
-        // Toggle sidebar menu visibility status
-        function toggleSidebarMenu() {
-            document.getElementById('appSidebar').classList.toggle('open');
+        function showGlobalToastAlert(messageString, isErrorStatus = false) {
+            const toastElement = document.getElementById('globalToastAlert');
+            document.getElementById('toast-alert-message-text').innerText = messageString;
+            toastElement.style.borderColor = isErrorStatus ? "#dc3545" : "#198754";
+            toastElement.style.backgroundColor = isErrorStatus ? "#2d1f1f" : "#1f2d1f";
+            toastElement.style.display = "block";
+            if (toastAutoCloseTimerReference) clearTimeout(toastAutoCloseTimerReference);
+            toastAutoCloseTimerReference = setTimeout(() => { hideGlobalToastAlert(); }, 3000);
         }
 
-        // Handle page visibility toggle on option clicks
+        function hideGlobalToastAlert() { document.getElementById('globalToastAlert').style.display = "none"; }
+        function toggleSidebarMenu() { document.getElementById('appSidebar').classList.toggle('open'); }
+
         function switchAdminPage(event, targetPageId) {
             event.preventDefault();
             const screens = document.querySelectorAll('.admin-page-view');
@@ -265,45 +282,26 @@
             menuLinks.forEach(link => link.classList.remove('active'));
             document.getElementById(targetPageId).classList.add('active-view');
             event.target.classList.add('active');
-            if (window.innerWidth <= 768) {
-                document.getElementById('appSidebar').classList.remove('open');
-            }
+            if (window.innerWidth <= 768) { document.getElementById('appSidebar').classList.remove('open'); }
         }
 
-        // Open specific user detailed metrics in popup frame
         function openUserPopupModal(userIdToFind) {
             const selectedUserObject = globalUsersCacheMemory.find(u => u._id === userIdToFind);
             if (!selectedUserObject) return;
-
             document.getElementById('pop-phone').innerText = selectedUserObject.phone || 'N/A';
             document.getElementById('pop-uid').innerText = selectedUserObject._id || 'N/A';
             document.getElementById('pop-balance').innerText = '₹' + (selectedUserObject.balance || 0).toFixed(2);
             document.getElementById('pop-password').innerText = selectedUserObject.password || 'N/A';
             document.getElementById('pop-invite').innerText = selectedUserObject.inviteCode || 'None';
-            
-            const convertedDateObj = new Date(selectedUserObject.createdAt).toLocaleDateString('en-IN');
-            document.getElementById('pop-date').innerText = convertedDateObj;
-
-            const modalOverlayElement = document.getElementById('userPopupModal');
-            modalOverlayElement.style.display = 'flex';
+            document.getElementById('pop-date').innerText = new Date(selectedUserObject.createdAt).toLocaleDateString('en-IN');
+            document.getElementById('userPopupModal').style.display = 'flex';
         }
 
-        // Shutdown popup dialog layout container frame
-        function closeUserPopupModal() {
-            document.getElementById('userPopupModal').style.display = 'none';
-        }
-
-        // Close management window dialog overlay frame
-        function closeManagementPopupModal() {
-            document.getElementById('managementPopupModal').style.display = 'none';
-            document.getElementById('manage-balance-amount').value = '';
-        }
-
-        // Action module to search any user account by phone number directly
-        function searchUserByPhone() {
+        function closeUserPopupModal() { document.getElementById('userPopupModal').style.display = 'none'; }
+        function closeManagementPopupModal() { document.getElementById('managementPopupModal').style.display = 'none'; document.getElementById('manage-balance-amount').value = ''; }
+                function searchUserByPhone() {
             const phoneInput = document.getElementById('search-phone-input').value.trim();
-            if (!phoneInput) return alert("Please enter a mobile number!");
-
+            if (!phoneInput) return showGlobalToastAlert("Please enter a mobile number!", true);
             fetch(`${SERVER_URL}/api/admin/search-user/${phoneInput}`)
                 .then(res => res.json())
                 .then(data => {
@@ -311,87 +309,125 @@
                         activeManagedUserObject = data.user;
                         document.getElementById('manage-pop-phone').innerText = data.user.phone;
                         document.getElementById('manage-pop-balance').innerText = '₹' + (data.user.balance || 0).toFixed(2);
-                        
                         const isBanned = data.user.isBanned || false;
-                        document.getElementById('manage-pop-status').innerText = isBanned ? "Banned" : "Active";
+                        document.getElementById('manage-pop-status').innerText = isBanned ? "Banned Account" : "Active Account";
                         document.getElementById('manage-pop-status').style.color = isBanned ? "#dc3545" : "#198754";
-                        document.getElementById('ban-action-btn').innerText = isBanned ? "Unban User" : "Ban User";
+                        document.getElementById('ban-action-btn').innerText = isBanned ? "Unban Account" : "Ban Account";
                         document.getElementById('ban-action-btn').style.backgroundColor = isBanned ? "#198754" : "#ff9800";
-
                         document.getElementById('managementPopupModal').style.display = 'flex';
-                    } else {
-                        alert(data.message || "User not found in database!");
-                    }
-                })
-                .catch(err => alert("Error searching user!"));
+                    } else { showGlobalToastAlert(data.message || "User account not found!", true); }
+                }).catch(err => showGlobalToastAlert("Network sync failure!", true));
         }
 
-        // Action module to add or deduct balance instantly
+        function toggleControlStrategyLayout() {
+            const chosenStrategyValue = document.getElementById('ctrl-strategy-mode').value;
+            const targetNumberGridDiv = document.getElementById('manual-number-grid-panel');
+            if (chosenStrategyValue === "manual") { targetNumberGridDiv.style.display = "block"; } 
+            else { targetNumberGridDiv.style.display = "none"; resetGameStrategyToAutomaticAction(); }
+        }
+
+        function changeGameControlModeTrigger() { syncLiveBettingSummaryMetrics(); }
+
+        function resetGameStrategyToAutomaticAction() {
+            const activeGameModeStr = document.getElementById('ctrl-game-mode').value;
+            fetch(`${SERVER_URL}/api/admin/reset-game-auto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gameMode: activeGameModeStr })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showGlobalToastAlert(data.message, false);
+                    document.getElementById('ctrl-strategy-mode').value = "auto";
+                    document.getElementById('manual-number-grid-panel').style.display = "none";
+                    syncLiveBettingSummaryMetrics();
+                }
+            }).catch(err => showGlobalToastAlert("Error releasing target override parameters!", true));
+        }
+                function lockForcedResultAction(targetWinningNumber) {
+            const activeGameModeStr = document.getElementById('ctrl-game-mode').value;
+            fetch(`${SERVER_URL}/api/admin/set-game-result`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gameMode: activeGameModeStr, forcedNumber: Number(targetWinningNumber) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showGlobalToastAlert(`Number ${targetWinningNumber} Successfully Locked for Next Round!`, false);
+                    document.getElementById('ctrl-strategy-mode').value = "auto";
+                    document.getElementById('manual-number-grid-panel').style.display = "none";
+                    syncLiveBettingSummaryMetrics();
+                } else { showGlobalToastAlert("Failed to transmit manual configuration parameter!", true); }
+            }).catch(err => showGlobalToastAlert("Control override endpoint synchronization error!", true));
+        }
+
+        function syncLiveBettingSummaryMetrics() {
+            const currentSelectedPageElement = document.getElementById('control-page');
+            if (!currentSelectedPageElement || currentSelectedPageElement.style.display === "none") return;
+            const activeGameModeStr = document.getElementById('ctrl-game-mode').value;
+
+            fetch(`${SERVER_URL}/api/admin/live-bets-summary/${activeGameModeStr}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('ctrl-live-period-id').innerText = data.currentPeriodId || 'N/A';
+                        document.getElementById('ctrl-current-status-label').innerText = data.overrideStatus;
+                        document.getElementById('ctrl-current-status-label').style.color = data.overrideStatus === "Automatic" ? "#ffc107" : "#dc3545";
+
+                        document.getElementById('pool-color-red').innerText = '₹' + (data.colorBets.red || 0).toFixed(2);
+                        document.getElementById('pool-color-green').innerText = '₹' + (data.colorBets.green || 0).toFixed(2);
+                        document.getElementById('pool-color-violet').innerText = '₹' + (data.colorBets.violet || 0).toFixed(2);
+                        document.getElementById('pool-size-big').innerText = '₹' + (data.sizeBets.big || 0).toFixed(2);
+                        document.getElementById('pool-size-small').innerText = '₹' + (data.sizeBets.small || 0).toFixed(2);
+
+                        for (let indexValue = 0; indexValue <= 9; indexValue++) {
+                            document.getElementById(`pool-num-${indexValue}`).innerText = '₹' + (data.numberBets[indexValue] || 0).toFixed(2);
+                        }
+                    }
+                }).catch(err => console.log("Real-time grid parameters synchronizer failure log:", err));
+        }
+
         function updateUserBalanceAction(operationType) {
             if (!activeManagedUserObject) return;
             const amountInput = document.getElementById('manage-balance-amount').value;
-            if (!amountInput || Number(amountInput) <= 0) return alert("Please enter a valid amount!");
-
+            if (!amountInput || Number(amountInput) <= 0) return showGlobalToastAlert("Please enter a valid amount!", true);
             fetch(`${SERVER_URL}/api/admin/update-balance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: activeManagedUserObject.phone, amount: Number(amountInput), type: operationType })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    searchUserByPhone(); 
-                } else {
-                    alert(data.message);
-                }
-            });
+            }).then(res => res.json()).then(data => {
+                if (data.success) { showGlobalToastAlert(data.message, false); searchUserByPhone(); } 
+                else { showGlobalToastAlert(data.message, true); }
+            }).catch(err => showGlobalToastAlert("Operation dropped!", true));
         }
 
-        // Action module to toggle the ban state parameter status
         function toggleUserBanStatusAction() {
             if (!activeManagedUserObject) return;
-            const currentBanState = activeManagedUserObject.isBanned || false;
-            const confirmMessage = currentBanState ? "Do you want to unban this user?" : "Are you sure you want to ban this user? They won't be able to login!";
-            if (!confirm(confirmMessage)) return;
-
+            if (!confirm(activeManagedUserObject.isBanned ? "Unban user account?" : "Ban user account permanently?")) return;
             fetch(`${SERVER_URL}/api/admin/toggle-ban`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: activeManagedUserObject.phone })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    searchUserByPhone();
-                }
-            });
+            }).then(res => res.json()).then(data => {
+                if (data.success) { showGlobalToastAlert(data.message, false); searchUserByPhone(); }
+            }).catch(err => showGlobalToastAlert("Ban command failed!", true));
         }
 
-        // Action module to clear individual record from database collections completely
         function deleteUserPermanentlyAction() {
             if (!activeManagedUserObject) return;
-            if (!confirm("CRITICAL WARNING: Are you absolutely sure you want to permanently delete this user account from the database? This action cannot be undone!")) return;
-
+            if (!confirm("Are you sure you want to permanently delete this user account?")) return;
             fetch(`${SERVER_URL}/api/admin/delete-user`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: activeManagedUserObject.phone })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    closeManagementPopupModal();
-                    document.getElementById('search-phone-input').value = '';
-                } else {
-                    alert(data.message);
-                }
-            });
+            }).then(res => res.json()).then(data => {
+                if (data.success) { showGlobalToastAlert(data.message, false); closeManagementPopupModal(); document.getElementById('search-phone-input').value = ''; } 
+                else { showGlobalToastAlert(data.message, true); }
+            }).catch(err => showGlobalToastAlert("Delete action failure!", true));
         }
 
-        // Pull active parameters through the cloud api architecture
         function syncNodeServerStats() {
             fetch(`${SERVER_URL}/api/admin/stats`)
                 .then(res => res.json())
@@ -402,8 +438,7 @@
                         document.getElementById('stat-total-withdrawal').innerText = '₹' + (data.totalWithdrawalBalance || 0);
                         document.getElementById('stat-active-bets').innerText = '₹' + (data.activeBetAmount || 0);
                     }
-                })
-                .catch(err => console.log("Cloud server communication pipeline timeout:", err));
+                }).catch(err => console.log("Cloud server communication pipeline timeout:", err));
 
             fetch(`${SERVER_URL}/api/admin/users-list`)
                 .then(res => res.json())
@@ -412,23 +447,17 @@
                         globalUsersCacheMemory = data.users;
                         let generatedRowsHtml = '';
                         data.users.forEach(user => {
-                            generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')">
-                                <td style="font-weight: bold;">${user.phone}</td>
-                                <td class="id-text-format">${user._id}</td>
-                            </tr>`;
+                            generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')"><td style="font-weight: bold;">${user.phone}</td><td class="id-text-format">${user._id}</td></tr>`;
                         });
                         document.getElementById('dashboard-table-body').innerHTML = generatedRowsHtml || '<tr><td colspan="2" style="text-align:center;">No users registered yet</td></tr>';
                     }
-                })
-                .catch(err => {
-                    document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#dc3545;">Live data fetching dropped</td></tr>';
-                });
+                }).catch(err => { document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#dc3545;">Live data fetching dropped</td></tr>'; });
         }
 
-        // Boot execution modules automatically
         window.onload = function() {
             syncNodeServerStats();
             setInterval(syncNodeServerStats, 5000);
+            setInterval(syncLiveBettingSummaryMetrics, 3000);
         };
     </script>
 </body>

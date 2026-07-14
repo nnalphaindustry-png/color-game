@@ -589,7 +589,7 @@ function fetchUserBetHistory() {
 
     // === CUSTOM BET MODAL CONTROLLER & MULTIPLIER LOGIC ===
 let currentSelectedValueForBet = "";
-let currentBaseAmount = 10;
+let currentBaseAmount = 1;
 let currentMultiplier = 1;
 
 window.openBetPopup = function(selectedValue) {
@@ -599,7 +599,7 @@ window.openBetPopup = function(selectedValue) {
   }
 
   currentSelectedValueForBet = selectedValue;
-  currentBaseAmount = 10;
+  currentBaseAmount = 1;
   currentMultiplier = 1;
 
   const modal = document.getElementById('custom-bet-modal');

@@ -8,338 +8,109 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
+// === MIDDLEWARES ===
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", credentials: true }));
 
-
-// === USER SCHEMA ===
+// === USER SCHEMA & MODEL ===
+// गेम का सारा एक्स्ट्रा स्कीमा (Bet, Period) यहाँ से हटा दिया गया है
 const userSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     inviteCode: { type: String, default: "" },
-    balance: { type: Number, default: 70 }, 
+    balance: { type: Number, default: 70 }, // नए यूज़र को मिलने वाला डिफ़ॉल्ट बैलेंस
     createdAt: { type: Date, default: Date.now }
 });
+
 const User = mongoose.model('User', userSchema);
-const periodSchema = new mongoose.Schema({ gameMode: String, periodId: String, resultNumber: Number, resultColor: String, resultSize: String, createdAt: { type: Date, default: Date.now } });
-const Period = mongoose.model('Period', periodSchema);
-const betSchema = new mongoose.Schema({ phone: String, gameMode: String, periodId: String, selectValue: String, betAmount: Number, winAmount: { type: Number, default: 0 }, status: { type: String, default: "Pending" }, createdAt: { type: Date, default: Date.now } });
-const Bet = mongoose.model('Bet', betSchema);
-// पीरियड नंबर को लगातार 1, 2, 3 गिनने के लिए नया काउंटर कोड
-const counterSchema = new mongoose.Schema({
-    gameMode: { type: String, required: true, unique: true },
-    nextPeriodNumber: { type: Number, default: 1 } // यह नंबर 1 से शुरू होगा
-});
-const GameCounter = mongoose.model('GameCounter', counterSchema);
 
-// === LIVE DATABASE STATUS ROUTE ===
-// इसे ब्राउज़र में खोलकर आप चेक कर सकते हैं कि डेटाबेस कनेक्टेड है या नहीं
+// === ROUTES / APIS ===
+
+// 1. डेटाबेस कनेक्शन स्टेटस चेक करने के लिए
 app.get('/api/db-status', (req, res) => {
-    const states = ["Disconnected", "Connected", "Connecting", "Disconnecting"];
-    const statusNum = mongoose.connection.readyState; // मोंगोडीबी की स्थिति जांचें
-    
-    if (statusNum === 1) {
-        return res.json({ success: true, status: states[statusNum], message: "Database is fully connected!" });
-    } else {
-        return res.json({ success: false, status: states[statusNum], message: "Database is NOT connected!" });
-    }
+    res.json({ success: mongoose.connection.readyState === 1 });
 });
 
-// === REGISTER ROUTE ===
+// 2. नया रजिस्ट्रेशन (Register API)
 app.post('/api/register', async (req, res) => {
     try {
-        const { phone, password, confirmPassword, inviteCode } = req.body;
-        if (!phone || !password || !confirmPassword) {
-            return res.json({ success: false, message: "Required fields are missing!" });
-        }
-        if (password !== confirmPassword) {
-            return res.json({ success: false, message: "Passwords do not match!" });
-        }
+        const { phone, password, inviteCode } = req.body;
+        
+        // चेक करें कि यह नंबर पहले से रजिस्टर्ड तो नहीं है
         const exists = await User.findOne({ phone: phone.trim() });
         if (exists) {
-            return res.json({ success: false, message: "This phone number is already registered!" });
+            return res.json({ success: false, message: "Already registered!" });
         }
-        const newUser = new User({
-            phone: phone.trim(),
-            password: password.trim(),
-            inviteCode: inviteCode ? inviteCode.trim() : ""
+        
+        // नया यूज़र डेटाबेस में सेव करें
+        const newUser = new User({ 
+            phone: phone.trim(), 
+            password: password.trim(), 
+            inviteCode: inviteCode || "" 
         });
         await newUser.save();
-        res.json({ success: true, message: "Registration successful!" });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Server error during registration!" });
+        
+        res.json({ success: true, message: "Registered successfully!" });
+    } catch (err) { 
+        res.status(500).json({ success: false, message: "Registration failed! Server error." }); 
     }
 });
 
-// === UPDATED LOGIN ROUTE WITH USER CHECK ===
+// 3. लॉगिन (Login API)
 app.post('/api/login', async (req, res) => {
     try {
         const { phone, password } = req.body;
-        if (!phone || !password) {
-            return res.json({ success: false, message: "Please fill all fields!" });
-        }
-
-        const cleanPhone = phone.trim();
-
-        // 1. पहले चेक करें कि इस नंबर से कोई अकाउंट बना भी है या नहीं
-        const userExists = await User.findOne({ phone: cleanPhone });
         
-        if (!userExists) {
-            // अगर डेटाबेस में नंबर नहीं मिला, तो यह विशिष्ट मैसेज भेजें
-            return res.json({ 
-                success: false, 
-                message: "No account found with this number. Please register first!" 
-            });
-        }
-
-        // 2. अगर अकाउंट है, तो पासवर्ड मैच करके देखें
-        if (userExists.password !== password.trim()) {
-            return res.json({ 
-                success: false, 
-                message: "Invalid password! Please try again." 
-            });
+        // डेटाबेस में पुराने रिकॉर्ड से फ़ोन नंबर मैच करें
+        const user = await User.findOne({ phone: phone.trim() });
+        
+        // अगर यूज़र नहीं मिला या पासवर्ड गलत हुआ
+        if (!user || user.password !== password.trim()) {
+            return res.json({ success: false, message: "Invalid credentials!" });
         }
         
-        // 3. सब कुछ सही होने पर लॉगिन सफल करें
+        // लॉगिन सफल होने पर यूज़र का डेटा भेजें
         res.json({ 
             success: true, 
-            phone: userExists.phone, 
-            balance: userExists.balance, 
-            message: "Login successful!" 
+            phone: user.phone, 
+            balance: user.balance, 
+            message: "Login success!" 
         });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Server error during login!" });
+    } catch (err) { 
+        res.status(500).json({ success: false, message: "Login failed! Server error." }); 
     }
 });
-// === NEW SECURE CONNECTION FOR PROFILE BALANCE ===
+
+// 4. यूज़र का बैलेंस चेक करने के लिए (डैशबोर्ड पर दिखाने के लिए)
 app.get('/api/balance/:phone', async (req, res) => {
     try {
-        const cleanPhone = req.params.phone.trim();
-        // नए डेटाबेस (goa_club_db) में यूज़र को खोजना
-        const user = await User.findOne({ phone: cleanPhone });
-        
-        if (!user) {
-            return res.json({ success: false, message: "User not found in new database!" });
-        }
-        
-        // सीधे नए डेटाबेस का रियल बैलेंस फ्रंटएंड को भेजना
-        res.json({
-            success: true,
-            balance: Number(user.balance || 0)
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Server error fetching balance!" });
-    }
-});
-
-
-// === MOVE THIS TO THE BOTTOM OF SERVER.JS ===
-app.use(express.static(path.join(__dirname, '')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-
-// ... आपका पुराना कोड ...
-
-// === यूज़र का सट्टा (Bet) सबमिट करने का रूट ===
-app.post('/api/place-bet', async (req, res) => {
-    try {
-        const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
-        const user = await User.findOne({ phone });
-        if (!user) return res.status(404).json({ success: false, message: "यूज़र नहीं मिला!" });
-        if (user.balance < betAmount) return res.status(400).json({ success: false, message: "अपर्याप्त बैलेंस!" });
-        
-        user.balance -= betAmount;
-await user.save();
-
-// 💡 नया बदलाव (FIX): दांव लगते ही लाइव पूल में अमाउंट को प्लस (+=) करें
-if (liveGames[gameMode] && liveGames[gameMode].pools) {
-    // अगर यूज़र ने 'Red' चुना है, तो पूल के 'Red' वाले हिस्से में पैसा जुड़ जाएगा
-    liveGames[gameMode].pools[selectValue] = (liveGames[gameMode].pools[selectValue] || 0) + Number(betAmount);
-}
-
-const newBet = new Bet({ phone, gameMode, periodId, selectValue, betAmount, status: "Pending" });
-await newBet.save();
-        
-        res.json({ success: true, message: "दांव सफलतापूर्वक लग गया!", newBalance: user.balance });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "सर्ver एरर!" });
-    }
-});
-
-// === लाइव टाइमर और पीरियड आईडी सिंक करने का रूट ===
-app.get('/api/game-sync', (req, res) => {
-    const syncData = {};
-    Object.keys(liveGames).forEach(mode => {
-        syncData[mode] = { timeLeft: liveGames[mode].timeLeft, currentPeriod: liveGames[mode].currentPeriod };
-    });
-    res.json({ success: true, data: syncData });
-});
-// 💡 नया बदलाव (FIX): हाफ-कलर और डायरेक्ट नंबर का बिल्कुल सटीक हिसाब
-async function settleUserBets(mode, periodId, winNum, winColor, winSize) {
-    try {
-        // इस राउंड के सभी पेंडिंग दांव डेटाबेस से निकालें
-        const pendingBets = await Bet.find({ gameMode: mode, periodId: periodId, status: "Pending" });
-        
-        for (let bet of pendingBets) {
-            let isWin = false; 
-            let multiplier = 0;
-
-            // १. अगर यूज़र ने सीधे वही नंबर चुना है जो आया है -> पूरा 9 गुना पैसा मिलेगा
-            if (bet.selectValue === winNum.toString()) {
-                isWin = true; 
-                multiplier = 9;
-            } 
-            // २. अगर यूज़र ने सही Size (Big/Small) चुना है -> 2 गुना पैसा मिलेगा
-            else if (bet.selectValue === winSize) {
-                isWin = true; 
-                multiplier = 2;
-            } 
-            // ३. अगर सीधा कलर मैच हो गया (जैसे Green आने पर Green चुना) -> 2 गुना पैसा मिलेगा
-            else if (bet.selectValue === winColor) {
-                isWin = true; 
-                multiplier = 2;
-            } 
-            // ४. हाफ-कलर लॉजिक: अगर 0 (Red-Violet) आया और यूज़र ने सिर्फ Red चुना था -> 1.5 गुना पैसा
-            else if (winColor === "Red-Violet" && bet.selectValue === "Red") {
-                isWin = true; 
-                multiplier = 1.5;
-            } 
-            // ५. हाफ-कलर लॉजिक: अगर 5 (Green-Violet) आया और यूज़र ने सिर्फ Green चुना था -> 1.5 गुना पैसा
-            else if (winColor === "Green-Violet" && bet.selectValue === "Green") {
-                isWin = true; 
-                multiplier = 1.5;
-            } 
-            // ६. अगर 0 या 5 आया और यूज़र ने Violet चुना था -> 4.5 गुना पैसा मिलेगा
-            else if ((winColor === "Red-Violet" || winColor === "Green-Violet") && bet.selectValue === "Violet") {
-                isWin = true; 
-                multiplier = 4.5;
-            }
-
-            // अगर यूज़र जीता है, तो उसका स्टेटस बदलें और वॉलेट में पैसा बढ़ाएं
-            if (isWin) {
-                bet.winAmount = bet.betAmount * multiplier; 
-                bet.status = "Win";
-                // डेटाबेस में यूज़र का बैलेंस $inc (Increase) करें
-                await User.findOneAndUpdate({ phone: bet.phone }, { $inc: { balance: bet.winAmount } });
-            } else {
-                // अगर नहीं जीता, तो स्टेटस Loss करें
-                bet.status = "Loss";
-            }
-            await bet.save(); // डेटाबेस में सेव करें
-        }
+        const user = await User.findOne({ phone: req.params.phone.trim() });
+        res.json({ success: !!user, balance: user ? user.balance : 0 });
     } catch (err) { 
-        console.error("Settlement Error:", err); 
+        res.status(500).json({ success: false }); 
     }
-}
-
-// === 2. असली गेम हिस्ट्री और माई हिस्ट्री भेजने का API रूट्स ===
-app.get('/api/game-history/:mode', async (req, res) => {
-    const list = await Period.find({ gameMode: req.params.mode }).sort({ createdAt: -1 }).limit(10);
-    res.json({ success: true, data: list });
 });
 
-app.get('/api/my-history/:mode/:phone', async (req, res) => {
-    const list = await Bet.find({ gameMode: req.params.mode, phone: req.params.phone }).sort({ createdAt: -1 }).limit(10);
-    res.json({ success: true, data: list });
+// === STATIC FILES SERVING ===
+// यह आपके फ्रंटएंड HTML पेजों (index.html, home.html) को लोड करने में मदद करेगा
+app.use(express.static(path.join(__dirname, '')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// === 1. चारों गेम्स की लाइव स्थिति और पूल को ट्रैक करने का ग्लोबल ऑब्जेक्ट ===
-const liveGames = {
-    "30s": { duration: 30, timeLeft: 30, currentPeriod: "", pools: {} },
-    "1m":  { duration: 60, timeLeft: 60, currentPeriod: "", pools: {} },
-    "3m":  { duration: 180, timeLeft: 180, currentPeriod: "", pools: {} },
-    "5m":  { duration: 300, timeLeft: 300, currentPeriod: "", pools: {} }
-};
-
-// पुराना resetPool हटाकर सिर्फ यह साफ फंक्शन रखो जो सिर्फ पैसे 0 करेगा, आईडी को हाथ नहीं लगाएगा
-function resetPoolOnly(mode) {
-    liveGames[mode].pools = {
-        "0":0,"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0,"9":0,
-        "Red":0,"Green":0,"Violet":0,"Big":0,"Small":0
-    };
-}
-
-    const now = new Date();
-    const timestamp = now.getFullYear() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0') + "0005";
-    const randomId = Math.floor(1000 + Math.random() * 9000);
-    liveGames[mode].currentPeriod = timestamp + randomId;
-}
-
-async function calculateGameResult(mode) {
-    const game = liveGames[mode]; const pool = game.pools;
-    let minPayout = Infinity; let bestNumbers = [];
-    
-    for (let num = 0; num <= 9; num++) {
-        let currentPayout = pool[num.toString()] || 0;
-        if (num === 0 || num === 5) currentPayout += (pool["Violet"] || 0);
-        if ([1,3,7,9].includes(num)) currentPayout += (pool["Green"] || 0);
-        if ([2,4,6,8].includes(num)) currentPayout += (pool["Red"] || 0);
-        if (num >= 5) currentPayout += (pool["Big"] || 0); else currentPayout += (pool["Small"] || 0);
-        if (currentPayout < minPayout) { minPayout = currentPayout; bestNumbers = [num]; }
-        else if (currentPayout === minPayout) { bestNumbers.push(num); }
-    }
-    const finalNumber = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
-    const finalColor = finalNumber === 0 ? "Red-Violet" : (finalNumber === 5 ? "Green-Violet" : ([1,3,7,9].includes(finalNumber) ? "Green" : "Red"));
-    const finalSize = finalNumber >= 5 ? "Big" : "Small";
-
-    // असली परिणाम को डेटाबेस में सेव करना
-    const newPeriod = new Period({ gameMode: mode, periodId: game.currentPeriod, resultNumber: finalNumber, resultColor: finalColor, resultSize: finalSize });
-    await newPeriod.save();
-
-    // यूज़र्स के दांव का निपटारा (Settle) करना
-    if (typeof settleUserBets === 'function') {
-        await settleUserBets(mode, game.currentPeriod, finalNumber, finalColor, finalSize);
-    }
-resetPoolOnly(mode); 
-
-}
-
-// १. नई ID बनाने के लिए एक नया छोटा फंक्शन जो इसी फाइल में ऊपर या नीचे कहीं भी रख दो
-function generateNewPeriodId(mode) {
-    const now = new Date();
-    const dateStr = now.getFullYear() + 
-                    (now.getMonth() + 1).toString().padStart(2, '0') + 
-                    now.getDate().toString().padStart(2, '0');
-    // 5 अंकों का एक सीरियल नंबर या रैंडम नंबर
-    const randomSec = Math.floor(10000 + Math.random() * 90000);
-    liveGames[mode].currentPeriod = dateStr + randomSec;
-}
-
-async function startServerTimerEngine() {
-    // गेम शुरू होते ही सभी मोड्स के लिए पहली सीरियल आईडी बनाएं
-    for (let mode of Object.keys(liveGames)) {
-        resetPool(mode);
-        await generateNewPeriodId(mode); 
-    }
-
-    setInterval(() => {
-        Object.keys(liveGames).forEach(async (mode) => {
-            const game = liveGames[mode];
-            if (game.timeLeft <= 0) {
-                // १. पुराना राउंड ख़त्म, रिजल्ट कैलकुलेट करो
-                await calculateGameResult(mode); 
-                
-                // २. अगला सीरियल नंबर जनरेट करो (जैसे 0001 के बाद 0002)
-                await generateNewPeriodId(mode); 
-                
-                // ३. टाइमर को फिर से रीस्टार्ट करो
-                game.timeLeft = game.duration; 
-            } else {
-                game.timeLeft--; // जब तक टाइम बचा है, सिर्फ सेकंड कम होंगे
-            }
-        });
-    }, 1000);
-}
-
-
-// सर्वर चलते ही टाइमर इंजन अपने आप चालू हो जाये
-startServerTimerEngine();
-
+// === SERVER START & DATABASE CONNECTION ===
 const PORT = process.env.PORT || 3000;
+
+// आपके .env फ़ाइल से MONGO_URI लेकर डेटाबेस कनेक्ट करेगा
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log("Database Connected Successfully!");
-        server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        console.log("MongoDB Connected Successfully!");
+        server.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
     })
-    .catch(err => console.error("Database Connection Error:", err));
-    
+    .catch(err => {
+        console.error("Database connection error:", err);
+    });

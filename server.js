@@ -149,10 +149,16 @@ app.post('/api/place-bet', async (req, res) => {
         if (user.balance < betAmount) return res.status(400).json({ success: false, message: "अपर्याप्त बैलेंस!" });
         
         user.balance -= betAmount;
-        await user.save();
-        
-        const newBet = new Bet({ phone, gameMode, periodId, selectValue, betAmount, status: "Pending" });
-        await newBet.save();
+await user.save();
+
+// 💡 नया बदलाव (FIX): दांव लगते ही लाइव पूल में अमाउंट को प्लस (+=) करें
+if (liveGames[gameMode] && liveGames[gameMode].pools) {
+    // अगर यूज़र ने 'Red' चुना है, तो पूल के 'Red' वाले हिस्से में पैसा जुड़ जाएगा
+    liveGames[gameMode].pools[selectValue] = (liveGames[gameMode].pools[selectValue] || 0) + Number(betAmount);
+}
+
+const newBet = new Bet({ phone, gameMode, periodId, selectValue, betAmount, status: "Pending" });
+await newBet.save();
         
         res.json({ success: true, message: "दांव सफलतापूर्वक लग गया!", newBalance: user.balance });
     } catch (error) {
@@ -168,32 +174,62 @@ app.get('/api/game-sync', (req, res) => {
     });
     res.json({ success: true, data: syncData });
 });
-// === 1. हर राउंड ख़त्म होने पर यूज़र्स का पैसा सेटल करने का फ़ंक्शन ===
+// 💡 नया बदलाव (FIX): हाफ-कलर और डायरेक्ट नंबर का बिल्कुल सटीक हिसाब
 async function settleUserBets(mode, periodId, winNum, winColor, winSize) {
     try {
+        // इस राउंड के सभी पेंडिंग दांव डेटाबेस से निकालें
         const pendingBets = await Bet.find({ gameMode: mode, periodId: periodId, status: "Pending" });
         
         for (let bet of pendingBets) {
-            let isWin = false; let multiplier = 2; // डिफ़ॉल्ट 2 गुना मुनाफा
-            
-            // जीतने की शर्तें चेक करें
-            if (bet.selectValue === winColor || bet.selectValue === winSize || bet.selectValue === winNum.toString()) {
-                isWin = true;
-                if (!isNaN(bet.selectValue)) multiplier = 9; // नंबर सही होने पर 9 गुना पैसा
-            } else if ((winColor === "Red-Violet" && (bet.selectValue === "Red" || bet.selectValue === "Violet")) ||
-                       (winColor === "Green-Violet" && (bet.selectValue === "Green" || bet.selectValue === "Violet"))) {
-                isWin = true; multiplier = 1.5; // हाफ कलर विन पर 1.5 गुना
+            let isWin = false; 
+            let multiplier = 0;
+
+            // १. अगर यूज़र ने सीधे वही नंबर चुना है जो आया है -> पूरा 9 गुना पैसा मिलेगा
+            if (bet.selectValue === winNum.toString()) {
+                isWin = true; 
+                multiplier = 9;
+            } 
+            // २. अगर यूज़र ने सही Size (Big/Small) चुना है -> 2 गुना पैसा मिलेगा
+            else if (bet.selectValue === winSize) {
+                isWin = true; 
+                multiplier = 2;
+            } 
+            // ३. अगर सीधा कलर मैच हो गया (जैसे Green आने पर Green चुना) -> 2 गुना पैसा मिलेगा
+            else if (bet.selectValue === winColor) {
+                isWin = true; 
+                multiplier = 2;
+            } 
+            // ४. हाफ-कलर लॉजिक: अगर 0 (Red-Violet) आया और यूज़र ने सिर्फ Red चुना था -> 1.5 गुना पैसा
+            else if (winColor === "Red-Violet" && bet.selectValue === "Red") {
+                isWin = true; 
+                multiplier = 1.5;
+            } 
+            // ५. हाफ-कलर लॉजिक: अगर 5 (Green-Violet) आया और यूज़र ने सिर्फ Green चुना था -> 1.5 गुना पैसा
+            else if (winColor === "Green-Violet" && bet.selectValue === "Green") {
+                isWin = true; 
+                multiplier = 1.5;
+            } 
+            // ६. अगर 0 या 5 आया और यूज़र ने Violet चुना था -> 4.5 गुना पैसा मिलेगा
+            else if ((winColor === "Red-Violet" || winColor === "Green-Violet") && bet.selectValue === "Violet") {
+                isWin = true; 
+                multiplier = 4.5;
             }
 
+            // अगर यूज़र जीता है, तो उसका स्टेटस बदलें और वॉलेट में पैसा बढ़ाएं
             if (isWin) {
-                bet.winAmount = bet.betAmount * multiplier; bet.status = "Win";
+                bet.winAmount = bet.betAmount * multiplier; 
+                bet.status = "Win";
+                // डेटाबेस में यूज़र का बैलेंस $inc (Increase) करें
                 await User.findOneAndUpdate({ phone: bet.phone }, { $inc: { balance: bet.winAmount } });
             } else {
+                // अगर नहीं जीता, तो स्टेटस Loss करें
                 bet.status = "Loss";
             }
-            await bet.save();
+            await bet.save(); // डेटाबेस में सेव करें
         }
-    } catch (err) { console.error("Settlement Error:", err); }
+    } catch (err) { 
+        console.error("Settlement Error:", err); 
+    }
 }
 
 // === 2. असली गेम हिस्ट्री और माई हिस्ट्री भेजने का API रूट्स ===

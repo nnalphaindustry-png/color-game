@@ -120,37 +120,57 @@ async function calculateGameResult(mode) {
     // इस राउंड की सभी पेंडिंग बेट्स निकालें
     const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
 
+        // === FIX: 2% COMMISSION AND WINNING CALCULATION ENGINE ===
     for (let bet of pendingBets) {
-        let isWin = false;
-        let multiplier = 2; // डिफ़ॉल्ट डबल पैसा (जैसे रेड या ग्रीन पर)
+      let isWin = false;
+      let multiplier = 0;
+      
+      const commissionRate = 0.02; // 2% trade fee
+      const tradeAmount = bet.betAmount * (1 - commissionRate); // Amount after fee
 
-        // चेक करें कि यूज़र ने क्या चुना था
-        if (bet.selectValue === String(finalNumber)) {
-            isWin = true;
-            multiplier = 9; // नंबर सही होने पर 9 गुना पैसा
-        } else if (bet.selectValue === finalColor) {
-            isWin = true;
-            if (finalColor === "Violet") multiplier = 4.5; // वायलेट होने पर साढ़े चार गुना
-        } else if (bet.selectValue === finalSize) {
-            isWin = true;
-        }
-
-        if (isWin) {
-            const winAmt = bet.betAmount * multiplier;
-            bet.winAmount = winAmt;
-            bet.status = "Win";
-            
-            // यूज़र के अकाउंट में असली पैसे तुरंत प्लस करें
-            await User.findOneAndUpdate(
-                { phone: bet.phone },
-                { $inc: { balance: winAmt } }
-            );
+      // Check number selection (9x Reward)
+      if (bet.selectValue === String(finalNumber)) {
+        isWin = true;
+        multiplier = 9;
+      } 
+      // Check color selection
+      else if (bet.selectValue === finalColor) {
+        isWin = true;
+        // Half Win logic for Violet mix (0 or 5)
+        if (finalNumber === 0 || finalNumber === 5) {
+          multiplier = 1.5;
         } else {
-            bet.status = "Loss";
+          multiplier = 2;
         }
-        await bet.save(); // बेट का स्टेटस सेव करें
+      } 
+      // Check individual Violet selection (4.5x Reward)
+      else if (bet.selectValue === "Violet" && (finalNumber === 0 || finalNumber === 5)) {
+        isWin = true;
+        multiplier = 4.5;
+      }
+      // Check size selection (2x Reward)
+      else if (bet.selectValue === finalSize) {
+        isWin = true;
+        multiplier = 2;
+      }
+
+      if (isWin) {
+        const winAmt = tradeAmount * multiplier;
+        bet.winAmount = Number(winAmt.toFixed(2));
+        bet.status = 'Win';
+
+        // Update user wallet balance immediately
+        await User.findOneAndUpdate(
+          { phone: bet.phone },
+          { $inc: { balance: bet.winAmount } }
+        );
+      } else {
+        bet.status = 'Loss';
+      }
+
+      await bet.save(); // Save bet record status
     }
-}
+    
 
 // === बैकएंड का टाइमर चालू करने का सही इंजन ===
 function startServerTimerEngine() {
@@ -305,7 +325,11 @@ app.post('/api/place-bet', async (req, res) => {
         if (!user || user.balance < betAmount) {
             return res.json({ success: false, message: "Balance issue! Low wallet balance." });
         }
-
+    // === FIX: MINIMUM BET LIMIT CHECK ===
+    if (!betAmount || isNaN(betAmount) || Number(betAmount) < 1) {
+      return res.json({ success: false, message: "Minimum bet amount is ₹1" });
+    }
+    
         // आखिरी 5 सेकंड में सट्टा ब्लॉक करें
         if (liveGames[gameMode] && liveGames[gameMode].timeLeft <= 5) {
             return res.json({ success: false, message: "Round betting locked! Wait for next round." });

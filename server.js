@@ -96,59 +96,70 @@ async function calculateGameResult(mode) {
   const game = liveGames[mode];
   const activePeriod = game.currentPeriod;
 
-  // 1. Fetch All Pending Bets for Lowest Payout Calculation
+  // 1. Get all pending bets for this round
   const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
 
-  // 2. Initialize Profit Tracker Array for All 10 Numbers (0-9)
-  let numberExpenses = Array(10).fill(0);
-
-  // 3. Loop and Calculate Payout Risk for Every Possible Outcome
+  // 2. Calculate Total Income collected by company in this round
+  let totalIncomingMoney = 0;
   pendingBets.forEach(bet => {
-    const amt = Number(bet.betAmount) * 0.98; // 2% fee deduction
-
-    for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {
-      const candidateSize = candidateNum >= 5 ? "Big" : "Small";
-      let candidateColor = "Red";
-      
-      if (candidateNum === 0 || candidateNum === 5) {
-        candidateColor = "Violet";
-      } else if ([1, 3, 7, 9].includes(candidateNum)) {
-        candidateColor = "Green";
-      }
-
-      // Check potential winner costs
-      if (bet.selectValue === String(candidateNum)) {
-        numberExpenses[candidateNum] += (amt * 9);
-      } else if ((bet.selectValue === "Big" || bet.selectValue === "Small") && bet.selectValue === candidateSize) {
-        numberExpenses[candidateNum] += (amt * 2);
-      } else if ((bet.selectValue === "Green" || bet.selectValue === "Red") && bet.selectValue === candidateColor) {
-        numberExpenses[candidateNum] += (amt * 2);
-      } else if ((bet.selectValue === "Green" && candidateNum === 5) || (bet.selectValue === "Red" && candidateNum === 0)) {
-        numberExpenses[candidateNum] += (amt * 1.5);
-      } else if (bet.selectValue === "Violet" && (candidateNum === 0 || candidateNum === 5)) {
-        numberExpenses[candidateNum] += (amt * 4.5);
-      }
-    }
+    totalIncomingMoney += Number(bet.betAmount);
   });
 
-  // 4. Find the Number with Lowest Company Loss
-  let minExpense = Infinity;
-  let bestNumbers = [];
+  // Array to store company's NET PROFIT for each candidate number (0 to 9)
+  let candidateNetProfits = Array(10).fill(0);
+
+  // 3. Loop through all 10 possible numbers to find company's net profit/loss
+  for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {
+    const candidateSize = candidateNum >= 5 ? "Big" : "Small";
+    let candidateColor = "Red";
+    if (candidateNum === 0 || candidateNum === 5) {
+      candidateColor = "Violet";
+    } else if ([1, 3, 7, 9].includes(candidateNum)) {
+      candidateColor = "Green";
+    }
+
+    let potentialPayoutToUsers = 0;
+
+    // Calculate how much we have to pay if this candidateNum wins
+    pendingBets.forEach(bet => {
+      const userSelection = String(bet.selectValue).trim();
+      const amt = Number(bet.betAmount) * 0.98; // 2% trade fee deducted
+
+      if (userSelection === String(candidateNum)) {
+        potentialPayoutToUsers += (amt * 9);
+      } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === candidateSize) {
+        potentialPayoutToUsers += (amt * 2);
+      } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === candidateColor) {
+        potentialPayoutToUsers += (amt * 2);
+      } else if ((userSelection === "Green" && candidateNum === 5) || (userSelection === "Red" && candidateNum === 0)) {
+        potentialPayoutToUsers += (amt * 1.5);
+      } else if (userSelection === "Violet" && (candidateNum === 0 || candidateNum === 5)) {
+        potentialPayoutToUsers += (amt * 4.5);
+      }
+    });
+
+    // Net Profit for company = Total Received - Total Given Out
+    candidateNetProfits[candidateNum] = totalIncomingMoney - potentialPayoutToUsers;
+  }
+
+  // 4. Find the number(s) that give maximum net profit to the company
+  let maxProfit = -Infinity;
+  let safestNumbersPool = [];
 
   for (let i = 0; i <= 9; i++) {
-    if (numberExpenses[i] < minExpense) {
-      minExpense = numberExpenses[i];
-      bestNumbers = [i];
-    } else if (numberExpenses[i] === minExpense) {
-      bestNumbers.push(i);
+    if (candidateNetProfits[i] > maxProfit) {
+      maxProfit = candidateNetProfits[i];
+      safestNumbersPool = [i]; // New king of profit
+    } else if (candidateNetProfits[i] === maxProfit) {
+      safestNumbersPool.push(i); // Tie pool
     }
   }
 
-  // Pick the winning number from safest options pool
-  const finalNumber = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
+  // Final selection of the number that makes company richest
+  const finalNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
   const num = Number(finalNumber);
 
-  // 5. Build Winner Parameters
+  // 5. Establish parameters for the winning number
   const finalSize = num >= 5 ? "Big" : "Small";
   let finalColor = "Red";
   if (num === 0 || num === 5) {
@@ -159,7 +170,7 @@ async function calculateGameResult(mode) {
     finalColor = "Red";
   }
 
-  // 6. Save Winner Record into Periods History Database
+  // 6. Save round outcome into database periods history
   const newPeriod = new Period({
     gameMode: mode,
     periodId: activePeriod,
@@ -169,27 +180,28 @@ async function calculateGameResult(mode) {
   });
   await newPeriod.save();
 
-  // 7. Process Payout Transactions and Balances
+  // 7. Strict Multi-Bet Distribution Engine (Guaranteed Win for correct entries)
   for (let bet of pendingBets) {
     let isWin = false;
     let multiplier = 0;
     
     const commissionRate = 0.02;
     const tradeAmount = bet.betAmount * (1 - commissionRate);
+    const userSelection = String(bet.selectValue).trim();
 
-    if (bet.selectValue === String(num)) {
+    if (userSelection === String(num)) {
       isWin = true;
       multiplier = 9;
-    } else if ((bet.selectValue === "Big" || bet.selectValue === "Small") && bet.selectValue === finalSize) {
+    } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === finalSize) {
       isWin = true;
       multiplier = 2;
-    } else if ((bet.selectValue === "Green" || bet.selectValue === "Red") && bet.selectValue === finalColor) {
+    } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalColor) {
       isWin = true;
       multiplier = 2;
-    } else if ((bet.selectValue === "Green" && num === 5) || (bet.selectValue === "Red" && num === 0)) {
+    } else if ((userSelection === "Green" && num === 5) || (userSelection === "Red" && num === 0)) {
       isWin = true;
       multiplier = 1.5;
-    } else if (bet.selectValue === "Violet" && (num === 0 || num === 5)) {
+    } else if (userSelection === "Violet" && (num === 0 || num === 5)) {
       isWin = true;
       multiplier = 4.5;
     }
@@ -199,6 +211,7 @@ async function calculateGameResult(mode) {
       bet.winAmount = Number(winAmt.toFixed(2));
       bet.status = 'Win';
 
+      // Instantly add cash back to user wallet
       await User.findOneAndUpdate(
         { phone: bet.phone },
         { $inc: { balance: bet.winAmount } }
@@ -208,7 +221,7 @@ async function calculateGameResult(mode) {
       bet.status = 'Loss';
     }
 
-    await bet.save();
+    await bet.save(); // Complete transaction
   }
 }
 

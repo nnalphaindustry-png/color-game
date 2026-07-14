@@ -96,14 +96,60 @@ async function calculateGameResult(mode) {
   const game = liveGames[mode];
   const activePeriod = game.currentPeriod;
 
-  // 1. Generate Authentic Random Number (0 to 9)
-  const finalNumber = Math.floor(Math.random() * 10);
+  // 1. Fetch All Pending Bets for Lowest Payout Calculation
+  const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
+
+  // 2. Initialize Profit Tracker Array for All 10 Numbers (0-9)
+  let numberExpenses = Array(10).fill(0);
+
+  // 3. Loop and Calculate Payout Risk for Every Possible Outcome
+  pendingBets.forEach(bet => {
+    const amt = Number(bet.betAmount) * 0.98; // 2% fee deduction
+
+    for (let candidateNum = 0; candidateNum <= 9; candidateNum++) {
+      const candidateSize = candidateNum >= 5 ? "Big" : "Small";
+      let candidateColor = "Red";
+      
+      if (candidateNum === 0 || candidateNum === 5) {
+        candidateColor = "Violet";
+      } else if ([1, 3, 7, 9].includes(candidateNum)) {
+        candidateColor = "Green";
+      }
+
+      // Check potential winner costs
+      if (bet.selectValue === String(candidateNum)) {
+        numberExpenses[candidateNum] += (amt * 9);
+      } else if ((bet.selectValue === "Big" || bet.selectValue === "Small") && bet.selectValue === candidateSize) {
+        numberExpenses[candidateNum] += (amt * 2);
+      } else if ((bet.selectValue === "Green" || bet.selectValue === "Red") && bet.selectValue === candidateColor) {
+        numberExpenses[candidateNum] += (amt * 2);
+      } else if ((bet.selectValue === "Green" && candidateNum === 5) || (bet.selectValue === "Red" && candidateNum === 0)) {
+        numberExpenses[candidateNum] += (amt * 1.5);
+      } else if (bet.selectValue === "Violet" && (candidateNum === 0 || candidateNum === 5)) {
+        numberExpenses[candidateNum] += (amt * 4.5);
+      }
+    }
+  });
+
+  // 4. Find the Number with Lowest Company Loss
+  let minExpense = Infinity;
+  let bestNumbers = [];
+
+  for (let i = 0; i <= 9; i++) {
+    if (numberExpenses[i] < minExpense) {
+      minExpense = numberExpenses[i];
+      bestNumbers = [i];
+    } else if (numberExpenses[i] === minExpense) {
+      bestNumbers.push(i);
+    }
+  }
+
+  // Pick the winning number from safest options pool
+  const finalNumber = bestNumbers[Math.floor(Math.random() * bestNumbers.length)];
   const num = Number(finalNumber);
 
-  // 2. Strict Size Logic
+  // 5. Build Winner Parameters
   const finalSize = num >= 5 ? "Big" : "Small";
-
-  // 3. Strict Color Logic
   let finalColor = "Red";
   if (num === 0 || num === 5) {
     finalColor = "Violet";
@@ -113,7 +159,7 @@ async function calculateGameResult(mode) {
     finalColor = "Red";
   }
 
-  // 4. Save Final Round Result to Database
+  // 6. Save Winner Record into Periods History Database
   const newPeriod = new Period({
     gameMode: mode,
     periodId: activePeriod,
@@ -123,50 +169,36 @@ async function calculateGameResult(mode) {
   });
   await newPeriod.save();
 
-  // 5. Fetch All Pending Bets for This Period
-  const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
-
-  // 6. 2% Commission & Strict Winning Calculation Engine
+  // 7. Process Payout Transactions and Balances
   for (let bet of pendingBets) {
     let isWin = false;
     let multiplier = 0;
     
-    const commissionRate = 0.02; // 2% Trade Fee Cut
+    const commissionRate = 0.02;
     const tradeAmount = bet.betAmount * (1 - commissionRate);
 
-    // Category 1: Exact Number Selection Check (9x)
     if (bet.selectValue === String(num)) {
       isWin = true;
       multiplier = 9;
-    }
-    // Category 2: Exact Size Selection Check (2x)
-    else if ((bet.selectValue === "Big" || bet.selectValue === "Small") && bet.selectValue === finalSize) {
+    } else if ((bet.selectValue === "Big" || bet.selectValue === "Small") && bet.selectValue === finalSize) {
       isWin = true;
       multiplier = 2;
-    }
-    // Category 3: Exact Color Selection Check (Red/Green - 2x)
-    else if ((bet.selectValue === "Green" || bet.selectValue === "Red") && bet.selectValue === finalColor) {
+    } else if ((bet.selectValue === "Green" || bet.selectValue === "Red") && bet.selectValue === finalColor) {
       isWin = true;
       multiplier = 2;
-    }
-    // Category 4: Half Win Logic (User selected Red/Green but Violet mix 0 or 5 appeared - 1.5x)
-    else if ((bet.selectValue === "Green" && num === 5) || (bet.selectValue === "Red" && num === 0)) {
+    } else if ((bet.selectValue === "Green" && num === 5) || (bet.selectValue === "Red" && num === 0)) {
       isWin = true;
       multiplier = 1.5;
-    }
-    // Category 5: Pure Violet Selection Check (4.5x)
-    else if (bet.selectValue === "Violet" && (num === 0 || num === 5)) {
+    } else if (bet.selectValue === "Violet" && (num === 0 || num === 5)) {
       isWin = true;
       multiplier = 4.5;
     }
 
-    // Process Wallet Updates Based on Result
     if (isWin) {
       const winAmt = tradeAmount * multiplier;
       bet.winAmount = Number(winAmt.toFixed(2));
       bet.status = 'Win';
 
-      // Update User Balance Immediately
       await User.findOneAndUpdate(
         { phone: bet.phone },
         { $inc: { balance: bet.winAmount } }
@@ -176,7 +208,7 @@ async function calculateGameResult(mode) {
       bet.status = 'Loss';
     }
 
-    await bet.save(); // Save Individual Bet Status
+    await bet.save();
   }
 }
 

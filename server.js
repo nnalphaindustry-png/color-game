@@ -13,8 +13,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", credentials: true }));
 
-// === USER SCHEMA & MODEL ===
-// गेम का सारा एक्स्ट्रा स्कीमा (Bet, Period) यहाँ से हटा दिया गया है
+// === MONGODB SCHEMAS (डेटाबेस के नियम) ===
+
+// 1. यूज़र का स्कीमा
 const userSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -22,10 +23,134 @@ const userSchema = new mongoose.Schema({
     balance: { type: Number, default: 70 }, // नए यूज़र को मिलने वाला डिफ़ॉल्ट बैलेंस
     createdAt: { type: Date, default: Date.now }
 });
-
 const User = mongoose.model('User', userSchema);
 
-// === ROUTES / APIS ===
+// 2. हर राउंड (लॉटरी रिज़ल्ट) का स्कीमा
+const periodSchema = new mongoose.Schema({
+    gameMode: String,     // '30s', '1m', '3m', '5m'
+    periodId: String,     // अनोखा राउंड नंबर
+    resultNumber: Number, // 0-9
+    resultColor: String,  // Red/Green/Violet
+    resultSize: String,   // Big/Small
+    createdAt: { type: Date, default: Date.now }
+});
+const Period = mongoose.model('Period', periodSchema);
+
+// 3. यूज़र के लगाए सट्टे (Bet) का स्कीमा
+const betSchema = new mongoose.Schema({
+    phone: String,
+    gameMode: String,
+    periodId: String,
+    selectValue: String, // जो यूज़र ने चुना (Red, Green, 0, 1, Big आदि)
+    betAmount: Number,
+    winAmount: { type: Number, default: 0 },
+    status: { type: String, default: "Pending" }, // Pending, Win, Loss
+    createdAt: { type: Date, default: Date.now }
+});
+const Bet = mongoose.model('Bet', betSchema);
+
+
+// === LIVE GAMES TIMER ENGINE (असली गेम इंजन लॉजिक) ===
+
+const liveGames = {
+    "30s": { duration: 30, timeLeft: 30, currentPeriod: "" },
+    "1m": { duration: 60, timeLeft: 60, currentPeriod: "" },
+    "3m": { duration: 180, timeLeft: 180, currentPeriod: "" },
+    "5m": { duration: 300, timeLeft: 300, currentPeriod: "" }
+};
+
+// नया पीरियड आईडी बनाने का फंक्शन
+function generateNewPeriodId(mode) {
+    const now = new Date();
+    const dateStr = now.getFullYear() +
+        (now.getMonth() + 1).toString().padStart(2, '0') +
+        now.getDate().toString().padStart(2, '0');
+    const randomSec = Math.floor(10000 + Math.random() * 90000);
+    liveGames[mode].currentPeriod = dateStr + randomSec;
+}
+
+// राउंड खत्म होने पर रिज़ल्ट निकालना और जीतने वालों को पैसे बांटना
+async function calculateGameResult(mode) {
+    const game = liveGames[mode];
+    const activePeriod = game.currentPeriod;
+
+    // 0 से 9 के बीच असली रैंडम नंबर
+    const finalNumber = Math.floor(Math.random() * 10);
+    
+    // रंग का नियम
+    const finalColor = (finalNumber === 0 || finalNumber === 5) ? "Violet" :
+                       ([1, 3, 7, 9].includes(finalNumber) ? "Green" : "Red");
+    
+    // साइज़ का नियम
+    const finalSize = finalNumber >= 5 ? "Big" : "Small";
+
+    // रिज़ल्ट डेटाबेस में सेव करें
+    const newPeriod = new Period({ 
+        gameMode: mode, 
+        periodId: activePeriod, 
+        resultNumber: finalNumber, 
+        resultColor: finalColor, 
+        resultSize: finalSize 
+    });
+    await newPeriod.save();
+
+    // इस राउंड की सभी पेंडिंग बेट्स निकालें
+    const pendingBets = await Bet.find({ gameMode: mode, periodId: activePeriod, status: "Pending" });
+
+    for (let bet of pendingBets) {
+        let isWin = false;
+        let multiplier = 2; // डिफ़ॉल्ट डबल पैसा (जैसे रेड या ग्रीन पर)
+
+        // चेक करें कि यूज़र ने क्या चुना था
+        if (bet.selectValue === String(finalNumber)) {
+            isWin = true;
+            multiplier = 9; // नंबर सही होने पर 9 गुना पैसा
+        } else if (bet.selectValue === finalColor) {
+            isWin = true;
+            if (finalColor === "Violet") multiplier = 4.5; // वायलेट होने पर साढ़े चार गुना
+        } else if (bet.selectValue === finalSize) {
+            isWin = true;
+        }
+
+        if (isWin) {
+            const winAmt = bet.betAmount * multiplier;
+            bet.winAmount = winAmt;
+            bet.status = "Win";
+            
+            // यूज़र के अकाउंट में असली पैसे तुरंत प्लस करें
+            await User.findOneAndUpdate(
+                { phone: bet.phone },
+                { $inc: { balance: winAmt } }
+            );
+        } else {
+            bet.status = "Loss";
+        }
+        await bet.save(); // बेट का स्टेटस सेव करें
+    }
+}
+
+// बैकएंड का टाइमर चालू करने का इंजन
+function startServerTimerEngine() {
+    Object.keys(liveGames).forEach(mode => {
+        generateNewPeriodId(mode);
+    });
+
+    setInterval(() => {
+        Object.keys(liveGames).forEach(async (mode) => {
+            const game = liveGames[mode];
+            if (game.timeLeft <= 0) {
+                await calculateGameResult(mode);
+                generateNewPeriodId(mode);
+                game.timeLeft = game.duration;
+            } else {
+                game.timeLeft--;
+            }
+        });
+    }, 1000);
+}
+
+
+// === ROUTES / APIS (फ्रंटएंड के लिए रास्ते) ===
 
 // 1. डेटाबेस कनेक्शन स्टेटस चेक करने के लिए
 app.get('/api/db-status', (req, res) => {
@@ -36,21 +161,16 @@ app.get('/api/db-status', (req, res) => {
 app.post('/api/register', async (req, res) => {
     try {
         const { phone, password, inviteCode } = req.body;
-        
-        // चेक करें कि यह नंबर पहले से रजिस्टर्ड तो नहीं है
         const exists = await User.findOne({ phone: phone.trim() });
         if (exists) {
             return res.json({ success: false, message: "Already registered!" });
         }
-        
-        // नया यूज़र डेटाबेस में सेव करें
         const newUser = new User({ 
             phone: phone.trim(), 
             password: password.trim(), 
             inviteCode: inviteCode || "" 
         });
         await newUser.save();
-        
         res.json({ success: true, message: "Registered successfully!" });
     } catch (err) { 
         res.status(500).json({ success: false, message: "Registration failed! Server error." }); 
@@ -61,16 +181,10 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { phone, password } = req.body;
-        
-        // डेटाबेस में पुराने रिकॉर्ड से फ़ोन नंबर मैच करें
         const user = await User.findOne({ phone: phone.trim() });
-        
-        // अगर यूज़र नहीं मिला या पासवर्ड गलत हुआ
         if (!user || user.password !== password.trim()) {
             return res.json({ success: false, message: "Invalid credentials!" });
         }
-        
-        // लॉगिन सफल होने पर यूज़र का डेटा भेजें
         res.json({ 
             success: true, 
             phone: user.phone, 
@@ -82,7 +196,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// 4. यूज़र का बैलेंस चेक करने के लिए (डैशबोर्ड पर दिखाने के लिए)
+// 4. यूज़र का लाइव बैलेंस चेक करने के लिए
 app.get('/api/balance/:phone', async (req, res) => {
     try {
         const user = await User.findOne({ phone: req.params.phone.trim() });
@@ -92,10 +206,55 @@ app.get('/api/balance/:phone', async (req, res) => {
     }
 });
 
-// === STATIC FILES SERVING ===
-// यह आपके फ्रंटएंड HTML पेजों (index.html, home.html) को लोड करने में मदद करेगा
-app.use(express.static(path.join(__dirname, '')));
+// 5. फ्रंटएंड को लाइव टाइमर और पीरियड आईडी भेजने की एपीआई
+app.get('/api/game-sync', (req, res) => {
+    const syncData = {};
+    Object.keys(liveGames).forEach(mode => {
+        syncData[mode] = { 
+            timeLeft: liveGames[mode].timeLeft, 
+            currentPeriod: liveGames[mode].currentPeriod 
+        };
+    });
+    res.json({ success: true, data: syncData });
+});
 
+// 6. असली सट्टा (Bet) लगाने की एपीआई
+app.post('/api/place-bet', async (req, res) => {
+    try {
+        const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
+        
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user || user.balance < betAmount) {
+            return res.json({ success: false, message: "Balance issue! Low wallet balance." });
+        }
+
+        // आखिरी 5 सेकंड में सट्टा ब्लॉक करें
+        if (liveGames[gameMode] && liveGames[gameMode].timeLeft <= 5) {
+            return res.json({ success: false, message: "Round betting locked! Wait for next round." });
+        }
+
+        // यूज़र के वॉलेट से पैसे काटें
+        user.balance -= Number(betAmount);
+        await user.save();
+
+        // सट्टा डेटाबेस में रिकॉर्ड करें
+        const newBet = new Bet({ 
+            phone: phone.trim(), 
+            gameMode, 
+            periodId, 
+            selectValue, 
+            betAmount: Number(betAmount) 
+        });
+        await newBet.save();
+
+        res.json({ success: true, message: "Bet placed successfully!", newBalance: user.balance });
+    } catch (error) { 
+        res.status(500).json({ success: false, message: "Server error during betting." }); 
+    }
+});
+
+// === STATIC FILES SERVING ===
+app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -103,10 +262,10 @@ app.get('/', (req, res) => {
 // === SERVER START & DATABASE CONNECTION ===
 const PORT = process.env.PORT || 3000;
 
-// आपके .env फ़ाइल से MONGO_URI लेकर डेटाबेस कनेक्ट करेगा
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("MongoDB Connected Successfully!");
+        startServerTimerEngine(); // डेटाबेस कनेक्ट होते ही टाइमर चालू हो जाएगा
         server.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
@@ -114,3 +273,4 @@ mongoose.connect(process.env.MONGO_URI)
     .catch(err => {
         console.error("Database connection error:", err);
     });
+    

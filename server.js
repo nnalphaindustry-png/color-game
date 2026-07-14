@@ -182,69 +182,80 @@ async function calculateGameResult(mode) {
   await newPeriod.save();
 
   // 7. Strict Multi-Bet Distribution Engine for users
-  for (let bet of pendingBets) {
+// FIX: हर बेट को पूरी तरह से स्वतंत्र ब्लॉक में प्रोसेस करना ताकि मल्टी-बेट आपस में न टकराएं
+await Promise.all(pendingBets.map(async (bet) => {
     let isWin = false;
-    let multiplier = 0;
-    
+    let currentMultiplier = 0; // नाम बदलकर स्कोप सुरक्षित किया
     const commissionRate = 0.02;
     const tradeAmount = bet.betAmount * (1 - commissionRate);
     const userSelection = String(bet.selectValue).trim();
 
     if (userSelection === String(num)) {
-      isWin = true;
-      multiplier = 9;
+        isWin = true;
+        currentMultiplier = 9;
     } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === finalSize) {
-      isWin = true;
-      multiplier = 2;
-    } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalColor) {
-      isWin = true;
-      multiplier = 2;
+        isWin = true;
+        currentMultiplier = 2;
+    } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalSize) { // यहाँ आपके लॉजिक अनुसार
+        isWin = true;
+        currentMultiplier = 2;
     } else if ((userSelection === "Green" && num === 5) || (userSelection === "Red" && num === 0)) {
-      isWin = true;
-      multiplier = 1.5;
+        isWin = true;
+        currentMultiplier = 1.5;
     } else if (userSelection === "Violet" && (num === 0 || num === 5)) {
-      isWin = true;
-      multiplier = 4.5;
+        isWin = true;
+        currentMultiplier = 4.5;
     }
 
     if (isWin) {
-      const winAmt = tradeAmount * multiplier;
-      bet.winAmount = Number(winAmt.toFixed(2));
-      bet.status = 'Win';
-
-      await User.findOneAndUpdate(
-        { phone: bet.phone },
-        { $inc: { balance: bet.winAmount } }
-      );
+        const winAmt = tradeAmount * currentMultiplier;
+        bet.winAmount = Number(winAmt.toFixed(2));
+        bet.status = 'Win';
+        
+        // यूजर के वॉलेट में पैसा जोड़ें
+        await User.findOneAndUpdate(
+            { phone: bet.phone },
+            { $inc: { balance: bet.winAmount } }
+        );
     } else {
-      bet.winAmount = 0;
-      bet.status = 'Loss';
+        bet.winAmount = 0;
+        bet.status = 'Loss';
     }
-
+    
+    // बेट स्टेटस को डेटाबेस में अपडेट करें
     await bet.save();
-  }
-}
+}));
+
 
 // === बैकएंड का टाइमर चालू करने का सही इंजन ===
 function startServerTimerEngine() {
-    Object.keys(liveGames).forEach(async (mode) => {
-        await generateNewPeriodId(mode);
-    });
+    // शुरुआती पीरियड आईडी जनरेट करने के लिए क्रमबद्ध लूप
+    (async () => {
+        for (const mode of Object.keys(liveGames)) {
+            await generateNewPeriodId(mode);
+        }
+    })();
 
-    setInterval(() => {
-        Object.keys(liveGames).forEach(async (mode) => {
+    setInterval(async () => {
+        // FIX: forEach हटाकर for...of लगाया ताकि async/await सही क्रम में काम करे
+        for (const mode of Object.keys(liveGames)) {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
-                await calculateGameResult(mode);
-                await generateNewPeriodId(mode); // नए राउंड के लिए नंबर-वाइज़ आईडी बनाएं
+                try {
+                    // पहले रिजल्ट कैलकुलेट होकर डेटाबेस में सेव होगा
+                    await calculateGameResult(mode);
+                    // रिजल्ट पूरी तरह सेव होने के बाद ही नया पीरियड आईडी जनरेट होगा
+                    await generateNewPeriodId(mode);
+                } catch (err) {
+                    console.error(`Error processing round for ${mode}:`, err);
+                }
                 game.timeLeft = game.duration;
             } else {
                 game.timeLeft--;
             }
-        });
+        }
     }, 1000);
 }
-
 
 // === ROUTES / APIS (फ्रंटएंड के लिए रास्ते) ===
 

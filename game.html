@@ -95,121 +95,107 @@
         .status-loss { background-color: #f8d7da; color: #721c24; }
         .status-pending { background-color: #fff3cd; color: #856404; }
 
-        .disabled-betting-panel { opacity: 0.5; pointer-events: none; }
-        .premium-timer-banner.bet-locked { background: linear-gradient(135deg, #d63031, #b21f1f); }
-        /* --- माय हिस्ट्री का हुबहू स्क्रीनशॉट जैसा डिज़ाइन --- */
+/* --- एक्स्ट्रा सफ़ेद पेज को हटाकर गेम के असली पेज पर सेट करने का फिक्स --- */
+
+#view-user-history-list {
+    background: transparent !important; /* एक्स्ट्रा सफ़ेद बैकग्राउंड को पूरी तरह खत्म किया */
+    width: 100% !important;             /* चौड़ाई को गेम के ओरिजिनल पेज के बराबर किया */
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-shadow: none !important;        /* बाहरी फालतू शैडो हटाई */
+}
+
 .user-history-card-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin: 0 auto 12px auto;
-    width: 95%;
-    border: 1px solid #edf2f7;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: transparent !important; /* पूरी तरह ट्रांसपेरेंट ताकि गेम का असली सफ़ेद पेज पीछे से दिखे */
+    padding: 14px 16px !important;
+    margin: 0 !important;
+    border: none !important;
+    /* केवल हर रिकॉर्ड के नीचे एक बहुत हल्की और बारीक लाइन जो बटनों को अलग करेगी */
+    border-bottom: 1px solid #f1f5f9 !important; 
+    cursor: pointer !important;
+}
+
+/* आखिरी रिकॉर्ड के नीचे की लाइन हटा दी */
+.user-history-card-item:last-child {
+    border-bottom: none !important;
 }
 
 .card-left-section {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
 }
 
-/* Big / Small के लिए चौकोर गोल कोनों वाला बॉक्स */
+/* --- सिर्फ बॉक्स को थोड़ा सा और मोटा करने के लिए सीएसएस --- */
 .bet-choice-rect {
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1);
-}
-
-/* --- गोल सर्कल को नंबर के हिसाब से रंग-बिरंगा करने का फिक्स --- */
-.bet-choice-circle {
     color: white !important;
-    font-size: 16px !important;
-    font-weight: 800 !important;
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 50% !important;
+    font-size: 11px !important;
+    font-weight: 800 !important; /* अक्षरों को भी थोड़ा और बोल्ड किया */
+    width: 52px !important;    
+    height: 36px !important;   /* ऊंचाई को 30px से बढ़ाकर 36px किया ताकि बॉक्स मोटा दिखे */
+    border-radius: 8px !important; 
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: inset 0 -3px 6px rgba(0,0,0,0.15) !important;
-    background: inherit; /* यह जावास्क्रिप्ट से आ रहे असली कलर (लाल, हरा, बैंगनी) को अपने आप पकड़ लेगा */
+    text-transform: uppercase !important;
+    /* अंदरूनी शैडो को थोड़ा मजबूत किया ताकि बटन मोटा और गद्देदार लगे */
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15) !important; 
 }
 
+
 .bet-info-text-block {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
 }
 
 .bet-period-row {
-    font-size: 14px;
-    font-weight: 700;
-    color: #2d3748;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #2d3748 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
 }
 
 .small-arrow-down {
-    font-size: 9px;
-    color: #a0aec0;
+    font-size: 8px !important;
+    color: #a0aec0 !important;
 }
 
 .bet-time-row {
-    font-size: 12px;
-    color: #a0aec0;
-    font-weight: 500;
+    font-size: 11px !important;
+    color: #a0aec0 !important;
+    font-weight: 500 !important;
 }
 
 .card-right-section {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
 }
 
-/* दाएँ तरफ का बॉर्डर वाला बटन जैसा बैज */
 .status-border-badge {
-    font-size: 12px;
-    font-weight: 700;
-    padding: 3px 14px;
-    border-radius: 8px;
-    min-width: 75px;
-    text-align: center;
-    background: #ffffff;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 12px !important;
+    border-radius: 6px !important;
+    min-width: 70px !important;
+    text-align: center !important;
+    background: #ffffff !important;
 }
 
-.badge-succeed {
-    border: 1px solid #2ecc71;
-    color: #2ecc71;
-}
-
-.badge-failed {
-    border: 1px solid #ff4d4d;
-    color: #ff4d4d;
-}
-
-.badge-pending {
-    border: 1px solid #f1c40f;
-    color: #f1c40f;
-}
+.badge-succeed { border: 1px solid #2ecc71 !important; color: #2ecc71 !important; }
+.badge-failed { border: 1px solid #ff4d4d !important; color: #ff4d4d !important; }
+.badge-pending { border: 1px solid #f1c40f !important; color: #f1c40f !important; }
 
 .bet-final-amount {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
+    font-size: 13px !important;
+    font-weight: 700 !important;
 }
 
     </style>
@@ -1086,6 +1072,112 @@ window.showToastAlert = function(message, isSuccess) {
   setTimeout(() => {
     toast.style.display = "none";
   }, 2000);
+};
+// === हुबहू आपके स्क्रीनशॉट जैसा प्रोफ़ेशनल डिटेल्स पॉपअप फंक्शन ===
+window.openDetailPopup = function(encodedData) {
+    const bet = JSON.parse(decodeURIComponent(encodedData));
+    
+    // 2% टैक्स और अमाउंट की सटीक गणना
+    const tax = bet.betAmount * 0.02;
+    const afterTax = (bet.betAmount - tax).toFixed(2);
+    
+    // स्क्रीनशॉट के अनुसार स्टेटस और उसके रंग
+    const statusText = bet.status === "Win" ? "Succeed" : bet.status === "Loss" ? "Failed" : "Pending";
+    const statusColor = bet.status === "Win" ? "#2ecc71" : bet.status === "Loss" ? "#ff4d4d" : "#f1c40f";
+    const finalAmount = bet.status === "Win" ? `+₹${parseFloat(bet.winAmount).toFixed(2)}` : bet.status === "Loss" ? `-₹${parseFloat(bet.betAmount).toFixed(2)}` : "Pending";
+
+    // आपके स्क्रीनशॉट के सारे कॉलम्स (Quantity और Result के साथ)
+    const roundResult = bet.gameResult || "0 Red Violet"; 
+    const quantityCount = bet.quantity || Math.floor(bet.betAmount / 1); 
+
+    // पूरा एचटीएमएल डिज़ाइन स्ट्रक्चर (हुबहू नीचे से स्लाइड होने वाला मेन्यू)
+    const popupHtml = `
+    <div id="history-detail-modal-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; display:flex; justify-content:center; align-items:flex-end; font-family:sans-serif;" onclick="document.getElementById('history-detail-modal-overlay').remove()">
+        
+        <div style="width:100%; max-width:450px; background:#ffffff; border-top-left-radius:24px; border-top-right-radius:24px; padding:20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); max-height:85vh; overflow-y:auto; animation: popupSlideUp 0.25s ease-out;" onclick="event.stopPropagation()">
+            
+            <!-- ऊपर की हेडिंग पट्टी -->
+            <div style="text-align:center; margin-bottom:20px; position:relative;">
+                <h3 style="font-size:18px; font-weight:700; color:#2d3748; margin:0;">Details</h3>
+                <button onclick="document.getElementById('history-detail-modal-overlay').remove()" style="position:absolute; right:5px; top:-2px; background:none; border:none; font-size:20px; cursor:pointer; color:#a0aec0;">✕</button>
+            </div>
+            
+            <!-- स्क्रीनशॉट के अनुसार सभी कॉलम्स की लिस्ट -->
+            <div style="display:flex; flex-direction:column; gap:14px; font-size:14px; color:#4a5568; background:#fafafa; border-radius:16px; padding:16px;">
+                
+                <!-- ऑर्डर नंबर कॉपी बटन के साथ -->
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <span style="color:#718096; font-weight:500;">Order number</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:10px 12px; border-radius:10px; border:1px solid #edf2f7;">
+                        <span style="font-weight:600; color:#2d3748; font-size:12px; word-break:break-all; letter-spacing:0.3px;">${bet.orderId}</span>
+                        <button onclick="navigator.clipboard.writeText('${bet.orderId}'); alert('Copied!');" style="background:none; border:none; cursor:pointer; font-size:16px; color:#4a5568; padding-left:10px;">📋</button>
+                    </div>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Period</span>
+                    <span style="font-weight:600; color:#2d3748; letter-spacing:0.5px;">${bet.periodId}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Purchase amount</span>
+                    <span style="font-weight:600; color:#2d3748;">₹${parseFloat(bet.betAmount).toFixed(2)}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Quantity</span>
+                    <span style="font-weight:600; color:#2d3748;">${quantityCount}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Amount after tax</span>
+                    <span style="font-weight:600; color:#ff4d4d;">₹${afterTax}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Tax</span>
+                    <span style="font-weight:600; color:#2d3748;">₹${tax.toFixed(2)}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Result</span>
+                    <span style="font-weight:700; color:#2d3748;">${roundResult}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Select</span>
+                    <span style="font-weight:700; color:#2d3748;">${bet.selectValue}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Status</span>
+                    <span style="font-weight:700; color:${statusColor};">${statusText}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#718096; font-weight:500;">Win/lose</span>
+                    <span style="font-weight:700; color:${statusColor};">${finalAmount}</span>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0;">
+                    <span style="color:#718096; font-weight:500;">Order time</span>
+                    <span style="font-weight:600; color:#718096; font-size:13px;">${bet.time}</span>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+    <!-- नीचे से ऊपर आने का सुंदर एनिमेशन सीएसएस -->
+    <style>
+        @keyframes popupSlideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+    </style>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', popupHtml);
 };
 
 </script>

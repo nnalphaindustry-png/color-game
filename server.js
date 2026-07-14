@@ -195,6 +195,30 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ success: false, message: "Login failed! Server error." }); 
     }
 });
+// 1. गेम मोड के अनुसार पिछले 10 मैचों का असली इतिहास भेजने की एपीआई
+app.get('/api/game-history/:mode', async (req, res) => {
+    try {
+        // डेटाबेस से चुनी हुई टाइमिंग का रिकॉर्ड समय के हिसाब से उल्टा (Latest First) निकालें
+        const list = await Period.find({ gameMode: req.params.mode })
+                                 .sort({ createdAt: -1 })
+                                 .limit(10);
+        res.json({ success: true, list });
+    } catch (err) { 
+        res.status(500).json({ success: false }); 
+    }
+});
+
+// 2. यूज़र द्वारा विशिष्ट गेम मोड में लगाई गई पुरानी बेट्स फ़िल्टर करने की एपीआई
+app.get('/api/user-bets/:phone/:mode', async (req, res) => {
+    try {
+        const list = await Bet.find({ phone: req.params.phone.trim(), gameMode: req.params.mode })
+                             .sort({ createdAt: -1 })
+                             .limit(10);
+        res.json({ success: true, list });
+    } catch (err) { 
+        res.status(500).json({ success: false }); 
+    }
+});
 
 // 4. यूज़र का लाइव बैलेंस चेक करने के लिए
 app.get('/api/balance/:phone', async (req, res) => {
@@ -206,17 +230,29 @@ app.get('/api/balance/:phone', async (req, res) => {
     }
 });
 
-// 5. फ्रंटएंड को लाइव टाइमर और पीरियड आईडी भेजने की एपीआई
-app.get('/api/game-sync', (req, res) => {
-    const syncData = {};
-    Object.keys(liveGames).forEach(mode => {
-        syncData[mode] = { 
-            timeLeft: liveGames[mode].timeLeft, 
-            currentPeriod: liveGames[mode].currentPeriod 
-        };
-    });
-    res.json({ success: true, data: syncData });
+// अपडेटेड एपीआई जो टाइमर के साथ-साथ आख़िरी जीता हुआ नंबर और रंग भी फ्रंटएंड को देगी
+app.get('/api/game-sync', async (req, res) => {
+    try {
+        const syncData = {};
+        for (let mode of Object.keys(liveGames)) {
+            // डेटाबेस से इस गेम मोड का सबसे लेटेस्ट ख़त्म हुआ राउंड ढूंढें
+            const lastPeriodRecord = await Period.findOne({ gameMode: mode }).sort({ createdAt: -1 });
+            
+            syncData[mode] = { 
+                timeLeft: liveGames[mode].timeLeft, 
+                currentPeriod: liveGames[mode].currentPeriod,
+                lastResult: lastPeriodRecord ? {
+                    number: lastPeriodRecord.resultNumber,
+                    color: lastPeriodRecord.resultColor
+                } : null
+            };
+        }
+        res.json({ success: true, data: syncData });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
 });
+
 
 // 6. असली सट्टा (Bet) लगाने की एपीआई
 app.post('/api/place-bet', async (req, res) => {

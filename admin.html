@@ -32,13 +32,23 @@
         .data-table-title { color: #ffc107; font-size: 16px; margin-bottom: 15px; font-weight: normal; }
         .table-scroll-area { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 10px 12px; border-bottom: 1px solid #2d2d2d; font-size: 13px; white-space: nowrap; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #2d2d2d; font-size: 14px; }
         th { background-color: #161616; color: #a0a0a0; font-weight: 600; }
-        tr:hover { background-color: #252525; }
+        .clickable-row { cursor: pointer; transition: background-color 0.2s; }
+        .clickable-row:hover { background-color: #2a2a2a; }
         .id-text-format { color: #0dcaf0; font-family: monospace; }
-        .balance-text-format { color: #198754; font-weight: bold; }
-        .muted-text-format { color: #747474; }
         .placeholder-screen-view { background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 40px 20px; text-align: center; color: #a0a0a0; }
+        .popup-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .popup-modal-box { background-color: #1a1a1a; border: 1px solid #333333; border-radius: 12px; width: 100%; max-width: 450px; padding: 20px; position: relative; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .popup-close-btn { position: absolute; top: 15px; right: 15px; background: none; color: #888888; border: none; font-size: 22px; cursor: pointer; transition: color 0.2s; }
+        .popup-close-btn:hover { color: #ffffff; }
+        .popup-header-title { color: #ffc107; font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; font-weight: bold; }
+        .popup-data-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222222; font-size: 14px; }
+        .popup-data-label { color: #a0a0a0; }
+        .popup-data-value { font-weight: bold; color: #ffffff; }
+        .popup-value-highlight { color: #198754; font-weight: bold; }
+        .popup-value-uid { color: #0dcaf0; font-family: monospace; }
         @media (min-width: 769px) { .sidebar { left: 0; } .main-content-wrapper { margin-left: 250px; } .nav-toggle-btn { display: none; } .box-grid-layout { grid-template-columns: repeat(4, 1fr); } }
     </style>
 </head>
@@ -58,6 +68,7 @@
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'deposit-page')">💰 Deposit Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'withdrawal-page')">💸 Withdrawal Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'control-page')">🎮 Game Control</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
         </ul>
     </nav>
@@ -71,13 +82,6 @@
             
             <!-- 2x2 Grid Boxes for Mobile Screen -->
             <div class="box-grid-layout">
-                <div class="stat-box-card">
-                    <div>
-                        <p class="box-label-text">Total Users</p>
-                        <h3 class="box-value-number" id="stat-total-users">0</h3>
-                    </div>
-                    <div class="indicator-badge-icon blue-ind">U</div>
-                </div>
                 <div class="stat-box-card">
                     <div>
                         <p class="box-label-text">Total Deposit</p>
@@ -94,6 +98,13 @@
                 </div>
                 <div class="stat-box-card">
                     <div>
+                        <p class="box-label-text">Total Users</p>
+                        <h3 class="box-value-number" id="stat-total-users">0</h3>
+                    </div>
+                    <div class="indicator-badge-icon blue-ind">U</div>
+                </div>
+                <div class="stat-box-card">
+                    <div>
                         <p class="box-label-text">Active Bets</p>
                         <h3 class="box-value-number" id="stat-active-bets">₹0</h3>
                     </div>
@@ -101,23 +112,20 @@
                 </div>
             </div>
 
-            <!-- Table Block inside Dashboard -->
+            <!-- Clean Table Block Inside Dashboard -->
             <div class="data-table-card">
                 <h5 class="data-table-title">Registered User List</h5>
                 <div class="table-scroll-area">
                     <table>
                         <thead>
                             <tr>
-                                <th>User ID (_id)</th>
                                 <th>Mobile Number</th>
-                                <th>Password</th>
-                                <th>Wallet Balance</th>
-                                <th>Join Date</th>
+                                <th>User ID (UID)</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-table-body">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading database statistics...</td>
+                                <td colspan="2" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading database statistics...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -125,188 +133,299 @@
             </div>
         </div>
 
-        <!-- PAGE 2: User List View -->
+        <!-- PAGE 2: User List View Placeholder -->
         <div id="user-list-page" class="admin-page-view">
             <h2 class="page-heading-title">Full User Records</h2>
-            <div class="placeholder-screen-view">यूजर लिस्ट का स्पेशल पेज यहाँ दिखाई देगा।</div>
+            <div class="placeholder-screen-view">User list custom page will be linked here.</div>
         </div>
 
-        <!-- PAGE 3: Deposit Approval View -->
+        <!-- PAGE 3: Deposit Approval View Placeholder -->
         <div id="deposit-page" class="admin-page-view">
             <h2 class="page-heading-title">Deposit Verification</h2>
-            <div class="placeholder-screen-view">रिचार्ज रिक्वेस्ट (Deposit Requests) अप्रूव करने का नया पेज यहाँ लोड होगा।</div>
+            <div class="placeholder-screen-view">Deposit transactions request screen layout will be loaded here.</div>
         </div>
 
-        <!-- PAGE 4: Withdrawal View -->
+        <!-- PAGE 4: Withdrawal View Placeholder -->
         <div id="withdrawal-page" class="admin-page-view">
             <h2 class="page-heading-title">Withdrawal Requests</h2>
-            <div class="placeholder-screen-view">यूजर के विड्रॉल (Withdrawal Requests) पास या फेल करने का पेज यहाँ खुलेगा।</div>
+            <div class="placeholder-screen-view">User payout clearance panel layout will open here.</div>
         </div>
 
-        <!-- PAGE 5: Game Control View -->
+        <!-- PAGE 5: Game Control View Placeholder -->
         <div id="control-page" class="admin-page-view">
             <h2 class="page-heading-title">Live Result Control Engine</h2>
-            <div class="placeholder-screen-view">गेम का अगला नंबर या कलर बदलने का (Manual Control) पेज यहाँ बनेगा।</div>
+            <div class="placeholder-screen-view">Manual result manipulation console will be created here.</div>
         </div>
 
-        <!-- PAGE 6: Settings View -->
+        <!-- PAGE 6: Settings View Placeholder -->
         <div id="settings-page" class="admin-page-view">
             <h2 class="page-heading-title">Global System Settings</h2>
-            <div class="placeholder-screen-view">गेम की जनरल सेटिंग्स बदलने का विकल्प यहाँ रहेगा।</div>
+            <div class="placeholder-screen-view">Global app maintenance options will remain here.</div>
         </div>
 
     </main>
-        <script>
-        // आपके लाइव रेंडर सर्वर का असली लिंक यहाँ सेट कर दिया गया है
-        const SERVER_URL = "https://color-game-1kc2.onrender.com"; 
 
-        // मोबाइल स्क्रीन पर साइडबार मेनू खोलने और बंद करने के लिए फंक्शन
+    <!-- Premium Custom Popup Modal Window Box Layout -->
+    <div class="popup-modal-overlay" id="userPopupModal">
+        <div class="popup-modal-box">
+            <button class="popup-close-btn" onclick="closeUserPopupModal()">&times;</button>
+            <div class="popup-header-title">User Account Details</div>
+            
+            <div class="popup-data-row">
+                <span class="popup-data-label">Mobile Number</span>
+                <span class="popup-data-value" id="pop-phone">-</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">User ID (UID)</span>
+                <span class="popup-data-value popup-value-uid" id="pop-uid">-</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">Wallet Balance</span>
+                <span class="popup-data-value popup-value-highlight" id="pop-balance">₹0.00</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">Secret Password</span>
+                <span class="popup-data-value" id="pop-password">-</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">Invite Code</span>
+                <span class="popup-data-value" id="pop-invite">-</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">Registration Date</span>
+                <span class="popup-data-value" id="pop-date">-</span>
+            </div>
+        </div>
+    </div>
+            <!-- PAGE 7: User Management Search View -->
+        <div id="management-page" class="admin-page-view">
+            <h2 class="page-heading-title">Search & Manage User</h2>
+            <div class="data-table-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+                <h5 class="data-table-title" style="margin-bottom: 20px;">Enter User Mobile Number</h5>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="search-phone-input" placeholder="e.g. 9876543210" style="flex: 1; padding: 12px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px; font-size: 16px;">
+                    <button onclick="searchUserByPhone()" style="padding: 12px 24px; background-color: #ffc107; color: #121212; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px;">Search</button>
+                </div>
+            </div>
+        </div>
+
+    <!-- Advanced User Management Control Popup Modal -->
+    <div class="popup-modal-overlay" id="managementPopupModal">
+        <div class="popup-modal-box" style="max-width: 480px;">
+            <button class="popup-close-btn" onclick="closeManagementPopupModal()">&times;</button>
+            <div class="popup-header-title">Manage User Account</div>
+            
+            <div class="popup-data-row">
+                <span class="popup-data-label">Mobile Number</span>
+                <span class="popup-data-value" id="manage-pop-phone">-</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">Current Balance</span>
+                <span class="popup-data-value popup-value-highlight" id="manage-pop-balance">₹0.00</span>
+            </div>
+            <div class="popup-data-row">
+                <span class="popup-data-label">Account Status</span>
+                <span class="popup-data-value" id="manage-pop-status" style="color: #198754;">Active</span>
+            </div>
+
+            <!-- Balance Update Section -->
+            <div style="margin-top: 20px; border-top: 1px solid #2d2d2d; padding-top: 15px;">
+                <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 8px;">ADD / DEDUCT WALLET BALANCE</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="manage-balance-amount" placeholder="Enter Amount" style="flex: 1; padding: 10px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px;">
+                    <button onclick="updateUserBalanceAction('add')" style="padding: 10px 15px; background-color: #198754; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Add</button>
+                    <button onclick="updateUserBalanceAction('deduct')" style="padding: 10px 15px; background-color: #dc3545; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Deduct</button>
+                </div>
+            </div>
+
+            <!-- Danger Zone Actions (Ban & Delete) -->
+            <div style="margin-top: 20px; border-top: 1px solid #2d2d2d; padding-top: 15px; display: flex; gap: 10px;">
+                <button id="ban-action-btn" onclick="toggleUserBanStatusAction()" style="flex: 1; padding: 12px; background-color: #ff9800; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Ban User</button>
+                <button onclick="deleteUserPermanentlyAction()" style="flex: 1; padding: 12px; background-color: #7f0000; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Delete User</button>
+            </div>
+        </div>
+    </div>
+    
+            <script>
+        const SERVER_URL = "https://color-game-1kc2.onrender.com"; 
+        let globalUsersCacheMemory = [];
+        let activeManagedUserObject = null;
+
+        // Toggle sidebar menu visibility status
         function toggleSidebarMenu() {
             document.getElementById('appSidebar').classList.toggle('open');
         }
 
-        // साइडबार के अलग-अलग पेजों पर जाने और पुराने पेज को छुपाने (Hide) का लॉजिक
+        // Handle page visibility toggle on option clicks
         function switchAdminPage(event, targetPageId) {
             event.preventDefault();
-
-            // 1. स्क्रीन पर खुले हुए सभी पेजों को छुपाएं
             const screens = document.querySelectorAll('.admin-page-view');
             screens.forEach(screen => screen.classList.remove('active-view'));
-
-            // 2. मेनू लिंक्स से पुराना एक्टिव कलर हटाएं
             const menuLinks = document.querySelectorAll('.menu-item a');
             menuLinks.forEach(link => link.classList.remove('active'));
-
-            // 3. जो पेज चुना गया है, सिर्फ उसे स्क्रीन पर दिखाएं
             document.getElementById(targetPageId).classList.add('active-view');
-
-            // 4. चुने हुए मेनू लिंक को हाइलाइट करें
             event.target.classList.add('active');
-
-            // 5. मोबाइल व्यू में क्लिक होते ही साइडबार को अपने आप बंद कर दें
             if (window.innerWidth <= 768) {
                 document.getElementById('appSidebar').classList.remove('open');
             }
         }
 
-        // लाइव रेंडर सर्वर और मोंगो-डीबी से असली डेटा खींचने का मुख्य फंक्शन
+        // Open specific user detailed metrics in popup frame
+        function openUserPopupModal(userIdToFind) {
+            const selectedUserObject = globalUsersCacheMemory.find(u => u._id === userIdToFind);
+            if (!selectedUserObject) return;
+
+            document.getElementById('pop-phone').innerText = selectedUserObject.phone || 'N/A';
+            document.getElementById('pop-uid').innerText = selectedUserObject._id || 'N/A';
+            document.getElementById('pop-balance').innerText = '₹' + (selectedUserObject.balance || 0).toFixed(2);
+            document.getElementById('pop-password').innerText = selectedUserObject.password || 'N/A';
+            document.getElementById('pop-invite').innerText = selectedUserObject.inviteCode || 'None';
+            
+            const convertedDateObj = new Date(selectedUserObject.createdAt).toLocaleDateString('en-IN');
+            document.getElementById('pop-date').innerText = convertedDateObj;
+
+            const modalOverlayElement = document.getElementById('userPopupModal');
+            modalOverlayElement.style.display = 'flex';
+        }
+
+        // Shutdown popup dialog layout container frame
+        function closeUserPopupModal() {
+            document.getElementById('userPopupModal').style.display = 'none';
+        }
+
+        // Close management window dialog overlay frame
+        function closeManagementPopupModal() {
+            document.getElementById('managementPopupModal').style.display = 'none';
+            document.getElementById('manage-balance-amount').value = '';
+        }
+
+        // Action module to search any user account by phone number directly
+        function searchUserByPhone() {
+            const phoneInput = document.getElementById('search-phone-input').value.trim();
+            if (!phoneInput) return alert("Please enter a mobile number!");
+
+            fetch(`${SERVER_URL}/api/admin/search-user/${phoneInput}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        activeManagedUserObject = data.user;
+                        document.getElementById('manage-pop-phone').innerText = data.user.phone;
+                        document.getElementById('manage-pop-balance').innerText = '₹' + (data.user.balance || 0).toFixed(2);
+                        
+                        const isBanned = data.user.isBanned || false;
+                        document.getElementById('manage-pop-status').innerText = isBanned ? "Banned" : "Active";
+                        document.getElementById('manage-pop-status').style.color = isBanned ? "#dc3545" : "#198754";
+                        document.getElementById('ban-action-btn').innerText = isBanned ? "Unban User" : "Ban User";
+                        document.getElementById('ban-action-btn').style.backgroundColor = isBanned ? "#198754" : "#ff9800";
+
+                        document.getElementById('managementPopupModal').style.display = 'flex';
+                    } else {
+                        alert(data.message || "User not found in database!");
+                    }
+                })
+                .catch(err => alert("Error searching user!"));
+        }
+
+        // Action module to add or deduct balance instantly
+        function updateUserBalanceAction(operationType) {
+            if (!activeManagedUserObject) return;
+            const amountInput = document.getElementById('manage-balance-amount').value;
+            if (!amountInput || Number(amountInput) <= 0) return alert("Please enter a valid amount!");
+
+            fetch(`${SERVER_URL}/api/admin/update-balance`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: activeManagedUserObject.phone, amount: Number(amountInput), type: operationType })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    searchUserByPhone(); 
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // Action module to toggle the ban state parameter status
+        function toggleUserBanStatusAction() {
+            if (!activeManagedUserObject) return;
+            const currentBanState = activeManagedUserObject.isBanned || false;
+            const confirmMessage = currentBanState ? "Do you want to unban this user?" : "Are you sure you want to ban this user? They won't be able to login!";
+            if (!confirm(confirmMessage)) return;
+
+            fetch(`${SERVER_URL}/api/admin/toggle-ban`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: activeManagedUserObject.phone })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    searchUserByPhone();
+                }
+            });
+        }
+
+        // Action module to clear individual record from database collections completely
+        function deleteUserPermanentlyAction() {
+            if (!activeManagedUserObject) return;
+            if (!confirm("CRITICAL WARNING: Are you absolutely sure you want to permanently delete this user account from the database? This action cannot be undone!")) return;
+
+            fetch(`${SERVER_URL}/api/admin/delete-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: activeManagedUserObject.phone })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeManagementPopupModal();
+                    document.getElementById('search-phone-input').value = '';
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // Pull active parameters through the cloud api architecture
         function syncNodeServerStats() {
-            // 1. ऊपर के 4 मुख्य बॉक्स (Stats) के लिए लाइव डेटा खींचना
             fetch(`${SERVER_URL}/api/admin/stats`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
                         document.getElementById('stat-total-deposit').innerText = '₹' + (data.totalWalletBalance || 0);
+                        document.getElementById('stat-total-withdrawal').innerText = '₹' + (data.totalWithdrawalBalance || 0);
                         document.getElementById('stat-active-bets').innerText = '₹' + (data.activeBetAmount || 0);
                     }
                 })
-                .catch(err => console.log("Stats fetch pipeline error:", err));
+                .catch(err => console.log("Cloud server communication pipeline timeout:", err));
 
-            // 2. नीचे की टेबल के लिए पंजीकृत यूज़र्स (User List) का असली डेटा खींचना
             fetch(`${SERVER_URL}/api/admin/users-list`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.users) {
-                        let rows = '';
+                        globalUsersCacheMemory = data.users;
+                        let generatedRowsHtml = '';
                         data.users.forEach(user => {
-                            let formatJoinDate = new Date(user.createdAt).toLocaleDateString('en-IN');
-                            rows += `<tr>
-                                <td class="id-text-format">${user._id}</td>
+                            generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')">
                                 <td style="font-weight: bold;">${user.phone}</td>
-                                <td class="muted-text-format">${user.password}</td>
-                                <td class="balance-text-format">₹${user.balance.toFixed(2)}</td>
-                                <td>${formatJoinDate}</td>
+                                <td class="id-text-format">${user._id}</td>
                             </tr>`;
                         });
-                        document.getElementById('dashboard-table-body').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;">No users registered</td></tr>';
+                        document.getElementById('dashboard-table-body').innerHTML = generatedRowsHtml || '<tr><td colspan="2" style="text-align:center;">No users registered yet</td></tr>';
                     }
                 })
                 .catch(err => {
-                    document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Server integration mismatch</td></tr>';
+                    document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#dc3545;">Live data fetching dropped</td></tr>';
                 });
         }
 
-        // पेज लोड होते ही डेटा सिंक शुरू करें और हर 5 सेकंड में ऑटो-रीफ्रेश करें
-        window.onload = function() {
-            syncNodeServerStats();
-            setInterval(syncNodeServerStats, 5000);
-        };
-    </script>
-</body>
-</html>
-    <script>
-        // आपके लाइव रेंडर सर्वर का असली लिंक यहाँ सेट कर दिया गया है
-        const SERVER_URL = "https://color-game-1kc2.onrender.com"; 
-
-        // मोबाइल स्क्रीन पर साइडबार मेनू खोलने और बंद करने के लिए फंक्शन
-        function toggleSidebarMenu() {
-            document.getElementById('appSidebar').classList.toggle('open');
-        }
-
-        // साइडबार के अलग-अलग पेजों पर जाने और पुराने पेज को छुपाने (Hide) का लॉजिक
-        function switchAdminPage(event, targetPageId) {
-            event.preventDefault();
-
-            // 1. स्क्रीन पर खुले हुए सभी पेजों को छुपाएं
-            const screens = document.querySelectorAll('.admin-page-view');
-            screens.forEach(screen => screen.classList.remove('active-view'));
-
-            // 2. मेनू लिंक्स से पुराना एक्टिव कलर हटाएं
-            const menuLinks = document.querySelectorAll('.menu-item a');
-            menuLinks.forEach(link => link.classList.remove('active'));
-
-            // 3. जो पेज चुना गया है, सिर्फ उसे स्क्रीन पर दिखाएं
-            document.getElementById(targetPageId).classList.add('active-view');
-
-            // 4. चुने हुए मेनू लिंक को हाइलाइट करें
-            event.target.classList.add('active');
-
-            // 5. मोबाइल व्यू में क्लिक होते ही साइडबार को अपने आप बंद कर दें
-            if (window.innerWidth <= 768) {
-                document.getElementById('appSidebar').classList.remove('open');
-            }
-        }
-
-        // लाइव रेंडर सर्वर और मोंगो-डीबी से असली डेटा खींचने का मुख्य फंक्शन
-        function syncNodeServerStats() {
-            // 1. ऊपर के 4 मुख्य बॉक्स (Stats) के लिए लाइव डेटा खींचना
-            fetch(`${SERVER_URL}/api/admin/stats`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
-                        document.getElementById('stat-total-deposit').innerText = '₹' + (data.totalWalletBalance || 0);
-                        document.getElementById('stat-active-bets').innerText = '₹' + (data.activeBetAmount || 0);
-                    }
-                })
-                .catch(err => console.log("Stats fetch pipeline error:", err));
-
-            // 2. नीचे की टेबल के लिए पंजीकृत यूज़र्स (User List) का असली डेटा खींचना
-            fetch(`${SERVER_URL}/api/admin/users-list`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.users) {
-                        let rows = '';
-                        data.users.forEach(user => {
-                            let formatJoinDate = new Date(user.createdAt).toLocaleDateString('en-IN');
-                            rows += `<tr>
-                                <td class="id-text-format">${user._id}</td>
-                                <td style="font-weight: bold;">${user.phone}</td>
-                                <td class="muted-text-format">${user.password}</td>
-                                <td class="balance-text-format">₹${user.balance.toFixed(2)}</td>
-                                <td>${formatJoinDate}</td>
-                            </tr>`;
-                        });
-                        document.getElementById('dashboard-table-body').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;">No users registered</td></tr>';
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Server integration mismatch</td></tr>';
-                });
-        }
-
-        // पेज लोड होते ही डेटा सिंक शुरू करें और हर 5 सेकंड में ऑटो-रीफ्रेश करें
+        // Boot execution modules automatically
         window.onload = function() {
             syncNodeServerStats();
             setInterval(syncNodeServerStats, 5000);

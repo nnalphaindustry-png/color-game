@@ -15,12 +15,13 @@ app.use(cors({ origin: "*", credentials: true }));
 
 // === MONGODB SCHEMAS (डेटाबेस के नियम) ===
 
-// 1. यूज़र का स्कीमा
+// === 1. USER SCHEMA WITH BAN TRACKING ===
 const userSchema = new mongoose.Schema({
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    isBanned: { type: Boolean, default: false }, // Added for tracking ban status
     inviteCode: { type: String, default: "" },
-    balance: { type: Number, default: 70 }, // नए यूज़र को मिलने वाला डिफ़ॉल्ट बैलेंस
+    balance: { type: Number, default: 70 }, 
     createdAt: { type: Date, default: Date.now }
 });
 const User = mongoose.model('User', userSchema);
@@ -279,24 +280,32 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// 3. लॉगिन (Login API)
+// === LOGIN API WITH BAN CHECK ===
 app.post('/api/login', async (req, res) => {
     try {
         const { phone, password } = req.body;
         const user = await User.findOne({ phone: phone.trim() });
+        
         if (!user || user.password !== password.trim()) {
             return res.json({ success: false, message: "Invalid credentials!" });
         }
-        res.json({ 
-            success: true, 
-            phone: user.phone, 
-            balance: user.balance, 
-            message: "Login success!" 
+
+        // Check if the user is banned before allowing login
+        if (user.isBanned) {
+            return res.json({ success: false, message: "Your account has been banned by management!" });
+        }
+
+        res.json({
+            success: true,
+            phone: user.phone,
+            balance: user.balance,
+            message: "Login success!"
         });
-    } catch (err) { 
-        res.status(500).json({ success: false, message: "Login failed! Server error." }); 
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Login failed! Server error." });
     }
 });
+
 // === १. गेम मोड के अनुसार पिछला इतिहास भेजने की अपडेटेड एपीआई (Pagination के साथ) ===
 app.get('/api/game-history/:mode', async (req, res) => {
   try {
@@ -458,6 +467,73 @@ app.get('/api/admin/users-list', async (req, res) => {
 app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+// === ADMIN SEARCH USER ROUTE ===
+app.get('/api/admin/search-user/:phone', async (req, res) => {
+    try {
+        const user = await User.findOne({ phone: req.params.phone.trim() });
+        if (!user) {
+            return res.json({ success: false, message: "User not found!" });
+        }
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === ADMIN UPDATE BALANCE ROUTE (ADD / DEDUCT) ===
+app.post('/api/admin/update-balance', async (req, res) => {
+    try {
+        const { phone, amount, type } = req.body;
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        if (type === 'add') {
+            user.balance += Number(amount);
+        } else if (type === 'deduct') {
+            if (user.balance < amount) {
+                return res.json({ success: false, message: "User has insufficient balance to deduct!" });
+            }
+            user.balance -= Number(amount);
+        }
+
+        await user.save();
+        res.json({ success: true, message: `Successfully updated! New balance is ₹${user.balance}` });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === ADMIN TOGGLE BAN USER ROUTE ===
+app.post('/api/admin/toggle-ban', async (req, res) => {
+    try {
+        const { phone } = req.body;
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        user.isBanned = !user.isBanned;
+        await user.save();
+
+        const stateText = user.isBanned ? "banned permanently" : "unbanned successfully";
+        res.json({ success: true, message: `User account has been ${stateText}!` });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === ADMIN PERMANENT DELETE USER ROUTE ===
+app.post('/api/admin/delete-user', async (req, res) => {
+    try {
+        const { phone } = req.body;
+        const result = await User.deleteOne({ phone: phone.trim() });
+        
+        if (result.deletedCount === 0) {
+            return res.json({ success: false, message: "User could not be deleted!" });
+        }
+        res.json({ success: true, message: "User account deleted permanently from database!" });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // === SERVER START & DATABASE CONNECTION ===

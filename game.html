@@ -221,12 +221,23 @@
             </tbody>
         </table>
     </div>
+    <!-- NEW PAGINATION BUTTONS FOR PREVIOUS/NEXT HISTORY -->
+<div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 5px;">
+  <button id="prev-page-btn" onclick="changePage(-1)" style="background-color: #f03e3e; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; opacity: 0.5;" disabled>Prev</button>
+  <span id="current-page-display" style="font-size: 13px; font-weight: 700; color: #475569;">Page: 1</span>
+  <button id="next-page-btn" onclick="changePage(1)" style="background-color: #f03e3e; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">Next</button>
+</div>
+
 </div>
 <script>
     const BACKEND_URL = "https://color-game-1kc2.onrender.com";
     let activeGameMode = "30s"; 
     let localSecondsLeft = 30;
     let activeSubTab = "game"; 
+    // PAGINATION STATE VARIABLES
+let currentGamePage = 1;
+let currentUserPage = 1;
+
 
     function fetchLiveBalance() {
         const phone = localStorage.getItem('user_phone');
@@ -264,98 +275,91 @@
     }
 
     function switchGameMode(mode) {
-        activeGameMode = mode;
-        document.querySelectorAll('.mode-tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        const titleText = document.getElementById('text-active-mode-title');
-        if(mode === '30s') { document.getElementById('tab-30s').classList.add('active'); titleText.innerText = "WinGo 30sec"; }
-        if(mode === '1m') { document.getElementById('tab-1m').classList.add('active'); titleText.innerText = "WinGo 1 Min"; }
-        if(mode === '3m') { document.getElementById('tab-3m').classList.add('active'); titleText.innerText = "WinGo 3 Min"; }
-        if(mode === '5m') { document.getElementById('tab-5m').classList.add('active'); titleText.innerText = "WinGo 5 Min"; }
+  activeGameMode = mode;
+  currentGamePage = 1; // Reset pagination page numbers on mode switch
+  currentUserPage = 1;
+  document.querySelectorAll('.mode-tab-btn').forEach(btn => btn.classList.remove('active'));
+  const titleText = document.getElementById('text-active-mode-title');
+  if(mode === '30s') { document.getElementById('tab-30s').classList.add('active'); titleText.innerText = "WinGo 30sec"; }
+  if(mode === '1m') { document.getElementById('tab-1m').classList.add('active'); titleText.innerText = "WinGo 1 Min"; }
+  if(mode === '3m') { document.getElementById('tab-3m').classList.add('active'); titleText.innerText = "WinGo 3 Min"; }
+  if(mode === '5m') { document.getElementById('tab-5m').classList.add('active'); titleText.innerText = "WinGo 5 Min"; }
+  syncTimerWithServer();
+}
 
-        syncTimerWithServer();
+
+            function fetchLiveGameHistory() {
+  const injector = document.getElementById('game-history-injector');
+  if (!injector) return;
+  fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}?page=${currentGamePage}`)
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && data.list.length > 0) {
+      let html = "";
+      data.list.forEach(row => {
+        let colorStyle = "";
+        if (row.resultNumber === 0) {
+          colorStyle = "background: linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%);";
+        } else if (row.resultNumber === 5) {
+          colorStyle = "background: linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%);";
+        } else if (row.resultColor === "Green") {
+          colorStyle = "background: #2ecc71;";
+        } else if (row.resultColor === "Red") {
+          colorStyle = "background: #ff4d4d;";
+        }
+        const sizeTag = row.resultSize === "Big" ? '<span class="size-tag-text size-tag-big">Big</span>' : '<span class="size-tag-text size-tag-small">Small</span>';
+        html += `<tr>
+          <td style="text-align: left; color:#7f8c8d;">${row.periodId}</td>
+          <td><div class="history-badge-circle" style="${colorStyle}">${row.resultNumber}</div></td>
+          <td style="color:${row.resultColor==='Green'?'#2ecc71':'#ff4d4d'};">${row.resultColor}</td>
+          <td style="text-align: right;">${sizeTag}</td>
+        </tr>`;
+      });
+      injector.innerHTML = html;
+      updatePaginationButtons(currentGamePage, data.hasMore);
+    } else {
+      injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No results found for ${activeGameMode}.</td></tr>`;
     }
-
-            // === सुधार: नीचे हिस्ट्री टेबल में 0 और 5 नंबर का रंग 100% सही दिखाने का लॉजिक ===
-    function fetchLiveGameHistory() {
-        const injector = document.getElementById('game-history-injector');
-        if (!injector) return;
-
-        fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.list.length > 0) {
-                    let html = "";
-                    data.list.forEach(row => {
-                        let colorStyle = "";
-                        
-                        // रंगों का असली नियम जो ऊपर बैनर से मैच करेगा
-                        if (row.resultNumber === 0) {
-                            // 0 नंबर = आधा लाल और आधा वायलेट
-                            colorStyle = "background: linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%);";
-                        } else if (row.resultNumber === 5) {
-                            // 5 number = आधा हरा और आधा वायलेट (जो नीचे गलत आ रहा था)
-                            colorStyle = "background: linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%);";
-                        } else if (row.resultColor === "Green") {
-                            colorStyle = "background: #2ecc71;";
-                        } else if (row.resultColor === "Red") {
-                            colorStyle = "background: #ff4d4d;";
-                        }
-
-                        const sizeTag = row.resultSize === "Big" ? '<span class="size-tag-text size-tag-big">Big</span>' : '<span class="size-tag-text size-tag-small">Small</span>';
-                        
-                        html += `<tr>
-                            <td style="text-align: left; color:#7f8c8d;">${row.periodId}</td>
-                            <td><div class="history-badge-circle" style="${colorStyle}">${row.resultNumber}</div></td>
-                            <td style="color:${row.resultColor==='Green'?'#2ecc71':'#ff4d4d'};">${row.resultColor}</td>
-                            <td style="text-align: right;">${sizeTag}</td>
-                        </tr>`;
-                    });
-                    injector.innerHTML = html;
-                } else {
-                    injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No results found for ${activeGameMode}.</td></tr>`;
-                }
-            })
-            .catch(() => {
-                if(injector.innerHTML === "") {
-                    injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading rows.</td></tr>`;
-                }
-            });
+  })
+  .catch(() => {
+    if(injector.innerHTML === "") {
+      injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading rows.</td></tr>`;
     }
-    
-    // === परमानेंट इलाज: यूज़र बेट हिस्ट्री टेबल बैकग्राउंड अपडेट लॉजिक ===
-    function fetchUserBetHistory() {
-        const injector = document.getElementById('user-history-injector');
-        const phone = localStorage.getItem('user_phone');
-        if (!injector || !phone) return;
+  });
+}
 
-        fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.list.length > 0) {
-                    let html = "";
-                    data.list.forEach(bet => {
-                        const statusClass = bet.status === "Win" ? "status-win" : bet.status === "Loss" ? "status-loss" : "status-pending";
-                        const displayWin = bet.status === "Win" ? `+₹${bet.winAmount}` : bet.status === "Loss" ? "-₹"+bet.betAmount : "Pending";
-                        
-                        html += `<tr>
-                            <td style="text-align: left; color:#7f8c8d;">${bet.periodId}</td>
-                            <td><span style="font-weight:700;">${bet.selectValue}</span></td>
-                            <td>₹${bet.betAmount}</td>
-                            <td style="text-align: right;"><span class="status-tag ${statusClass}">${displayWin}</span></td>
-                        </tr>`;
-                    });
-                    injector.innerHTML = html;
-                } else {
-                    injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No bets placed in ${activeGameMode}.</td></tr>`;
-                }
-            })
-            .catch(() => {
-                if(injector.innerHTML === "") {
-                    injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading bet logs.</td></tr>`;
-                }
-            });
+function fetchUserBetHistory() {
+  const injector = document.getElementById('user-history-injector');
+  const phone = localStorage.getItem('user_phone');
+  if (!injector || !phone) return;
+  fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}?page=${currentUserPage}`)
+  .then(res => res.json())
+  .then(data => {
+    if (data.success && data.list.length > 0) {
+      let html = "";
+      data.list.forEach(bet => {
+        const statusClass = bet.status === "Win" ? "status-win" : bet.status === "Loss" ? "status-loss" : "status-pending";
+        const displayWin = bet.status === "Win" ? `+₹${bet.winAmount}` : bet.status === "Loss" ? "-₹"+bet.betAmount : "Pending";
+        html += `<tr>
+          <td style="text-align: left; color:#7f8c8d;">${bet.periodId}</td>
+          <td><span style="font-weight:700;">${bet.selectValue}</span></td>
+          <td>₹${bet.betAmount}</td>
+          <td style="text-align: right;"><span class="status-tag ${statusClass}">${displayWin}</span></td>
+        </tr>`;
+      });
+      injector.innerHTML = html;
+      updatePaginationButtons(currentUserPage, data.hasMore);
+    } else {
+      injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No bets placed in ${activeGameMode}.</td></tr>`;
     }
+  })
+  .catch(() => {
+    if(injector.innerHTML === "") {
+      injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading bet logs.</td></tr>`;
+    }
+  });
+}
+
     
                 // === परमानेंट इलाज: नया रिजल्ट सबसे पहले (बाईं तरफ) दिखाने का लॉजिक ===
     function fetchLastRoundResult() {
@@ -479,6 +483,47 @@
         syncTimerWithServer();
         runLocalClockEngine();
     });
+    // === FIX: DEFINING PAGINATION FUNCTIONS ===
+window.changePage = function(direction) {
+  if (activeSubTab === 'game') {
+    currentGamePage += direction;
+    if (currentGamePage < 1) currentGamePage = 1;
+    fetchLiveGameHistory();
+  } else {
+    currentUserPage += direction;
+    if (currentUserPage < 1) currentUserPage = 1;
+    fetchUserBetHistory();
+  }
+};
+
+window.updatePaginationButtons = function(currentPage, hasMore) {
+  const prevBtn = document.getElementById('prev-page-btn');
+  const nextBtn = document.getElementById('next-page-btn');
+  const display = document.getElementById('current-page-display');
+  
+  if(display) display.innerText = "Page: " + currentPage;
+  
+  if(prevBtn) {
+    if (currentPage > 1) {
+      prevBtn.disabled = false;
+      prevBtn.style.opacity = "1";
+    } else {
+      prevBtn.disabled = true;
+      prevBtn.style.opacity = "0.5";
+    }
+  }
+  
+  if(nextBtn) {
+    if (hasMore) {
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = "1";
+    } else {
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = "0.5";
+    }
+  }
+};
+
 </script>
 </body>
 </html>

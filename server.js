@@ -59,7 +59,7 @@ const liveGames = {
     "5m": { duration: 300, timeLeft: 300, currentPeriod: "" }
 };
 
-// === नया सीरियल पीरियड आईडी बनाने का सही फंक्शन ===
+// === पीरियड आईडी को सुरक्षित तरीके से आगे बढ़ाने का नया लॉजिक ===
 async function generateNewPeriodId(mode) {
     const now = new Date();
     const dateStr = now.getFullYear() +
@@ -67,34 +67,31 @@ async function generateNewPeriodId(mode) {
         now.getDate().toString().padStart(2, '0');
 
     try {
-        // डेटाबेस से आज का सबसे आख़िरी पीरियड रिकॉर्ड ढूँढें
-        const lastRecord = await Period.findOne({ 
-            gameMode: mode, 
-            periodId: { $regex: '^' + dateStr } 
+        // डेटाबेस से आज का सबसे आखिरी पीरियड रिकॉर्ड ढूंढें
+        const lastRecord = await Period.findOne({
+            gameMode: mode,
+            periodId: { $regex: '^' + dateStr }
         }).sort({ createdAt: -1 });
 
         let nextCount = 1;
         if (lastRecord) {
-            // अगर पुराना रिकॉर्ड है, तो आख़िरी के 3 डिजिट निकालकर उसमें 1 जोड़ें
             const lastCountStr = lastRecord.periodId.slice(-3);
             nextCount = parseInt(lastCountStr) + 1;
         }
 
-        // काउंटर को 3 डिजिट का बनाएं (जैसे: 001, 002, 003)
         const countStr = String(nextCount).padStart(3, '0');
         liveGames[mode].currentPeriod = dateStr + countStr;
-
+        console.log(`[${mode}] New Period Generated: ${liveGames[mode].currentPeriod}`);
     } catch (err) {
         console.error("Period ID error:", err);
-        // बैकअप के लिए अगर कोई दिक्कत आए तो 3 डिजिट रैंडम
         const randomSec = Math.floor(100 + Math.random() * 900);
         liveGames[mode].currentPeriod = dateStr + randomSec;
     }
 }
 
+// === रिजल्ट कैलकुलेशन और विनर चुनने का सटीक इंजन ===
 async function calculateGameResult(mode) {
     const game = liveGames[mode];
-    // Strictly use the period ID belonging ONLY to this specific game mode
     const activePeriod = game.currentPeriod;
 
     // 1. Fetch All Pending Bets strictly for THIS game mode and THIS period ID
@@ -108,8 +105,6 @@ async function calculateGameResult(mode) {
 
     // Array to store company's NET PROFIT for each candidate number (0 to 9)
     let candidateNetProfits = Array(10).fill(0);
-
-    // FIX: Using string split to securely inject green numbers [1, 3, 7, 9] without system drops
     const greenNumbersArray = "1,3,7,9".split(",").map(Number);
 
     // 3. Loop through all 10 possible numbers to find company's net profit/loss
@@ -159,7 +154,6 @@ async function calculateGameResult(mode) {
     const finalNumber = safestNumbersPool[Math.floor(Math.random() * safestNumbersPool.length)];
     const num = Number(finalNumber);
 
-    // 5. Establish parameters for the winning number
     const finalSize = num >= 5 ? "Big" : "Small";
     let finalColor = "Red";
     if (num === 0 || num === 5) {
@@ -170,7 +164,7 @@ async function calculateGameResult(mode) {
         finalColor = "Red";
     }
 
-    // 6. Save round outcome into database periods history with explicit mode tag
+    // 5. Save round outcome into database periods history
     const newPeriod = new Period({
         gameMode: mode,
         periodId: activePeriod,
@@ -180,52 +174,55 @@ async function calculateGameResult(mode) {
     });
     await newPeriod.save();
 
-    // 7. Strict Multi-Bet Distribution Engine for users (Fixed Loop structure)
-    await Promise.all(pendingBets.map(async (bet) => {
-        let isWin = false;
-        let currentMultiplier = 0;
-        const commissionRate = 0.02;
-        const tradeAmount = bet.betAmount * (1 - commissionRate);
-        const userSelection = String(bet.selectValue).trim();
+    // 6. Strict Multi-Bet Distribution Engine (for...of लूप से वॉलेट अपडेट)
+    for (let bet of pendingBets) {
+        try {
+            let isWin = false;
+            let currentMultiplier = 0;
+            const commissionRate = 0.02;
+            const tradeAmount = bet.betAmount * (1 - commissionRate);
+            const userSelection = String(bet.selectValue).trim();
 
-        if (userSelection === String(num)) {
-            isWin = true;
-            currentMultiplier = 9;
-        } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === finalSize) {
-            isWin = true;
-            currentMultiplier = 2;
-        } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalColor) {
-            isWin = true;
-            currentMultiplier = 2;
-        } else if ((userSelection === "Green" && num === 5) || (userSelection === "Red" && num === 0)) {
-            isWin = true;
-            currentMultiplier = 1.5;
-        } else if (userSelection === "Violet" && (num === 0 || num === 5)) {
-            isWin = true;
-            currentMultiplier = 4.5;
-        }
+            if (userSelection === String(num)) {
+                isWin = true;
+                currentMultiplier = 9;
+            } else if ((userSelection === "Big" || userSelection === "Small") && userSelection === finalSize) {
+                isWin = true;
+                currentMultiplier = 2;
+            } else if ((userSelection === "Green" || userSelection === "Red") && userSelection === finalColor) {
+                isWin = true;
+                currentMultiplier = 2;
+            } else if ((userSelection === "Green" && num === 5) || (userSelection === "Red" && num === 0)) {
+                isWin = true;
+                currentMultiplier = 1.5;
+            } else if (userSelection === "Violet" && (num === 0 || num === 5)) {
+                isWin = true;
+                currentMultiplier = 4.5;
+            }
 
-        if (isWin) {
-            const winAmt = tradeAmount * currentMultiplier;
-            bet.winAmount = Number(winAmt.toFixed(2));
-            bet.status = 'Win';
-            
-            await User.findOneAndUpdate(
-                { phone: bet.phone },
-                { $inc: { balance: bet.winAmount } }
-            );
-        } else {
-            bet.winAmount = 0;
-            bet.status = 'Loss';
+            if (isWin) {
+                const winAmt = tradeAmount * currentMultiplier;
+                bet.winAmount = Number(winAmt.toFixed(2));
+                bet.status = 'Win';
+                
+                await User.findOneAndUpdate(
+                    { phone: bet.phone },
+                    { $inc: { balance: bet.winAmount } }
+                );
+            } else {
+                bet.winAmount = 0;
+                bet.status = 'Loss';
+            }
+            await bet.save();
+        } catch (betError) {
+            console.error("Error processing individual bet:", betError);
         }
-        await bet.save();
-    }));
+    }
 }
 
-
-// === बैकएंड का टाइमर चालू करने का सही इंजन ===
+// === 8. FIXED: लॉक और सिंक किया गया नया टाइमर इंजन ===
 function startServerTimerEngine() {
-    // शुरुआती पीरियड आईडी जनरेट करने के लिए क्रमबद्ध लूप
+    // सर्वर शुरू होते ही पहली बार सभी गेम के लिए पीरियड जनरेट करें
     (async () => {
         for (const mode of Object.keys(liveGames)) {
             await generateNewPeriodId(mode);
@@ -233,20 +230,22 @@ function startServerTimerEngine() {
     })();
 
     setInterval(async () => {
-        // FIX: forEach हटाकर for...of लगाया ताकि async/await सही क्रम में काम करे
         for (const mode of Object.keys(liveGames)) {
             const game = liveGames[mode];
             if (game.timeLeft <= 0) {
+                // यहाँ गेम का टाइमर कुछ पलों के लिए लॉक हो जाएगा ताकि डेटाबेस क्लैश न हो
+                game.timeLeft = 999; 
                 try {
-                    // पहले रिजल्ट कैलकुलेट होकर डेटाबेस में सेव होगा
+                    // 1. पहले रिजल्ट की गणना पूरी करके डेटाबेस में सेव करेंगे
                     await calculateGameResult(mode);
-                    // रिजल्ट पूरी तरह सेव होने के बाद ही नया पीरियड आईडी जनरेट होगा
+                    // 2. रिजल्ट का काम पूरा खत्म होने के बाद ही अगला नया पीरियड आईडी बनेगा
                     await generateNewPeriodId(mode);
                 } catch (err) {
                     console.error(`Error processing round for ${mode}:`, err);
                 }
+                // सब काम हो जाने के बाद टाइमर दोबारा अपनी मूल अवधि (30s, 60s आदि) पर वापस आ जाएगा
                 game.timeLeft = game.duration;
-            } else {
+            } else if (game.timeLeft !== 999) {
                 game.timeLeft--;
             }
         }

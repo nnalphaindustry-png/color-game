@@ -229,6 +229,107 @@
 </div>
 
 </div>
+<!-- CUSTM GAME RESULT MODAL (WIN/LOSS POPUP) -->
+<div id="custom-result-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; font-family: sans-serif;">
+  <div style="width: 90%; max-width: 360px; text-align: center; position: relative;">
+    
+    <!-- VIP Banner Card Area -->
+    <div id="modal-banner-card" style="background: linear-gradient(180deg, #ff7675 0%, #ef3e3e 100%); border-radius: 24px; padding: 20px 15px 25px 15px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2);">
+      
+      <!-- Top Trophy/Rocket Icon Element -->
+      <div id="modal-status-icon" style="width: 80px; height: 80px; background: #ffeaa7; border-radius: 50%; margin: -60px auto 10px auto; display: flex; align-items: center; justify-content: center; font-size: 38px; box-shadow: 0 6px 12px rgba(0,0,0,0.2); border: 4px solid #fff;">🏆</div>
+      
+      <h2 id="modal-title-text" style="font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Congratulations</h2>
+      
+      <!-- Lottery Results Section -->
+      <div style="background: rgba(0,0,0,0.15); padding: 10px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-around; align-items: center; font-size: 14px; font-weight: 600;">
+        <span>Lottery results</span>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span id="modal-res-color" style="padding: 3px 10px; border-radius: 6px; color: white; font-size: 12px; font-weight: 700;">Green</span>
+          <span id="modal-res-num" style="background: white; color: #111; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">5</span>
+          <span id="modal-res-size" style="color: rgba(255,255,255,0.9); margin-left: 5px;">Big</span>
+        </div>
+      </div>
+      
+      <!-- White Bonus Slip Area -->
+      <div style="background: white; border-radius: 14px; padding: 15px 10px; color: #333; box-shadow: inset 0 2px 5px rgba(0,0,0,0.15); position: relative; margin-bottom: 15px;">
+        <div id="modal-slip-label" style="font-size: 13px; font-weight: 700; color: #ef3e3e; margin-bottom: 5px;">Bonus</div>
+        <div id="modal-slip-amount" style="font-size: 28px; font-weight: 800; color: #ef3e3e; margin-bottom: 5px;">+₹980.00</div>
+        <div style="font-size: 11px; color: #7f8c8d; line-height: 1.4;">
+          <div id="modal-slip-mode">Period: WinGo 1 Min</div>
+          <div id="modal-slip-period" style="letter-spacing: 0.5px;">20260626100010599</div>
+        </div>
+      </div>
+      
+      <!-- Auto Close Text Element -->
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600;">
+        <span style="background: rgba(255,255,255,0.2); width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">✓</span>
+        <span id="modal-timer-text">3 seconds auto close</span>
+      </div>
+    </div>
+    
+    <!-- Bottom Close X Button -->
+    <button onclick="closeResultModal()" style="background: transparent; border: 2px solid white; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; font-weight: 400; margin-top: 20px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s;">✕</button>
+  </div>
+</div>
+<!-- CUSTOM BET AMOUNT MODAL PANEL -->
+<div id="custom-bet-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9998; justify-content: center; align-items: flex-end; font-family: sans-serif;">
+  <div style="width: 100%; max-width: 450px; background: white; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out; color: #333;">
+    
+    <!-- Top Header Title -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f3f5; padding-bottom: 10px;">
+      <h3 style="font-size: 16px; font-weight: 700; color: #111;">Join Wingo</h3>
+      <span id="bet-modal-selected-tag" style="background: #ff4d4d; color: white; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase;">Green</span>
+    </div>
+
+    <!-- Amount Selection Buttons (₹10, ₹100, ₹500, ₹1000) -->
+    <div style="margin-bottom: 15px;">
+      <div style="font-size: 12px; color: #888; font-weight: 600; margin-bottom: 8px;">Base Amount</div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="base-amt-btn active" onclick="selectBaseAmount(10, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹10</button>
+        <button type="button" class="base-amt-btn" onclick="selectBaseAmount(100, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹100</button>
+        <button type="button" class="base-amt-btn" onclick="selectBaseAmount(500, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹500</button>
+        <button type="button" class="base-amt-btn" onclick="selectBaseAmount(1000, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹1000</button>
+      </div>
+    </div>
+
+    <!-- Multiplier Selection Buttons (X1, X5, X10, X20) -->
+    <div style="margin-bottom: 20px;">
+      <div style="font-size: 12px; color: #888; font-weight: 600; margin-bottom: 8px;">Multiplier</div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" class="mult-btn active" onclick="selectMultiplier(1, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X1</button>
+        <button type="button" class="mult-btn" onclick="selectMultiplier(5, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X5</button>
+        <button type="button" class="mult-btn" onclick="selectMultiplier(10, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X10</button>
+        <button type="button" class="mult-btn" onclick="selectMultiplier(20, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X20</button>
+      </div>
+    </div>
+
+    <!-- Total Amount Calculator Display Area -->
+    <div style="background: #f4f6fb; padding: 12px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 13px; color: #64748b; font-weight: 600;">Total Contract Money</span>
+      <span id="bet-modal-total-display" style="font-size: 18px; font-weight: 800; color: #f03e3e;">₹10</span>
+    </div>
+
+    <!-- Bottom Action Buttons (Cancel / Confirm Bet) -->
+    <div style="display: flex; gap: 12px;">
+      <button type="button" onclick="closeBetModal()" style="flex: 1; height: 44px; border: 1px solid #cbd5e1; border-radius: 22px; background: white; font-weight: 700; cursor: pointer; color: #64748b;">Cancel</button>
+      <button type="button" onclick="submitCustomBet()" style="flex: 1; height: 44px; border: none; border-radius: 22px; background: #f03e3e; color: white; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(240, 62, 62, 0.25);">Confirm Bet</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Extra Styles for Active States and Slide Animation -->
+<style>
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.base-amt-btn.active, .mult-btn.active { background: #f03e3e !important; color: white !important; border-color: #f03e3e !important; box-shadow: 0 2px 6px rgba(240, 62, 62, 0.15); }
+</style>
+<!-- CUSTOM VIP SUCCESS/ERROR TOAST ALERT -->
+<div id="custom-toast-alert" style="display: none; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.85); color: white; padding: 15px 30px; border-radius: 12px; z-index: 10000; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-family: sans-serif; min-width: 200px; border: 1px solid rgba(255,255,255,0.1);">
+  <div id="toast-alert-icon" style="font-size: 30px; margin-bottom: 8px; color: #2ecc71;">✓</div>
+  <div id="toast-alert-msg" style="font-size: 14px; font-weight: 600; letter-spacing: 0.5px;">Bet placed successfully!</div>
+</div>
+
 <script>
     const BACKEND_URL = "https://color-game-1kc2.onrender.com";
     let activeGameMode = "30s"; 
@@ -402,20 +503,53 @@ function fetchUserBetHistory() {
     }
     
     function syncTimerWithServer() {
-        fetch(`${BACKEND_URL}/api/game-sync`)
-            .then(res => res.json())
-            .then(resData => {
-                if (resData.success && resData.data[activeGameMode]) {
-                    const serverGame = resData.data[activeGameMode];
-                    document.getElementById('text-period-id').innerText = serverGame.currentPeriod;
-                    localSecondsLeft = serverGame.timeLeft;
-                    updateTimerUI(localSecondsLeft);
-                    
-                    fetchLastRoundResult();
-                    if (activeSubTab === 'game') fetchLiveGameHistory(); else fetchUserBetHistory();
-                }
-            });
+  fetch(`${BACKEND_URL}/api/game-sync`)
+  .then(res => res.json())
+  .then(resData => {
+    if (resData.success && resData.data[activeGameMode]) {
+      const serverGame = resData.data[activeGameMode];
+      
+      // पुराना पीरियड आईडी और नया पीरियड आईडी चेक करने के लिए
+      const oldPeriodId = document.getElementById('text-period-id').innerText;
+      document.getElementById('text-period-id').innerText = serverGame.currentPeriod;
+      localSecondsLeft = serverGame.timeLeft;
+      updateTimerUI(localSecondsLeft);
+      fetchLastRoundResult();
+      
+      if (activeSubTab === 'game') fetchLiveGameHistory(); else fetchUserBetHistory();
+
+      // यदि राउंड बदल गया है (नया पीरियड आ गया है) और पिछला रिजल्ट मौजूद है
+      if (oldPeriodId && oldPeriodId !== "Loading..." && oldPeriodId !== serverGame.currentPeriod && serverGame.lastResult) {
+        const phone = localStorage.getItem('user_phone');
+        
+        // यूजर की सबसे ताज़ा बेट चेक करने के लिए एपीआई कॉल
+        fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}`)
+        .then(r => r.json())
+        .then(betData => {
+          if (betData.success && betData.list && betData.list.length > 0) {
+            // सबसे नवीनतम बेट ढूंढें जो अभी-अभी समाप्त हुए राउंड (oldPeriodId) की हो
+            const lastBet = betData.list.find(b => b.periodId === oldPeriodId);
+            
+            if (lastBet && (lastBet.status === "Win" || lastBet.status === "Loss")) {
+              const isWin = lastBet.status === "Win";
+              // वीआईपी पॉपअप को कॉल करें
+              window.showResultModal(
+                isWin, 
+                lastBet.winAmount, 
+                lastBet.betAmount, 
+                oldPeriodId, 
+                serverGame.lastResult.number, 
+                serverGame.lastResult.color, 
+                serverGame.lastResult.number >= 5 ? "Big" : "Small"
+              );
+            }
+          }
+        });
+      }
     }
+  });
+}
+
 
     function updateTimerUI(totalSeconds) {
         const minutes = Math.floor(totalSeconds / 60);
@@ -453,30 +587,97 @@ function fetchUserBetHistory() {
         }, 1000);
     }
 
-    function openBetPopup(selectedValue) {
-        const amount = prompt(`You selected [${selectedValue}]. Enter bet amount (Rs):`, "10");
-        if (!amount || isNaN(amount) || parseInt(amount) <= 0) return;
+    // === CUSTOM BET MODAL CONTROLLER & MULTIPLIER LOGIC ===
+let currentSelectedValueForBet = "";
+let currentBaseAmount = 10;
+let currentMultiplier = 1;
 
-        fetch(`${BACKEND_URL}/api/place-bet`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                phone: localStorage.getItem('user_phone'),
-                gameMode: activeGameMode,
-                periodId: document.getElementById('text-period-id').innerText,
-                selectValue: selectedValue,
-                betAmount: parseInt(amount)
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.message);
-            if (data.success) {
-                document.getElementById('wallet-balance').innerText = parseFloat(data.newBalance).toFixed(2);
-                if (activeSubTab === 'user') fetchUserBetHistory();
-            }
-        });
+window.openBetPopup = function(selectedValue) {
+  if (localSecondsLeft <= 5) {
+    alert("Round betting locked! Wait for next round.");
+    return;
+  }
+
+  currentSelectedValueForBet = selectedValue;
+  currentBaseAmount = 10;
+  currentMultiplier = 1;
+
+  const modal = document.getElementById('custom-bet-modal');
+  const tag = document.getElementById('bet-modal-selected-tag');
+  
+  if (!modal || !tag) return;
+
+  tag.innerText = selectedValue;
+  
+  if (selectedValue === 'Green' || selectedValue === '1' || selectedValue === '3' || selectedValue === '7' || selectedValue === '9') {
+    tag.style.background = "#2ecc71";
+  } else if (selectedValue === 'Red' || selectedValue === '2' || selectedValue === '4' || selectedValue === '6' || selectedValue === '8') {
+    tag.style.background = "#ff4d4d";
+  } else if (selectedValue === 'Violet' || selectedValue === '0' || selectedValue === '5') {
+    tag.style.background = "#9b59b6";
+  } else {
+    tag.style.background = selectedValue === 'Big' ? "#e67e22" : "#3498db";
+  }
+
+  document.querySelectorAll('.base-amt-btn').forEach((b, i) => i === 0 ? b.classList.add('active') : b.classList.remove('active'));
+  document.querySelectorAll('.mult-btn').forEach((b, i) => i === 0 ? b.classList.add('active') : b.classList.remove('active'));
+  
+  updateTotalBetDisplay();
+  modal.style.display = "flex";
+};
+
+window.selectBaseAmount = function(amount, element) {
+  currentBaseAmount = amount;
+  document.querySelectorAll('.base-amt-btn').forEach(btn => btn.classList.remove('active'));
+  element.classList.add('active');
+  updateTotalBetDisplay();
+};
+
+window.selectMultiplier = function(mult, element) {
+  currentMultiplier = mult;
+  document.querySelectorAll('.mult-btn').forEach(btn => btn.classList.remove('active'));
+  element.classList.add('active');
+  updateTotalBetDisplay();
+};
+
+function updateTotalBetDisplay() {
+  const display = document.getElementById('bet-modal-total-display');
+  if (display) display.innerText = "₹" + (currentBaseAmount * currentMultiplier);
+}
+
+window.closeBetModal = function() {
+  const modal = document.getElementById('custom-bet-modal');
+  if (modal) modal.style.display = "none";
+};
+
+window.submitCustomBet = function() {
+  const finalAmount = currentBaseAmount * currentMultiplier;
+  const periodId = document.getElementById('text-period-id').innerText;
+  
+  closeBetModal();
+
+  fetch(`${BACKEND_URL}/api/place-bet`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      phone: localStorage.getItem('user_phone'),
+      gameMode: activeGameMode,
+      periodId: periodId,
+      selectValue: currentSelectedValueForBet,
+      betAmount: finalAmount
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    window.showToastAlert(data.message, data.success);
+    
+    if (data.success) {
+      document.getElementById('wallet-balance').innerText = parseFloat(data.newBalance).toFixed(2);
+      if (activeSubTab === 'user') fetchUserBetHistory();
     }
+  })
+  .catch(() => window.showToastAlert("Server error during betting.", false));
+};
 
     document.addEventListener("DOMContentLoaded", () => {
         fetchLiveBalance();
@@ -522,6 +723,112 @@ window.updatePaginationButtons = function(currentPage, hasMore) {
       nextBtn.style.opacity = "0.5";
     }
   }
+};
+// === CUSTOM VIP RESULT POPUP LOGIC (WIN / LOSS) ===
+window.showResultModal = function(isWin, winAmount, betAmount, periodId, resNumber, resColor, resSize) {
+  const modal = document.getElementById('custom-result-modal');
+  const banner = document.getElementById('modal-banner-card');
+  const icon = document.getElementById('modal-status-icon');
+  const title = document.getElementById('modal-title-text');
+  const label = document.getElementById('modal-slip-label');
+  const amountDisplay = document.getElementById('modal-slip-amount');
+  
+  const resColorDisplay = document.getElementById('modal-res-color');
+  const resNumDisplay = document.getElementById('modal-res-num');
+  const resSizeDisplay = document.getElementById('modal-res-size');
+  const slipMode = document.getElementById('modal-slip-mode');
+  const slipPeriod = document.getElementById('modal-slip-period');
+  const timerText = document.getElementById('modal-timer-text');
+
+  if (!modal) return;
+
+  // Fill Common Data
+  resNumDisplay.innerText = resNumber;
+  resSizeDisplay.innerText = resSize;
+  slipPeriod.innerText = periodId;
+  slipMode.innerText = "Period: " + (activeGameMode === '30s' ? 'WinGo 30sec' : 'WinGo ' + activeGameMode);
+  
+  // Set Color Badge Background
+  if (resNumber === 0) {
+    resColorDisplay.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
+    resColorDisplay.innerText = "Violet Red";
+  } else if (resNumber === 5) {
+    resColorDisplay.style.background = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)";
+    resColorDisplay.innerText = "Violet Green";
+  } else {
+    resColorDisplay.style.background = resColor === "Green" ? "#2ecc71" : "#ff4d4d";
+    resColorDisplay.innerText = resColor;
+  }
+
+  // Setup Win or Loss Design
+  if (isWin) {
+    // Win Styling
+    banner.style.background = "linear-gradient(180deg, #ff7675 0%, #ef3e3e 100%)";
+    icon.innerText = "🏆";
+    title.innerText = "Congratulations";
+    label.innerText = "Bonus";
+    label.style.color = "#ef3e3e";
+    amountDisplay.innerText = "+₹" + parseFloat(winAmount).toFixed(2);
+    amountDisplay.style.color = "#ef3e3e";
+  } else {
+    // Loss Styling
+    banner.style.background = "linear-gradient(180deg, #747d8c 0%, #2f3542 100%)";
+    icon.innerText = "😥";
+    title.innerText = "Try Again";
+    label.innerText = "Loss Amount";
+    label.style.color = "#747d8c";
+    amountDisplay.innerText = "-₹" + parseFloat(betAmount).toFixed(2);
+    amountDisplay.style.color = "#747d8c";
+  }
+
+  // Display Modal
+  modal.style.display = "flex";
+
+  // 3 Seconds Auto Close Timer Logic
+  let timeLeft = 3;
+  timerText.innerText = timeLeft + " seconds auto close";
+  
+  if (window.modalTimerInterval) clearInterval(window.modalTimerInterval);
+  
+  window.modalTimerInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(window.modalTimerInterval);
+      closeResultModal();
+    } else {
+      timerText.innerText = timeLeft + " seconds auto close";
+    }
+  }, 1000);
+};
+
+window.closeResultModal = function() {
+  const modal = document.getElementById('custom-result-modal');
+  if (modal) modal.style.display = "none";
+  if (window.modalTimerInterval) clearInterval(window.modalTimerInterval);
+};
+// === CUSTOM SUCCESS / ERROR TOAST CONTROLLER ===
+window.showToastAlert = function(message, isSuccess) {
+  const toast = document.getElementById('custom-toast-alert');
+  const icon = document.getElementById('toast-alert-icon');
+  const msg = document.getElementById('toast-alert-msg');
+  
+  if (!toast || !icon || !msg) return;
+  
+  msg.innerText = message;
+  if (isSuccess) {
+    icon.innerText = "✓";
+    icon.style.color = "#2ecc71"; // Green color
+  } else {
+    icon.innerText = "✕";
+    icon.style.color = "#ff4d4d"; // Red color
+  }
+  
+  toast.style.display = "block";
+  
+  // 2 Seconds auto close
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 2000);
 };
 
 </script>

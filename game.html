@@ -276,19 +276,32 @@
         syncTimerWithServer();
     }
 
-        // === परमानेंट इलाज: गेम हिस्ट्री टेबल बिना किसी लोडिंग लैग के तुरंत बदलेगी ===
+            // === सुधार: नीचे हिस्ट्री टेबल में 0 और 5 नंबर का रंग 100% सही दिखाने का लॉजिक ===
     function fetchLiveGameHistory() {
         const injector = document.getElementById('game-history-injector');
         if (!injector) return;
 
-        // ध्यान दें: हमने यहाँ से लोडिंग टेक्स्ट हटा दिया है, अब यह बैकग्राउंड में तुरंत डेटा रिप्लेस करेगा
         fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.list.length > 0) {
                     let html = "";
                     data.list.forEach(row => {
-                        let colorStyle = row.resultColor === "Green" ? "background:#2ecc71;" : row.resultColor === "Red" ? "background:#ff4d4d;" : "background:linear-gradient(135deg,#ff4d4d 50%,#9b59b6 50%);";
+                        let colorStyle = "";
+                        
+                        // रंगों का असली नियम जो ऊपर बैनर से मैच करेगा
+                        if (row.resultNumber === 0) {
+                            // 0 नंबर = आधा लाल और आधा वायलेट
+                            colorStyle = "background: linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%);";
+                        } else if (row.resultNumber === 5) {
+                            // 5 number = आधा हरा और आधा वायलेट (जो नीचे गलत आ रहा था)
+                            colorStyle = "background: linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%);";
+                        } else if (row.resultColor === "Green") {
+                            colorStyle = "background: #2ecc71;";
+                        } else if (row.resultColor === "Red") {
+                            colorStyle = "background: #ff4d4d;";
+                        }
+
                         const sizeTag = row.resultSize === "Big" ? '<span class="size-tag-text size-tag-big">Big</span>' : '<span class="size-tag-text size-tag-small">Small</span>';
                         
                         html += `<tr>
@@ -309,7 +322,7 @@
                 }
             });
     }
-
+    
     // === परमानेंट इलाज: यूज़र बेट हिस्ट्री टेबल बैकग्राउंड अपडेट लॉजिक ===
     function fetchUserBetHistory() {
         const injector = document.getElementById('user-history-injector');

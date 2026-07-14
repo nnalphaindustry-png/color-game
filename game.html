@@ -1214,6 +1214,22 @@ window.openDetailPopup = function(encodedData) {
     
     document.body.insertAdjacentHTML('beforeend', popupHtml);
 };
+// ---- होम पेज के बटन को चालू करने का लॉजिक ----
+document.addEventListener("DOMContentLoaded", () => {
+    // अगर आपके कोड में पहले से fetchLiveBalance() है तो उसे रहने दें
+    if (typeof fetchLiveBalance === 'function') fetchLiveBalance();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const modeFromUrl = urlParams.get('mode'); // यह होम पेज से आए mode को पढ़ेगा
+    
+    if (modeFromUrl && ['30s', '1m', '3m', '5m'].includes(modeFromUrl)) {
+        if (typeof switchGameMode === 'function') {
+            switchGameMode(modeFromUrl); // सही टाइमर चालू करेगा
+        }
+    }
+    
+    if (typeof runLocalClockEngine === 'function') runLocalClockEngine();
+});
 
 </script>
 </body>

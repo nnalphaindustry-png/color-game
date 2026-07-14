@@ -171,6 +171,7 @@ async function calculateGameResult(mode) {
       await bet.save(); // Save bet record status
     }
     
+}
 
 // === बैकएंड का टाइमर चालू करने का सही इंजन ===
 function startServerTimerEngine() {

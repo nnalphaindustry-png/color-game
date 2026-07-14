@@ -134,25 +134,27 @@ async function calculateGameResult(mode) {
         multiplier = 9;
       } 
       // Check color selection
-      else if (bet.selectValue === finalColor) {
+            // === BUG FIX: STRICT COLOR SELECTION CHECK ===
+      else if ((bet.selectValue === "Green" || bet.selectValue === "Red") && bet.selectValue === finalColor) {
         isWin = true;
-        // Half Win logic for Violet mix (0 or 5)
         if (finalNumber === 0 || finalNumber === 5) {
           multiplier = 1.5;
         } else {
           multiplier = 2;
         }
-      } 
+      }
+      
       // Check individual Violet selection (4.5x Reward)
       else if (bet.selectValue === "Violet" && (finalNumber === 0 || finalNumber === 5)) {
         isWin = true;
         multiplier = 4.5;
       }
-      // Check size selection (2x Reward)
-      else if (bet.selectValue === finalSize) {
+            // === BUG FIX: STRICT SIZE SELECTION CHECK ===
+      else if ((bet.selectValue === "Big" || bet.selectValue === "Small") && bet.selectValue === finalSize) {
         isWin = true;
         multiplier = 2;
       }
+      
 
       if (isWin) {
         const winAmt = tradeAmount * multiplier;

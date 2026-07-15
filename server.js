@@ -501,6 +501,25 @@ app.post('/api/place-deposit', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर एरर! कृपया दोबारा प्रयास करें।" });
     }
 });
+// === यूज़र की डिपॉजिट हिस्ट्री खींचने की एपीआई ===
+app.get('/api/deposit-history/:phone', async (req, res) => {
+    try {
+        const userPhone = req.params.phone.trim();
+
+        if (!userPhone) {
+            return res.json({ success: false, message: "Phone number is required!" });
+        }
+
+        // डेटाबेस से इस यूज़र के सभी डिपॉजिट्स नए से पुराने (createdAt: -1) के क्रम में ढूँढें
+        const history = await Deposit.find({ phone: userPhone }).sort({ createdAt: -1 });
+        
+        res.json({ success: true, history });
+
+    } catch (error) {
+        console.error("Fetch deposit history error:", error);
+        res.status(500).json({ success: false, message: "Internal server error!" });
+    }
+});
 
 // === ADMIN DASHBOARD STATS ROUTE ===
 app.get('/api/admin/stats', async (req, res) => {

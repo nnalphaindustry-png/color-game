@@ -1,1239 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>91 Goa Club - Win Go Game</title>
-    <!-- आइकॉन्स के लिए FontAwesome Library -->
-    <link rel="stylesheet" href="https://cloudflare.com">
-        <style>
-        :root { color-scheme: light !important; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
-        
-        .game-container { width: 100%; max-width: 450px; background-color: #f4f6fb; min-height: 100vh; position: relative; padding-bottom: 50px; }
-        
-        .wallet-card-wrapper { background-color: #f03e3e; padding: 12px 14px 18px 14px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
-        .game-title { color: white; font-size: 22px; font-weight: 800; font-style: italic; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
-        
-        .balance-box { background-color: white; border-radius: 20px; padding: 12px 15px; box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-        .balance-row { display: flex; justify-content: center; align-items: center; gap: 6px; margin-bottom: 2px; }
-        .currency-symbol { font-size: 28px; font-weight: 700; color: #111; }
-        .live-balance { font-size: 28px; font-weight: 700; color: #111; }
-        
-        .refresh-btn { background: #cbd5e1; border: none; width: 22px; height: 22px; border-radius: 5px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .refresh-btn:active { transform: scale(0.9); background: #94a3b8; }
-        .refresh-btn i { font-size: 12px; color: #475569; }
-        .wallet-label { display: flex; align-items: center; justify-content: center; gap: 4px; color: #70757a; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
-        
-        .btn-row { display: flex; gap: 10px; justify-content: center; }
-        .action-btn { flex: 1; height: 38px; border: none; border-radius: 20px; color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .action-btn:active { transform: scale(0.96); }
-        .btn-withdraw { background-color: #f03e3e; }
-        .btn-deposit { background-color: #2ecc71; }
-                .notification-card { background-color: #fff !important; padding: 6px 12px; display: flex; align-items: center; gap: 10px; border-radius: 20px; width: 93%; margin: 12px auto 12px auto; box-shadow: 0 2px 6px rgba(0,0,0,0.03); border: 1px solid #eef2f5; }
-        .notification-card i { color: #f03e3e !important; font-size: 14px; flex-shrink: 0; }
-        .marquee-container { flex: 1; overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
-        .marquee-text { display: inline-block; padding-left: 100%; animation: marqueeEffect 15s linear infinite; font-size: 12px; color: #444 !important; font-weight: 600; }
-        @keyframes marqueeEffect { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
-        .btn-detail { background-color: #ff7675; color: white; border: none; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 Goa Club - Win Go</title>
+<style>
+:root { color-scheme: light !important; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
 
-        .game-modes-tabs-container { display: flex; justify-content: space-between; gap: 6px; width: 93%; margin: 10px auto; }
-        .mode-tab-btn { flex: 1; background-color: white; border: none; border-radius: 10px; padding: 10px 4px; text-align: center; color: #7f8c8d; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: 0.2s; }
-        .mode-tab-btn.active { background: linear-gradient(135deg, #ff4d4d, #f03e3e); color: white; box-shadow: 0 4px 10px rgba(240, 62, 62, 0.25); }
-
-        .premium-timer-banner { width: 93%; background: linear-gradient(135deg, #ff6b6b, #f03e3e); border-radius: 16px; margin: 12px auto; padding: 16px; color: white; position: relative; box-shadow: 0 4px 12px rgba(240, 62, 62, 0.2); }
-        .timer-banner-left { display: flex; flex-direction: column; justify-content: space-between; height: 65px; }
-        .how-to-play-btn { background-color: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 15px; color: white; font-size: 11px; font-weight: 600; padding: 4px 10px; width: fit-content; }
-        .active-mode-title-text { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin-top: 8px; }
-        
-        .banner-last-number-box { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-        .banner-number-text { font-size: 12px; color: rgba(255, 255, 255, 0.85); font-weight: 600; }
-        .banner-number-circle { width: 22px; height: 22px; border-radius: 50%; color: white; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.15); text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        
-        .timer-banner-right { position: absolute; right: 16px; top: 14px; text-align: right; }
-        .time-remaining-label-text { font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.9); margin-bottom: 6px; display: block; }
-        
-        .premium-digits-wrapper { display: flex; gap: 3px; justify-content: flex-end; align-items: center; }
-        .premium-digit-box { background-color: white; color: #111; font-size: 18px; font-weight: 800; width: 22px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
-        .timer-colon-separator { color: white; font-size: 18px; font-weight: 800; margin: 0 2px; }
-        .period-id-loading-text { font-size: 12px; color: rgba(255, 255, 255, 0.8); margin-top: 6px; display: block; font-weight: 600; }
-                .premium-color-row { display: flex; justify-content: space-between; gap: 10px; width: 93%; margin: 15px auto; }
-        .premium-color-btn { flex: 1; height: 42px; border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
-        .p-btn-green { background-color: #2ecc71; }
-        .p-btn-violet { background-color: #9b59b6; }
-        .p-btn-red { background-color: #ff4d4d; }
-
-        .premium-numbers-card-box { width: 93%; background-color: white; border-radius: 16px; padding: 15px 12px; margin: 15px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px 10px; }
-        .premium-num-circle { aspect-ratio: 1 / 1; border: none; border-radius: 50%; color: white; font-size: 18px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 -4px 8px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.1); text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-        .p-num-green { background: radial-gradient(circle at 35% 35%, #5cd68a, #2ecc71); }
-        .p-num-red { background: radial-gradient(circle at 35% 35%, #ff7675, #e74c3c); }
-        .p-num-0 { background: linear-gradient(135deg, #e74c3c 50%, #9b59b6 50%); }
-        .p-num-5 { background: linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%); }
-
-        .premium-size-row { display: flex; gap: 12px; width: 93%; margin: 15px auto; }
-        .premium-size-btn { flex: 1; height: 46px; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
-        .p-btn-big { background: linear-gradient(to right, #ff9f43, #ff7675); }
-        .p-btn-small { background: linear-gradient(to right, #00cec9, #0984e3); }
-
-        .history-tabs-navigator { display: flex; background-color: #e2e8f0; width: 93%; margin: 20px auto 0 auto; border-radius: 12px; padding: 4px; gap: 4px; }
-        .sub-tab-trigger-btn { flex: 1; border: none; background: transparent; padding: 10px 0; font-size: 13px; font-weight: 700; color: #64748b; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-        .sub-tab-trigger-btn.active { background-color: white; color: #f03e3e; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-
-        .history-section-wrapper { width: 93%; background-color: white; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; margin: 0 auto 30px auto; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-        .history-table { width: 100%; border-collapse: collapse; text-align: center; }
-        .history-table th { font-size: 11px; color: #8e9aa7; font-weight: 700; text-transform: uppercase; padding-bottom: 10px; border-bottom: 2px solid #f1f3f5; }
-        .history-table td { font-size: 13px; color: #2c3e50; font-weight: 600; padding: 10px 0; border-bottom: 1px solid #f8fafc; }
-        
-        .history-badge-circle { width: 20px; height: 20px; border-radius: 50%; color: white; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15); }
-        .size-tag-text { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
-        .size-tag-big { background-color: #ffeaa7; color: #d35400; }
-        .size-tag-small { background-color: #dff9fb; color: #2980b9; }
-
-        .status-tag { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-        .status-win { background-color: #d4edda; color: #155724; }
-        .status-loss { background-color: #f8d7da; color: #721c24; }
-        .status-pending { background-color: #fff3cd; color: #856404; }
-
-/* --- एक्स्ट्रा सफ़ेद पेज को हटाकर गेम के असली पेज पर सेट करने का फिक्स --- */
-
-#view-user-history-list {
-    background: transparent !important; /* एक्स्ट्रा सफ़ेद बैकग्राउंड को पूरी तरह खत्म किया */
-    width: 100% !important;             /* चौड़ाई को गेम के ओरिजिनल पेज के बराबर किया */
-    margin: 0 auto !important;
-    padding: 0 !important;
-    box-shadow: none !important;        /* बाहरी फालतू शैडो हटाई */
+/* मुख्य मोबाइल कंटेनर */
+.app-container { 
+    width: 100%; 
+    max-width: 450px; 
+    background-color: #f4f6fb; 
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.05); 
+    padding-bottom: 30px;
 }
 
-.user-history-card-item {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    background: transparent !important; /* पूरी तरह ट्रांसपेरेंट ताकि गेम का असली सफ़ेद पेज पीछे से दिखे */
-    padding: 14px 16px !important;
-    margin: 0 !important;
-    border: none !important;
-    /* केवल हर रिकॉर्ड के नीचे एक बहुत हल्की और बारीक लाइन जो बटनों को अलग करेगी */
-    border-bottom: 1px solid #f1f5f9 !important; 
-    cursor: pointer !important;
+/* 1. टॉप लाल बैकग्राउंड और स्लिम वॉलेट कार्ड */
+.top-gradient-container {
+    background: #f03e3e; 
+    padding: 12px 15px 20px 15px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    position: relative;
 }
+.navbar-top { display: flex; align-items: center; position: relative; margin-bottom: 10px; }
+.back-arrow-btn { cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; z-index: 12; }
+.page-main-title { color: white; font-size: 16px; font-weight: 700; position: absolute; width: 100%; text-align: center; left: 0; z-index: 10; }
 
-/* आखिरी रिकॉर्ड के नीचे की लाइन हटा दी */
-.user-history-card-item:last-child {
-    border-bottom: none !important;
+.wallet-balance-white-card {
+    background: white; border-radius: 16px; padding: 12px 15px; text-align: center; width: 100%; margin-top: 5px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
 }
+.amount-row { display: flex; justify-content: center; align-items: center; gap: 8px; }
+.currency-symbol-amount { font-size: 26px; font-weight: 800; color: #111; }
+.refresh-balance-icon-btn { cursor: pointer; color: #666; display: flex; align-items: center; transition: transform 0.3s; }
+.refresh-balance-icon-btn svg { width: 16px; height: 16px; }
+.refresh-balance-icon-btn:active { transform: rotate(180deg); }
+.wallet-label-text { font-size: 12px; color: #8a99a8; font-weight: 600; margin-top: 2px; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
-.card-left-section {
-    display: flex !important;
-    align-items: center !important;
-    gap: 14px !important;
+.wallet-action-buttons-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.action-btn-main { border: none; border-radius: 20px; padding: 8px 0; font-size: 14px; font-weight: 700; color: white; cursor: pointer; text-align: center; text-decoration: none; transition: transform 0.1s; }
+.action-btn-main:active { transform: scale(0.96); }
+.btn-withdraw-red { background: #f03e3e; }
+.btn-deposit-green { background: #2aa757; }
+
+/* 2. चलता हुआ मोटा मारकी सूचना बार */
+.moving-notification-strip-wrapper {
+    background: white; width: 92%; margin: 10px auto 0 auto; border-radius: 20px; 
+    padding: 12px 16px; 
+    display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); overflow: hidden;
 }
+.speaker-icon-box { color: #f03e3e; display: flex; align-items: center; }
+.speaker-icon-box svg { width: 16px; height: 16px; }
+.marquee-container-box { flex: 1; overflow: hidden; white-space: nowrap; position: relative; }
+.marquee-scrolling-text { display: inline-block; padding-left: 100%; animation: marqueeSpeedRule 15s linear infinite; font-size: 12px; color: #444; font-weight: 600; }
+@keyframes marqueeSpeedRule { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+.detail-static-btn { background: #ff6b6b; color: white; border: none; border-radius: 12px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+/* 3. गेम मोड सेलेक्शन टैब्स */
+.game-modes-tab-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 92%; margin: 15px auto 12px auto; }
+.mode-tab-item-btn { background: white; border: none; border-radius: 14px; padding: 10px 4px; font-size: 13px; font-weight: 700; color: #8a99a8; cursor: pointer; text-align: center; line-height: 1.3; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: all 0.2s; }
+.mode-tab-item-btn.active { background: #f03e3e; color: white; }
 
-/* --- सिर्फ बॉक्स को थोड़ा सा और मोटा करने के लिए सीएसएस --- */
-.bet-choice-rect {
-    color: white !important;
-    font-size: 11px !important;
-    font-weight: 800 !important; /* अक्षरों को भी थोड़ा और बोल्ड किया */
-    width: 52px !important;    
-    height: 36px !important;   /* ऊंचाई को 30px से बढ़ाकर 36px किया ताकि बॉक्स मोटा दिखे */
-    border-radius: 8px !important; 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-transform: uppercase !important;
-    /* अंदरूनी शैडो को थोड़ा मजबूत किया ताकि बटन मोटा और गद्देदार लगे */
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15) !important; 
+/* 4. मुख्य लाल टाइमर डैशबोर्ड टिकट */
+.main-red-timer-dashboard-card {
+    background: linear-gradient(to right, #ff4d4d, #f03e3e); width: 92%; margin: 0 auto 15px auto; border-radius: 20px; padding: 15px;
+    display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 6px 15px rgba(240,62,62,0.15); position: relative;
 }
+.timer-card-left-pane { display: flex; flex-direction: column; gap: 6px; }
+.how-to-play-pill-btn { background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; cursor: pointer; align-self: flex-start; }
+.current-selected-game-title { font-size: 16px; font-weight: 700; margin-top: 4px; }
+.current-period-display-row { font-size: 13px; opacity: 0.9; font-weight: 500; }
+.time-remaining-label-title { font-size: 13px; font-weight: 600; opacity: 0.95; }
+.digital-clock-boxes-row { display: flex; align-items: center; gap: 3px; }
+.clock-digit-box { background: white; color: #111; font-size: 20px; font-weight: 800; padding: 4px 8px; border-radius: 6px; min-width: 24px; text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.1); font-family: monospace; }
+.clock-colon-separator { font-size: 20px; font-weight: 800; color: white; margin: 0 1px; }
 
+/* 5. बेटिंग डिब्बा - कलर और साइज बटन स्लिम, नंबर्स मोटे */
+.betting-panel-card { background: white; width: 92%; margin: 15px auto; border-radius: 20px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); position: relative; }
+.color-bet-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+.color-btn { border: none; border-radius: 12px; padding: 10px 0; font-size: 14px; font-weight: 700; color: white; cursor: pointer; text-align: center; box-shadow: 0 3px 8px rgba(0,0,0,0.1); transition: transform 0.1s; }
+.color-btn:active { transform: scale(0.95); }
+.btn-green-color { background: #2aa757; }
+.btn-violet-color { background: #b53cd4; }
+.btn-red-color { background: #f03e3e; }
 
-.bet-info-text-block {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
-}
+/* 0-9 मोटे और इंसानी टाइप नंबर्स */
+.numbers-bet-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px 10px; margin: 15px 0; }
+.num-btn { border: none; border-radius: 50%; width: 46px; height: 46px; font-size: 18px; font-weight: 900; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.1s; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+.num-btn:active { transform: scale(0.90); }
+.num-red { background: linear-gradient(135deg, #ff4757, #e74c3c); }
+.num-green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.num-violet-red { background: linear-gradient(135deg, #e74c3c 45%, #9b59b6 55%); }
+.num-violet-green { background: linear-gradient(135deg, #2ecc71 45%, #9b59b6 55%); }
 
-.bet-period-row {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #2d3748 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-}
+/* बिग और स्मॉल बटन्स */
+.size-bet-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+.size-btn { border: none; border-radius: 12px; padding: 10px 0; font-size: 15px; font-weight: 700; color: white; cursor: pointer; text-align: center; box-shadow: 0 3px 8px rgba(0,0,0,0.08); transition: transform 0.1s; }
+.size-btn:active { transform: scale(0.96); }
+.btn-big-size { background: #e67e22; }
+.btn-small-size { background: #2980b9; }
 
-.small-arrow-down {
-    font-size: 8px !important;
-    color: #a0aec0 !important;
-}
+/* लॉक ओवरले स्क्रीन */
+.betting-disabled-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); border-radius: 20px; display: none; justify-content: center; align-items: center; z-index: 100; }
+.lock-message-box { background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; }
 
-.bet-time-row {
-    font-size: 11px !important;
-    color: #a0aec0 !important;
-    font-weight: 500 !important;
-}
-
-.card-right-section {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-end !important;
-    gap: 4px !important;
-}
-
-.status-border-badge {
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 12px !important;
-    border-radius: 6px !important;
-    min-width: 70px !important;
-    text-align: center !important;
-    background: #ffffff !important;
-}
-
-.badge-succeed { border: 1px solid #2ecc71 !important; color: #2ecc71 !important; }
-.badge-failed { border: 1px solid #ff4d4d !important; color: #ff4d4d !important; }
-.badge-pending { border: 1px solid #f1c40f !important; color: #f1c40f !important; }
-
-.bet-final-amount {
-    font-size: 13px !important;
-    font-weight: 700 !important;
-}
-
-    </style>
+/* अमाउंट सेलेक्टर पॉप-अप (मोडल) */
+.bet-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
+.bet-modal-box { background: white; width: 100%; max-width: 450px; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+.modal-header-title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 15px; color: #222; }
+.amount-chips-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+.chip-btn { background: #f4f6fb; border: 1px solid #e2e6f0; border-radius: 12px; padding: 10px 0; font-size: 14px; font-weight: 700; color: #444; cursor: pointer; text-align: center; }
+.chip-btn.active { background: #f03e3e; color: white; border-color: #f03e3e; }
+.multiplier-counter-row { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; background: #f4f6fb; padding: 10px 15px; border-radius: 12px; }
+.counter-btn-action { background: white; border: 1px solid #e2e6f0; width: 32px; height: 32px; font-size: 18px; font-weight: 700; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-action-footer-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+.modal-btn-footer { border: none; border-radius: 25px; padding: 12px 0; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
+.btn-modal-close { background: #e2e6f0; color: #555; }
+.btn-modal-submit-bet { background: #f03e3e; color: white; }
+</style>
 </head>
 <body>
-
-<div class="game-container">
-    <div class="wallet-card-wrapper">
-    <!-- 📌 तैरता हुआ बैक बटन (यह किसी भी डिज़ाइन को नहीं छेड़ेगा) -->
-<a href="home.html" style="position: absolute; left: 15px; top: 15px; text-decoration: none; color: #ffffff; font-size: 22px; font-weight: bold; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; z-index: 10; cursor: pointer;"><</a>
-
-        <div class="game-title">91 GOA CLUB</div>
-        <div class="balance-box">
-            <div class="balance-row">
-                <span class="currency-symbol">₹</span>
-                <span class="live-balance" id="wallet-balance">0.00</span>
-                <button class="refresh-btn" onclick="fetchLiveBalance()">
-                    <i class="fa-solid fa-rotate-right" id="refresh-icon"></i>
-                </button>
-            </div>
-            <div class="wallet-label"><span>👛 Wallet balance</span></div>
-            <div class="btn-row">
-                <button class="action-btn btn-withdraw" onclick="location.href='withdraw.html'">Withdraw</button>
-                <button class="action-btn btn-deposit" onclick="location.href='deposit.html'">Deposit</button>
-            </div>
+<div class="app-container">
+    
+    <!-- 1. टॉप वॉलेट नेविगेशन पैनल -->
+    <div class="top-gradient-container">
+        <div class="navbar-top">
+            <a href="profile.html" class="back-arrow-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <div class="page-main-title">Win Go</div>
         </div>
-    </div>
 
-    <div class="notification-card">
-        <i class="fa-solid fa-volume-high"></i>
-        <div class="marquee-container">
-            <span class="marquee-text">Welcome to 91 GOA CLUB! Daily deposits and withdrawals are running successfully. Bet safe and win big!</span>
-        </div>
-        <button class="btn-detail" onclick="alert('Opening Details...')">Detail</button>
-    </div>
-        <div class="game-modes-tabs-container">
-        <button class="mode-tab-btn active" id="tab-30s" onclick="switchGameMode('30s')">WinGo<br>30sec</button>
-        <button class="mode-tab-btn" id="tab-1m" onclick="switchGameMode('1m')">WinGo 1<br>Min</button>
-        <button class="mode-tab-btn" id="tab-3m" onclick="switchGameMode('3m')">WinGo 3<br>Min</button>
-        <button class="mode-tab-btn" id="tab-5m" onclick="switchGameMode('5m')">WinGo 5<br>Min</button>
-    </div>
+        <div class="wallet-balance-white-card">
+            <div class="amount-row">
+                <div class="currency-symbol-amount" id="live-wallet-balance-text">₹0.00</div>
+                <div class="refresh-balance-icon-btn" onclick="fetchLiveServerBalance()" id="refresh-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px; height:16px;">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="wallet-label-text">
+                <span style="font-size:13px;">👛</span> Wallet balance
+            </div>
 
-    <div class="premium-timer-banner" id="timer-banner-element">
-        <div class="timer-banner-left">
-            <button class="how-to-play-btn">How to play</button>
-            <div>
-                <div class="active-mode-title-text" id="text-active-mode-title">WinGo 30sec</div>
-                <div class="banner-last-number-box">
-    <span class="banner-number-text">Result:</span>
-    <!-- नया बॉक्स जो पिछले 5 राउंड के परिणाम एक लाइन में दिखाएगा -->
-    <div id="banner-results-flex-wrapper" style="display: flex; gap: 4px; align-items: center; margin-left: 2px;">
-        <span style="font-size:12px; color:rgba(255,255,255,0.6);">Loading...</span>
-    </div>
-</div>
-
+            <div class="wallet-action-buttons-row">
+                <a href="withdraw.html" class="action-btn-main btn-withdraw-red">Withdraw</a>
+                <a href="deposit.html" class="action-btn-main btn-deposit-green">Deposit</a>
             </div>
         </div>
-        
-        <div class="timer-banner-right">
-            <span class="time-remaining-label-text">Time remaining</span>
-            <div class="premium-digits-wrapper">
-                <div class="premium-digit-box" id="box-m1">0</div>
-                <div class="premium-digit-box" id="box-m2">0</div>
-                <span class="timer-colon-separator">:</span>
-                <div class="premium-digit-box" id="box-s1">0</div>
-                <div class="premium-digit-box" id="box-s2">0</div>
+    </div>
+
+    <!-- 2. चलता हुआ सूचना मारकी बार -->
+    <div class="moving-notification-strip-wrapper">
+        <div class="speaker-icon-box">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px; height:16px;">
+                <path d="M20 21c0 .55-.45 1-1 1h-2c-.55 0-1-.45-1-1v-1c0-.55.45-1 1-1h2c.55 0 1 .45 1 1v1zm-8-1H5c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h7V6H5c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v11h-8v6zm6-6h2v-3h-2v3zm0-5h2V6h-2v3z"/>
+            </svg>
+        </div>
+        <div class="marquee-container-box">
+            <div class="marquee-scrolling-text">
+                Withdrawals are running successfully. Bet safe and keep winning! 91 Goa Club trustable games.
             </div>
-            <span class="period-id-loading-text" id="text-period-id">Loading...</span>
         </div>
+        <button class="detail-static-btn" onclick="alert('Opening Notice Details...')">Detail</button>
     </div>
-        <div id="betting-interactive-panel">
-        <div class="premium-color-row">
-            <button class="premium-color-btn p-btn-green" onclick="openBetPopup('Green')">Green</button>
-            <button class="premium-color-btn p-btn-violet" onclick="openBetPopup('Violet')">Violet</button>
-            <button class="premium-color-btn p-btn-red" onclick="openBetPopup('Red')">Red</button>
-        </div>
-
-        <div class="premium-numbers-card-box">
-            <button class="premium-num-circle p-num-0" onclick="openBetPopup('0')">0</button>
-            <button class="premium-num-circle p-num-green" onclick="openBetPopup('1')">1</button>
-            <button class="premium-num-circle p-num-red" onclick="openBetPopup('2')">2</button>
-            <button class="premium-num-circle p-num-green" onclick="openBetPopup('3')">3</button>
-            <button class="premium-num-circle p-num-red" onclick="openBetPopup('4')">4</button>
-            <button class="premium-num-circle p-num-5" onclick="openBetPopup('5')">5</button>
-            <button class="premium-num-circle p-num-red" onclick="openBetPopup('6')">6</button>
-            <button class="premium-num-circle p-num-green" onclick="openBetPopup('7')">7</button>
-            <button class="premium-num-circle p-num-red" onclick="openBetPopup('8')">8</button>
-            <button class="premium-num-circle p-num-green" onclick="openBetPopup('9')">9</button>
-        </div>
-
-        <div class="premium-size-row">
-            <button class="premium-size-btn p-btn-big" onclick="openBetPopup('Big')">Big</button>
-            <button class="premium-size-btn p-btn-small" onclick="openBetPopup('Small')">Small</button>
-        </div>
-    </div>
-        <div class="history-tabs-navigator">
-        <button class="sub-tab-trigger-btn active" id="subtab-game" onclick="toggleSubTab('game')">Game History</button>
-        <button class="sub-tab-trigger-btn" id="subtab-user" onclick="toggleSubTab('user')">My History</button>
+        <!-- 3. गेम टाइम मोड सेलेक्शन टैब्स -->
+    <div class="game-modes-tab-row">
+        <button class="mode-tab-item-btn active" onclick="changeActiveGameMode('30s')">WinGo<br>30sec</button>
+        <button class="mode-tab-item-btn" onclick="changeActiveGameMode('1m')">WinGo 1<br>Min</button>
+        <button class="mode-tab-item-btn" onclick="changeActiveGameMode('3m')">WinGo 3<br>Min</button>
+        <button class="mode-tab-item-btn" onclick="changeActiveGameMode('5m')">WinGo 5<br>Min</button>
     </div>
 
-    <div class="history-section-wrapper">
-        <!-- FIXED: एक लाइन में सीधा दिखने वाला प्रीमियम लाल हेडर -->
-<table class="history-table" id="view-game-history-table" style="width: 100%; border-collapse: collapse; text-align: center;">
-    <thead>
-        <tr style="background-color: #ef4444;">
-            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-align: left; text-transform: uppercase; white-space: nowrap;">Period</th>
-            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">Number</th>
-            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">Big Small</th>
-            <th style="color: white; padding: 12px 8px; font-size: 13px; font-weight: 700; text-align: right; text-transform: uppercase; white-space: nowrap;">Color</th>
-        </tr>
-    </thead>
-
-    
-            <tbody id="game-history-injector">
-                <tr><td colspan="4" style="color:#aaa; padding:15px;">Loading game results...</td></tr>
-            </tbody>
-        </table>
-
-        <div id="view-user-history-list" style="display: none; width: 100%; padding: 10px 0;"></div>
-        
+    <!-- 4. मुख्य लाल टाइमर डैशबोर्ड टिकट -->
+    <div class="main-red-timer-dashboard-card">
+        <div class="timer-card-left-pane">
+            <button class="how-to-play-pill-btn">How to play</button>
+            <div class="current-selected-game-title" id="display-game-title-text">WinGo 30sec</div>
+            <div class="current-period-display-row">Period: <span id="display-live-period-number">Loading...</span></div>
+        </div>
+        <div class="timer-card-right-pane">
+            <div class="time-remaining-label-title">Time remaining</div>
+            <div class="digital-clock-boxes-row">
+                <span class="clock-digit-box" id="min-digit-1">0</span>
+                <span class="clock-digit-box" id="min-digit-2">0</span>
+                <span class="clock-colon-separator">:</span>
+                <span class="clock-digit-box" id="sec-digit-1">0</span>
+                <span class="clock-digit-box" id="sec-digit-2">0</span>
+            </div>
+        </div>
     </div>
-    <!-- NEW PAGINATION BUTTONS FOR PREVIOUS/NEXT HISTORY -->
-<div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 5px;">
-  <button id="prev-page-btn" onclick="changePage(-1)" style="background-color: #f03e3e; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; opacity: 0.5;" disabled>Prev</button>
-  <span id="current-page-display" style="font-size: 13px; font-weight: 700; color: #475569;">Page: 1</span>
-  <button id="next-page-btn" onclick="changePage(1)" style="background-color: #f03e3e; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">Next</button>
+
+    <!-- 5. बेटिंग पैनल - स्लिम कलर्स और साइज बटन्स + मोटे नंबर्स -->
+    <div class="betting-panel-card">
+        <div class="betting-disabled-overlay" id="lock-overlay-screen">
+            <div class="lock-message-box">⏳ Betting locked! Wait for next round...</div>
+        </div>
+
+        <!-- तीन मुख्य रंग बटन्स -->
+        <div class="color-bet-row">
+            <button class="color-btn btn-green-color" onclick="openBettingModal('Green')">Green</button>
+            <button class="color-btn btn-violet-color" onclick="openBettingModal('Violet')">Violet</button>
+            <button class="color-btn btn-red-color" onclick="openBettingModal('Red')">Red</button>
+        </div>
+
+        <!-- 0-9 नंबर्स ग्रिड -->
+        <div class="numbers-bet-grid">
+            <button class="num-btn num-violet-red" onclick="openBettingModal('0')">0</button>
+            <button class="num-btn num-green" onclick="openBettingModal('1')">1</button>
+            <button class="num-btn num-red" onclick="openBettingModal('2')">2</button>
+            <button class="num-btn num-green" onclick="openBettingModal('3')">3</button>
+            <button class="num-btn num-red" onclick="openBettingModal('4')">4</button>
+            <button class="num-btn num-violet-green" onclick="openBettingModal('5')">5</button>
+            <button class="num-btn num-red" onclick="openBettingModal('6')">6</button>
+            <button class="num-btn num-green" onclick="openBettingModal('7')">7</button>
+            <button class="num-btn num-red" onclick="openBettingModal('8')">8</button>
+            <button class="num-btn num-green" onclick="openBettingModal('9')">9</button>
+        </div>
+
+        <!-- बिग और स्माल बटन्स -->
+        <div class="size-bet-row">
+            <button class="size-btn btn-big-size" onclick="openBettingModal('Big')">Big</button>
+            <button class="size-btn btn-small-size" onclick="openBettingModal('Small')">Small</button>
+        </div>
+    </div>
+
 </div>
 
-</div>
-<!-- CUSTM GAME RESULT MODAL (WIN/LOSS POPUP) -->
-<div id="custom-result-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; font-family: sans-serif;">
-  <div style="width: 90%; max-width: 360px; text-align: center; position: relative;">
-    
-    <!-- VIP Banner Card Area -->
-    <div id="modal-banner-card" style="background: linear-gradient(180deg, #ff7675 0%, #ef3e3e 100%); border-radius: 24px; padding: 20px 15px 25px 15px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2);">
-      
-      <!-- Top Trophy/Rocket Icon Element -->
-      <div id="modal-status-icon" style="width: 80px; height: 80px; background: #ffeaa7; border-radius: 50%; margin: -60px auto 10px auto; display: flex; align-items: center; justify-content: center; font-size: 38px; box-shadow: 0 6px 12px rgba(0,0,0,0.2); border: 4px solid #fff;">🏆</div>
-      
-      <h2 id="modal-title-text" style="font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Congratulations</h2>
-      
-      <!-- Lottery Results Section -->
-      <div style="background: rgba(0,0,0,0.15); padding: 10px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-around; align-items: center; font-size: 14px; font-weight: 600;">
-        <span>Lottery results</span>
-        <div style="display: flex; gap: 6px; align-items: center;">
-          <span id="modal-res-color" style="padding: 3px 10px; border-radius: 6px; color: white; font-size: 12px; font-weight: 700;">Green</span>
-          <span id="modal-res-num" style="background: white; color: #111; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px;">5</span>
-          <span id="modal-res-size" style="color: rgba(255,255,255,0.9); margin-left: 5px;">Big</span>
+<!-- अमाउंट सेलेक्टर मोडल - अब ₹1 से सट्टा शुरू करने के विकल्प के साथ -->
+<div class="bet-modal-overlay" id="global-betting-modal">
+    <div class="bet-modal-box">
+        <div class="modal-header-title">Select Bet for: <span id="modal-selected-value-label" style="font-weight:800;">None</span></div>
+        <div class="amount-chips-row">
+            <button class="chip-btn active" onclick="selectBaseChipAmount(1)">₹1</button>
+            <button class="chip-btn" onclick="selectBaseChipAmount(5)">₹5</button>
+            <button class="chip-btn" onclick="selectBaseChipAmount(10)">₹10</button>
+            <button class="chip-btn" onclick="selectBaseChipAmount(50)">₹50</button>
         </div>
-      </div>
-      
-      <!-- White Bonus Slip Area -->
-      <div style="background: white; border-radius: 14px; padding: 15px 10px; color: #333; box-shadow: inset 0 2px 5px rgba(0,0,0,0.15); position: relative; margin-bottom: 15px;">
-        <div id="modal-slip-label" style="font-size: 13px; font-weight: 700; color: #ef3e3e; margin-bottom: 5px;">Bonus</div>
-        <div id="modal-slip-amount" style="font-size: 28px; font-weight: 800; color: #ef3e3e; margin-bottom: 5px;">+₹980.00</div>
-        <div style="font-size: 11px; color: #7f8c8d; line-height: 1.4;">
-          <div id="modal-slip-mode">Period: WinGo 1 Min</div>
-          <div id="modal-slip-period" style="letter-spacing: 0.5px;">20260626100010599</div>
+        <div class="multiplier-counter-row">
+            <span>Multiplier</span>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button class="counter-btn-action" onclick="updateMultiplierValue(-1)">-</button>
+                <span id="display-multiplier-text-count" style="font-weight:700; font-size:16px;">1</span>
+                <button class="counter-btn-action" onclick="updateMultiplierValue(1)">+</button>
+            </div>
         </div>
-      </div>
-      
-      <!-- Auto Close Text Element -->
-      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600;">
-        <span style="background: rgba(255,255,255,0.2); width: 16px; height: 16px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">✓</span>
-        <span id="modal-timer-text">3 seconds auto close</span>
-      </div>
-    </div>
-    
-    <!-- Bottom Close X Button -->
-    <button onclick="closeResultModal()" style="background: transparent; border: 2px solid white; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; font-weight: 400; margin-top: 20px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s;">✕</button>
-  </div>
-</div>
-<!-- CUSTOM BET AMOUNT MODAL PANEL -->
-<div id="custom-bet-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9998; justify-content: center; align-items: flex-end; font-family: sans-serif;">
-  <div style="width: 100%; max-width: 450px; background: white; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out; color: #333;">
-    
-    <!-- Top Header Title -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f3f5; padding-bottom: 10px;">
-      <h3 style="font-size: 16px; font-weight: 700; color: #111;">Join Wingo</h3>
-      <span id="bet-modal-selected-tag" style="background: #ff4d4d; color: white; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase;">Green</span>
-    </div>
-
-    <!-- Amount Selection Buttons (₹10, ₹100, ₹500, ₹1000) -->
-    <div style="margin-bottom: 15px;">
-      <div style="font-size: 12px; color: #888; font-weight: 600; margin-bottom: 8px;">Base Amount</div>
-      <div style="display: flex; gap: 8px;">
-        <button type="button" class="base-amt-btn active" onclick="selectBaseAmount(10, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹10</button>
-        <button type="button" class="base-amt-btn" onclick="selectBaseAmount(100, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹100</button>
-        <button type="button" class="base-amt-btn" onclick="selectBaseAmount(500, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹500</button>
-        <button type="button" class="base-amt-btn" onclick="selectBaseAmount(1000, this)" style="flex: 1; height: 36px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-weight: 700; cursor: pointer; color: #333;">₹1000</button>
-      </div>
-    </div>
-
-    <!-- Multiplier Selection Buttons (X1, X5, X10, X20) -->
-    <div style="margin-bottom: 20px;">
-      <div style="font-size: 12px; color: #888; font-weight: 600; margin-bottom: 8px;">Multiplier</div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button type="button" class="mult-btn active" onclick="selectMultiplier(1, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X1</button>
-        <button type="button" class="mult-btn" onclick="selectMultiplier(5, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X5</button>
-        <button type="button" class="mult-btn" onclick="selectMultiplier(10, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X10</button>
-        <button type="button" class="mult-btn" onclick="selectMultiplier(20, this)" style="flex: 1; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; color: #333;">X20</button>
-      </div>
-    </div>
-
-    <!-- Total Amount Calculator Display Area -->
-    <div style="background: #f4f6fb; padding: 12px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 13px; color: #64748b; font-weight: 600;">Total Contract Money</span>
-      <span id="bet-modal-total-display" style="font-size: 18px; font-weight: 800; color: #f03e3e;">₹10</span>
-    </div>
-
-    <!-- Bottom Action Buttons (Cancel / Confirm Bet) -->
-    <div style="display: flex; gap: 12px;">
-      <button type="button" onclick="closeBetModal()" style="flex: 1; height: 44px; border: 1px solid #cbd5e1; border-radius: 22px; background: white; font-weight: 700; cursor: pointer; color: #64748b;">Cancel</button>
-      <button type="button" onclick="submitCustomBet()" style="flex: 1; height: 44px; border: none; border-radius: 22px; background: #f03e3e; color: white; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(240, 62, 62, 0.25);">Confirm Bet</button>
-    </div>
-
-  </div>
-</div>
-
-<!-- Extra Styles for Active States and Slide Animation -->
-<style>
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.base-amt-btn.active, .mult-btn.active { background: #f03e3e !important; color: white !important; border-color: #f03e3e !important; box-shadow: 0 2px 6px rgba(240, 62, 62, 0.15); }
-</style>
-<!-- सुंदर और मॉडर्न बेट लॉक्ड पॉपअप (English Version) -->
-<div id="bet-locked-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100005; justify-content: center; align-items: center; font-family: sans-serif;">
-    <div style="width: 85%; max-width: 320px; background: white; border-radius: 20px; text-align: center; padding: 25px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); animation: popScale 0.25s ease-out; border: 1px solid rgba(0,0,0,0.05);">
-        <!-- चेतावनी वाला सुंदर आइकॉन -->
-        <div style="width: 60px; height: 60px; background: #fff5f5; color: #e74c3c; border-radius: 50%; margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 2px solid #fed7d7;">⏳</div>
-        
-        <!-- मुख्य हेडिंग (English) -->
-        <h3 style="color: #2d3748; font-size: 18px; font-weight: 700; margin-bottom: 8px;">Betting Locked!</h3>
-        
-        <!-- संदेश (English) -->
-        <p style="color: #718096; font-size: 14px; font-weight: 500; line-height: 1.5; margin-bottom: 20px;">The time for this round has expired. Please wait for the next round to start.</p>
-        
-        <!-- OK बटन (English) -->
-        <button onclick="document.getElementById('bet-locked-modal').style.display='none'" style="width: 100%; background: linear-gradient(135deg, #ff4d4d, #f03e3e); color: white; border: none; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(240, 62, 62, 0.2); transition: 0.2s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform='scale(1)'">OK</button>
+        <div style="font-size:14px; color:#555; text-align:right; font-weight:600;">
+            Total Bet Amount: <span id="display-total-final-payout-text" style="font-weight:800;">₹1</span>
+        </div>
+        <div class="modal-action-footer-buttons">
+            <button class="modal-btn-footer btn-modal-close" onclick="closeBettingModal()">Cancel</button>
+            <button class="modal-btn-footer btn-modal-submit-bet" onclick="submitBetToLiveServer()">Confirm Bet</button>
+        </div>
     </div>
 </div>
-
-<!-- पॉपअप के खुलने का सुंदर एनीमेशन इफेक्ट -->
-<style>
-@keyframes popScale {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-</style>
-
 <script>
-    const BACKEND_URL = "https://color-game-1kc2.onrender.com";
-    let activeGameMode = "30s"; 
-    let localSecondsLeft = 30;
-    let activeSubTab = "game"; 
-    // PAGINATION STATE VARIABLES
-let currentGamePage = 1;
-let currentUserPage = 1;
+const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
+const loggedInUserPhone = localStorage.getItem('user_phone') || "";
 
+let activeRunningMode = "30s"; 
+let currentSelectedBetValue = "";
+let chosenBaseChipAmount = 1; // डिफ़ॉल्ट रूप से ₹1 सेट
+let activeMultiplierCount = 1;
+let globalCurrentPeriodId = "";
 
-    function fetchLiveBalance() {
-        const phone = localStorage.getItem('user_phone');
-        if (!phone) { window.location.href = "index.html"; return; }
-        const icon = document.getElementById('refresh-icon');
-        if(icon) icon.classList.add('fa-spin');
+const gameTitleNamesMapping = { "30s": "WinGo 30sec", "1m": "WinGo 1 Min", "3m": "WinGo 3 Min", "5m": "WinGo 5 Min" };
 
-        fetch(`${BACKEND_URL}/api/balance/${phone}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('wallet-balance').innerText = parseFloat(data.balance).toFixed(2);
-                }
-                if(icon) setTimeout(() => icon.classList.remove('fa-spin'), 600);
-            })
-            .catch(err => console.error(err));
-    }
-
-    function toggleSubTab(tabName) {
-    activeSubTab = tabName;
-    document.getElementById('subtab-game').classList.remove('active');
-    document.getElementById('subtab-user').classList.remove('active');
-    
-    if (tabName === 'game') {
-        document.getElementById('subtab-game').classList.add('active');
-        document.getElementById('view-game-history-table').style.display = "table";
-        
-        // यहाँ पुराने टेबल नाम की जगह नया लिस्ट नाम डाला गया है ताकि एरर न आए
-        if (document.getElementById('view-user-history-list')) {
-            document.getElementById('view-user-history-list').style.display = "none";
-        }
-        fetchLiveGameHistory();
-    } else {
-        document.getElementById('subtab-user').classList.add('active');
-        document.getElementById('view-game-history-table').style.display = "none";
-        
-        // यहाँ भी नया नाम सेट किया गया है
-        if (document.getElementById('view-user-history-list')) {
-            document.getElementById('view-user-history-list').style.display = "block";
-        }
-        fetchUserBetHistory();
-    }
-}
-
-
-    function switchGameMode(mode) {
-  activeGameMode = mode;
-  currentGamePage = 1; // Reset pagination page numbers on mode switch
-  currentUserPage = 1;
-  document.querySelectorAll('.mode-tab-btn').forEach(btn => btn.classList.remove('active'));
-  const titleText = document.getElementById('text-active-mode-title');
-  if(mode === '30s') { document.getElementById('tab-30s').classList.add('active'); titleText.innerText = "WinGo 30sec"; }
-  if(mode === '1m') { document.getElementById('tab-1m').classList.add('active'); titleText.innerText = "WinGo 1 Min"; }
-  if(mode === '3m') { document.getElementById('tab-3m').classList.add('active'); titleText.innerText = "WinGo 3 Min"; }
-  if(mode === '5m') { document.getElementById('tab-5m').classList.add('active'); titleText.innerText = "WinGo 5 Min"; }
-  syncTimerWithServer();
-}
-
-
-            function fetchLiveGameHistory() {
-    const injector = document.getElementById('game-history-injector');
-    if (!injector) return;
-    
-    fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}?page=${currentGamePage}`)
-    .then(res => res.json())
-    .then(data => {
-        injector.innerHTML = "";
-
-        if (data.success && data.list.length > 0) {
-            data.list.forEach((row, index) => {
-                const tr = document.createElement("tr");
-                tr.style.borderBottom = "1px solid #f1f3f5";
-                
-                if (index % 2 === 1) {
-                    tr.style.backgroundColor = "#f9fafb";
-                }
-
-                // 1. Period ID कॉलम (साफ और नॉर्मल)
-                const tdPeriod = document.createElement("td");
-                tdPeriod.style.textAlign = "left";
-                tdPeriod.style.padding = "12px 8px";
-                tdPeriod.style.color = "#444";
-                tdPeriod.style.fontSize = "13px";
-                tdPeriod.style.fontWeight = "500";
-                tdPeriod.textContent = row.periodId;
-                tr.appendChild(tdPeriod);
-
-                // 2. Number कॉलम (परफेक्ट बोल्ड और असली कलर)
-                const tdNumber = document.createElement("td");
-                tdNumber.style.padding = "12px 8px";
-                tdNumber.style.fontWeight = "bold"; // एकदम परफेक्ट मोटाई
-                tdNumber.style.fontSize = "20px";   // आँखों को सुहाने वाला साइज़
-                tdNumber.textContent = row.resultNumber;
-                
-                const numVal = Number(row.resultNumber);
-                if (numVal === 0) {
-                    tdNumber.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
-                    tdNumber.style.webkitBackgroundClip = "text";
-                    tdNumber.style.webkitTextFillColor = "transparent";
-                } else if (numVal === 5) {
-                    tdNumber.style.background = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)";
-                    tdNumber.style.webkitBackgroundClip = "text";
-                    tdNumber.style.webkitTextFillColor = "transparent";
-                } else if (row.resultColor === "Green") {
-                    tdNumber.style.color = "#2ecc71";
-                } else if (row.resultColor === "Red") {
-                    tdNumber.style.color = "#ff4d4d";
-                } else {
-                    tdNumber.style.color = "#9b59b6";
-                }
-                tr.appendChild(tdNumber);
-
-                // 3. Big Small कॉलम (FIXED: शुद्ध ब्लैक और बिना टूटे एक लाइन में)
-                const tdSize = document.createElement("td");
-                tdSize.style.padding = "12px 8px";
-                tdSize.style.fontSize = "13px";
-                tdSize.style.fontWeight = "500";
-                tdSize.style.color = "#111111";
-                tdSize.style.whiteSpace = "nowrap"; // टूटने से रोकने के लिए लॉक किया
-                tdSize.textContent = row.resultSize;
-                tr.appendChild(tdSize);
-
-                // 4. Color कॉलम (परफेक्ट स्लिम गोल डॉट)
-                const tdColor = document.createElement("td");
-                tdColor.style.textAlign = "right";
-                tdColor.style.padding = "12px 8px";
-                
-                const dot = document.createElement("span");
-                dot.style.width = "12px";
-                dot.style.height = "12px";
-                dot.style.borderRadius = "50%";
-                dot.style.display = "inline-block";
-
-                if (numVal === 0) {
-                    dot.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
-                } else if (numVal === 5) {
-                    dot.style.background = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)";
-                } else if (row.resultColor === "Green") {
-                    dot.style.background = "#2ecc71";
-                } else if (row.resultColor === "Red") {
-                    dot.style.background = "#ff4d4d";
-                } else {
-                    dot.style.background = "#9b59b6";
-                }
-                
-                tdColor.appendChild(dot);
-                tr.appendChild(tdColor);
-
-                injector.appendChild(tr);
-            });
-            updatePaginationButtons(currentGamePage, data.hasMore);
-        } else {
-            injector.innerHTML = `<tr><td colspan="4" style="color:#aaa; padding:15px;">No results found.</td></tr>`;
-        }
-    })
-    .catch(() => {
-        if(injector.innerHTML === "") {
-            injector.innerHTML = `<tr><td colspan="4" style="color:#ff4d4d; padding:15px;">Error loading rows.</td></tr>`;
-        }
-    });
-}
-
-function fetchUserBetHistory() {
-    const injector = document.getElementById('view-user-history-list');
-    const phone = localStorage.getItem('user_phone');
-    if (!injector || !phone) return;
-    
-    fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}?page=${currentUserPage}`)
-    .then(res => res.json())
-    .then(data => {
-        injector.innerHTML = "";
-        if (data.success && data.list.length > 0) {
-            let html = "";
-            
-            data.list.forEach(bet => {
-                const isWin = bet.status === "Win";
-                const isLoss = bet.status === "Loss";
-                
-                const statusText = isWin ? "Succeed" : isLoss ? "Failed" : "Pending";
-                const statusBtnClass = isWin ? "badge-succeed" : isLoss ? "badge-failed" : "badge-pending";
-                
-                const displayWin = isWin ? `+₹${parseFloat(bet.winAmount).toFixed(2)}` : isLoss ? `-₹${parseFloat(bet.betAmount).toFixed(2)}` : "Pending";
-                const amtColor = isWin ? "#2ecc71" : isLoss ? "#ff4d4d" : "#f1c40f";
-                
-                const betDate = bet.createdAt ? new Date(bet.createdAt) : new Date();
-                const formattedTime = betDate.toLocaleString('en-IN', { hour12: false }).replace(/\//g, '-');
-
-                // --- आपकी फाइनल रिक्वायरमेंट के अनुसार सटीक लॉजिक ---
-                let displayValue = bet.selectValue; 
-                let tagBg = "#54a0ff"; 
-
-                // 1. अगर यूज़र ने Big या Small चुना है (सिर्फ Big/Small दिखेगा)
-                if (bet.selectValue === "Big" || bet.selectValue === "10") {
-                    displayValue = "Big";
-                    tagBg = "linear-gradient(to right, #ff7675, #ff9f43)";
-                } else if (bet.selectValue === "Small" || bet.selectValue === "11") {
-                    displayValue = "Small";
-                    tagBg = "linear-gradient(to right, #00cec9, #54a0ff)";
-                } 
-                // 2. अगर यूज़र ने सीधे कलर्स चुने हैं (सिर्फ कलर का नाम दिखेगा, नंबर नहीं)
-                else if (bet.selectValue === "Green") {
-                    displayValue = "Green";
-                    tagBg = "#2ecc71";
-                } else if (bet.selectValue === "Red") {
-                    displayValue = "Red";
-                    tagBg = "#ff4d4d";
-                } else if (bet.selectValue === "Violet") {
-                    displayValue = "Violet";
-                    tagBg = "#9b59b6";
-                } 
-                // 3. अगर यूज़र ने 0 से 9 के बीच नंबर चुना है (कलर बॉक्स के साथ नंबर दिखेगा)
-                else if (!isNaN(bet.selectValue) && bet.selectValue !== "" && bet.selectValue !== null) {
-                    const num = parseInt(bet.selectValue);
-                    
-                    if (num === 0) {
-                        displayValue = "0";
-                        tagBg = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)"; // आधा लाल, आधा बैंगनी
-                    } else if (num === 5) {
-                        displayValue = "5";
-                        tagBg = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)"; // आधा हरा, आधा बैंगनी
-                    } else if ([1, 3, 7, 9].includes(num)) {
-                        displayValue = num.toString(); // नंबर दिखेगा
-                        tagBg = "#2ecc71"; // हरा बॉक्स
-                    } else if ([2, 4, 6, 8].includes(num)) {
-                        displayValue = num.toString(); // नंबर दिखेगा
-                        tagBg = "#ff4d4d"; // लाल बॉक्स
-                    }
-                }
-
-                const choiceClass = "bet-choice-rect";
-
-                const betDataString = encodeURIComponent(JSON.stringify({
-                    orderId: bet.orderId || "WG" + bet.periodId + Math.floor(1000 + Math.random() * 9000),
-                    periodId: bet.periodId,
-                    betAmount: bet.betAmount,
-                    selectValue: displayValue, 
-                    status: bet.status,
-                    winAmount: bet.winAmount,
-                    time: formattedTime
-                }));
-
-                html += `
-                <div class="user-history-card-item" onclick="openDetailPopup('${betDataString}')">
-                    <div class="card-left-section">
-                        <!-- आपकी एकदम सटीक शर्त के अनुसार बना हुआ बॉक्स और टेक्स्ट -->
-                        <div class="${choiceClass}" style="background: ${tagBg};">${displayValue}</div>
-                        
-                        <div class="bet-info-text-block">
-                            <div class="bet-period-row">${bet.periodId} <span class="small-arrow-down">▼</span></div>
-                            <div class="bet-time-row">${formattedTime}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="card-right-section">
-                        <div class="status-border-badge ${statusBtnClass}">${statusText}</div>
-                        <div class="bet-final-amount" style="color: ${amtColor};">${displayWin}</div>
-                    </div>
-                </div>`;
-            });
-            
-            injector.innerHTML = html;
-            updatePaginationButtons(currentUserPage, data.hasMore);
-        } else {
-            injector.innerHTML = `<div style="color:#aaa; text-align:center; padding:30px; font-size:13px;">No bets placed in ${activeGameMode}.</div>`;
-        }
-    })
-    .catch((err) => {
-        console.error(err);
-        injector.innerHTML = `<div style="color:#ff4d4d; text-align:center; padding:30px; font-size:13px;">Error loading bet logs.</div>`;
-    });
-}
-
-    
-                // === परमानेंट इलाज: नया रिजल्ट सबसे पहले (बाईं तरफ) दिखाने का लॉजिक ===
-    function fetchLastRoundResult() {
-        const flexWrapper = document.getElementById('banner-results-flex-wrapper');
-        if (!flexWrapper) return;
-
-        fetch(`${BACKEND_URL}/api/game-history/${activeGameMode}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.list && data.list.length > 0) {
-                    let htmlElements = "";
-                    
-                    // सिर्फ़ सबसे ताज़ा 5 गेम के रिकॉर्ड लें
-                    const recentFive = data.list.slice(0, 5);
-                    
-                    // .reverse() हटा दिया है, जिससे सबसे नया रिज़ल्ट अब सबसे पहले (Left Side) दिखेगा
-                    recentFive.forEach(record => {
-                        let bgStyle = "";
-                        if (record.resultColor === "Green") {
-                            bgStyle = "background: radial-gradient(circle at 35% 35%, #5cd68a, #2ecc71);";
-                        } else if (record.resultColor === "Red") {
-                            bgStyle = "background: radial-gradient(circle at 35% 35%, #ff7675, #e74c3c);";
-                        } else {
-                            if(record.resultNumber === 0) {
-                                bgStyle = "background: linear-gradient(135deg, #e74c3c 50%, #9b59b6 50%);";
-                            } else {
-                                bgStyle = "background: linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%);";
-                            }
-                        }
-
-                        htmlElements += `<div class="banner-number-circle" style="${bgStyle} width: 20px; height: 20px; font-size: 11px;">${record.resultNumber}</div>`;
-                    });
-                    
-                    flexWrapper.innerHTML = htmlElements;
-                } else {
-                    flexWrapper.innerHTML = `<span style="font-size:12px; color:rgba(255,255,255,0.5);">-</span>`;
-                }
-            })
-            .catch(err => console.error("Error rendering 5 results:", err));
-    }
-    
-    function syncTimerWithServer() {
-  fetch(`${BACKEND_URL}/api/game-sync`)
-  .then(res => res.json())
-  .then(resData => {
-    if (resData.success && resData.data[activeGameMode]) {
-      const serverGame = resData.data[activeGameMode];
-      
-      // पुराना पीरियड आईडी और नया पीरियड आईडी चेक करने के लिए
-      const oldPeriodId = document.getElementById('text-period-id').innerText;
-      document.getElementById('text-period-id').innerText = serverGame.currentPeriod;
-      localSecondsLeft = serverGame.timeLeft;
-      updateTimerUI(localSecondsLeft);
-      fetchLastRoundResult();
-      
-      if (activeSubTab === 'game') fetchLiveGameHistory(); else fetchUserBetHistory();
-
-      // यदि राउंड बदल गया है (नया पीरियड आ गया है) और पिछला रिजल्ट मौजूद है
-      if (oldPeriodId && oldPeriodId !== "Loading..." && oldPeriodId !== serverGame.currentPeriod && serverGame.lastResult) {
-        const phone = localStorage.getItem('user_phone');
-        
-        // यूजर की सबसे ताज़ा बेट चेक करने के लिए एपीआई कॉल
-        fetch(`${BACKEND_URL}/api/user-bets/${phone}/${activeGameMode}`)
-        .then(r => r.json())
-        .then(betData => {
-          if (betData.success && betData.list && betData.list.length > 0) {
-            // सबसे नवीनतम बेट ढूंढें जो अभी-अभी समाप्त हुए राउंड (oldPeriodId) की हो
-            const lastBet = betData.list.find(b => b.periodId === oldPeriodId);
-            
-            if (lastBet && (lastBet.status === "Win" || lastBet.status === "Loss")) {
-              const isWin = lastBet.status === "Win";
-              // वीआईपी पॉपअप को कॉल करें
-              window.showResultModal(
-                isWin, 
-                lastBet.winAmount, 
-                lastBet.betAmount, 
-                oldPeriodId, 
-                serverGame.lastResult.number, 
-                serverGame.lastResult.color, 
-                serverGame.lastResult.number >= 5 ? "Big" : "Small"
-              );
-            }
-          }
-        });
-      }
-    }
-  });
-}
-
-
-    function updateTimerUI(totalSeconds) {
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        const mStr = String(minutes).padStart(2, '0');
-        const sStr = String(seconds).padStart(2, '0');
-
-        document.getElementById('box-m1').innerText = mStr.charAt(0);
-        document.getElementById('box-m2').innerText = mStr.charAt(1);
-        document.getElementById('box-s1').innerText = sStr.charAt(0);
-        document.getElementById('box-s2').innerText = sStr.charAt(1);
-
-        const bannerCard = document.getElementById('timer-banner-element');
-        const bettingPanel = document.getElementById('betting-interactive-panel');
-
-        if (totalSeconds <= 5) {
-            bannerCard.classList.add('bet-locked');
-            if (bettingPanel) bettingPanel.classList.add('disabled-betting-panel');
-        } else {
-            bannerCard.classList.remove('bet-locked');
-            if (bettingPanel) bettingPanel.classList.remove('disabled-betting-panel');
-        }
-    }
-
-    function runLocalClockEngine() {
-        setInterval(() => {
-            if (localSecondsLeft <= 0) {
-                syncTimerWithServer();
-                setTimeout(fetchLiveBalance, 1500); 
-            } else {
-                localSecondsLeft--;
-                updateTimerUI(localSecondsLeft);
-                if (localSecondsLeft % 8 === 0) { syncTimerWithServer(); }
-            }
-        }, 1000);
-    }
-
-    // === CUSTOM BET MODAL CONTROLLER & MULTIPLIER LOGIC ===
-let currentSelectedValueForBet = "";
-let currentBaseAmount = 1;
-let currentMultiplier = 1;
-
-window.openBetPopup = function(selectedValue) {
-  if (localSecondsLeft <= 5) {
-    alert("Round betting locked! Wait for next round.");
-    return;
-  }
-
-  currentSelectedValueForBet = selectedValue;
-  currentBaseAmount = 1;
-  currentMultiplier = 1;
-
-  const modal = document.getElementById('custom-bet-modal');
-  const tag = document.getElementById('bet-modal-selected-tag');
-  
-  if (!modal || !tag) return;
-
-  tag.innerText = selectedValue;
-  
-  if (selectedValue === 'Green' || selectedValue === '1' || selectedValue === '3' || selectedValue === '7' || selectedValue === '9') {
-    tag.style.background = "#2ecc71";
-  } else if (selectedValue === 'Red' || selectedValue === '2' || selectedValue === '4' || selectedValue === '6' || selectedValue === '8') {
-    tag.style.background = "#ff4d4d";
-  } else if (selectedValue === 'Violet' || selectedValue === '0' || selectedValue === '5') {
-    tag.style.background = "#9b59b6";
-  } else {
-    tag.style.background = selectedValue === 'Big' ? "#e67e22" : "#3498db";
-  }
-
-  document.querySelectorAll('.base-amt-btn').forEach((b, i) => i === 0 ? b.classList.add('active') : b.classList.remove('active'));
-  document.querySelectorAll('.mult-btn').forEach((b, i) => i === 0 ? b.classList.add('active') : b.classList.remove('active'));
-  
-  updateTotalBetDisplay();
-  modal.style.display = "flex";
-};
-
-window.selectBaseAmount = function(amount, element) {
-  currentBaseAmount = amount;
-  document.querySelectorAll('.base-amt-btn').forEach(btn => btn.classList.remove('active'));
-  element.classList.add('active');
-  updateTotalBetDisplay();
-};
-
-window.selectMultiplier = function(mult, element) {
-  currentMultiplier = mult;
-  document.querySelectorAll('.mult-btn').forEach(btn => btn.classList.remove('active'));
-  element.classList.add('active');
-  updateTotalBetDisplay();
-};
-
-function updateTotalBetDisplay() {
-  const display = document.getElementById('bet-modal-total-display');
-  if (display) display.innerText = "₹" + (currentBaseAmount * currentMultiplier);
-}
-
-window.closeBetModal = function() {
-  const modal = document.getElementById('custom-bet-modal');
-  if (modal) modal.style.display = "none";
-};
-
-window.submitCustomBet = function() {
-  const finalAmount = currentBaseAmount * currentMultiplier;
-  const periodId = document.getElementById('text-period-id').innerText;
-  
-  closeBetModal();
-
-  fetch(`${BACKEND_URL}/api/place-bet`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      phone: localStorage.getItem('user_phone'),
-      gameMode: activeGameMode,
-      periodId: periodId,
-      selectValue: currentSelectedValueForBet,
-      betAmount: finalAmount
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    window.showToastAlert(data.message, data.success);
-    
-    if (data.success) {
-      document.getElementById('wallet-balance').innerText = parseFloat(data.newBalance).toFixed(2);
-      if (activeSubTab === 'user') fetchUserBetHistory();
-    }
-  })
-  .catch(() => window.showToastAlert("Server error during betting.", false));
-};
-
-    document.addEventListener("DOMContentLoaded", () => {
-        fetchLiveBalance();
-        syncTimerWithServer();
-        runLocalClockEngine();
-    });
-    // === FIX: DEFINING PAGINATION FUNCTIONS ===
-window.changePage = function(direction) {
-  if (activeSubTab === 'game') {
-    currentGamePage += direction;
-    if (currentGamePage < 1) currentGamePage = 1;
-    fetchLiveGameHistory();
-  } else {
-    currentUserPage += direction;
-    if (currentUserPage < 1) currentUserPage = 1;
-    fetchUserBetHistory();
-  }
-};
-
-window.updatePaginationButtons = function(currentPage, hasMore) {
-  const prevBtn = document.getElementById('prev-page-btn');
-  const nextBtn = document.getElementById('next-page-btn');
-  const display = document.getElementById('current-page-display');
-  
-  if(display) display.innerText = "Page: " + currentPage;
-  
-  if(prevBtn) {
-    if (currentPage > 1) {
-      prevBtn.disabled = false;
-      prevBtn.style.opacity = "1";
-    } else {
-      prevBtn.disabled = true;
-      prevBtn.style.opacity = "0.5";
-    }
-  }
-  
-  if(nextBtn) {
-    if (hasMore) {
-      nextBtn.disabled = false;
-      nextBtn.style.opacity = "1";
-    } else {
-      nextBtn.disabled = true;
-      nextBtn.style.opacity = "0.5";
-    }
-  }
-};
-// === CUSTOM VIP RESULT POPUP LOGIC (WIN / LOSS) ===
-window.showResultModal = function(isWin, winAmount, betAmount, periodId, resNumber, resColor, resSize) {
-  const modal = document.getElementById('custom-result-modal');
-  const banner = document.getElementById('modal-banner-card');
-  const icon = document.getElementById('modal-status-icon');
-  const title = document.getElementById('modal-title-text');
-  const label = document.getElementById('modal-slip-label');
-  const amountDisplay = document.getElementById('modal-slip-amount');
-  
-  const resColorDisplay = document.getElementById('modal-res-color');
-  const resNumDisplay = document.getElementById('modal-res-num');
-  const resSizeDisplay = document.getElementById('modal-res-size');
-  const slipMode = document.getElementById('modal-slip-mode');
-  const slipPeriod = document.getElementById('modal-slip-period');
-  const timerText = document.getElementById('modal-timer-text');
-
-  if (!modal) return;
-
-  // Fill Common Data
-  resNumDisplay.innerText = resNumber;
-  resSizeDisplay.innerText = resSize;
-  slipPeriod.innerText = periodId;
-  slipMode.innerText = "Period: " + (activeGameMode === '30s' ? 'WinGo 30sec' : 'WinGo ' + activeGameMode);
-  
-  // Set Color Badge Background
-  if (resNumber === 0) {
-    resColorDisplay.style.background = "linear-gradient(135deg, #ff4d4d 50%, #9b59b6 50%)";
-    resColorDisplay.innerText = "Violet Red";
-  } else if (resNumber === 5) {
-    resColorDisplay.style.background = "linear-gradient(135deg, #2ecc71 50%, #9b59b6 50%)";
-    resColorDisplay.innerText = "Violet Green";
-  } else {
-    resColorDisplay.style.background = resColor === "Green" ? "#2ecc71" : "#ff4d4d";
-    resColorDisplay.innerText = resColor;
-  }
-
-  // Setup Win or Loss Design
-  if (isWin) {
-    // Win Styling
-    banner.style.background = "linear-gradient(180deg, #ff7675 0%, #ef3e3e 100%)";
-    icon.innerText = "🏆";
-    title.innerText = "Congratulations";
-    label.innerText = "Bonus";
-    label.style.color = "#ef3e3e";
-    amountDisplay.innerText = "+₹" + parseFloat(winAmount).toFixed(2);
-    amountDisplay.style.color = "#ef3e3e";
-  } else {
-    // Loss Styling
-    banner.style.background = "linear-gradient(180deg, #747d8c 0%, #2f3542 100%)";
-    icon.innerText = "😥";
-    title.innerText = "Try Again";
-    label.innerText = "Loss Amount";
-    label.style.color = "#747d8c";
-    amountDisplay.innerText = "-₹" + parseFloat(betAmount).toFixed(2);
-    amountDisplay.style.color = "#747d8c";
-  }
-
-  // Display Modal
-  modal.style.display = "flex";
-
-  // 3 Seconds Auto Close Timer Logic
-  let timeLeft = 3;
-  timerText.innerText = timeLeft + " seconds auto close";
-  
-  if (window.modalTimerInterval) clearInterval(window.modalTimerInterval);
-  
-  window.modalTimerInterval = setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) {
-      clearInterval(window.modalTimerInterval);
-      closeResultModal();
-    } else {
-      timerText.innerText = timeLeft + " seconds auto close";
-    }
-  }, 1000);
-};
-
-window.closeResultModal = function() {
-  const modal = document.getElementById('custom-result-modal');
-  if (modal) modal.style.display = "none";
-  if (window.modalTimerInterval) clearInterval(window.modalTimerInterval);
-};
-// === CUSTOM SUCCESS / ERROR TOAST CONTROLLER ===
-window.showToastAlert = function(message, isSuccess) {
-  const toast = document.getElementById('custom-toast-alert');
-  const icon = document.getElementById('toast-alert-icon');
-  const msg = document.getElementById('toast-alert-msg');
-  
-  if (!toast || !icon || !msg) return;
-  
-  msg.innerText = message;
-  if (isSuccess) {
-    icon.innerText = "✓";
-    icon.style.color = "#2ecc71"; // Green color
-  } else {
-    icon.innerText = "✕";
-    icon.style.color = "#ff4d4d"; // Red color
-  }
-  
-  toast.style.display = "block";
-  
-  // 2 Seconds auto close
-  setTimeout(() => {
-    toast.style.display = "none";
-  }, 2000);
-};
-// ---- आखिरी 5 सेकंड में बेटिंग लॉक करने का ग्लोबल लॉजिक ----
-document.addEventListener("click", function(event) {
-    if (event.target && event.target.getAttribute("onclick") && event.target.getAttribute("onclick").includes("openBetPopup")) {
-        if (typeof localSecondsLeft !== 'undefined' && localSecondsLeft <= 5) {
-            event.preventDefault();
-            event.stopPropagation();
-            
-            const lockedModal = document.getElementById('bet-locked-modal');
-            if (lockedModal) {
-                lockedModal.style.display = "flex";
-            }
-            return false;
-        }
-    }
-}, true);
-
-// === हुबहू आपके स्क्रीनशॉट जैसा प्रोफ़ेशनल डिटेल्स पॉपअप फंक्शन ===
-window.openDetailPopup = function(encodedData) {
-    const bet = JSON.parse(decodeURIComponent(encodedData));
-    
-    // 2% टैक्स और अमाउंट की सटीक गणना
-    const tax = bet.betAmount * 0.02;
-    const afterTax = (bet.betAmount - tax).toFixed(2);
-    
-    // स्क्रीनशॉट के अनुसार स्टेटस और उसके रंग
-    const statusText = bet.status === "Win" ? "Succeed" : bet.status === "Loss" ? "Failed" : "Pending";
-    const statusColor = bet.status === "Win" ? "#2ecc71" : bet.status === "Loss" ? "#ff4d4d" : "#f1c40f";
-    const finalAmount = bet.status === "Win" ? `+₹${parseFloat(bet.winAmount).toFixed(2)}` : bet.status === "Loss" ? `-₹${parseFloat(bet.betAmount).toFixed(2)}` : "Pending";
-
-    // आपके स्क्रीनशॉट के सारे कॉलम्स (Quantity और Result के साथ)
-    const roundResult = bet.gameResult || "0 Red Violet"; 
-    const quantityCount = bet.quantity || Math.floor(bet.betAmount / 1); 
-
-    // पूरा एचटीएमएल डिज़ाइन स्ट्रक्चर (हुबहू नीचे से स्लाइड होने वाला मेन्यू)
-    const popupHtml = `
-    <div id="history-detail-modal-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; display:flex; justify-content:center; align-items:flex-end; font-family:sans-serif;" onclick="document.getElementById('history-detail-modal-overlay').remove()">
-        
-        <div style="width:100%; max-width:450px; background:#ffffff; border-top-left-radius:24px; border-top-right-radius:24px; padding:20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); max-height:85vh; overflow-y:auto; animation: popupSlideUp 0.25s ease-out;" onclick="event.stopPropagation()">
-            
-            <!-- ऊपर की हेडिंग पट्टी -->
-            <div style="text-align:center; margin-bottom:20px; position:relative;">
-                <h3 style="font-size:18px; font-weight:700; color:#2d3748; margin:0;">Details</h3>
-                <button onclick="document.getElementById('history-detail-modal-overlay').remove()" style="position:absolute; right:5px; top:-2px; background:none; border:none; font-size:20px; cursor:pointer; color:#a0aec0;">✕</button>
-            </div>
-            
-            <!-- स्क्रीनशॉट के अनुसार सभी कॉलम्स की लिस्ट -->
-            <div style="display:flex; flex-direction:column; gap:14px; font-size:14px; color:#4a5568; background:#fafafa; border-radius:16px; padding:16px;">
-                
-                <!-- ऑर्डर नंबर कॉपी बटन के साथ -->
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <span style="color:#718096; font-weight:500;">Order number</span>
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; padding:10px 12px; border-radius:10px; border:1px solid #edf2f7;">
-                        <span style="font-weight:600; color:#2d3748; font-size:12px; word-break:break-all; letter-spacing:0.3px;">${bet.orderId}</span>
-                        <button onclick="navigator.clipboard.writeText('${bet.orderId}'); alert('Copied!');" style="background:none; border:none; cursor:pointer; font-size:16px; color:#4a5568; padding-left:10px;">📋</button>
-                    </div>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Period</span>
-                    <span style="font-weight:600; color:#2d3748; letter-spacing:0.5px;">${bet.periodId}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Purchase amount</span>
-                    <span style="font-weight:600; color:#2d3748;">₹${parseFloat(bet.betAmount).toFixed(2)}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Quantity</span>
-                    <span style="font-weight:600; color:#2d3748;">${quantityCount}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Amount after tax</span>
-                    <span style="font-weight:600; color:#ff4d4d;">₹${afterTax}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Tax</span>
-                    <span style="font-weight:600; color:#2d3748;">₹${tax.toFixed(2)}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Result</span>
-                    <span style="font-weight:700; color:#2d3748;">${roundResult}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Select</span>
-                    <span style="font-weight:700; color:#2d3748;">${bet.selectValue}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Status</span>
-                    <span style="font-weight:700; color:${statusColor};">${statusText}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f1f5f9;">
-                    <span style="color:#718096; font-weight:500;">Win/lose</span>
-                    <span style="font-weight:700; color:${statusColor};">${finalAmount}</span>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0;">
-                    <span style="color:#718096; font-weight:500;">Order time</span>
-                    <span style="font-weight:600; color:#718096; font-size:13px;">${bet.time}</span>
-                </div>
-                
-            </div>
-        </div>
-    </div>
-    
-    <!-- नीचे से ऊपर आने का सुंदर एनिमेशन सीएसएस -->
-    <style>
-        @keyframes popupSlideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-    </style>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', popupHtml);
-};
-// ---- होम पेज के बटन को चालू करने का लॉजिक ----
-document.addEventListener("DOMContentLoaded", () => {
-    // अगर आपके कोड में पहले से fetchLiveBalance() है तो उसे रहने दें
-    if (typeof fetchLiveBalance === 'function') fetchLiveBalance();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const modeFromUrl = urlParams.get('mode'); // यह होम पेज से आए mode को पढ़ेगा
-    
-    if (modeFromUrl && ['30s', '1m', '3m', '5m'].includes(modeFromUrl)) {
-        if (typeof switchGameMode === 'function') {
-            switchGameMode(modeFromUrl); // सही टाइमर चालू करेगा
-        }
-    }
-    
-    if (typeof runLocalClockEngine === 'function') runLocalClockEngine();
+document.addEventListener("DOMContentLoaded", function () {
+    fetchLiveServerBalance();
+    setInterval(syncLiveServerTimerData, 1000);
 });
 
+// 1. सर्वर सिंक और 5 सेकंड लॉक नियम
+function syncLiveServerTimerData() {
+    fetch(`${BACKEND_SERVER_URL}/api/game-sync`)
+    .then(res => res.json())
+    .then(resData => {
+        if (resData.success && resData.data[activeRunningMode]) {
+            const currentRoundData = resData.data[activeRunningMode];
+            
+            // नया पीरियड आईडी रेंडर होना
+            if(globalCurrentPeriodId !== currentRoundData.currentPeriod) {
+                globalCurrentPeriodId = currentRoundData.currentPeriod;
+                
+                if (globalCurrentPeriodId && !globalCurrentPeriodId.includes("---")) {
+                    document.getElementById('display-live-period-number').innerText = globalCurrentPeriodId;
+                } else {
+                    document.getElementById('display-live-period-number').innerText = "Loading...";
+                }
+                fetchLiveServerBalance();
+            }
+            
+            let remainingSeconds = currentRoundData.timeLeft;
+            
+            // 999 सर्वर लॉक इंजन हैंडलिंग
+            if (remainingSeconds === 999 || remainingSeconds < 0) {
+                updateDigitalClockDisplay(0, 0);
+                document.getElementById('lock-overlay-screen').style.display = "flex";
+                return;
+            }
+            
+            // 5 सेकंड का बेटिंग लॉक नियम
+            if (remainingSeconds <= 5) {
+                document.getElementById('lock-overlay-screen').style.display = "flex";
+                closeBettingModal();
+            } else {
+                document.getElementById('lock-overlay-screen').style.display = "none";
+            }
+            
+            let minutesPart = Math.floor(remainingSeconds / 60);
+            let secondsPart = remainingSeconds % 60;
+            updateDigitalClockDisplay(minutesPart, secondsPart);
+        }
+    }).catch(err => console.error("Sync Error:", err));
+}
+
+// अंकों को अलग-अलग सफ़ेद डिब्बों में सिंगल-सिंगल डिजिट भेजने का बिल्कुल सही लॉजिक
+function updateDigitalClockDisplay(mins, secs) {
+    let minString = mins.toString().padStart(2, '0');
+    let secString = secs.toString().padStart(2, '0');
+    
+    document.getElementById('min-digit-1').innerText = minString.charAt(0);
+    document.getElementById('min-digit-2').innerText = minString.charAt(1);
+    document.getElementById('sec-digit-1').innerText = secString.charAt(0);
+    document.getElementById('sec-digit-2').innerText = secString.charAt(1);
+}
+
+// लाइव बैलेंस सिंकर
+function fetchLiveServerBalance() {
+    if (!loggedInUserPhone) return;
+    fetch(`${BACKEND_SERVER_URL}/api/balance/${loggedInUserPhone.trim()}`)
+    .then(res => res.json())
+    .then(resData => {
+        if (resData.success) {
+            document.getElementById('live-wallet-balance-text').innerText = "₹" + Number(resData.balance).toFixed(2);
+        }
+    }).catch(err => console.error(err));
+}
+// querySelectorAll के एरे क्रैश को पूरी तरह ठीक करने वाला नया लॉजिक
+function openBettingModal(valueToSelect) {
+    currentSelectedBetValue = valueToSelect;
+    chosenBaseChipAmount = 1; // डिफ़ॉल्ट चिप ₹1
+    activeMultiplierCount = 1;
+    
+    const valueLabel = document.getElementById('modal-selected-value-label');
+    const submitBtn = document.querySelector('.btn-modal-submit-bet');
+    const finalPriceText = document.getElementById('display-total-final-payout-text');
+    
+    if(valueLabel) valueLabel.innerText = valueToSelect;
+    if(document.getElementById('display-multiplier-text-count')) {
+        document.getElementById('display-multiplier-text-count').innerText = "1";
+    }
+    if(finalPriceText) finalPriceText.innerText = "₹1"; 
+    
+    // एरे को लूप चलाकर पहले चिप (₹1) को एक्टिव क्लास देना (कोई एरर नहीं आएगा)
+    const chips = document.querySelectorAll('.chip-btn');
+    chips.forEach(c => c.classList.remove('active'));
+    if(chips.length > 0) {
+        chips[0].classList.add('active'); // पहले डिब्बे (₹1) पर सही से क्लास जोड़ी
+    }
+    
+    // बटन के अनुसार रंग कोड तय करना
+    let dynamicColor = "#f03e3e"; 
+    
+    if (valueToSelect === 'Green' || ['1', '3', '7', '9'].includes(valueToSelect)) {
+        dynamicColor = "#2aa757"; 
+    } else if (valueToSelect === 'Violet' || ['0', '5'].includes(valueToSelect)) {
+        dynamicColor = "#b53cd4"; 
+    } else if (valueToSelect === 'Red' || ['2', '4', '6', '8'].includes(valueToSelect)) {
+        dynamicColor = "#f03e3e"; 
+    } else if (valueToSelect === 'Big') {
+        dynamicColor = "#e67e22"; 
+    } else if (valueToSelect === 'Small') {
+        dynamicColor = "#2980b9"; 
+    }
+    
+    // रंग लागू करना
+    if(valueLabel) valueLabel.style.color = dynamicColor;
+    if(finalPriceText) finalPriceText.style.color = dynamicColor;
+    if(submitBtn) {
+        submitBtn.style.background = dynamicColor;
+    }
+    
+    document.getElementById('global-betting-modal').style.display = "flex";
+}
+
+function closeBettingModal() {
+    document.getElementById('global-betting-modal').style.display = "none";
+}
+
+function selectBaseChipAmount(amount) {
+    chosenBaseChipAmount = amount;
+    event.currentTarget.parentElement.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    calculateTotalBetPrice();
+}
+
+function updateMultiplierValue(step) {
+    activeMultiplierCount += step;
+    if(activeMultiplierCount < 1) activeMultiplierCount = 1;
+    document.getElementById('display-multiplier-text-count').innerText = activeMultiplierCount;
+    calculateTotalBetPrice();
+}
+
+function calculateTotalBetPrice() {
+    let finalSum = chosenBaseChipAmount * activeMultiplierCount;
+    const finalPriceText = document.getElementById('display-total-final-payout-text');
+    if(finalPriceText) finalPriceText.innerText = "₹" + finalSum;
+}
+
+// सुरक्षित बेट सबमिशन लॉजिक (String Format और Mongoose Validation Errors पूरी तरह फिक्स)
+function submitBetToLiveServer() {
+    let finalBetAmount = chosenBaseChipAmount * activeMultiplierCount;
+    
+    if(!loggedInUserPhone) { alert("Please login again!"); return; }
+    
+    if(!globalCurrentPeriodId || globalCurrentPeriodId === "" || globalCurrentPeriodId.includes("Loading")) { 
+        alert("Wait! Server current round code is syncing. Try again in a second."); 
+        return; 
+    }
+
+    const cleanSelectValue = String(currentSelectedBetValue).trim();
+
+    fetch(`${BACKEND_SERVER_URL}/api/place-bet`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            phone: loggedInUserPhone.trim(),
+            gameMode: activeRunningMode,
+            periodId: globalCurrentPeriodId.trim(), 
+            selectValue: cleanSelectValue, 
+            betAmount: Number(finalBetAmount)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if(data.success) {
+            closeBettingModal();
+            fetchLiveServerBalance();
+        }
+    }).catch(err => alert("Server network error! Check MongoDB Logs."));
+}
+
+function changeActiveGameMode(selectedModeCode) {
+    activeRunningMode = selectedModeCode;
+    const modeTabsList = document.querySelectorAll('.mode-tab-item-btn');
+    modeTabsList.forEach(tab => tab.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    globalCurrentPeriodId = ""; 
+    document.getElementById('display-game-title-text').innerText = gameTitleNamesMapping[selectedModeCode];
+    document.getElementById('display-live-period-number').innerText = "Loading...";
+}
 </script>
 </body>
 </html>

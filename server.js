@@ -720,7 +720,7 @@ app.get('/api/admin/pending-deposits', async (req, res) => {
     }
 });
 
-// === सुधरा हुआ एडमिन डिपॉजिट एक्शन रूट (FIXED MASTER API) ===
+// === फाइनल एडमिन डिपॉजिट एक्शन रूट (VALIDATION BYPASS FIXED) ===
 app.post('/api/admin/action-deposit', async (req, res) => {
     try {
         const { id, action } = req.body; 
@@ -732,7 +732,7 @@ app.post('/api/admin/action-deposit', async (req, res) => {
         // 1. डेटाबेस से पेंडिंग डिपॉजिट रिकॉर्ड ढूंढें
         const depositItem = await Deposit.findById(id);
         if (!depositItem) {
-            return res.json({ success: false, message: "Deposit record not found in database!" });
+            return res.json({ success: false, message: "Deposit record not found!" });
         }
         
         if (depositItem.status !== "Pending") {
@@ -740,18 +740,19 @@ app.post('/api/admin/action-deposit', async (req, res) => {
         }
 
         if (action === 'approve') {
-            // 2. यूज़र का अकाउंट ढूंढने के लिए हम आपके मुख्य मोंगूज मॉडल का उपयोग करेंगे
-            // यहाँ ध्यान दें: आपके सर्वर में यूज़र मॉडल का नाम 'User' या 'user' जो भी हो, हम mongoose.models से डायरेक्ट उठाएंगे ताकि क्रैश न हो
+            // 2. यूज़र मॉडल को ढूँढना
             const UserModel = mongoose.models.User || mongoose.model('User');
-            const user = await UserModel.findOne({ phone: depositItem.phone.trim() });
             
-            if (!user) {
+            // 3. [यहाँ सबसे बड़ा बदलाव]: सीधे $inc (Increment) का उपयोग करके बैलेंस बढ़ाना ताकि Validation Error न आए
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { phone: depositItem.phone.trim() },
+                { $inc: { balance: Number(depositItem.amount) } },
+                { new: true } // ताकि अपडेटेड डेटा वापस मिले
+            );
+            
+            if (!updatedUser) {
                 return res.json({ success: false, message: `User with phone ${depositItem.phone} not found!` });
             }
-
-            // 3. बैलेंस जोड़ना
-            user.balance += Number(depositItem.amount);
-            await user.save();
 
             depositItem.status = "Approved";
         } else if (action === 'reject') {

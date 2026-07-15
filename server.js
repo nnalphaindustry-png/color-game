@@ -427,18 +427,18 @@ app.get('/api/game-sync', async (req, res) => {
 
 
 // 6. असली सट्टा (Bet) लगाने की एपीआई
-// === आपके बैकएंड सर्वर के लिए पूरी तरह सुधरा हुआ एरर-प्रूफ बेटिंग एपीआई (पेज 11) ===
+// === आपके सर्वर के लिए 100% फिक्स किया गया बेटिंग एपीआई ===
 app.post('/api/place-bet', async (req, res) => {
     try {
         const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
         
-        // 1. यूज़र और बैलेंस की जांच
+        // 1. यूज़र को ढूंढें और बैलेंस चेक करें
         const user = await User.findOne({ phone: phone.trim() });
         if (!user || user.balance < Number(betAmount)) {
             return res.json({ success: false, message: "Balance issue! Low wallet balance." });
         }
         
-        // 2. मिनिमम बेट अमाउंट चेक
+        // 2. मिनिमम बेट अमाउंट चेक (₹1 नियम)
         if (!betAmount || isNaN(betAmount) || Number(betAmount) < 1) {
             return res.json({ success: false, message: "Minimum bet amount is ₹1" });
         }
@@ -448,7 +448,7 @@ app.post('/api/place-bet', async (req, res) => {
             return res.json({ success: false, message: "Round betting locked! Wait for next round." });
         }
 
-        // [मास्टर फिक्स]: अगर फ्रंटएंड से पीरियड आईडी खाली या मिसमैच आई है, तो सर्वर के लाइव इंजन से उठाएं
+        // 4. पीरियड आईडी की सुरक्षा जांच
         let finalPeriodId = String(periodId).trim();
         if (!finalPeriodId || finalPeriodId === "" || finalPeriodId.includes("Loading") || finalPeriodId.includes("-")) {
             if (liveGames[gameMode] && liveGames[gameMode].currentPeriod) {
@@ -458,12 +458,13 @@ app.post('/api/place-bet', async (req, res) => {
             }
         }
         
-        // 4. यूज़र के वॉलेट से पैसे काटें
+        // 5. यूज़र के वॉलेट से पैसे काटें
         user.balance -= Number(betAmount);
         await user.save();
         
-        // 5. सट्टा डेटाबेस में रिकॉर्ड करें (डेटा टाइप्स को कड़ाई से स्ट्रिंग में बदला गया ताकि मंगूस क्रैश न हो)
+        // [मास्टर फिक्स]: सट्टा डेटाबेस में रिकॉर्ड करें (यूजर की UID को यहाँ अनिवार्य रूप से शामिल किया गया है)
         const newBet = new Bet({
+            uid: String(user.uid), // <--- यह लाइन डेटाबेस का 'uid is required' एरर हमेशा के लिए खत्म कर देगी!
             phone: String(phone).trim(),
             gameMode: String(gameMode).trim(),
             periodId: finalPeriodId,
@@ -475,7 +476,7 @@ app.post('/api/place-bet', async (req, res) => {
         return res.json({ success: true, message: "Bet placed successfully!", newBalance: user.balance });
         
     } catch (error) {
-        console.error("CRITICAL BETTING SERVER ERROR:", error); // यह आपके रेंडर लॉग्स में असली एरर दिखाएगा
+        console.error("CRITICAL BETTING SERVER ERROR:", error);
         return res.status(500).json({ success: false, message: "Server error during betting. Core database mismatch fixed." });
     }
 });

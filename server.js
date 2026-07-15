@@ -595,6 +595,38 @@ app.get('/api/deposit-history/:phone', async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error!" });
     }
 });
+// === [MASTER FIX]: यूजर विथड्रॉल हिस्ट्री लाइव डेटाबेस एपीआई ===
+app.get('/api/withdrawal-history/:phone', async (req, res) => {
+    try {
+        const userPhone = req.params.phone;
+
+        if (!userPhone || userPhone.trim() === "") {
+            return res.status(400).json({ 
+                success: false, 
+                message: "मोबाइल नंबर प्रदान करना अनिवार्य है!" 
+            });
+        }
+
+        // विथड्रॉल कलेक्शन में यूजर के फोन नंबर से रिकॉर्ड खोजना 
+        // .sort({ createdAt: -1 }) से नया विथड्रॉल हमेशा सबसे ऊपर दिखेगा
+        const historyRecords = await Withdrawal.find({ phone: userPhone.trim() })
+                                               .sort({ createdAt: -1 });
+
+        console.log(`[HISTORY FETCH SUCCESS]: User ${userPhone} requested history. Found ${historyRecords.length} records.`);
+
+        res.json({
+            success: true,
+            history: historyRecords
+        });
+
+    } catch (error) {
+        console.error("CRITICAL HISTORY FETCH ERROR:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "सर्वर डेटाबेस से इतिहास खींचने में असमर्थ रहा।" 
+        });
+    }
+});
 
 // === ADMIN DASHBOARD STATS ROUTE ===
 app.get('/api/admin/stats', async (req, res) => {

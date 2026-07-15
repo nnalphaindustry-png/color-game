@@ -182,7 +182,7 @@
     </div>
 </div>
 
-        <!-- PAGE 4: Withdrawal Verification Panel (FULLY UPDATED LIVE VIEW) -->
+        <!-- [UPGRADED WITHDRAWAL VERIFICATION PANEL] -->
 <div id="withdrawal-page" class="admin-page-view">
     <h2 class="page-heading-title">Withdrawal Requests Verification</h2>
     <div class="data-table-card">
@@ -191,22 +191,20 @@
             <table>
                 <thead>
                     <tr>
-                        <th>User UID</th>
                         <th>Mobile Number</th>
                         <th>Amount</th>
-                        <th>Method & Payout Account Details</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="admin-withdrawal-table-body">
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading pending withdrawals...</td>
+                        <td colspan="2" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading pending withdrawals...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
 
         <div id="settings-page" class="admin-page-view"><h2 class="page-heading-title">Global System Settings</h2><div class="placeholder-screen-view">Global app maintenance options will remain here.</div></div>
                 <!-- PAGE 5: Master Live Result Control Engine -->
@@ -507,31 +505,34 @@
             }).catch(err => showGlobalToastAlert("Delete action failure!", true));
         }
 
-        function syncNodeServerStats() {
-            fetch(`${SERVER_URL}/api/admin/stats`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
-                        document.getElementById('stat-total-deposit').innerText = '₹' + (data.totalWalletBalance || 0);
-                        document.getElementById('stat-total-withdrawal').innerText = '₹' + (data.totalWithdrawalBalance || 0);
-                        document.getElementById('stat-active-bets').innerText = '₹' + (data.activeBetAmount || 0);
-                    }
-                }).catch(err => console.log("Cloud server communication pipeline timeout:", err));
-
-            fetch(`${SERVER_URL}/api/admin/users-list`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.users) {
-                        globalUsersCacheMemory = data.users;
-                        let generatedRowsHtml = '';
-                        data.users.forEach(user => {
-                                    generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')"><td style="font-weight: bold;">${user.phone}</td><td class="id-text-format">${user.uid || 'N/A'}</td></tr>`;
-                        });
-                        document.getElementById('dashboard-table-body').innerHTML = generatedRowsHtml || '<tr><td colspan="2" style="text-align:center;">No users registered yet</td></tr>';
-                    }
-                }).catch(err => { document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#dc3545;">Live data fetching dropped</td></tr>'; });
+        // [FIXED FRONTEND STATS SYNC]
+function syncNodeServerStats() {
+    fetch(`${SERVER_URL}/api/admin/stats`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('stat-total-users').innerText = data.totalUsers || 0;
+            document.getElementById('stat-total-deposit').innerText = '' + (data.totalWalletBalance || 0);
+            document.getElementById('stat-total-withdrawal').innerText = '' + (data.totalWithdrawalBalance || 0); //   
+            document.getElementById('stat-active-bets').innerText = '' + (data.activeBetAmount || 0);
         }
+    }).catch(err => console.log("Cloud server communication pipeline timeout:", err));
+
+    fetch(`${SERVER_URL}/api/admin/users-list`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.users) {
+            globalUsersCacheMemory = data.users;
+            let generatedRowsHtml = '';
+            data.users.forEach(user => {
+                generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')"><td style="font-weight: bold;">${user.phone}</td><td class="id-text-format">${user.uid || 'N/A'}</td></tr>`;
+            });
+            document.getElementById('dashboard-table-body').innerHTML = generatedRowsHtml || '<tr><td colspan="2" style="text-align:center;">No users registered yet</td></tr>';
+        }
+    }).catch(err => { 
+        document.getElementById('dashboard-table-body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#dc3545;">Live data fetching dropped</td></tr>'; 
+    });
+}
 
         window.onload = function() {
             syncNodeServerStats();
@@ -595,89 +596,139 @@ function searchPendingDepositByUTR() {
 // Master Live Withdrawal Engine Core Logic
 let localPendingWithdrawalsCache = [];
 
+// [FIXED LIVE WITHDRAWAL TABLE - SIMPLE VIEW]
 function fetchAdminPendingWithdrawals() {
     const withdrawalPageElement = document.getElementById('withdrawal-page');
     if (!withdrawalPageElement || withdrawalPageElement.style.display === "none") return;
-
+    
     fetch(`${SERVER_URL}/api/admin/pending-withdrawals`)
     .then(res => res.json())
     .then(data => {
         if (data.success && data.list) {
             localPendingWithdrawalsCache = data.list;
             let rowsHtml = '';
+            
             data.list.forEach(item => {
-                let detailsDisplayContent = '';
-                if(item.method === 'BANK') {
-                    detailsDisplayContent = `<strong>[BANK]</strong> ${item.bankName || 'N/A'}<br>Acc: ${item.accountNumber || 'N/A'}<br>Name: ${item.recipientName || 'N/A'}<br>IFSC: ${item.ifscCode || 'N/A'}`;
-                } else if(item.method === 'UPI') {
-                    detailsDisplayContent = `<strong>[UPI]</strong><br>ID: ${item.upiAddress || 'N/A'}<br>Name: ${item.recipientName || 'N/A'}`;
-                } else if(item.method === 'USDT') {
-                    detailsDisplayContent = `<strong>[USDT]</strong><br>Wallet: ${item.usdtWallet || 'N/A'}`;
-                } else {
-                    detailsDisplayContent = item.accountValue || 'No Details';
-                }
-
+                //   (Row)      - 
                 rowsHtml += `
-                <tr>
-                    <td class="id-text-format" style="font-weight: bold;">${item.uid || 'N/A'}</td>
+                <tr class="clickable-row" onclick="openDetailedWithdrawalPopup('${item._id}')">
                     <td style="color: #ffffff; font-weight: bold;">${item.phone}</td>
                     <td style="color: #ff9f43; font-weight: bold;">${parseFloat(item.amount).toFixed(2)}</td>
-                    <td><div class="payout-details-badge">${detailsDisplayContent}</div></td>
-                    <td>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="modal-btn btn-green" style="padding: 6px 12px; font-size: 13px;" onclick="openWithdrawalConfirmPopup('${item._id}', 'approve', '${item.amount}')">Approve</button>
-                            <button class="modal-btn btn-red" style="padding: 6px 12px; font-size: 13px;" onclick="openWithdrawalConfirmPopup('${item._id}', 'reject', '${item.amount}')">Reject</button>
-                        </div>
-                    </td>
                 </tr>`;
             });
-            document.getElementById('admin-withdrawal-table-body').innerHTML = rowsHtml || 
-            `<tr><td colspan="5" style="text-align:center; color:#a0a0a0; padding:20px;">No pending withdrawal requests found!</td></tr>`;
+            
+            document.getElementById('admin-withdrawal-table-body').innerHTML = rowsHtml ||
+            `<tr><td colspan="2" style="text-align:center; color:#a0a0a0; padding:20px;">No pending withdrawal requests found!</td></tr>`;
         }
     })
     .catch(err => {
-        document.getElementById('admin-withdrawal-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Withdrawal data sync timeout!</td></tr>';
+        document.getElementById('admin-withdrawal-table-body').innerHTML = '<tr><td colspan="2" style="text-align:center; color:#dc3545;">Withdrawal data sync timeout!</td></tr>';
     });
 }
+// [DYNAMIC MASTER POPUP ENGINE FOR WITHDRAWAL]
+function openDetailedWithdrawalPopup(id) {
+    //          
+    const item = localPendingWithdrawalsCache.find(u => u._id === id);
+    if (!item) return;
 
-function openWithdrawalConfirmPopup(id, actionType, amount) {
-    const oldPopup = document.getElementById('admin-confirm-popup-overlay');
+    //           
+    let methodDetailsHtml = '';
+    if(item.method === 'BANK') {
+        methodDetailsHtml = `
+            <div><b>Bank Name:</b> ${item.bankName || 'N/A'}</div>
+            <div><b>Acc No:</b> ${item.accountNumber || 'N/A'}</div>
+            <div><b>Holder Name:</b> ${item.recipientName || 'N/A'}</div>
+            <div><b>IFSC Code:</b> ${item.ifscCode || 'N/A'}</div>
+        `;
+    } else if(item.method === 'UPI') {
+        methodDetailsHtml = `
+            <div><b>UPI ID:</b> ${item.upiAddress || item.accountValue || 'N/A'}</div>
+            <div><b>Holder Name:</b> ${item.recipientName || 'N/A'}</div>
+        `;
+    } else if(item.method === 'USDT') {
+        methodDetailsHtml = `
+            <div><b>TRC20 Wallet:</b> ${item.usdtWallet || item.accountValue || 'N/A'}</div>
+        `;
+    } else {
+        methodDetailsHtml = `<div><b>Account Value:</b> ${item.accountValue || 'N/A'}</div>`;
+    }
+
+    //   -       
+    const oldPopup = document.getElementById('admin-detailed-withdraw-overlay');
     if (oldPopup) oldPopup.remove();
 
+    //    -   
     const overlay = document.createElement('div');
-    overlay.id = 'admin-confirm-popup-overlay';
-    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px;";
-    
+    overlay.id = 'admin-detailed-withdraw-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px;";
+
     const box = document.createElement('div');
-    box.style.cssText = "background: #1e1e1e; border: 1px solid #333; width: 90%; max-width: 380px; padding: 25px; border-radius: 14px; text-align: center; color: white;";
-    
-    const headingText = actionType === 'approve' ? "Approve Payout?" : "Reject Payout Request?";
-    const bodyMessage = actionType === 'approve' 
-        ? `Are you sure you want to APPROVE this withdrawal request of ${amount}?` 
-        : `Are you sure you want to REJECT this withdrawal request of ${amount}?`;
+    box.style.cssText = "background-color: #1a1a1a; border: 1px solid #333333; border-radius: 14px; width: 100%; max-width: 420px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; color: white;";
+
+    box.innerHTML = `
+        <!--   (�) -->
+        <button style="position: absolute; top: 12px; right: 16px; background: none; color: #888; border: none; font-size: 26px; cursor: pointer; line-height: 1;" onclick="document.getElementById('admin-detailed-withdraw-overlay').remove()">&times;</button>
         
-    const actionBtnColor = actionType === 'approve' ? '#198754' : '#ef233c';
+        <div style="color: #ffc107; font-size: 18px; margin-bottom: 18px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; font-weight: bold;">User Withdrawal Details</div>
+        
+        <!--   (Rows) -->
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">User UID</span><span style="font-family: monospace; color: #0dcaf0; font-weight: bold;">${item.uid || 'N/A'}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">Mobile Number</span><span style="font-weight: bold;">${item.phone}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">Requested Amount</span><span style="font-weight: bold; color: #ff9f43;">${parseFloat(item.amount).toFixed(2)}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">Method</span><span style="font-weight: bold; color: #198754;">${item.method}</span></div>
+        
+        <!--       -->
+        <div style="background-color: #121212; border: 1px solid #2d2d2d; border-radius: 8px; padding: 12px; margin-top: 15px; font-size: 13.5px; line-height: 1.5; text-align: left; color: #e0e0e0;">
+            <div style="color: #a0a0a0; font-size: 11px; text-transform: uppercase; font-weight: bold; margin-bottom: 6px;">Payout Account Information</div>
+            ${methodDetailsHtml}
+        </div>
+        
+        <!--   (Approve / Reject) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; width: 100%;">
+            <button class="modal-btn btn-green" style="padding: 12px;" onclick="askWithdrawConfirmation('${item._id}', 'approve', '${item.amount}')">Approve Now</button>
+            <button class="modal-btn btn-red" style="padding: 12px;" onclick="askWithdrawConfirmation('${item._id}', 'reject', '${item.amount}')">Reject Request</button>
+        </div>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+}
+
+// [STEP 2: APPROVE/REJECT PAR CONFIRMATION POPUP ASKING]
+function askWithdrawConfirmation(id, actionType, amount) {
+    const confirmOverlay = document.createElement('div');
+    confirmOverlay.id = 'admin-withdraw-confirm-sub-overlay';
+    confirmOverlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10001; padding: 15px;";
+
+    const box = document.createElement('div');
+    box.style.cssText = "background: #1e1e1e; border: 1px solid #333; width: 90%; max-width: 360px; padding: 25px; border-radius: 14px; text-align: center; color: white;";
+    
+    const headingText = actionType === 'approve' ? "Confirm Approval?" : "Confirm Rejection?";
+    const bodyMessage = actionType === 'approve' 
+        ? `Are you absolutely sure you want to APPROVE this withdrawal request of ${amount}?`
+        : `Are you absolutely sure you want to REJECT this withdrawal request of ${amount}?`;
+    const actionBtnColor = actionType === 'approve' ? '#198754' : '#dc3545';
     const actionBtnText = actionType === 'approve' ? "Yes, Approve" : "Yes, Reject";
 
     box.innerHTML = `
-        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #ffffff;">${headingText}</h3>
+        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">${headingText}</h3>
         <p style="font-size: 13.5px; color: #b0b0b0; line-height: 1.5; margin-bottom: 22px;">${bodyMessage}</p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
-            <button id="admin-withdraw-yes-btn" style="background: ${actionBtnColor}; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;">${actionBtnText}</button>
-            <button id="admin-withdraw-cancel-btn" style="background: #333; color: #ccc; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;">Cancel</button>
-        </div>`;
-        
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
+            <button style="background: ${actionBtnColor}; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;" onclick="executeFinalServerWithdrawAction('${id}', '${actionType}')">${actionBtnText}</button>
+            <button style="background: #333; color: #ccc; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;" onclick="document.getElementById('admin-withdraw-confirm-sub-overlay').remove()">Cancel</button>
+        </div>
+    `;
 
-    document.getElementById('admin-withdraw-cancel-btn').onclick = function() { overlay.remove(); };
-    document.getElementById('admin-withdraw-yes-btn').onclick = function() {
-        overlay.remove();
-        executeFinalServerWithdrawAction(id, actionType);
-    };
+    confirmOverlay.appendChild(box);
+    document.body.appendChild(confirmOverlay);
 }
 
+// [STEP 3: SERVER ENDPOINT TRANSACTION EXECUTION]
 function executeFinalServerWithdrawAction(id, actionType) {
+    //  -   
+    const confirmSubOverlay = document.getElementById('admin-withdraw-confirm-sub-overlay');
+    if (confirmSubOverlay) confirmSubOverlay.remove();
+
     fetch(`${SERVER_URL}/api/admin/action-withdrawal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -686,8 +737,12 @@ function executeFinalServerWithdrawAction(id, actionType) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showAdminCustomPopup("Payout Action Successful", data.message || "Status updated!", "success");
-            fetchAdminPendingWithdrawals();
+            //  : 'OK'       -     
+            const mainOverlay = document.getElementById('admin-detailed-withdraw-overlay');
+            if (mainOverlay) mainOverlay.remove();
+
+            showAdminCustomPopup("Payout Action Successful", data.message || "Status updated successfully!", "success");
+            fetchAdminPendingWithdrawals(); //   
         } else {
             showAdminCustomPopup("Action Refused", data.message || "Failed to update status.", "error");
         }

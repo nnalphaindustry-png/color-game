@@ -427,7 +427,7 @@ app.get('/api/game-sync', async (req, res) => {
 
 
 // 6. असली सट्टा (Bet) लगाने की एपीआई
-// === आपके सर्वर के लिए 100% फिक्स किया गया बेटिंग एपीआई ===
+// === सर्वर फाइल के लिए 100% सटीक और फाइनल बेटिंग एपीआई ===
 app.post('/api/place-bet', async (req, res) => {
     try {
         const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
@@ -462,9 +462,8 @@ app.post('/api/place-bet', async (req, res) => {
         user.balance -= Number(betAmount);
         await user.save();
         
-        // [मास्टर फिक्स]: सट्टा डेटाबेस में रिकॉर्ड करें (यूजर की UID को यहाँ अनिवार्य रूप से शामिल किया गया है)
+        // [अंतिम फिक्स]: केवल वही फील्ड्स जो आपके असली betSchema (पेज 2) में मौजूद हैं!
         const newBet = new Bet({
-            uid: String(user.uid), // <--- यह लाइन डेटाबेस का 'uid is required' एरर हमेशा के लिए खत्म कर देगी!
             phone: String(phone).trim(),
             gameMode: String(gameMode).trim(),
             periodId: finalPeriodId,

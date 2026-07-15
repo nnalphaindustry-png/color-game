@@ -153,10 +153,10 @@
 <div id="deposit-page" class="admin-page-view">
     <h2 class="page-heading-title">Deposit Verification</h2>
     <div class="data-table-card">
-    <!-- SEARCH BAR ADDED HERE -->
-<div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 12px; margin: 15px; display: flex; gap: 10px; align-items: center;">
-    <input type="text" id="admin-utr-search-input" placeholder="Paste 12-Digit UTR Number to Verify..." style="margin: 0; flex: 1; background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; outline: none; font-size: 14px;">
-    <button onclick="searchPendingDepositByUTR()" style="padding: 10px 20px; margin: 0; white-space: nowrap; background: #ffc107; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer;">Search UTR</button>
+    <!-- SEARCH BAR UPDATED FOR PERFECT MOBILE VIEW -->
+<div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 12px; margin: 15px; display: flex; flex-direction: column; gap: 10px;">
+    <input type="text" id="admin-utr-search-input" placeholder="Paste 12-Digit UTR Number to Verify..." style="width: 100%; margin: 0; background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 6px; outline: none; font-size: 14px; box-sizing: border-box;">
+    <button onclick="searchPendingDepositByUTR()" style="width: 100%; padding: 12px; margin: 0; background: #ffc107; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; box-sizing: border-box; text-align: center;">Search UTR Number</button>
 </div>
 
         <h5 class="data-table-title">Pending UTR Recharge Requests</h5>
@@ -511,16 +511,19 @@
             setInterval(syncNodeServerStats, 5000);
             setInterval(syncLiveBettingSummaryMetrics, 3000);
         };
-        // 1.         
+        //   (Global Variable)     
+let localPendingDepositsCache = [];
+
+// 1.          (  )
 function fetchAdminPendingDeposits() {
     const depositPageElement = document.getElementById('deposit-page');
-    //  :          ,       
     if (!depositPageElement || depositPageElement.style.display === "none") return;
 
     fetch(`${SERVER_URL}/api/admin/pending-deposits`)
         .then(res => res.json())
         .then(data => {
             if (data.success && data.list) {
+                localPendingDepositsCache = data.list; //       
                 let rowsHtml = '';
                 data.list.forEach(item => {
                     rowsHtml += `
@@ -545,64 +548,26 @@ function fetchAdminPendingDeposits() {
             document.getElementById('admin-deposit-table-body').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#dc3545;">Data sync timeout!</td></tr>';
         });
 }
-//   (Global Variable)     
-let localPendingDepositsCache = [];
 
-// [           ]
-function fetchAdminPendingDeposits() {
-    const depositPageElement = document.getElementById('deposit-page');
-    if (!depositPageElement || depositPageElement.style.display === "none") return;
-
-    fetch(`${SERVER_URL}/api/admin/pending-deposits`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success && data.list) {
-                localPendingDepositsCache = data.list; //       
-                let rowsHtml = '';
-                data.list.forEach(item => {
-                    rowsHtml += `
-                        <tr>
-                            <td style="font-weight: bold; color: #fff;">${item.phone}</td>
-                            <td style="color: #198754; font-weight: bold;">${item.amount.toFixed(2)}</td>
-                            <td class="id-text-format">${item.utr}</td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="modal-btn btn-green" style="padding: 6px 12px; font-size: 13px;" onclick="processDepositAction('${item._id}', 'approve')">Approve</button>
-                                    <button class="modal-btn btn-red" style="padding: 6px 12px; font-size: 13px;" onclick="processDepositAction('${item._id}', 'reject')">Reject</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-                document.getElementById('admin-deposit-table-body').innerHTML = rowsHtml || `<tr><td colspan="4" style="text-align:center; color:#a0a0a0; padding:20px;">       !</td></tr>`;
-            }
-        });
-}
-
-//  : UTR       - 
+// 2. UTR       - 
 function searchPendingDepositByUTR() {
     const searchUTR = document.getElementById('admin-utr-search-input').value.trim();
-    
     if (!searchUTR) {
         showGlobalToastAlert("Please paste or type a UTR number first!", true);
         return;
     }
 
-    //      UTR  
     const matchedRecord = localPendingDepositsCache.find(item => item.utr === searchUTR);
-
     if (!matchedRecord) {
         showGlobalToastAlert("This UTR is not found in the Pending List!", true);
         return;
     }
 
-    //  UTR   ,         -  
     openQuickDepositVerifyModal(matchedRecord);
 }
 
-//   -     
+// 3.   -     
 function openQuickDepositVerifyModal(record) {
-    //        
     const oldModal = document.getElementById('quick-utr-modal-overlay');
     if (oldModal) oldModal.remove();
 
@@ -632,13 +597,39 @@ function openQuickDepositVerifyModal(record) {
     document.body.appendChild(overlay);
 }
 
-// 1. Approve  Reject           
+// 4.       - ( )
+function showAdminCustomPopup(title, message, type) {
+    const oldPopup = document.getElementById('admin-custom-popup-overlay');
+    if (oldPopup) oldPopup.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'admin-custom-popup-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px; animation: fadeInAdmin 0.2s ease-out;";
+
+    const box = document.createElement('div');
+    let iconColor = type === 'success' ? '#198754' : '#ef233c'; 
+    let iconSymbol = type === 'success' ? '' : '';
+
+    box.style.cssText = "background: #1e1e1e; border: 1px solid #333; width: 90%; max-width: 360px; padding: 25px; border-radius: 14px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: white;";
+    box.innerHTML = `
+        <div style="width: 55px; height: 55px; background: ${iconColor}20; color: ${iconColor}; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: bold; margin: 0 auto 15px auto; border: 1px solid ${iconColor}40;">${iconSymbol}</div>
+        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #fff;">${title}</h3>
+        <p style="font-size: 13.5px; color: #b0b0b0; line-height: 1.5; margin-bottom: 22px;">${message}</p>
+        <button id='admin-popup-close-btn' style='background: ${iconColor}; color: white; border: none; padding: 11px 25px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer; width: 100%;'>OK</button>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    document.getElementById('admin-popup-close-btn').onclick = function() {
+        overlay.remove();
+    };
+}
+
+// 5.      alert()     
 function processDepositAction(id, actionType) {
-    const confirmationText = actionType === 'approve' 
-        ? "Do you want to APPROVE this payment and add balance to user?" 
-        : "Do you want to REJECT this request?";
-        
-    if (!confirm(confirmationText)) return;
+    //        
+    if (!confirm("Are you sure you want to proceed with this action?")) return;
 
     fetch(`${SERVER_URL}/api/admin/action-deposit`, {
         method: 'POST',
@@ -647,42 +638,105 @@ function processDepositAction(id, actionType) {
     })
     .then(res => res.json())
     .then(data => {
-        //        undefined        
         if (data.success) {
-            //          ,       
-            alert("Success: " + (data.message || "Action processed successfully!"));
-            fetchAdminPendingDeposits(); //      
+            //  -    
+            showAdminCustomPopup("Action Successful", data.message || "Deposit request completed!", "success");
+            fetchAdminPendingDeposits(); 
         } else {
-            alert("Server Error: " + (data.message || "Failed to process request."));
+            showAdminCustomPopup("Action Refused", data.message || "Failed to process request.", "error");
         }
     })
     .catch(err => {
-        console.error("Admin Action Error:", err);
-        alert("Network Error: Cannot connect to server. Please check your Render link.");
+        showAdminCustomPopup("Network Failure", "Cannot connect to server.", "error");
     });
 }
 
-// 2. - (Modal)         
+// 6.   modal    
 function executeQuickAction(id, actionType) {
-    // 1.   -     
     const modalOverlay = document.getElementById('quick-utr-modal-overlay');
     if (modalOverlay) modalOverlay.remove();
     
-    // 2.     
     const searchInput = document.getElementById('admin-utr-search-input');
     if (searchInput) searchInput.value = '';
     
-    // 3.   API     
     processDepositAction(id, actionType);
 }
+// 1. [ ]:    confirm()       - 
+function processDepositAction(id, actionType) {
+    //      -    
+    const oldPopup = document.getElementById('admin-confirm-popup-overlay');
+    if (oldPopup) oldPopup.remove();
 
+    const overlay = document.createElement('div');
+    overlay.id = 'admin-confirm-popup-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px; animation: fadeInAdmin 0.2s ease-out;";
+
+    const box = document.createElement('div');
+    box.style.cssText = "background: #1e1e1e; border: 1px solid #333; width: 90%; max-width: 380px; padding: 25px; border-radius: 14px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: white;";
+
+    const headingText = actionType === 'approve' ? "Approve Deposit?" : "Reject Request?";
+    const bodyMessage = actionType === 'approve' 
+        ? "Are you sure you want to approve this payment and add balance to this user's wallet?" 
+        : "Are you sure you want to reject this deposit request?";
+    
+    const actionBtnColor = actionType === 'approve' ? '#198754' : '#ef233c';
+    const actionBtnText = actionType === 'approve' ? "Yes, Approve" : "Yes, Reject";
+
+    box.innerHTML = `
+        <div style="width: 55px; height: 55px; background: #ff980020; color: #ff9800; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: bold; margin: 0 auto 15px auto; border: 1px solid #ff980040;"></div>
+        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #fff;">${headingText}</h3>
+        <p style="font-size: 13.5px; color: #b0b0b0; line-height: 1.5; margin-bottom: 22px;">${bodyMessage}</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+            <button id="admin-confirm-yes-btn" style="background: ${actionBtnColor}; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;">${actionBtnText}</button>
+            <button id="admin-confirm-cancel-btn" style="background: #333; color: #ccc; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;">Cancel</button>
+        </div>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    //    (Cancel)   
+    document.getElementById('admin-confirm-cancel-btn').onclick = function() {
+        overlay.remove();
+    };
+
+    //    (Yes)   ,     
+    document.getElementById('admin-confirm-yes-btn').onclick = function() {
+        overlay.remove(); //    
+        executeFinalServerDepositAction(id, actionType); //  API    
+    };
+}
+
+// 2.          
+function executeFinalServerDepositAction(id, actionType) {
+    fetch(`${SERVER_URL}/api/admin/action-deposit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, action: actionType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            //      -
+            showAdminCustomPopup("Action Successful", data.message || "Deposit request completed!", "success");
+            fetchAdminPendingDeposits(); //      
+        } else {
+            showAdminCustomPopup("Action Refused", data.message || "Failed to process request.", "error");
+        }
+    })
+    .catch(err => {
+        showAdminCustomPopup("Network Failure", "Cannot connect to server. Check your backend logs.", "error");
+    });
+}
+
+
+// 7.      
 window.onload = function() {
-    // 1.          
     syncNodeServerStats();
     setInterval(syncNodeServerStats, 5000);
     setInterval(syncLiveBettingSummaryMetrics, 3000);
     
-    // 2.         - 
     fetchAdminPendingDeposits();
     setInterval(fetchAdminPendingDeposits, 4000);
 };

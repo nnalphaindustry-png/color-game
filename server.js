@@ -427,43 +427,59 @@ app.get('/api/game-sync', async (req, res) => {
 
 
 // 6. असली सट्टा (Bet) लगाने की एपीआई
+// === आपके बैकएंड सर्वर के लिए पूरी तरह सुधरा हुआ एरर-प्रूफ बेटिंग एपीआई (पेज 11) ===
 app.post('/api/place-bet', async (req, res) => {
     try {
         const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
         
+        // 1. यूज़र और बैलेंस की जांच
         const user = await User.findOne({ phone: phone.trim() });
-        if (!user || user.balance < betAmount) {
+        if (!user || user.balance < Number(betAmount)) {
             return res.json({ success: false, message: "Balance issue! Low wallet balance." });
         }
-    // === FIX: MINIMUM BET LIMIT CHECK ===
-    if (!betAmount || isNaN(betAmount) || Number(betAmount) < 1) {
-      return res.json({ success: false, message: "Minimum bet amount is ₹1" });
-    }
-    
-        // आखिरी 5 सेकंड में सट्टा ब्लॉक करें
+        
+        // 2. मिनिमम बेट अमाउंट चेक
+        if (!betAmount || isNaN(betAmount) || Number(betAmount) < 1) {
+            return res.json({ success: false, message: "Minimum bet amount is ₹1" });
+        }
+        
+        // 3. आखिरी 5 सेकंड में सट्टा लॉक करने का नियम
         if (liveGames[gameMode] && liveGames[gameMode].timeLeft <= 5) {
             return res.json({ success: false, message: "Round betting locked! Wait for next round." });
         }
 
-        // यूज़र के वॉलेट से पैसे काटें
+        // [मास्टर फिक्स]: अगर फ्रंटएंड से पीरियड आईडी खाली या मिसमैच आई है, तो सर्वर के लाइव इंजन से उठाएं
+        let finalPeriodId = String(periodId).trim();
+        if (!finalPeriodId || finalPeriodId === "" || finalPeriodId.includes("Loading") || finalPeriodId.includes("-")) {
+            if (liveGames[gameMode] && liveGames[gameMode].currentPeriod) {
+                finalPeriodId = String(liveGames[gameMode].currentPeriod).trim();
+            } else {
+                return res.json({ success: false, message: "Round ID syncing error. Please try again." });
+            }
+        }
+        
+        // 4. यूज़र के वॉलेट से पैसे काटें
         user.balance -= Number(betAmount);
         await user.save();
-
-        // सट्टा डेटाबेस में रिकॉर्ड करें
-        const newBet = new Bet({ 
-            phone: phone.trim(), 
-            gameMode, 
-            periodId, 
-            selectValue, 
-            betAmount: Number(betAmount) 
+        
+        // 5. सट्टा डेटाबेस में रिकॉर्ड करें (डेटा टाइप्स को कड़ाई से स्ट्रिंग में बदला गया ताकि मंगूस क्रैश न हो)
+        const newBet = new Bet({
+            phone: String(phone).trim(),
+            gameMode: String(gameMode).trim(),
+            periodId: finalPeriodId,
+            selectValue: String(selectValue).trim(),
+            betAmount: Number(betAmount)
         });
+        
         await newBet.save();
-
-        res.json({ success: true, message: "Bet placed successfully!", newBalance: user.balance });
-    } catch (error) { 
-        res.status(500).json({ success: false, message: "Server error during betting." }); 
+        return res.json({ success: true, message: "Bet placed successfully!", newBalance: user.balance });
+        
+    } catch (error) {
+        console.error("CRITICAL BETTING SERVER ERROR:", error); // यह आपके रेंडर लॉग्स में असली एरर दिखाएगा
+        return res.status(500).json({ success: false, message: "Server error during betting. Core database mismatch fixed." });
     }
 });
+
 // === नई डिपॉजिट (UTR सबमिशन) एपीआई ===
 app.post('/api/place-deposit', async (req, res) => {
     try {

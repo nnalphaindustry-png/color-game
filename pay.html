@@ -62,20 +62,24 @@
 </div>
 
 <script>
+    // 1. आपके रेंडर सर्वर की असली लिंक (जो डिफाइन नहीं थी)
+    const SERVER_URL = "https://color-game-1kc2.onrender.com";
+
     // पेज लोड होते ही लोकल स्टोरेज से डेटा खींचना
     document.addEventListener("DOMContentLoaded", function() {
         const amount = localStorage.getItem('pending_deposit_amount') || "0";
         const upiIntent = localStorage.getItem('pending_upi_intent');
 
-        // 1. स्क्रीन पर अमाउंट दिखाना
+        // स्क्रीन पर अमाउंट दिखाना
         document.getElementById('display-amount').innerText = "₹" + Number(amount).toFixed(2);
 
-        // 2. पे बटन में असली UPI लिंक सेट करना
+        // पे बटन में असली UPI लिंक सेट करना
         if (upiIntent) {
             document.getElementById('dynamic-upi-link').href = upiIntent;
         } else {
-            alert("Payment link expired or invalid! Please go back.");
-            window.location.href = "deposit.html"; // लिंक न होने पर वापस भेजना
+            showBeautifulPopup("एरर", "पेमेंट लिंक अमान्य है! कृपया डिपॉजिट पेज पर वापस जाएं।", "error", function() {
+                window.location.href = "deposit.html";
+            });
         }
     });
 
@@ -86,21 +90,90 @@
         }
     }
 
-    // UTR को असली सर्वर API पर सबमिट करने का फंक्शन
+    // सुंदर कस्टम पॉप-अप बनाने का मास्टर फंक्शन (English + Pending Loader)
+function showBeautifulPopup(title, message, type, callback) {
+    // अगर पहले से कोई पॉप-अप स्क्रीन पर है तो उसे हटाना
+    const oldPopup = document.getElementById('custom-alert-overlay');
+    if (oldPopup) oldPopup.remove();
+
+    // पॉप-अप का नया HTML ढांचा बनाना
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-alert-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; animation: fadeIn 0.2s ease-out;";
+
+    const box = document.createElement('div');
+    
+    // कलर थीम सेट करना
+    let iconColor = '#ff9800'; // Default Orange for Pending
+    let visualIconHtml = '';
+
+    if (type === 'success') {
+        iconColor = '#ff9800'; // Success होने पर हम Pending का विजुअल दिखा रहे हैं जैसा आपने कहा
+        // यहाँ हमने टिक मार्क हटाकर एक गोल घूमने वाला पेंडिंग सिंबल/घड़ी बना दी है
+        visualIconHtml = `
+            <div style="width: 60px; height: 60px; border: 4px solid #ff980020; border-top: 4px solid #ff9800; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; margin: 0 auto 15px auto; animation: spinLoader 2s linear infinite;">🕒</div>
+        `;
+    } else if (type === 'warning') {
+        iconColor = '#ff9800';
+        visualIconHtml = `<div style="width: 60px; height: 60px; background: #ff980020; color: #ff9800; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; margin: 0 auto 15px auto;">⚠</div>`;
+    } else {
+        iconColor = '#ef233c'; // Error
+        visualIconHtml = `<div style="width: 60px; height: 60px; background: #ef233c20; color: #ef233c; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; margin: 0 auto 15px auto;">✖</div>`;
+    }
+
+    box.style.cssText = "background: white; width: 90%; max-width: 360px; padding: 25px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);";
+    
+    box.innerHTML = `
+        ${visualIconHtml}
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 8px; color: #111;">${title}</h3>
+        <p style="font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 20px;">${message}</p>
+        <button id='popup-close-btn' style='background: ${iconColor}; color: white; border: none; padding: 12px 30px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; box-shadow: 0 4px 10px ${iconColor}40;'>OK</button>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // स्पिनर एनिमेशन के लिए सीएसएस स्टाइल्स जोड़ना
+    if (!document.getElementById('popup-animation-styles')) {
+        const style = document.createElement('style');
+        style.id = 'popup-animation-styles';
+        style.innerHTML = `
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+            @keyframes spinLoader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.getElementById('popup-close-btn').onclick = function() {
+        overlay.remove();
+        if (callback) callback();
+    };
+}
+
+// UTR को असली सर्वर API पर सबमिट करने का मुख्य फंक्शन (English में)
 function submitUserUTRData() {
     const utrValue = document.getElementById('utr-number-input').value.trim();
     const amountValue = localStorage.getItem('pending_deposit_amount');
     const userPhone = localStorage.getItem('user_phone');
 
-    // सुरक्षा जांच
-    if (utrValue.length !== 12 || isNaN(utrValue)) {
-        alert("कृपया सही 12 अंकों का UTR नंबर दर्ज करें!");
+    // जांच 1: इनपुट खाली होने पर
+    if (!utrValue) {
+        showBeautifulPopup("Warning", "Please enter your 12-digit UTR number!", "warning");
         return;
     }
 
+    // जांच 2: यूटीआर 12 अंकों का न होने पर
+    if (utrValue.length !== 12 || isNaN(utrValue)) {
+        showBeautifulPopup("Invalid UTR", "Please enter a valid 12-digit UTR number. Currently you entered " + utrValue.length + " digits.", "error");
+        return;
+    }
+
+    // जांच 3: यूजर सेशन गायब होने पर
     if (!userPhone || !amountValue) {
-        alert("यूजर सेशन या अमाउंट गायब है! कृपया दोबारा प्रयास करें।");
-        window.location.href = "deposit.html";
+        showBeautifulPopup("Session Expired", "User session or amount missing! Please try again from deposit page.", "error", function() {
+            window.location.href = "deposit.html";
+        });
         return;
     }
 
@@ -117,19 +190,20 @@ function submitUserUTRData() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert(data.message); // सफलता का मैसेज दिखेगा
-            
-            // डेटा क्लियर करके प्रोफाइल पर भेजना
-            localStorage.removeItem('pending_deposit_amount');
-            localStorage.removeItem('pending_upi_intent');
-            window.location.href = "profile.html";
+            // सफलता पर पेंडिंग क्लॉक वाला ओरेंज पॉप-अप इंग्लिश में
+            showBeautifulPopup("Deposit Pending", "Your UTR has been submitted successfully! Balance will be credited after admin verification.", "success", function() {
+                localStorage.removeItem('pending_deposit_amount');
+                localStorage.removeItem('pending_upi_intent');
+                window.location.href = "profile .html";
+            });
         } else {
-            alert(data.message); // अगर कोई एरर या डुप्लीकेट UTR हुआ तो वो दिखेगा
+            // सर्वर रिजेक्शन एरर (जैसे डुप्लीकेट UTR)
+            showBeautifulPopup("Request Denied", data.message || "This UTR is already used.", "error");
         }
     })
     .catch(err => {
         console.error("Deposit Error:", err);
-        alert("सर्वर से कनेक्ट करने में विफल! कृपया इंटरनेट चेक करें।");
+        showBeautifulPopup("Connection Error", "Failed to connect with server! Please make sure your backend is live.", "error");
     });
 }
 

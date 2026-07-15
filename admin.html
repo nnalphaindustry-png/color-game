@@ -84,8 +84,8 @@
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'deposit-page')">💰 Deposit Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'withdrawal-page')">💸 Withdrawal Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'control-page')">🎮 Game Control</a></li>
-            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
         </ul>
     </nav>
 
@@ -149,7 +149,37 @@
 
         <!-- PLACEHOLDERS FOR OTHER PAGES -->
         <div id="user-list-page" class="admin-page-view"><h2 class="page-heading-title">Full User Records</h2><div class="placeholder-screen-view">User list custom page will be linked here.</div></div>
-        <div id="deposit-page" class="admin-page-view"><h2 class="page-heading-title">Deposit Verification</h2><div class="placeholder-screen-view">Deposit transactions request screen layout will be loaded here.</div></div>
+        <!-- PAGE 3: Deposit Verification Panel (FULLY UPDATED) -->
+<div id="deposit-page" class="admin-page-view">
+    <h2 class="page-heading-title">Deposit Verification</h2>
+    <div class="data-table-card">
+    <!-- SEARCH BAR ADDED HERE -->
+<div style="background-color: #121212; border: 1px solid #333; border-radius: 8px; padding: 12px; margin: 15px; display: flex; gap: 10px; align-items: center;">
+    <input type="text" id="admin-utr-search-input" placeholder="Paste 12-Digit UTR Number to Verify..." style="margin: 0; flex: 1; background: #1a1a1a; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 6px; outline: none; font-size: 14px;">
+    <button onclick="searchPendingDepositByUTR()" style="padding: 10px 20px; margin: 0; white-space: nowrap; background: #ffc107; color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer;">Search UTR</button>
+</div>
+
+        <h5 class="data-table-title">Pending UTR Recharge Requests</h5>
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mobile Number</th>
+                        <th>Amount</th>
+                        <th>12-Digit UTR</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-deposit-table-body">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading pending deposits...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
         <div id="withdrawal-page" class="admin-page-view"><h2 class="page-heading-title">Withdrawal Requests</h2><div class="placeholder-screen-view">User payout clearance panel layout will open here.</div></div>
         <div id="settings-page" class="admin-page-view"><h2 class="page-heading-title">Global System Settings</h2><div class="placeholder-screen-view">Global app maintenance options will remain here.</div></div>
                 <!-- PAGE 5: Master Live Result Control Engine -->
@@ -239,16 +269,20 @@
         </div>
 
         <!-- PAGE 7: User Management Search View -->
-        <div id="management-page" class="admin-page-view">
-            <h2 class="page-heading-title">Search & Manage User</h2>
-            <div class="data-table-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
-                <h5 class="data-table-title" style="margin-bottom: 20px;">Enter User Mobile Number</h5>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <input type="text" id="search-phone-input" placeholder="e.g. 9876543210" class="input-block-field">
-                    <button onclick="searchUserByPhone()" class="submit-action-btn">Search User</button>
-                </div>
-            </div>
-        </div>
+<div id="management-page" class="admin-page-view">
+  <h2 class="page-heading-title">Search & Manage User</h2>
+  <div class="data-table-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <!--      -->
+    <h5 class="data-table-title" style="margin-bottom: 20px;">Enter User Mobile Number or 6-Digit UID</h5>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <!--         -->
+      <input type="text" id="search-master-input" placeholder="e.g. 9876543210 or 521487" class="input-block-field">
+      <!--       -->
+      <button onclick="searchUserMaster()" class="submit-action-btn">Search User</button>
+    </div>
+  </div>
+</div>
+
 
     </main>
 
@@ -286,38 +320,56 @@
         }
 
         function openUserPopupModal(userIdToFind) {
-            const selectedUserObject = globalUsersCacheMemory.find(u => u._id === userIdToFind);
-            if (!selectedUserObject) return;
-            document.getElementById('pop-phone').innerText = selectedUserObject.phone || 'N/A';
-            document.getElementById('pop-uid').innerText = selectedUserObject._id || 'N/A';
-            document.getElementById('pop-balance').innerText = '₹' + (selectedUserObject.balance || 0).toFixed(2);
-            document.getElementById('pop-password').innerText = selectedUserObject.password || 'N/A';
-            document.getElementById('pop-invite').innerText = selectedUserObject.inviteCode || 'None';
-            document.getElementById('pop-date').innerText = new Date(selectedUserObject.createdAt).toLocaleDateString('en-IN');
-            document.getElementById('userPopupModal').style.display = 'flex';
-        }
+    const selectedUserObject = globalUsersCacheMemory.find(u => u._id === userIdToFind);
+    if (!selectedUserObject) return;
+    
+    document.getElementById('pop-phone').innerText = selectedUserObject.phone || 'N/A';
+    document.getElementById('pop-uid').innerText = selectedUserObject.uid || 'N/A'; //  _id  uid 
+    document.getElementById('pop-balance').innerText = '' + (selectedUserObject.balance || 0).toFixed(2);
+    document.getElementById('pop-password').innerText = selectedUserObject.password || 'N/A';
+    document.getElementById('pop-invite').innerText = selectedUserObject.inviteCode || 'None';
+    document.getElementById('pop-date').innerText = new Date(selectedUserObject.createdAt).toLocaleDateString('en-IN');
+    
+    document.getElementById('userPopupModal').style.display = 'flex';
+}
 
         function closeUserPopupModal() { document.getElementById('userPopupModal').style.display = 'none'; }
         function closeManagementPopupModal() { document.getElementById('managementPopupModal').style.display = 'none'; document.getElementById('manage-balance-amount').value = ''; }
-                function searchUserByPhone() {
-            const phoneInput = document.getElementById('search-phone-input').value.trim();
-            if (!phoneInput) return showGlobalToastAlert("Please enter a mobile number!", true);
-            fetch(`${SERVER_URL}/api/admin/search-user/${phoneInput}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.user) {
-                        activeManagedUserObject = data.user;
-                        document.getElementById('manage-pop-phone').innerText = data.user.phone;
-                        document.getElementById('manage-pop-balance').innerText = '₹' + (data.user.balance || 0).toFixed(2);
-                        const isBanned = data.user.isBanned || false;
-                        document.getElementById('manage-pop-status').innerText = isBanned ? "Banned Account" : "Active Account";
-                        document.getElementById('manage-pop-status').style.color = isBanned ? "#dc3545" : "#198754";
-                        document.getElementById('ban-action-btn').innerText = isBanned ? "Unban Account" : "Ban Account";
-                        document.getElementById('ban-action-btn').style.backgroundColor = isBanned ? "#198754" : "#ff9800";
-                        document.getElementById('managementPopupModal').style.display = 'flex';
-                    } else { showGlobalToastAlert(data.message || "User account not found!", true); }
-                }).catch(err => showGlobalToastAlert("Network sync failure!", true));
-        }
+                function searchUserMaster() {
+  //      
+  const searchInput = document.getElementById('search-master-input').value.trim();
+  
+  if (!searchInput) {
+    return showGlobalToastAlert("Please enter a mobile number or UID!", true);
+  }
+  
+  //        
+  fetch(`${SERVER_URL}/api/admin/search-user/${searchInput}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.user) {
+        activeManagedUserObject = data.user;
+        
+        //        
+        document.getElementById('manage-pop-phone').innerText = data.user.phone || 'N/A';
+        document.getElementById('manage-pop-balance').innerText = '' + (data.user.balance || 0).toFixed(2);
+        
+        const isBanned = data.user.isBanned || false;
+        document.getElementById('manage-pop-status').innerText = isBanned ? "Banned Account" : "Active Account";
+        document.getElementById('manage-pop-status').style.color = isBanned ? "#dc3545" : "#198754";
+        
+        document.getElementById('ban-action-btn').innerText = isBanned ? "Unban Account" : "Ban Account";
+        document.getElementById('ban-action-btn').style.backgroundColor = isBanned ? "#198754" : "#ff9800";
+        
+        //     
+        document.getElementById('managementPopupModal').style.display = 'flex';
+      } else { 
+        showGlobalToastAlert(data.message || "User account not found!", true); 
+      }
+    })
+    .catch(err => showGlobalToastAlert("Network sync failure!", true));
+}
+
 
         function toggleControlStrategyLayout() {
             const chosenStrategyValue = document.getElementById('ctrl-strategy-mode').value;
@@ -398,7 +450,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: activeManagedUserObject.phone, amount: Number(amountInput), type: operationType })
             }).then(res => res.json()).then(data => {
-                if (data.success) { showGlobalToastAlert(data.message, false); searchUserByPhone(); } 
+                if (data.success) { showGlobalToastAlert(data.message, false); searchUserMaster(); }
                 else { showGlobalToastAlert(data.message, true); }
             }).catch(err => showGlobalToastAlert("Operation dropped!", true));
         }
@@ -411,7 +463,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: activeManagedUserObject.phone })
             }).then(res => res.json()).then(data => {
-                if (data.success) { showGlobalToastAlert(data.message, false); searchUserByPhone(); }
+                if (data.success) { showGlobalToastAlert(data.message, false); searchUserMaster(); }
             }).catch(err => showGlobalToastAlert("Ban command failed!", true));
         }
 
@@ -423,7 +475,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone: activeManagedUserObject.phone })
             }).then(res => res.json()).then(data => {
-                if (data.success) { showGlobalToastAlert(data.message, false); closeManagementPopupModal(); document.getElementById('search-phone-input').value = ''; } 
+                if (data.success) { showGlobalToastAlert(data.message, false); closeManagementPopupModal(); document.getElementById('search-master-input').value = ''; } 
                 else { showGlobalToastAlert(data.message, true); }
             }).catch(err => showGlobalToastAlert("Delete action failure!", true));
         }
@@ -447,7 +499,7 @@
                         globalUsersCacheMemory = data.users;
                         let generatedRowsHtml = '';
                         data.users.forEach(user => {
-                            generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')"><td style="font-weight: bold;">${user.phone}</td><td class="id-text-format">${user._id}</td></tr>`;
+                                    generatedRowsHtml += `<tr class="clickable-row" onclick="openUserPopupModal('${user._id}')"><td style="font-weight: bold;">${user.phone}</td><td class="id-text-format">${user.uid || 'N/A'}</td></tr>`;
                         });
                         document.getElementById('dashboard-table-body').innerHTML = generatedRowsHtml || '<tr><td colspan="2" style="text-align:center;">No users registered yet</td></tr>';
                     }
@@ -459,6 +511,182 @@
             setInterval(syncNodeServerStats, 5000);
             setInterval(syncLiveBettingSummaryMetrics, 3000);
         };
+        // 1.         
+function fetchAdminPendingDeposits() {
+    const depositPageElement = document.getElementById('deposit-page');
+    //  :          ,       
+    if (!depositPageElement || depositPageElement.style.display === "none") return;
+
+    fetch(`${SERVER_URL}/api/admin/pending-deposits`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.list) {
+                let rowsHtml = '';
+                data.list.forEach(item => {
+                    rowsHtml += `
+                        <tr>
+                            <td style="font-weight: bold; color: #fff;">${item.phone}</td>
+                            <td style="color: #198754; font-weight: bold;">${item.amount.toFixed(2)}</td>
+                            <td class="id-text-format" style="letter-spacing: 0.5px;">${item.utr}</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="modal-btn btn-green" style="padding: 6px 12px; font-size: 13px;" onclick="processDepositAction('${item._id}', 'approve')">Approve</button>
+                                    <button class="modal-btn btn-red" style="padding: 6px 12px; font-size: 13px;" onclick="processDepositAction('${item._id}', 'reject')">Reject</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                document.getElementById('admin-deposit-table-body').innerHTML = rowsHtml || `<tr><td colspan="4" style="text-align:center; color:#a0a0a0; padding:20px;">       !</td></tr>`;
+            }
+        })
+        .catch(err => {
+            document.getElementById('admin-deposit-table-body').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#dc3545;">Data sync timeout!</td></tr>';
+        });
+}
+//   (Global Variable)     
+let localPendingDepositsCache = [];
+
+// [           ]
+function fetchAdminPendingDeposits() {
+    const depositPageElement = document.getElementById('deposit-page');
+    if (!depositPageElement || depositPageElement.style.display === "none") return;
+
+    fetch(`${SERVER_URL}/api/admin/pending-deposits`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.list) {
+                localPendingDepositsCache = data.list; //       
+                let rowsHtml = '';
+                data.list.forEach(item => {
+                    rowsHtml += `
+                        <tr>
+                            <td style="font-weight: bold; color: #fff;">${item.phone}</td>
+                            <td style="color: #198754; font-weight: bold;">${item.amount.toFixed(2)}</td>
+                            <td class="id-text-format">${item.utr}</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="modal-btn btn-green" style="padding: 6px 12px; font-size: 13px;" onclick="processDepositAction('${item._id}', 'approve')">Approve</button>
+                                    <button class="modal-btn btn-red" style="padding: 6px 12px; font-size: 13px;" onclick="processDepositAction('${item._id}', 'reject')">Reject</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('admin-deposit-table-body').innerHTML = rowsHtml || `<tr><td colspan="4" style="text-align:center; color:#a0a0a0; padding:20px;">       !</td></tr>`;
+            }
+        });
+}
+
+//  : UTR       - 
+function searchPendingDepositByUTR() {
+    const searchUTR = document.getElementById('admin-utr-search-input').value.trim();
+    
+    if (!searchUTR) {
+        showGlobalToastAlert("Please paste or type a UTR number first!", true);
+        return;
+    }
+
+    //      UTR  
+    const matchedRecord = localPendingDepositsCache.find(item => item.utr === searchUTR);
+
+    if (!matchedRecord) {
+        showGlobalToastAlert("This UTR is not found in the Pending List!", true);
+        return;
+    }
+
+    //  UTR   ,         -  
+    openQuickDepositVerifyModal(matchedRecord);
+}
+
+//   -     
+function openQuickDepositVerifyModal(record) {
+    //        
+    const oldModal = document.getElementById('quick-utr-modal-overlay');
+    if (oldModal) oldModal.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'quick-utr-modal-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; padding: 15px;";
+
+    const box = document.createElement('div');
+    box.style.cssText = "background-color: #1a1a1a; border: 1px solid #333333; border-radius: 12px; width: 100%; max-width: 440px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; color: white;";
+
+    box.innerHTML = `
+        <button style="position: absolute; top: 15px; right: 15px; background: none; color: #888; border: none; font-size: 24px; cursor: pointer;" onclick="document.getElementById('quick-utr-modal-overlay').remove()">&times;</button>
+        <div style="color: #ffc107; font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; font-weight: bold;"> Quick UTR Verification</div>
+        
+        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">Mobile Number</span><span style="font-weight: bold;">${record.phone}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">Deposit Amount</span><span style="font-weight: bold; color: #198754;">${record.amount.toFixed(2)}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">12-Digit UTR</span><span style="font-family: monospace; color: #0dcaf0; font-weight: bold;">${record.utr}</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #222; font-size: 14px;"><span style="color: #a0a0a0;">Current Status</span><span style="color: #ffc107; font-weight: bold;">${record.status}</span></div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 25px;">
+            <button class="modal-btn btn-green" onclick="executeQuickAction('${record._id}', 'approve')">Approve Now</button>
+            <button class="modal-btn btn-red" onclick="executeQuickAction('${record._id}', 'reject')">Reject Request</button>
+        </div>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+}
+
+// 1. Approve  Reject           
+function processDepositAction(id, actionType) {
+    const confirmationText = actionType === 'approve' 
+        ? "Do you want to APPROVE this payment and add balance to user?" 
+        : "Do you want to REJECT this request?";
+        
+    if (!confirm(confirmationText)) return;
+
+    fetch(`${SERVER_URL}/api/admin/action-deposit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, action: actionType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        //        undefined        
+        if (data.success) {
+            //          ,       
+            alert("Success: " + (data.message || "Action processed successfully!"));
+            fetchAdminPendingDeposits(); //      
+        } else {
+            alert("Server Error: " + (data.message || "Failed to process request."));
+        }
+    })
+    .catch(err => {
+        console.error("Admin Action Error:", err);
+        alert("Network Error: Cannot connect to server. Please check your Render link.");
+    });
+}
+
+// 2. - (Modal)         
+function executeQuickAction(id, actionType) {
+    // 1.   -     
+    const modalOverlay = document.getElementById('quick-utr-modal-overlay');
+    if (modalOverlay) modalOverlay.remove();
+    
+    // 2.     
+    const searchInput = document.getElementById('admin-utr-search-input');
+    if (searchInput) searchInput.value = '';
+    
+    // 3.   API     
+    processDepositAction(id, actionType);
+}
+
+window.onload = function() {
+    // 1.          
+    syncNodeServerStats();
+    setInterval(syncNodeServerStats, 5000);
+    setInterval(syncLiveBettingSummaryMetrics, 3000);
+    
+    // 2.         - 
+    fetchAdminPendingDeposits();
+    setInterval(fetchAdminPendingDeposits, 4000);
+};
+
     </script>
 </body>
 </html>

@@ -720,20 +720,36 @@ app.get('/api/admin/pending-deposits', async (req, res) => {
     }
 });
 
-// 2. एडमिन द्वारा डिपॉजिट को Approve या Reject करने की मास्टर API
+// === सुधरा हुआ एडमिन डिपॉजिट एक्शन रूट (FIXED MASTER API) ===
 app.post('/api/admin/action-deposit', async (req, res) => {
     try {
-        const { id, action } = req.body; // id = डिपॉजिट रिकॉर्ड की ID, action = 'approve' या 'reject'
+        const { id, action } = req.body; 
 
+        if (!id || !action) {
+            return res.json({ success: false, message: "Missing id or action parameter!" });
+        }
+
+        // 1. डेटाबेस से पेंडिंग डिपॉजिट रिकॉर्ड ढूंढें
         const depositItem = await Deposit.findById(id);
-        if (!depositItem) return res.json({ success: false, message: "डिपॉजिट रिकॉर्ड नहीं मिला!" });
-        if (depositItem.status !== "Pending") return res.json({ success: false, message: "यह रिक्वेस्ट पहले ही प्रोसेस हो चुकी है!" });
+        if (!depositItem) {
+            return res.json({ success: false, message: "Deposit record not found in database!" });
+        }
+        
+        if (depositItem.status !== "Pending") {
+            return res.json({ success: false, message: "This request has already been processed!" });
+        }
 
         if (action === 'approve') {
-            // यूजर का अकाउंट ढूंढें और उसका बैलेंस बढ़ाएं
-            const user = await User.findOne({ phone: depositItem.phone });
-            if (!user) return res.json({ success: false, message: "इस फोन नंबर का कोई यूजर नहीं मिला!" });
+            // 2. यूज़र का अकाउंट ढूंढने के लिए हम आपके मुख्य मोंगूज मॉडल का उपयोग करेंगे
+            // यहाँ ध्यान दें: आपके सर्वर में यूज़र मॉडल का नाम 'User' या 'user' जो भी हो, हम mongoose.models से डायरेक्ट उठाएंगे ताकि क्रैश न हो
+            const UserModel = mongoose.models.User || mongoose.model('User');
+            const user = await UserModel.findOne({ phone: depositItem.phone.trim() });
+            
+            if (!user) {
+                return res.json({ success: false, message: `User with phone ${depositItem.phone} not found!` });
+            }
 
+            // 3. बैलेंस जोड़ना
             user.balance += Number(depositItem.amount);
             await user.save();
 
@@ -742,11 +758,13 @@ app.post('/api/admin/action-deposit', async (req, res) => {
             depositItem.status = "Rejected";
         }
 
+        // 4. डिपॉजिट स्टेटस अपडेट करना
         await depositItem.save();
-        res.json({ success: true, message: `डिपॉजिट सफलतापूर्वक ${depositItem.status} कर दिया गया है!` });
+        return res.json({ success: true, message: `Deposit successfully ${depositItem.status}!` });
 
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error("Master Admin Action Error:", error);
+        return res.status(500).json({ success: false, message: "Internal server error: " + error.message });
     }
 });
 

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transaction history</title>
+<!-- ================= [भाग 1: अपडेटेड प्रीमियम CSS - इक्वल ड्रॉपडाउन और बोल्ड फॉन्ट] ================= -->
+<style>
+/* बुनियादी पेज सेटिंग्स - स्क्रीनशॉट की तरह साफ रखने के लिए */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+}
+body { 
+    background-color: #f7f9fc; 
+    color: #333; 
+    padding-bottom: 20px; 
+}
+
+/* स्क्रीनशॉट जैसा प्रीमियम हेडर (Top Navigation bar) */
+.history-header { 
+    position: sticky; 
+    top: 0; 
+    background: white; 
+    display: flex; 
+    align-items: center; 
+    padding: 14px 15px; 
+    z-index: 100; 
+}
+.back-arrow-btn { 
+    background: none; 
+    border: none; 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #666; 
+    cursor: pointer; 
+    padding-right: 12px; 
+    display: flex; 
+    align-items: center; 
+}
+.header-title { 
+    font-size: 16px; 
+    font-weight: 600; 
+    color: #222; 
+    flex: 1; 
+    text-align: center; 
+    margin-right: 24px; 
+}
+
+/* आपकी पहली शर्त: ऊपरी दोनों ड्रॉपडाउन बॉक्स को बिल्कुल बराबर (50% - 50%) और स्क्रीन के अंदर सेट करना */
+.dropdown-filters-box { 
+    display: flex; 
+    gap: 10px; 
+    padding: 12px 15px; 
+    background: #f7f9fc; 
+    width: 100%;
+}
+.select-filter-menu { 
+    width: 50%; /* दोनों डिब्बे स्क्रीन के बिल्कुल आधे-आधे हिस्से में बैठेंगे */
+    padding: 12px 8px; /* पैडिंग को थोड़ा एडजस्ट किया ताकि टेक्स्ट अंदर समा सके */
+    border: 1px solid #edf0f5; 
+    border-radius: 8px; 
+    font-size: 13px; 
+    font-weight: 600; /* ड्रॉपडाउन का टेक्स्ट भी मजबूत दिखेगा */
+    background: #fff; 
+    color: #444; 
+    outline: none; 
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    text-overflow: ellipsis; /* अगर नाम बड़ा हो तो बाहर भागने के बजाय अंदर ही सिमट जाए */
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* इतिहास कार्ड्स का मुख्य बाहरी क्षेत्र */
+.tx-list-wrapper { 
+    padding: 5px 15px; 
+}
+
+/* स्क्रीनशॉट जैसा लाल हेडर वाला प्रीमियम कार्ड */
+.tx-record-card { 
+    background: white; 
+    border-radius: 10px; 
+    overflow: hidden; 
+    margin-bottom: 16px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+    animation: fadeInCardEffect 0.3s ease;
+}
+@keyframes fadeInCardEffect { 
+    from { opacity: 0; transform: translateY(5px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* कार्ड का ऊपरी लाल हेडर हिस्सा */
+.card-header-banner { 
+    background-color: #ff6b6b; 
+    color: white; 
+    padding: 12px 14px; 
+    font-size: 14.5px; /* हेडर का फॉन्ट साइज थोड़ा बढ़ा दिया */
+    font-weight: 700; /* हेडर को और कड़क किया */
+    letter-spacing: 0.3px;
+}
+
+/* कार्ड के अंदर का डेटा बॉक्स ग्रिड */
+.card-body-content {
+    padding: 10px 14px 14px 14px;
+}
+
+/* आपकी दूसरी शर्त: नीचे के सभी ऑप्शंस को थोड़ा और मोटा (Bold) और बड़ा (Size Bigger) करना */
+.card-data-line { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 12px 0; /* स्पेसिंग को थोड़ा बढ़ाया ताकि कार्ड्स खुले-खुले लगें */
+    font-size: 14px; /* फॉन्ट साइज 12px से बढ़ाकर 14px (बड़ा) कर दिया */
+    border-bottom: 1px solid #f1f3f5;
+}
+.card-data-line:last-child {
+    border-bottom: none; 
+}
+.data-label-title { 
+    color: #555; 
+    font-weight: 600; /* 'Detail', 'Time' शब्दों को मोंगिया / मोटा (Bold) किया */
+}
+.data-value-content { 
+    font-weight: 700; /* सामने वाली वैल्यूज को भी पूरी तरह से बोल्ड (Mota) किया */
+    color: #222; 
+    text-align: right; 
+}
+
+/* स्क्रीनशॉट की तरह बैलेंस की रकम का खास बड़ा और मोटा स्टाइल */
+.data-value-content.amount-highlight-red { 
+    color: #ff5345; 
+    font-weight: 800; /* रकम को सबसे ज्यादा मोटा और स्पष्ट दिखाने के लिए */
+    font-size: 16px; /* साइज और बड़ा किया */
+}
+.data-value-content.amount-highlight-green { 
+    color: #2aa757; 
+    font-weight: 800; 
+    font-size: 16px; 
+}
+</style>
+
+</head>
+<body>
+
+<!-- 1. स्क्रीनशॉट जैसा मुख्य हेडर बार (Top Navigation bar) -->
+<div class="history-header">
+    <button class="back-arrow-btn" onclick="window.location.href='profile .html'">‹</button>
+    <div class="header-title">Transaction history</div>
+</div>
+
+<!-- 2. स्क्रीनशॉट के ऊपरी ड्रॉपडाउन बॉक्स (Dropdown Filtering Box Menu) -->
+<div class="dropdown-filters-box">
+    <!-- पहला सिलेक्ट फ़िल्टर बॉक्स -->
+    <select class="select-filter-menu" id="tx-type-dropdown-filter" onchange="executeLiveDropdownFilterChange()">
+        <option value="ALL">All Transactions</option>
+        <option value="DEPOSIT">Recharge (Game moved in)</option>
+        <option value="WITHDRAW">Withdraw (Game moved out)</option>
+        <option value="BONUS">Agent commission / Gifts</option>
+    </select>
+    
+    <!-- दूसरा सिलेक्ट फ़िल्टर बॉक्स -->
+    <select class="select-filter-menu">
+        <option>Choose a date</option>
+    </select>
+</div>
+
+<!-- 3. डायनेमिक फीड इंजेक्शन क्षेत्र (Dynamic Card Destination View) -->
+<!-- शुरुआत में यहाँ 'Loading...' दिखेगा, फिर जावास्क्रिप्ट सर्वर से डेटा लाकर यहाँ लेनदेन की लाल पर्चियां छाप देगा -->
+<div id="universal-tx-history-layer" class="tx-list-wrapper">
+    <div style="text-align: center; color: #999; padding: 30px 0; font-size: 13px;">Compiling transaction ledger...</div>
+</div>
+<!-- ================= [भाग 3: स्क्रीनशॉट लुक जावास्क्रिप्ट इंजन] ================= -->
+<script>
+// 1. आपके क्लाउड रेंडर बैकएंड सर्वर का मुख्य लाइव यूआरएल लिंक
+const SERVER_URL = "https://color-game-1kc2.onrender.com";
+
+// सभी रिकॉर्ड्स को एक साथ रखने के लिए ग्लोबल कैश मेमोरी
+let globalTxCacheLedgerArray = []; 
+
+// जैसे ही पेज ब्राउज़र में लोड होगा, यह स्वतः सबसे पहले चालू हो जाएगा
+document.addEventListener("DOMContentLoaded", function() {
+    fetchAllFinancialLedgerLogsFromServer();
+});
+
+// [फंक्शन 1: डेटाबेस से सारा वित्तीय डेटा एक साथ संकलित करना]
+function fetchAllFinancialLedgerLogsFromServer() {
+    const loggedUserPhone = localStorage.getItem('user_phone') || localStorage.getItem('userPhone') || localStorage.getItem('phone');
+    const container = document.getElementById('universal-tx-history-layer');
+    
+    if (!loggedUserPhone) {
+        container.innerHTML = `<div style="text-align: center; color: #ef233c; padding: 20px; font-weight: bold; font-size:13px;">Session Expired! Please login again.</div>`;
+        return;
+    }
+
+    container.innerHTML = `<div style="text-align: center; color: #999; padding: 30px 0; font-size: 13px;">Compiling transaction ledger...</div>`;
+
+    // 1. डिपॉजिट हिस्ट्री एपीआई प्रॉमिस (Game moved in)
+    const depositPromise = fetch(`${SERVER_URL}/api/deposit-history/${loggedUserPhone.trim()}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success && data.history) {
+                return data.history.map(item => ({ ...item, txType: 'DEPOSIT' }));
+            }
+            return [];
+        }).catch(() => []);
+
+    // 2. विथड्रॉल हिस्ट्री एपीआई प्रॉमिस (Withdraw)
+    const withdrawPromise = fetch(`${SERVER_URL}/api/withdrawal-history/${loggedUserPhone.trim()}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success && data.history) {
+                return data.history.map(item => ({ ...item, txType: 'WITHDRAW' }));
+            }
+            return [];
+        }).catch(() => []);
+
+    // दोनों सूचियों को समानांतर (Parallel) लोड करके आपस में मिलाना
+    Promise.all([depositPromise, withdrawPromise]).then(results => {
+        let compiledArray = [].concat(...results);
+        
+        // समय के अनुसार सॉर्ट करना (नया लेनदेन सबसे ऊपर - Descending Order)
+        compiledArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        // ग्लोबल मेमोरी में डेटा सुरक्षित रखना
+        globalTxCacheLedgerArray = compiledArray;
+
+        // डिफ़ॉल्ट रूप से ऑल रिकॉर्ड्स को स्क्रीन पर प्रदर्शित करना
+        renderTargetTxLedgerOnScreen("ALL");
+    });
+}
+
+// [फंक्शन 2: ड्रॉपडाउन बदलने पर डेटा फिल्टर करना]
+function executeLiveDropdownFilterChange() {
+    const selectedValue = document.getElementById('tx-type-dropdown-filter').value;
+    renderTargetTxLedgerOnScreen(selectedValue);
+}
+
+// [फंक्शन 3: रेंडरिंग इंजन - स्क्रीनशॉट जैसा लाल हेडर वाला कार्ड छापना]
+function renderTargetTxLedgerOnScreen(filterKey) {
+    const container = document.getElementById('universal-tx-history-layer');
+    
+    // कैश मेमोरी से चुने हुए फ़िल्टर के अनुसार डेटा अलग करना
+    let filteredList = [];
+    if(filterKey === "ALL") {
+        filteredList = globalTxCacheLedgerArray;
+    } else {
+        filteredList = globalTxCacheLedgerArray.filter(item => item.txType === filterKey);
+    }
+
+    if (!filteredList || filteredList.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: #a0a0a0; padding: 40px 0; font-size: 13px;">🎉 No financial entries found!</div>`;
+        return;
+    }
+
+    let cardsHtml = '';
+    
+    // लूप चलाकर एक-एक लेनदेन का स्क्रीनशॉट जैसा प्रीमियम कार्ड बनाना
+    filteredList.forEach((item) => {
+        let cardTitleHeader = 'Game moved in'; // डिफ़ॉल्ट टाइटल (Recharge के लिए)
+        let amountStyleClass = 'amount-highlight-green'; // प्लस के लिए हरा
+        let moneyPrefix = '+₹';
+        
+        if(item.txType === 'WITHDRAW') {
+            cardTitleHeader = 'Withdrawal processed';
+            amountStyleClass = 'amount-highlight-red'; // माइनस के लिए लाल
+            moneyPrefix = '-₹';
+        }
+        
+        // यदि डेटाबेस में कोई एजेंट बोनस रिकॉर्ड है (Simulated Agent support)
+        if(item.txType === 'BONUS') {
+            cardTitleHeader = 'Agent commission';
+            amountStyleClass = 'amount-highlight-green';
+            moneyPrefix = '+₹';
+        }
+
+        // आईएसओ डेट को स्क्रीनशॉट जैसी साफ डेट-टाइम में बदलना (YYYY-MM-DD HH:MM:SS)
+        const d = new Date(item.createdAt || Date.now());
+        const formattedTime = d.getFullYear() + '-' + 
+            String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(d.getDate()).padStart(2, '0') + ' ' + 
+            String(d.getHours()).padStart(2, '0') + ':' + 
+            String(d.getMinutes()).padStart(2, '0') + ':' + 
+            String(d.getSeconds()).padStart(2, '0');
+
+        // स्क्रीनशॉट की शैली में सटीक HTML कतरन
+        cardsHtml += `
+        <div class="tx-record-card">
+            <!-- लाल पट्टी हेडर -->
+            <div class="card-header-banner">${cardTitleHeader}</div>
+            
+            <div class="card-body-content">
+                <!-- पहली लाइन: Detail -->
+                <div class="card-data-line">
+                    <span class="data-label-title">Detail</span>
+                    <span class="data-value-content">${cardTitleHeader}</span>
+                </div>
+                
+                <!-- दूसरी लाइन: Time -->
+                <div class="card-data-line">
+                    <span class="data-label-title">Time</span>
+                    <span class="data-value-content" style="color: #555; font-family: monospace;">${formattedTime}</span>
+                </div>
+                
+                <!-- तीसरी लाइन: Balance -->
+                <div class="card-data-line">
+                    <span class="data-label-title">Balance</span>
+                    <span class="data-value-content ${amountStyleClass}">${moneyPrefix}${parseFloat(item.amount).toFixed(2)}</span>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    container.innerHTML = cardsHtml;
+}
+</script>
+</body>
+</html>

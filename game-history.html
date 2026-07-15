@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game History Hub</title>
+<!-- ================= [भाग 1: आपके गेम के रंगों के अनुसार प्रीमियम CSS] ================= -->
+<style>
+/* बुनियादी पेज सेटिंग्स - सभी मार्जिन और पैडिंग साफ़ करने के लिए */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+}
+body { 
+    background-color: #f7f9fc; 
+    color: #333; 
+    padding-bottom: 30px; 
+}
+
+/* प्रीमियम चिपचिपा हेडर (Sticky Navigation Header) */
+.history-header { 
+    position: sticky; 
+    top: 0; 
+    background: white; 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 15px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+    z-index: 100; 
+}
+.back-arrow-btn { 
+    background: none; 
+    border: none; 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #333; 
+    cursor: pointer; 
+    padding-right: 12px; 
+    display: flex; 
+    align-items: center; 
+}
+.header-title { 
+    font-size: 16px; 
+    font-weight: 600; 
+    color: #111; 
+    flex: 1; 
+    text-align: center; 
+    margin-right: 24px; 
+}
+
+/* कतार 1: मुख्य गेम श्रेणियाँ (91GoaClub प्रीमियम रेड-ऑरेंज ग्रेडिएंट थीम) */
+.main-game-category-row { 
+    display: flex; 
+    gap: 10px; 
+    overflow-x: auto; 
+    padding: 12px 15px; 
+    background: linear-gradient(135deg, #f03e3e, #ff6b6b); /* आपके गेम का ओरिजिनल लाल रंग */
+    white-space: nowrap; 
+    border-bottom: 2px solid #e03131; 
+}
+.main-game-category-row::-webkit-scrollbar { 
+    display: none; 
+}
+.game-type-btn { 
+    padding: 8px 16px; 
+    border-radius: 20px; 
+    font-size: 13px; 
+    font-weight: 700; 
+    background: rgba(255,255,255,0.2); 
+    color: #ffffff; 
+    border: none; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+}
+.game-type-btn.active { 
+    background: #ffffff; 
+    color: #f03e3e; /* एक्टिव होने पर बटन सफेद होगा और अक्षर लाल होंगे */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
+}
+
+/* कतार 2: सब-टाइमर टैब्स (सक्रिय होने पर प्रीमियम सॉफ्ट रेड थीम) */
+.sub-timer-tabs-row { 
+    display: flex; 
+    gap: 8px; 
+    overflow-x: auto; 
+    padding: 10px 15px; 
+    background: white; 
+    white-space: nowrap; 
+    border-bottom: 1px solid #edf0f5; 
+}
+.sub-timer-tabs-row::-webkit-scrollbar { 
+    display: none; 
+}
+.timer-item-btn { 
+    padding: 6px 14px; 
+    border-radius: 6px; 
+    font-size: 12px; 
+    font-weight: 600; 
+    background: #f0f2f5; 
+    color: #555; 
+    border: none; 
+    cursor: pointer; 
+}
+.timer-item-btn.active { 
+    background: #ff6b6b; /* सब-फ़िल्टर के लिए सुंदर लाल रंग */
+    color: white; 
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.2);
+}
+
+/* इतिहास कार्ड्स का मुख्य बाहरी डिब्बा */
+.history-list-wrapper { 
+    padding: 8px 12px; 
+}
+
+/* प्रीमियम खेल इतिहास कार्ड (Aesthetic Layout) */
+.game-record-card { 
+    background: white; 
+    border-radius: 10px; 
+    padding: 12px 14px; 
+    margin-bottom: 10px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
+    animation: fadeInCardEffect 0.3s ease; 
+}
+@keyframes fadeInCardEffect { 
+    from { opacity: 0; transform: translateY(5px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+.card-row-top { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 10px; 
+}
+.badge-game-label { 
+    background: #ff6b6b; /* विंगो लेबल का लाल रंग */
+    color: white; 
+    padding: 4px 10px; 
+    border-radius: 5px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+}
+.status-text-view { 
+    font-size: 12.5px; 
+    font-weight: 700; 
+}
+.status-text-view.win { color: #198754; }   /* जीत = हरा */
+.status-text-view.loss { color: #ef233c; }  /* हार = लाल */
+.status-text-view.pending { color: #ff9800; } 
+
+.card-data-line { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 4px 0; 
+    font-size: 12px; 
+}
+.data-label-title { 
+    color: #777; 
+    font-weight: 400; 
+}
+.data-value-content { 
+    font-weight: 500; 
+    color: #222; 
+    text-align: right; 
+}
+.data-value-content.win-amount-txt { 
+    color: #198754; 
+    font-weight: bold; 
+}
+.data-value-content.loss-amount-txt { 
+    color: #ef233c; 
+    font-weight: bold; 
+}
+
+/* आगामी खेलों के लिए 'कमिंग सून' आकर्षक डिब्बा (Coming Soon Card Box) */
+.coming-soon-card-box { 
+    background: white; 
+    border-radius: 12px; 
+    padding: 40px 20px; 
+    text-align: center; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02); 
+    margin-top: 20px; 
+}
+.coming-soon-title { 
+    font-size: 18px; 
+    font-weight: 700; 
+    color: #f03e3e; 
+    margin-bottom: 6px; 
+}
+.coming-soon-desc { 
+    font-size: 13px; 
+    color: #666; 
+    line-height: 1.4; 
+}
+</style>
+
+</head>
+<body>
+
+<!-- 1. मुख्य नेविगेशन हेडर पट्टी (Top Navigation Bar) -->
+<div class="history-header">
+    <!-- बटन पर क्लिक करते ही यूजर सीधे वापस आपके प्रोफाइल पेज पर चला जाएगा -->
+    <button class="back-arrow-btn" onclick="window.location.href='profile .html'">‹</button>
+    <div class="header-title">Game History Hub</div>
+</div>
+
+<!-- 2. कतार 1: मुख्य गेम श्रेणियाँ (Main Game Categories - WINGO, 5D, 3D, K3) -->
+<div class="main-game-category-row" id="main-games-hub-bar">
+    <button class="game-type-btn active" onclick="switchMainGameCategoryContext('WINGO')">WinGo Games</button>
+    <button class="game-type-btn" onclick="switchMainGameCategoryContext('5D')">5D Lotre</button>
+    <button class="game-type-btn" onclick="switchMainGameCategoryContext('3D')">3D Lotre</button>
+    <button class="game-type-btn" onclick="switchMainGameCategoryContext('K3')">K3 Slot</button>
+</div>
+
+<!-- 3. कतार 2: सब-टाइमर टैब्स (Dynamic Sub-Timers Bar) -->
+<!-- यहाँ पर जावास्क्रिप्ट स्वतः ही 30s, 1m, 3m, 5m के बटन अपनी जरूरत के हिसाब से पैदा करेगा -->
+<div class="sub-timer-tabs-row" id="dynamic-sub-timers-bar"></div>
+
+<!-- 4. डायनेमिक फीड इंजेक्शन क्षेत्र (Dynamic Content Destination View) -->
+<!-- शुरुआत में यहाँ 'Loading...' दिखेगा, फिर जावास्क्रिप्ट डेटाबेस से डेटा लाकर यहाँ कार्ड्स छाप देगा -->
+<div id="universal-game-history-layer" class="history-list-wrapper">
+    <div style="text-align: center; color: #999; padding: 30px 0; font-size: 13px;">Loading history engine...</div>
+</div>
+<!-- ================= [भाग 3: जावास्क्रिप्ट लॉजिक इंजन] ================= -->
+<!-- ================= [भाग 3: अपडेटेड यूनिवर्सल जावास्क्रिप्ट इंजन] ================= -->
+<script>
+// 1. आपके क्लाउड रेंडर बैकएंड सर्वर का मुख्य लाइव यूआरएल लिंक
+const SERVER_URL = "https://color-game-1kc2.onrender.com";
+
+// वर्तमान एक्टिव स्टेट्स मैनेजमेंट ट्रैकिंग
+let currentGlobalGameEngineType = "WINGO"; 
+let currentActiveTargetModeKey = "ALL"; // आपकी शर्त: स्वतः ही 'ALL' सिलेक्ट रहेगा
+
+// सभी टाइमर्स का डेटा एक साथ स्टोर करने के लिए ग्लोबल कैश मेमोरी
+let globalFetchedBetsCacheMemory = [];
+
+// आपके पूरे प्रोजेक्ट के डेटाबेस रूट्स का मैप
+const gameModesDatabaseMappingTable = {
+    "WINGO": [
+        { label: "All Records", key: "ALL" }, // पहला ऑटोमैटिक ऑल टैब
+        { label: "WinGo 30s",  key: "win_go_30s" },
+        { label: "WinGo 1m",   key: "win_go_1m" },
+        { label: "WinGo 3m",   key: "win_go_3m" },
+        { label: "WinGo 5m",   key: "win_go_5m" }
+    ],
+    "5D": [
+        { label: "All Records", key: "ALL" },
+        { label: "5D Lotre 1m", key: "five_d_1m" },
+        { label: "5D Lotre 3m", key: "five_d_3m" }
+    ],
+    "3D": [
+        { label: "All Records", key: "ALL" },
+        { label: "3D Lotre 1m", key: "three_d_1m" }
+    ],
+    "K3": [
+        { label: "All Records", key: "ALL" },
+        { label: "K3 Slot 1m", key: "k3_slot_1m" }
+    ]
+};
+
+// पेज लोड होते ही सबसे पहले चालू होने वाला हुक
+document.addEventListener("DOMContentLoaded", function() {
+    switchMainGameCategoryContext("WINGO");
+});
+
+// [फंक्शन 1: मुख्य गेम बदलने का इंजन - WINGO, 5D, 3D]
+function switchMainGameCategoryContext(categoryKey) {
+    currentGlobalGameEngineType = categoryKey;
+    currentActiveTargetModeKey = "ALL"; // गेम बदलते ही डिफ़ॉल्ट 'ALL' हो जाएगा
+    
+    // कैटेगरी बटनों का एक्टिव स्टाइल संभालना
+    const catButtons = document.querySelectorAll('.game-type-btn');
+    catButtons.forEach(btn => {
+        if(btn.innerText.toUpperCase().includes(categoryKey)) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    // मैप से उस गेम के संबंधित टाइमर्स की लिस्ट निकालना
+    const subTimersList = gameModesDatabaseMappingTable[categoryKey] || [];
+    let subTabsHtml = '';
+    
+    // लूप चलाकर सब-बटन बनाना
+    subTimersList.forEach((timer) => {
+        const isAllActive = timer.key === "ALL" ? 'active' : '';
+        subTabsHtml += `<button class="timer-item-btn ${isAllActive}" onclick="executeLiveHistoryQueryRequest('${timer.key}', this)">${timer.label}</button>`;
+    });
+    
+    document.getElementById('dynamic-sub-timers-bar').innerHTML = subTabsHtml;
+
+    // यदि डेटाबेस में वह श्रेणी अभी लाइव नहीं है (सुरक्षा कवच)
+    if(categoryKey !== "WINGO") {
+        renderComingSoonAestheticCard(categoryKey);
+    } else {
+        // WinGo सिलेक्ट होने पर सभी टाइमर्स का डेटा समानांतर (Parallel) लोड करना
+        fetchAllWinGoTimersDataAtOnce();
+    }
+}
+
+// [फंक्शन 2: सब-टाइमर या 'ALL' बटन पर क्लिक करने का लॉजिक]
+function executeLiveHistoryQueryRequest(gameModeKey, clickedBtnElement) {
+    currentActiveTargetModeKey = gameModeKey;
+    
+    if(clickedBtnElement) {
+        const timerButtons = document.querySelectorAll('.timer-item-btn');
+        timerButtons.forEach(b => b.classList.remove('active'));
+        clickedBtnElement.classList.add('active');
+    }
+
+    // यदि यूजर ने 'ALL' चुना है तो कैश से सारा डेटा दिखाएं, वरना विशिष्ट की (Key) से फ़िल्टर करें
+    if(gameModeKey === "ALL") {
+        renderFilteredCardsOnScreen(globalFetchedBetsCacheMemory);
+    } else {
+        const filteredList = globalFetchedBetsCacheMemory.filter(bet => bet.gameModeKey === gameModeKey);
+        renderFilteredCardsOnScreen(filteredList);
+    }
+}
+
+// [फंक्शन 3: आपकी शर्त अनुसार - सभी टाइमर्स का डेटा एक साथ खींचकर 'ALL' में मिलाना]
+function fetchAllWinGoTimersDataAtOnce() {
+    const loggedUserPhone = localStorage.getItem('user_phone') || localStorage.getItem('userPhone') || localStorage.getItem('phone');
+    const container = document.getElementById('universal-game-history-layer');
+    
+    if (!loggedUserPhone) {
+        container.innerHTML = `<div style="text-align: center; color: #ef233c; padding: 20px; font-weight: bold; font-size:13px;">Session Expired! Please login again.</div>`;
+        return;
+    }
+
+    container.innerHTML = `<div style="text-align: center; color: #999; padding: 30px 0; font-size: 13px;">Compiling all records...</div>`;
+
+    // चारों टाइमर्स के क्रेडेंशियल्स की लिस्ट
+    const modesToFetch = ["win_go_30s", "win_go_1m", "win_go_3m", "win_go_5m"];
+    
+    // सभी नेटवर्क रिक्वेस्ट को एक साथ भेजने के लिए प्रॉमिस ऐरे (Promise.all)
+    const fetchPromises = modesToFetch.map(mode => 
+        fetch(`${SERVER_URL}/api/user-bets/${loggedUserPhone.trim()}/${mode}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success && data.list) {
+                // प्रत्येक रिकॉर्ड में उसकी गेम मोड की पहचान चिपकाना
+                return data.list.map(bet => ({ ...bet, gameModeKey: mode }));
+            }
+            return [];
+        }).catch(() => [])
+    );
+
+    Promise.all(fetchPromises).then(results => {
+        // सभी ऐरे को आपस में जोड़कर एक महा-सूची (Master List) बनाना
+        let masterList = [].concat(...results);
+        
+        // समय के अनुसार सॉर्ट करना (नया दांव सबसे ऊपर - Descending Order)
+        masterList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        // ग्लोबल मेमोरी में सुरक्षित रखना
+        globalFetchedBetsCacheMemory = masterList;
+
+        // डिफ़ॉल्ट रूप से ऑल रिकॉर्ड्स को स्क्रीन पर छाप देना
+        renderFilteredCardsOnScreen(masterList);
+    });
+}
+
+// [फंक्शन 4: रेंडरिंग इंजन - डेटा को स्क्रीन पर सुंदर कार्ड्स में तब्दील करना]
+function renderFilteredCardsOnScreen(listData) {
+    const container = document.getElementById('universal-game-history-layer');
+    
+    if (!listData || listData.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: #a0a0a0; padding: 40px 0; font-size: 13px;">🎉 No game logs found for this filter!</div>`;
+        return;
+    }
+
+    let recordsHtml = '';
+    
+    listData.forEach((bet) => {
+        let statusClass = 'pending';
+        let statusText = 'Pending';
+        let moneyDisplayHtml = `<span class="data-value-content">₹${parseFloat(bet.betAmount).toFixed(2)}</span>`;
+        
+        if (bet.status === 'Win' || bet.status === 'win') { 
+            statusClass = 'win'; statusText = 'Success'; 
+            moneyDisplayHtml = `<span class="data-value-content win-amount-txt">+₹${parseFloat(bet.winAmount).toFixed(2)}</span>`;
+        }
+        if (bet.status === 'Loss' || bet.status === 'loss' || bet.status === 'Failed') { 
+            statusClass = 'loss'; statusText = 'Failed'; 
+            moneyDisplayHtml = `<span class="data-value-content loss-amount-txt">-₹${parseFloat(bet.betAmount).toFixed(2)}</span>`;
+        }
+
+        const formattedTime = new Date(bet.createdAt || Date.now()).toLocaleString();
+        
+        // मोड की चाबी को सुंदर टेक्स्ट में बदलना (जैसे win_go_30s -> 30s)
+        let modeLabel = bet.gameModeKey ? bet.gameModeKey.replace("win_go_", "") : "Game";
+
+        recordsHtml += `
+        <div class="game-record-card">
+            <div class="card-row-top">
+                <span class="badge-game-label" style="background:#0ea5e9;">${currentGlobalGameEngineType} (${modeLabel})</span>
+                <span class="status-text-view ${statusClass}">${statusText}</span>
+            </div>
+            <div class="card-data-line">
+                <span class="data-label-title">Period Detail</span>
+                <span class="data-value-content" style="font-family: monospace; font-weight:bold;">${bet.periodId || '---'}</span>
+            </div>
+            <div class="card-data-line">
+                <span class="data-label-title">Your Select</span>
+                <span class="data-value-content" style="text-transform: capitalize;">${bet.selectValue || 'N/A'}</span>
+            </div>
+            <div class="card-data-line">
+                <span class="data-label-title">Status/Result Money</span>
+                ${moneyDisplayHtml}
+            </div>
+            <div class="card-data-line">
+                <span class="data-label-title">Time</span>
+                <span class="data-value-content" style="color: #666; font-size:11.5px;">${formattedTime}</span>
+            </div>
+        </div>`;
+    });
+    
+    container.innerHTML = recordsHtml;
+}
+
+// [फंक्शन 5: कमिंग सून (Coming Soon) स्क्रीन दिखाने का लेआउट]
+function renderComingSoonAestheticCard(gameName) {
+    document.getElementById('universal-game-history-layer').innerHTML = `
+    <div class="coming-soon-card-box">
+        <div class="coming-soon-title">🚀 ${gameName} History Coming Soon</div>
+        <div class="coming-soon-desc">Our developers are integrating the ${gameName} database engine pipeline. Systems will be live in the next main app updates!</div>
+    </div>`;
+}
+</script>
+
+</body>
+</html>

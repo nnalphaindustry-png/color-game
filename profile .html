@@ -278,6 +278,28 @@ confirmBtn.addEventListener('click', function() {
 });
 
 });
+// === [91GOACLUB BRANDED UNIQUE USERNAME LOGIC - UPDATED FOR MASKED-PHONE] ===
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. ब्राउज़र की मेमोरी (localStorage) से यूजर की असली UID खींचना
+    const userUIDForName = localStorage.getItem('user_uid') || localStorage.getItem('uid');
+    
+    // 2. स्क्रीन पर 'masked-phone' वाले डिब्बे को खोजना (लाइन 33 वाला)
+    const userPhoneElement = document.getElementById('masked-phone');
+
+    if (userPhoneElement) {
+        // 3. यदि यूजर की UID मिल जाती है, तो '91GoaClub_' के साथ उसे जोड़ देना
+        if (userUIDForName && userUIDForName !== "N/A" && userUIDForName.trim() !== "") {
+            userPhoneElement.innerText = "91GoaClub_" + userUIDForName.trim();
+            userPhoneElement.style.fontWeight = "800"; // नाम को मोटा और स्पष्ट करने के लिए
+            userPhoneElement.style.letterSpacing = "0.5px"; // अक्षरों के बीच की दूरी सुंदर रखने के लिए
+        } else {
+            // फॉलबैक: यदि किसी कारणवश UID न मिले, तो पुराना मास्क नंबर लोड करें
+            const backupPhone = localStorage.getItem('user_phone') || localStorage.getItem('phone') || "1234***890";
+            userPhoneElement.innerText = backupPhone;
+        }
+    }
+});
+// === [91GOACLUB BRANDED UNIQUE USERNAME LOGIC - END] ===
 
 </script>
 </body>

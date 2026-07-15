@@ -709,6 +709,46 @@ app.post('/api/admin/reset-game-auto', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+// 1. एडमिन के लिए सभी पेंडिंग डिपॉजिट्स की लिस्ट खींचने की API
+app.get('/api/admin/pending-deposits', async (req, res) => {
+    try {
+        // केवल 'Pending' स्टेटस वाले रिचार्ज रिकॉर्ड्स को नए से पुराने के क्रम में ढूँढें
+        const list = await Deposit.find({ status: "Pending" }).sort({ createdAt: -1 });
+        res.json({ success: true, list });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// 2. एडमिन द्वारा डिपॉजिट को Approve या Reject करने की मास्टर API
+app.post('/api/admin/action-deposit', async (req, res) => {
+    try {
+        const { id, action } = req.body; // id = डिपॉजिट रिकॉर्ड की ID, action = 'approve' या 'reject'
+
+        const depositItem = await Deposit.findById(id);
+        if (!depositItem) return res.json({ success: false, message: "डिपॉजिट रिकॉर्ड नहीं मिला!" });
+        if (depositItem.status !== "Pending") return res.json({ success: false, message: "यह रिक्वेस्ट पहले ही प्रोसेस हो चुकी है!" });
+
+        if (action === 'approve') {
+            // यूजर का अकाउंट ढूंढें और उसका बैलेंस बढ़ाएं
+            const user = await User.findOne({ phone: depositItem.phone });
+            if (!user) return res.json({ success: false, message: "इस फोन नंबर का कोई यूजर नहीं मिला!" });
+
+            user.balance += Number(depositItem.amount);
+            await user.save();
+
+            depositItem.status = "Approved";
+        } else if (action === 'reject') {
+            depositItem.status = "Rejected";
+        }
+
+        await depositItem.save();
+        res.json({ success: true, message: `डिपॉजिट सफलतापूर्वक ${depositItem.status} कर दिया गया है!` });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // === SERVER START & DATABASE CONNECTION ===
 const PORT = process.env.PORT || 3000;

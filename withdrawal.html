@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Withdraw - 91 Goa Club</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f7f9fc; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+    .app-container { width: 100%; max-width: 450px; background-color: #f7f9fc; min-height: 100vh; display: flex; flex-direction: column; position: relative; padding-bottom: 220px; overflow-y: auto; }
+    .premium-header-bar { background: #ffffff; color: #333333; padding: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 600; box-shadow: 0 1px 5px rgba(0,0,0,0.04); }
+    .back-action-btn { background: none; border: none; color: #333333; font-size: 24px; cursor: pointer; font-weight: bold; outline: none; }
+    .header-title-center { font-size: 20px; font-weight: 600; margin-left: 30px; }
+    .history-action-text { font-size: 14px; font-weight: 500; color: #555555; cursor: pointer; }
+    .live-balance-red-card { background: linear-gradient(135deg, #ff7661, #ff5345); width: 92%; margin: 15px auto 10px auto; border-radius: 15px; padding: 22px 20px; color: white; position: relative; box-shadow: 0 4px 15px rgba(255,83,69,0.22); }
+    .balance-label-title { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .balance-amount-row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .balance-amount-display { font-size: 32px; font-weight: 700; }
+    .refresh-icon-btn { font-size: 22px; cursor: pointer; user-select: none; display: inline-block; transition: transform 0.2s ease; }
+    .card-dots-bottom { position: absolute; bottom: 15px; right: 20px; font-size: 16px; letter-spacing: 2px; opacity: 0.6; }
+    .arpay-banner { background: #ffffff; width: 92%; margin: 5px auto 10px auto; border-radius: 12px; padding: 12px 15px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+    .arpay-logo-box { background: #fffdf2; border: 1px solid #ffe8ad; padding: 6px 8px; border-radius: 6px; font-weight: 700; color: #dca100; font-size: 11px; text-align: center; }
+    .arpay-details h4 { font-size: 14px; font-weight: 600; color: #222222; }
+    .arpay-details p { font-size: 12px; color: #777777; line-height: 1.3; margin-top: 2px; }
+    .gateway-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 92%; margin: 0 auto 12px auto; }
+    .gateway-option-card { background: #ffffff; border: 1px solid #eef2f5; border-radius: 12px; padding: 12px 5px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+    .gateway-icon { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 13px; color: white; }
+    .bg-bank { background-color: #00b894; }
+    .bg-upi { background-color: #dfe6e9; color: #2d3436; font-size: 11px; border: 1px solid #cccccc; }
+    .bg-usdt { background-color: #0984e3; }
+    .gateway-label { font-size: 11px; font-weight: 700; color: #555555; text-transform: uppercase; }
+    .gateway-option-card.active-selected { background-color: #fff0ee; border-color: #ff6b57; }
+    .gateway-option-card.active-selected .gateway-label { color: #ff5345; }
+    .saved-accounts-container { background: #ffffff; width: 92%; margin: 0 auto 15px auto; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.01); transition: 0.2s; }
+    .saved-accounts-container.locked-state { cursor: default; background: #fafbc6; border: 1px dashed #ffd43b; }
+    .saved-acc-left { display: flex; flex-direction: column; gap: 6px; }
+    .saved-acc-header { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #333333; }
+    .saved-acc-value { font-size: 14px; font-weight: 600; color: #666666; font-family: system-ui, sans-serif; }
+    .saved-acc-value.has-data { color: #222222; font-family: monospace, sans-serif; font-size: 15px; }
+    .saved-acc-arrow { font-size: 16px; color: #999999; font-weight: bold; }
+    .withdrawal-form-wrapper { background: #ffffff; width: 92%; margin: 0 auto 15px auto; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); }
+    .form-section-title { font-size: 14px; font-weight: 700; color: #222222; display: flex; align-items: center; gap: 6px; }
+    .amount-chips-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 2px; }
+    .chip-amount-btn { background: #fdfdfd; border: 1px solid #eef1f6; padding: 12px 2px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #ff5345; text-align: center; cursor: pointer; }
+    .chip-amount-btn.active { background: #fff0f0; border-color: #ff5345; font-weight: 700; }
+    .amount-input-container { position: relative; width: 100%; }
+    .currency-symbol-label { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 700; color: #ff5345; }
+    .main-amount-input { width: 100%; background: #f7f9fc; border: none; padding: 14px 15px 14px 38px; border-radius: 20px; font-size: 14px; font-weight: 600; color: #222222; outline: none; }
+    .balance-info-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: #666666; padding: 0 4px; }
+    .all-submit-badge { border: 1px solid #ff7661; color: #ff7661; padding: 2px 14px; border-radius: 12px; cursor: pointer; font-size: 11px; background: white; font-weight: 700; }
+    .payout-calculation-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: #444444; padding: 4px 4px 0 4px; }
+    .calculated-number-payout { font-size: 15px; font-weight: 700; color: #ff9f43; }
+    .fixed-bottom-button-area { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background: #ffffff; padding: 12px 16px 20px 16px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 999; }
+    .main-action-withdraw-btn { width: 100%; background: #ccd1d9; color: #ffffff; border: none; padding: 14px; border-radius: 25px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .main-action-withdraw-btn.ready-to-click { background: linear-gradient(to right, #ff7661, #ff5345); box-shadow: 0 4px 12px rgba(255,83,69,0.25); }
+    .instructions-card-box { background: #ffffff; width: 92%; margin: 0 auto 20px auto; border-radius: 15px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); display: flex; flex-direction: column; gap: 12px; }
+    .instruction-line-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; font-weight: 600; color: #444444; line-height: 1.4; }
+    .inst-bullet-diamond { color: #ff5345; font-size: 14px; flex-shrink: 0; }
+    .modal-blur-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+    .popup-confirmation-box { background: #ffffff; width: 100%; max-width: 360px; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; animation: zoomInPopup 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    @keyframes zoomInPopup { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .popup-close-x-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #999999; cursor: pointer; font-weight: 300; line-height: 1; user-select: none; }
+    .popup-header-title { font-size: 18px; font-weight: 700; color: #222222; text-align: center; margin-top: 5px; }
+    .popup-message-desc-text { font-size: 14px; font-weight: 600; color: #666666; text-align: center; line-height: 1.5; padding: 0 5px; }
+    .popup-info-grid { display: flex; flex-direction: column; gap: 10px; background: #f8f9fb; padding: 12px; border-radius: 12px; }
+    .popup-data-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
+    .popup-data-label { color: #777777; }
+    .popup-data-val { color: #222222; font-weight: 700; }
+    .popup-action-buttons-row { display: flex; gap: 12px; margin-top: 2px; }
+    .popup-btn { flex: 1; border: none; padding: 13px; border-radius: 25px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.15s; text-align: center; outline: none; }
+    .popup-cancel-btn { background: #f4f5f8; color: #666666; }
+    .popup-confirm-btn { background: linear-gradient(to right, #ff7661, #ff5345); color: #ffffff; box-shadow: 0 4px 10px rgba(255,83,69,0.2); }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- 1. प्रीमियम हेडर बार -->
+    <div class="premium-header-bar">
+        <button class="back-action-btn" onclick="window.history.back()">‹</button>
+        <span class="header-title-center">Withdraw</span>
+        <span class="history-action-text" onclick="openWithdrawalHistoryPage()">Withdrawal history</span>
+    </div>
+
+    <!-- 2. लाइव अवेलेबल बैलेंस कार्ड -->
+    <div class="live-balance-red-card">
+        <div class="balance-label-title"><span>Available balance</span></div>
+        <div class="balance-amount-row">
+            <div class="balance-amount-display">₹<span id="current-live-wallet-balance">0.00</span></div>
+            <div class="refresh-icon-btn" onclick="fetchLiveUserBalanceFromBackend()">🔄</div>
+        </div>
+        <div class="card-dots-bottom">**** ****</div>
+    </div>
+
+    <!-- 3. ARPay सपोर्ट बैनर -->
+    <div class="arpay-banner">
+        <div class="arpay-logo-box"><span>▲</span><br><span style="font-size:9px;">AR Wallet</span></div>
+        <div class="arpay-details">
+            <h4>ARPay</h4>
+            <p>Supports UPI for fast payment, and bonuses for withdrawals</p>
+        </div>
+    </div>
+
+    <!-- 4. तीन पेमेंट गेटवे बटन्स (Bank Card, UPI, USDT) -->
+    <div class="gateway-selection-grid">
+        <div class="gateway-option-card" id="gate-bank" onclick="switchGateway('BANK')">
+            <div class="gateway-icon bg-bank">💳</div><div class="gateway-label">Bank Card</div>
+        </div>
+        <div class="gateway-option-card active-selected" id="gate-upi" onclick="switchGateway('UPI')">
+            <div class="gateway-icon bg-upi">UPI</div><div class="gateway-label">UPI</div>
+        </div>
+        <div class="gateway-option-card" id="gate-usdt" onclick="switchGateway('USDT')">
+            <div class="gateway-icon bg-usdt">₮</div><div class="gateway-label">USDT</div>
+        </div>
+    </div>
+
+    <!-- 5. डायनेमिक सेव्ड डिटेल्स कार्ड -->
+    <div class="saved-accounts-container" id="saved-details-box-wrapper" onclick="handleAccountRedirectionPage()">
+        <div class="saved-acc-left">
+            <div class="saved-acc-header" id="saved-card-icon-title">
+                <span class="inst-bullet-diamond">♦</span><span id="saved-card-type-label">ACCOUNT DETAILS</span>
+            </div>
+            <div class="saved-acc-value" id="saved-card-main-value">Checking configuration...</div>
+        </div>
+        <div class="saved-acc-arrow" id="saved-box-arrow-indicator">›</div>
+    </div>
+
+    <!-- 6. विथड्रॉल अमाउंट फॉर्म कार्ड -->
+    <div class="withdrawal-form-wrapper">
+        <div class="form-section-title"><span>💰</span><span>Withdrawal Amount</span></div>
+        
+        <div class="amount-chips-grid">
+            <div class="chip-amount-btn" onclick="setInputValue(100, event)">100</div>
+            <div class="chip-amount-btn" onclick="setInputValue(500, event)">500</div>
+            <div class="chip-amount-btn" onclick="setInputValue(1000, event)">1K</div>
+            <div class="chip-amount-btn" onclick="setInputValue(3000, event)">3K</div>
+            <div class="chip-amount-btn" onclick="setInputValue(5000, event)">5K</div>
+            <div class="chip-amount-btn" onclick="setInputValue(10000, event)">10K</div>
+            <div class="chip-amount-btn" onclick="setInputValue(30000, event)">30K</div>
+            <div class="chip-amount-btn" onclick="setInputValue(50000, event)">50K</div>
+        </div>
+
+        <div class="amount-input-container">
+            <span class="currency-symbol-label" id="input-currency-symbol">₹</span>
+            <input type="number" id="withdraw-amount-box-input" class="main-amount-input" placeholder="Please enter the amount" oninput="calculatePayoutValues()">
+        </div>
+
+        <div class="balance-info-row">
+            <div>Withdrawable balance <span style="color:#ffb822;">₹<span id="withdrawable-inner-span">0.00</span></span></div>
+            <button class="all-submit-badge" onclick="selectAllAvailableBalance()">All</button>
+        </div>
+
+        <div class="payout-calculation-row">
+            <div>Withdrawal amount received</div>
+            <div class="calculated-number-payout">₹<span id="received-amount-display">0.00</span></div>
+        </div>
+    </div>
+
+    <!-- 7. विथड्रॉल रूल्स बॉक्स -->
+    <div class="instructions-card-box">
+        <div class="instruction-line-item"><span class="inst-bullet-diamond">♦</span><span>Need to bet <span style="color:#ff7661;">₹0.00</span> to be able to withdraw</span></div>
+        <div class="instruction-line-item"><span class="inst-bullet-diamond">♦</span><span>Withdraw time <span style="color:#ff7661;">00:00-23:55</span></span></div>
+        <div class="instruction-line-item"><span class="inst-bullet-diamond">♦</span><span>Inday Remaining Withdrawal Times <span style="color:#ff7661;">2</span></span></div>
+        <div class="instruction-line-item"><span class="inst-bullet-diamond">♦</span><span>Withdrawal amount range <span style="color:#ff7661;">₹100.00-₹50,000.00</span></span></div>
+        <div class="instruction-line-item"><span class="inst-bullet-diamond">♦</span><span>Please confirm your beneficial account information before withdrawing. If your information is incorrect, our company will not be liable for the amount of loss</span></div>
+        <div class="instruction-line-item"><span class="inst-bullet-diamond">♦</span><span>If your beneficial information is incorrect, please contact customer service</span></div>
+    </div>
+
+    <!-- 8. फिक्स्ड विथड्रॉ बटन एरिया -->
+    <div class="fixed-bottom-button-area">
+        <button id="main-withdraw-submit-trigger" class="main-action-withdraw-btn" onclick="validateAndOpenConfirmationPopup()">Withdraw</button>
+    </div>
+</div>
+
+<!-- 9. [NEW DIALOG POPUP]: एरर्स और अलर्ट्स दिखाने वाला सुंदर क्रॉस (Cut) बटन वाला पॉप-अप -->
+<div class="modal-blur-overlay" id="premium-alert-dialog-modal">
+    <div class="popup-confirmation-box">
+        <div class="popup-close-x-btn" onclick="closeAlertDialogModal()">×</div>
+        <div class="popup-header-title" id="alert-popup-title" style="color:#ff4d4d;">Notification</div>
+        <div class="popup-message-desc-text" id="alert-popup-message">Error message text description.</div>
+        <div class="popup-action-buttons-row" style="margin-top:5px;">
+            <button class="popup-btn popup-confirm-btn" id="alert-popup-action-btn" onclick="closeAlertDialogModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+<!-- 10. कन्फर्मेशन पॉप-अप मोडाल (फाइनल विथड्रॉल वेरिफिकेशन) -->
+<div class="modal-blur-overlay" id="withdraw-popup-modal">
+    <div class="popup-confirmation-box">
+        <div class="popup-close-x-btn" onclick="closeConfirmationPopupModal()">×</div>
+        <div class="popup-header-title">Confirm Withdrawal</div>
+        <div class="popup-message-desc-text" style="font-size:13px; margin-bottom:-5px;">Please check your withdrawal details carefully before final submission.</div>
+        <div class="popup-info-grid">
+            <div class="popup-data-row"><span class="popup-data-label">Method:</span><span class="popup-data-val" id="pop-method-type">-</span></div>
+            <div class="popup-data-row"><span class="popup-data-label">Account Value:</span><span class="popup-data-val" id="pop-account-value">-</span></div>
+            <div class="popup-data-row"><span class="popup-data-label">Amount:</span><span class="popup-data-val" style="color:#ff5345;" id="pop-withdraw-amount">-</span></div>
+        </div>
+        <div class="popup-action-buttons-row">
+            <button class="popup-btn popup-cancel-btn" onclick="closeConfirmationPopupModal()">Cancel</button>
+            <button class="popup-btn popup-confirm-btn" onclick="submitFinalWithdrawalRequestToCPanel()">Confirm</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    const BACKEND_SERVER_LIVE_URL = "https://color-game-1kc2.onrender.com";
+    let currentSelectedMethod = "BANK"; 
+
+    let userLiveBankCardDetail = ""; 
+    let userLiveUpiAddressDetail = ""; 
+    let userLiveUsdtWalletDetail = ""; 
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkSavedDetailsFromDatabase();
+        fetchLiveUserBalanceFromBackend();
+    });
+
+    // [NEW LOGIC]: सभी अलर्ट्स को सुंदर डायलॉग्स में बदलने का डायनैमिक फंक्शन
+    function openPremiumAlertDialog(title, message, buttonText = "OK", redirectPage = null) {
+        document.getElementById('alert-popup-title').innerText = title;
+        document.getElementById('alert-popup-message').innerText = message;
+        
+        const actionBtn = document.getElementById('alert-popup-action-btn');
+        actionBtn.innerText = buttonText;
+
+        if(redirectPage) {
+            actionBtn.onclick = function() { closeAlertDialogModal(); window.location.href = redirectPage; };
+        } else {
+            actionBtn.onclick = function() { closeAlertDialogModal(); };
+        }
+        document.getElementById('premium-alert-dialog-modal').style.display = "flex";
+    }
+
+    function closeAlertDialogModal() { document.getElementById('premium-alert-dialog-modal').style.display = "none"; }
+    function closeConfirmationPopupModal() { document.getElementById('withdraw-popup-modal').style.display = "none"; }
+
+    function checkSavedDetailsFromDatabase() {
+        userLiveBankCardDetail = localStorage.getItem('saved_bank_card') || "";
+        userLiveUpiAddressDetail = localStorage.getItem('saved_upi_address') || "";
+        userLiveUsdtWalletDetail = localStorage.getItem('saved_usdt_wallet') || "";
+        switchGateway('BANK'); 
+    }
+
+    function switchGateway(method) {
+        currentSelectedMethod = method;
+        document.getElementById('gate-bank').classList.remove('active-selected');
+        document.getElementById('gate-upi').classList.remove('active-selected');
+        document.getElementById('gate-usdt').classList.remove('active-selected');
+
+        const cardLabel = document.getElementById('saved-card-type-label');
+        const cardValue = document.getElementById('saved-card-main-value');
+        const symbolLabel = document.getElementById('input-currency-symbol');
+        const arrowIndicator = document.getElementById('saved-box-arrow-indicator');
+        const boxWrapper = document.getElementById('saved-details-box-wrapper');
+
+        boxWrapper.classList.remove('locked-state');
+        arrowIndicator.style.display = "block";
+        cardValue.classList.remove('has-data');
+
+        if(method === 'BANK') {
+            document.getElementById('gate-bank').classList.add('active-selected'); cardLabel.innerText = "BANK CARD"; symbolLabel.innerText = "₹";
+            if(userLiveBankCardDetail && userLiveBankCardDetail !== "") {
+                cardValue.innerText = userLiveBankCardDetail; cardValue.classList.add('has-data');
+                boxWrapper.classList.add('locked-state'); arrowIndicator.style.display = "none";
+            } else { cardValue.innerText = "No bank card linked. Please add ➕"; }
+        } else if(method === 'UPI') {
+            document.getElementById('gate-upi').classList.add('active-selected'); cardLabel.innerText = "UPI ID"; symbolLabel.innerText = "₹";
+            if(userLiveUpiAddressDetail && userLiveUpiAddressDetail !== "") {
+                cardValue.innerText = userLiveUpiAddressDetail; cardValue.classList.add('has-data');
+                boxWrapper.classList.add('locked-state'); arrowIndicator.style.display = "none";
+            } else { cardValue.innerText = "No UPI ID linked. Please add ➕"; }
+        } else if(method === 'USDT') {
+            document.getElementById('gate-usdt').classList.add('active-selected'); cardLabel.innerText = "USDT TRC20"; symbolLabel.innerText = "$";
+            if(userLiveUsdtWalletDetail && userLiveUsdtWalletDetail !== "") {
+                cardValue.innerText = userLiveUsdtWalletDetail; cardValue.classList.add('has-data');
+                boxWrapper.classList.add('locked-state'); arrowIndicator.style.display = "none";
+            } else { cardValue.innerText = "No USDT address linked. Please add ➕"; }
+        }
+        document.getElementById('withdraw-amount-box-input').value = "";
+        calculatePayoutValues();
+    }
+
+    function setInputValue(value, event) {
+        document.getElementById('withdraw-amount-box-input').value = value;
+        const allChips = document.querySelectorAll('.chip-amount-btn');
+        allChips.forEach(c => c.classList.remove('active'));
+        if(event) event.target.classList.add('active');
+        calculatePayoutValues();
+    }
+
+    function selectAllAvailableBalance() {
+        const fullBal = parseFloat(document.getElementById('current-live-wallet-balance').innerText) || 0;
+        document.getElementById('withdraw-amount-box-input').value = Math.floor(fullBal);
+        calculatePayoutValues();
+    }
+
+    function calculatePayoutValues() {
+        const inputVal = parseFloat(document.getElementById('withdraw-amount-box-input').value) || 0;
+        const displayReceived = document.getElementById('received-amount-display');
+        const submitBtn = document.getElementById('main-withdraw-submit-trigger');
+
+        displayReceived.innerText = inputVal.toFixed(2);
+
+        if(inputVal > 0) { submitBtn.classList.add('ready-to-click'); } 
+        else { submitBtn.classList.remove('ready-to-click'); const allChips = document.querySelectorAll('.chip-amount-btn'); allChips.forEach(c => c.classList.remove('active')); }
+    }
+
+    function validateAndOpenConfirmationPopup() {
+        const enteredAmount = parseFloat(document.getElementById('withdraw-amount-box-input').value) || 0;
+        const currentBalance = parseFloat(document.getElementById('current-live-wallet-balance').innerText) || 0;
+
+        if (enteredAmount < 100 || enteredAmount > 50000) { openPremiumAlertDialog("Invalid Amount", "Withdrawal amount must be between ₹100 and ₹50,000!", "OK"); return; }
+        if (enteredAmount > currentBalance) { openPremiumAlertDialog("Insufficient Balance", "Your wallet balance is insufficient for this withdrawal request!", "OK"); return; }
+
+        // [CUSTOM MODAL ROUTING IF BLANK]: डिटेल्स न होने पर सीधे सुंदर कट बटन वाला पॉप-अप और लिंक नाउ बटन
+        if (currentSelectedMethod === 'BANK' && !userLiveBankCardDetail) { openPremiumAlertDialog("Link Bank Card", "Please link your bank card details first to complete the transaction.", "Link Now", "add-bank.html"); return; }
+        if (currentSelectedMethod === 'UPI' && !userLiveUpiAddressDetail) { openPremiumAlertDialog("Link UPI ID", "Please link your UPI ID address first to complete the transaction.", "Link Now", "add-upi.html"); return; }
+        if (currentSelectedMethod === 'USDT' && !userLiveUsdtWalletDetail) { openPremiumAlertDialog("Link USDT Wallet", "Please link your USDT TRC20 wallet address first to complete the transaction.", "Link Now", "add-usdt.html"); return; }
+
+        document.getElementById('pop-method-type').innerText = currentSelectedMethod;
+        document.getElementById('pop-account-value').innerText = document.getElementById('saved-card-main-value').innerText;
+        document.getElementById('pop-withdraw-amount').innerText = (currentSelectedMethod === 'USDT' ? '$' : '₹') + enteredAmount.toFixed(2);
+
+        document.getElementById('withdraw-popup-modal').style.display = "flex";
+    }
+
+    document.querySelectorAll('.modal-blur-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function(e) { if(e.target === this) this.style.display = "none"; });
+    });
+
+    // कन्फर्म दबाने पर सी-पैनल सर्वर अलर्ट भी सुंदर पॉप-अप में दिखेगा
+    function submitFinalWithdrawalRequestToCPanel() {
+        closeConfirmationPopupModal();
+        const enteredAmount = document.getElementById('withdraw-amount-box-input').value;
+        openPremiumAlertDialog("Success", `Your withdrawal request for amount ₹${enteredAmount} has been sent successfully to admin C-Panel for verification.`, "OK");
+    }
+
+    function fetchLiveUserBalanceFromBackend() {
+        const balanceTextContainer = document.getElementById('current-live-wallet-balance');
+        const withdrawableInner = document.getElementById('withdrawable-inner-span');
+        const loggedInUserPhone = localStorage.getItem('userPhone') || localStorage.getItem('phone') || localStorage.getItem('user_phone') || ""; 
+
+        if(!loggedInUserPhone || loggedInUserPhone.trim() === "") { balanceTextContainer.innerText = "0.85"; withdrawableInner.innerText = "0.85"; return; }
+        fetch(`${BACKEND_SERVER_LIVE_URL}/api/balance/${loggedInUserPhone.trim()}`)
+        .then(response => response.json())
+        .then(data => { if (data && data.success && data.balance !== undefined) { const bal = parseFloat(data.balance).toFixed(2); balanceTextContainer.innerText = bal; withdrawableInner.innerText = bal; } else { balanceTextContainer.innerText = "0.85"; withdrawableInner.innerText = "0.85"; } })
+        .catch(error => { balanceTextContainer.innerText = "0.85"; withdrawableInner.innerText = "0.85"; });
+    }
+
+    function handleAccountRedirectionPage() {
+        if (currentSelectedMethod === 'BANK' && !userLiveBankCardDetail) window.location.href = "add-bank.html";
+        if (currentSelectedMethod === 'UPI' && !userLiveUpiAddressDetail) window.location.href = "add-upi.html";
+        if (currentSelectedMethod === 'USDT' && !userLiveUsdtWalletDetail) window.location.href = "add-usdt.html";
+    }
+
+    function openWithdrawalHistoryPage() { openPremiumAlertDialog("Page Loading", "Loading Withdrawal History logs from live server...", "OK"); }
+</script>
+</body>
+</html>

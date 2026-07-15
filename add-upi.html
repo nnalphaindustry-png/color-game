@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Add UPI - 91 Goa Club</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; overflow: hidden; }
+    .app-container { width: 100%; max-width: 450px; background-color: #f4f6fb; height: 100vh; display: flex; flex-direction: column; position: relative; }
+    .premium-header-bar { background: linear-gradient(to right, #ff7661, #ff5345); color: #ffffff; padding: 18px 16px; display: flex; align-items: center; font-size: 18px; font-weight: 600; box-shadow: 0 2px 8px rgba(255,83,69,0.15); position: relative; flex-shrink: 0; }
+    .back-action-btn { background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; font-weight: bold; outline: none; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); }
+    .header-title-center { width: 100%; text-align: center; font-size: 19px; font-weight: 600; color: #ffffff; padding: 0 30px; }
+    .scrollable-form-body { flex: 1; overflow-y: auto; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
+    .top-sub-badge-row { width: 92%; margin: 15px auto 10px auto; padding: 0 4px; }
+    .sub-red-badge-pill { display: inline-flex; align-items: center; gap: 6px; background: #fff0f0; border: 1px solid #ffe3e3; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #ff4d4d; }
+    .bank-form-wrapper { width: 92%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .input-group-field { display: flex; flex-direction: column; gap: 8px; }
+    .field-label-title { font-size: 13px; font-weight: 700; color: #444444; display: flex; align-items: center; gap: 8px; }
+    .field-icon-img { color: #ff4d4d; font-size: 17px; font-weight: 900; }
+    .main-form-input { width: 100%; background: #ffffff; border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #222222; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.02); transition: 0.2s; }
+    .main-form-input:focus { box-shadow: 0 0 0 1px #ff4d4d; }
+    .main-form-input::placeholder { color: #cccccc; font-weight: 500; }
+    .fixed-bottom-button-area { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background: #f4f6fb; padding: 14px 16px 24px 16px; z-index: 999; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); }
+    .main-action-save-btn { width: 100%; background: #ccd1d9; color: #ffffff; border: none; padding: 15px; border-radius: 25px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; outline: none; }
+    .main-action-save-btn.ready-to-click { background: linear-gradient(to right, #ff7661, #ff4d4d); box-shadow: 0 4px 12px rgba(255,77,77,0.25); }
+    .modal-blur-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+    .popup-confirmation-box { background: #ffffff; width: 100%; max-width: 360px; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: relative; animation: zoomInPopup 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    @keyframes zoomInPopup { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .popup-close-x-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #999999; cursor: pointer; font-weight: 300; line-height: 1; user-select: none; }
+    .popup-header-title { font-size: 18px; font-weight: 700; color: #ff4d4d; text-align: center; }
+    .popup-message-desc-text { font-size: 14px; font-weight: 600; color: #666666; text-align: center; line-height: 1.5; padding: 0 5px; }
+    .popup-btn { width: 100%; border: none; padding: 13px; border-radius: 25px; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; background: linear-gradient(to right, #ff7661, #ff4d4d); color: #ffffff; box-shadow: 0 4px 10px rgba(255,77,77,0.2); outline: none; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- 1. प्रीमियम लाल हेडर पट्टी -->
+    <div class="premium-header-bar">
+        <button class="back-action-btn" onclick="goToWithdrawPageWithoutSaving()">‹</button>
+        <span class="header-title-center">Add UPI ID Address</span>
+    </div>
+
+    <!-- 2. कीबोर्ड फ्रेंडली स्क्रॉलेबल कंटेनर -->
+    <div class="scrollable-form-body">
+        
+        <!-- रेड बैज रो -->
+        <div class="top-sub-badge-row">
+            <div class="sub-red-badge-pill">
+                <span>⚡</span><span>UPI details</span>
+            </div>
+        </div>
+
+        <!-- फॉर्म इनपुट्स रैपर -->
+        <div class="bank-form-wrapper">
+            
+            <!-- 1. यूज़र का असली नाम -->
+            <div class="input-group-field">
+                <label class="field-label-title"><span class="field-icon-img">👤</span><span>Recipient's Name</span></label>
+                <input type="text" id="input-upi-name" class="main-form-input" placeholder="Please enter the recipient's name" oninput="checkFormInputsStatus()">
+            </div>
+
+            <!-- 2. UPI आईडी बॉक्स -->
+            <div class="input-group-field">
+                <label class="field-label-title"><span class="field-icon-img">📩</span><span>UPI ID Address</span></label>
+                <input type="text" id="input-upi-address" class="main-form-input" placeholder="Please enter your UPI ID (e.g., name@upi)" oninput="checkFormInputsStatus()">
+            </div>
+
+            <!-- 3. मोबाइल नंबर (यूज़र के लिए बिल्कुल खाली रहेगा) -->
+            <div class="input-group-field">
+                <label class="field-label-title"><span class="field-icon-img">📱</span><span>Phone number</span></label>
+                <input type="number" id="input-upi-phone" class="main-form-input" placeholder="Please enter your phone number" oninput="checkFormInputsStatus()">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3. बॉटम फिक्स्ड 'Save' बटन -->
+    <div class="fixed-bottom-button-area">
+        <button id="form-save-submit-btn" class="main-action-save-btn" onclick="processAndSaveUpiDetails()">Save</button>
+    </div>
+</div>
+
+<!-- 4. सुंदर डायलॉग पॉप-अप -->
+<div class="modal-blur-overlay" id="premium-alert-dialog-modal">
+    <div class="popup-confirmation-box">
+        <div class="popup-close-x-btn" onclick="closeAlertDialogModal()">×</div>
+        <div class="popup-header-title" id="alert-popup-title">Notification</div>
+        <div class="popup-message-desc-text" id="alert-popup-message">Description text.</div>
+        <button class="popup-btn" id="alert-popup-action-btn" onclick="closeAlertDialogModal()">OK</button>
+    </div>
+</div>
+</body>
+<script>
+    const BACKEND_SERVER_LIVE_URL = "https://onrender.com";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // शुरुआत में इनपुट पूरी तरह खाली (Blank) रहेंगे
+        checkFormInputsStatus();
+    });
+
+    function goToWithdrawPageWithoutSaving() {
+        window.location.href = "withdrawal.html";
+    }
+
+    function openCustomDialogPopup(title, message, isSuccess = false, autoRedirect = false) {
+        const titleElement = document.getElementById('alert-popup-title');
+        titleElement.innerText = title;
+        titleElement.style.color = isSuccess ? "#00b894" : "#ff4d4d";
+        
+        document.getElementById('alert-popup-message').innerText = message;
+        document.getElementById('premium-alert-dialog-modal').style.display = "flex";
+
+        if(autoRedirect) {
+            document.getElementById('alert-popup-action-btn').style.display = "none";
+            setTimeout(() => {
+                closeAlertDialogModal();
+                window.location.href = "withdrawal.html"; 
+            }, 1500);
+        } else {
+            document.getElementById('alert-popup-action-btn').style.display = "block";
+        }
+    }
+
+    function closeAlertDialogModal() {
+        document.getElementById('premium-alert-dialog-modal').style.display = "none";
+    }
+
+    function checkFormInputsStatus() {
+        const upiName = document.getElementById('input-upi-name').value.trim();
+        const upiAddress = document.getElementById('input-upi-address').value.trim();
+        const upiPhone = document.getElementById('input-upi-phone').value.trim();
+        
+        const saveBtn = document.getElementById('form-save-submit-btn');
+
+        if(upiName !== "" && upiAddress !== "" && upiPhone !== "") {
+            saveBtn.classList.add('ready-to-click');
+        } else {
+            saveBtn.classList.remove('ready-to-click');
+        }
+    }
+
+    function processAndSaveUpiDetails() {
+        const upiName = document.getElementById('input-upi-name').value.trim();
+        const upiAddress = document.getElementById('input-upi-address').value.trim();
+        const upiPhone = document.getElementById('input-upi-phone').value.trim();
+
+        if(!upiName || !upiAddress || !upiPhone) {
+            openCustomDialogPopup("Error", "Please fill in all UPI fields!");
+            return;
+        }
+
+        if(!upiAddress.includes('@')) {
+            openCustomDialogPopup("Invalid UPI", "Please enter a valid UPI ID (must contain @)!");
+            return;
+        }
+
+        // ब्राउज़र मेमोरी में सेव करना
+        localStorage.setItem('saved_upi_name', upiName);
+        localStorage.setItem('saved_upi_address', upiAddress);
+        localStorage.setItem('saved_upi_phone', upiPhone);
+
+        openCustomDialogPopup("Success", "UPI ID address saved successfully!", true, true);
+    }
+
+    document.getElementById('premium-alert-dialog-modal').addEventListener('click', function(e) {
+        if(e.target === this && document.getElementById('alert-popup-action-btn').style.display !== "none") {
+            this.style.display = "none";
+        }
+    });
+</script>
+</html>

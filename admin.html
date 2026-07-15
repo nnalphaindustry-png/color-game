@@ -66,6 +66,8 @@
         .toast-close-icon { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); background: none; border: none; color: #a0a0a0; font-size: 18px; cursor: pointer; }
         .toast-close-icon:hover { color: #ffffff; }
         @media (min-width: 769px) { .sidebar { left: 0; } .main-content-wrapper { margin-left: 250px; } .nav-toggle-btn { display: none; } .box-grid-layout { grid-template-columns: repeat(4, 1fr); } }
+        .payout-details-badge { background-color: #2a2a2a; border-left: 3px solid #ff7661; padding: 6px 10px; border-radius: 4px; font-size: 13px; font-family: monospace; color: #e0e0e0; line-height: 1.4; display: inline-block; text-align: left; }
+        
     </style>
 </head>
 <body>
@@ -180,7 +182,32 @@
     </div>
 </div>
 
-        <div id="withdrawal-page" class="admin-page-view"><h2 class="page-heading-title">Withdrawal Requests</h2><div class="placeholder-screen-view">User payout clearance panel layout will open here.</div></div>
+        <!-- PAGE 4: Withdrawal Verification Panel (FULLY UPDATED LIVE VIEW) -->
+<div id="withdrawal-page" class="admin-page-view">
+    <h2 class="page-heading-title">Withdrawal Requests Verification</h2>
+    <div class="data-table-card">
+        <h5 class="data-table-title" style="color: #ff5345;">Pending User Payout Clearance Requests</h5>
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User UID</th>
+                        <th>Mobile Number</th>
+                        <th>Amount</th>
+                        <th>Method & Payout Account Details</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-withdrawal-table-body">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading pending withdrawals...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
         <div id="settings-page" class="admin-page-view"><h2 class="page-heading-title">Global System Settings</h2><div class="placeholder-screen-view">Global app maintenance options will remain here.</div></div>
                 <!-- PAGE 5: Master Live Result Control Engine -->
         <div id="control-page" class="admin-page-view">
@@ -565,6 +592,110 @@ function searchPendingDepositByUTR() {
 
     openQuickDepositVerifyModal(matchedRecord);
 }
+// Master Live Withdrawal Engine Core Logic
+let localPendingWithdrawalsCache = [];
+
+function fetchAdminPendingWithdrawals() {
+    const withdrawalPageElement = document.getElementById('withdrawal-page');
+    if (!withdrawalPageElement || withdrawalPageElement.style.display === "none") return;
+
+    fetch(`${SERVER_URL}/api/admin/pending-withdrawals`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.list) {
+            localPendingWithdrawalsCache = data.list;
+            let rowsHtml = '';
+            data.list.forEach(item => {
+                let detailsDisplayContent = '';
+                if(item.method === 'BANK') {
+                    detailsDisplayContent = `<strong>[BANK]</strong> ${item.bankName || 'N/A'}<br>Acc: ${item.accountNumber || 'N/A'}<br>Name: ${item.recipientName || 'N/A'}<br>IFSC: ${item.ifscCode || 'N/A'}`;
+                } else if(item.method === 'UPI') {
+                    detailsDisplayContent = `<strong>[UPI]</strong><br>ID: ${item.upiAddress || 'N/A'}<br>Name: ${item.recipientName || 'N/A'}`;
+                } else if(item.method === 'USDT') {
+                    detailsDisplayContent = `<strong>[USDT]</strong><br>Wallet: ${item.usdtWallet || 'N/A'}`;
+                } else {
+                    detailsDisplayContent = item.accountValue || 'No Details';
+                }
+
+                rowsHtml += `
+                <tr>
+                    <td class="id-text-format" style="font-weight: bold;">${item.uid || 'N/A'}</td>
+                    <td style="color: #ffffff; font-weight: bold;">${item.phone}</td>
+                    <td style="color: #ff9f43; font-weight: bold;">${parseFloat(item.amount).toFixed(2)}</td>
+                    <td><div class="payout-details-badge">${detailsDisplayContent}</div></td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="modal-btn btn-green" style="padding: 6px 12px; font-size: 13px;" onclick="openWithdrawalConfirmPopup('${item._id}', 'approve', '${item.amount}')">Approve</button>
+                            <button class="modal-btn btn-red" style="padding: 6px 12px; font-size: 13px;" onclick="openWithdrawalConfirmPopup('${item._id}', 'reject', '${item.amount}')">Reject</button>
+                        </div>
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('admin-withdrawal-table-body').innerHTML = rowsHtml || 
+            `<tr><td colspan="5" style="text-align:center; color:#a0a0a0; padding:20px;">No pending withdrawal requests found!</td></tr>`;
+        }
+    })
+    .catch(err => {
+        document.getElementById('admin-withdrawal-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Withdrawal data sync timeout!</td></tr>';
+    });
+}
+
+function openWithdrawalConfirmPopup(id, actionType, amount) {
+    const oldPopup = document.getElementById('admin-confirm-popup-overlay');
+    if (oldPopup) oldPopup.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'admin-confirm-popup-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px;";
+    
+    const box = document.createElement('div');
+    box.style.cssText = "background: #1e1e1e; border: 1px solid #333; width: 90%; max-width: 380px; padding: 25px; border-radius: 14px; text-align: center; color: white;";
+    
+    const headingText = actionType === 'approve' ? "Approve Payout?" : "Reject Payout Request?";
+    const bodyMessage = actionType === 'approve' 
+        ? `Are you sure you want to APPROVE this withdrawal request of ${amount}?` 
+        : `Are you sure you want to REJECT this withdrawal request of ${amount}?`;
+        
+    const actionBtnColor = actionType === 'approve' ? '#198754' : '#ef233c';
+    const actionBtnText = actionType === 'approve' ? "Yes, Approve" : "Yes, Reject";
+
+    box.innerHTML = `
+        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #ffffff;">${headingText}</h3>
+        <p style="font-size: 13.5px; color: #b0b0b0; line-height: 1.5; margin-bottom: 22px;">${bodyMessage}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+            <button id="admin-withdraw-yes-btn" style="background: ${actionBtnColor}; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;">${actionBtnText}</button>
+            <button id="admin-withdraw-cancel-btn" style="background: #333; color: #ccc; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 7px; cursor: pointer;">Cancel</button>
+        </div>`;
+        
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    document.getElementById('admin-withdraw-cancel-btn').onclick = function() { overlay.remove(); };
+    document.getElementById('admin-withdraw-yes-btn').onclick = function() {
+        overlay.remove();
+        executeFinalServerWithdrawAction(id, actionType);
+    };
+}
+
+function executeFinalServerWithdrawAction(id, actionType) {
+    fetch(`${SERVER_URL}/api/admin/action-withdrawal`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, action: actionType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showAdminCustomPopup("Payout Action Successful", data.message || "Status updated!", "success");
+            fetchAdminPendingWithdrawals();
+        } else {
+            showAdminCustomPopup("Action Refused", data.message || "Failed to update status.", "error");
+        }
+    })
+    .catch(err => {
+        showAdminCustomPopup("Network Failure", "Cannot connect to server.", "error");
+    });
+}
 
 // 3.   -     
 function openQuickDepositVerifyModal(record) {
@@ -739,6 +870,9 @@ window.onload = function() {
     
     fetchAdminPendingDeposits();
     setInterval(fetchAdminPendingDeposits, 4000);
+        fetchAdminPendingWithdrawals();
+    setInterval(fetchAdminPendingWithdrawals, 4000);
+    
 };
 
     </script>

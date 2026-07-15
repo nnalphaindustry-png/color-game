@@ -67,6 +67,17 @@ const depositSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Deposit = mongoose.model('Deposit', depositSchema);
+// === 5. यूज़र के विथड्रॉल (Withdrawal) का स्कीमा ===
+const withdrawalSchema = new mongoose.Schema({
+    uid: { type: String, required: true },
+    phone: { type: String, required: true },
+    amount: { type: Number, required: true },
+    method: { type: String, required: true },
+    accountValue: { type: String, required: true },
+    status: { type: String, default: "Pending" }, // Pending, Approved, Rejected
+    createdAt: { type: Date, default: Date.now }
+});
+const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);
 
 
 // === LIVE GAMES TIMER ENGINE (असली गेम इंजन लॉजिक) ===
@@ -521,6 +532,50 @@ app.post('/api/place-deposit', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर एरर! कृपया दोबारा प्रयास करें।" });
     }
 });
+// === नई विथड्रॉल सबमिशन एपीआई (User End) ===
+app.post('/api/place-withdrawal', async (req, res) => {
+    try {
+        const { uid, phone, amount, method, accountValue } = req.body;
+
+        if (!phone || !amount || !method || !accountValue) {
+            return res.json({ success: false, message: "All fields are required!" });
+        }
+
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) {
+            return res.json({ success: false, message: "User account not found!" });
+        }
+
+        if (Number(user.balance) < Number(amount)) {
+            return res.json({ success: false, message: "Insufficient wallet balance!" });
+        }
+
+        if (Number(amount) < 100 || Number(amount) > 50000) {
+            return res.json({ success: false, message: "Amount must be between ₹100 and ₹50,000!" });
+        }
+
+        // 1. यूज़र के वॉलेट से बैलेंस तुरंत माइनस करना
+        user.balance -= Number(amount);
+        await user.save();
+
+        // 2. डेटाबेस में विथड्रॉल रिकॉर्ड पेंडिंग स्टेटस के साथ सेव करना
+        const newWithdrawal = new Withdrawal({
+            uid: uid || "N/A",
+            phone: phone.trim(),
+            amount: Number(amount),
+            method: method,
+            accountValue: accountValue,
+            status: "Pending"
+        });
+        await newWithdrawal.save();
+
+        res.json({ success: true, message: "Withdrawal request submitted successfully! Verifying...", newBalance: user.balance });
+    } catch (error) {
+        console.error("User withdrawal error:", error);
+        res.status(500).json({ success: false, message: "Server error! Please try again." });
+    }
+});
+
 // === यूज़र की डिपॉजिट हिस्ट्री खींचने की एपीआई ===
 app.get('/api/deposit-history/:phone', async (req, res) => {
     try {
@@ -805,6 +860,53 @@ app.post('/api/admin/action-deposit', async (req, res) => {
     } catch (error) {
         console.error("Master Admin Action Error:", error);
         return res.status(500).json({ success: false, message: "Internal server error: " + error.message });
+    }
+});
+// === 1. एडमिन पैनल के लिए सभी पेंडिंग विथड्रॉल की लिस्ट भेजने की API ===
+app.get('/api/admin/pending-withdrawals', async (req, res) => {
+    try {
+        const list = await Withdrawal.find({ status: "Pending" }).sort({ createdAt: -1 });
+        res.json({ success: true, list });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === 2. एडमिन पैनल द्वारा विथड्रॉल को APPROVE या REJECT करने की मुख्य API ===
+app.post('/api/admin/action-withdrawal', async (req, res) => {
+    try {
+        const { id, action } = req.body;
+        if (!id || !action) {
+            return res.json({ success: false, message: "Missing id or action parameter!" });
+        }
+
+        const withdrawItem = await Withdrawal.findById(id);
+        if (!withdrawItem) {
+            return res.json({ success: false, message: "Withdrawal record not found!" });
+        }
+
+        if (withdrawItem.status !== "Pending") {
+            return res.json({ success: false, message: "This request has already been processed!" });
+        }
+
+        if (action === 'approve') {
+            // अप्रूव होने पर बैलेंस फ्रंटएंड से पहले ही कट चुका है, इसलिए सिर्फ स्टेटस अपडेट होगा
+            withdrawItem.status = "Approved";
+        } else if (action === 'reject') {
+            // रिजेक्ट होने पर पैसे यूज़र के वॉलेट में वापस (Refund) क्रेडिट कर दिए जाएंगे
+            const UserModel = mongoose.models.User || mongoose.model('User');
+            await UserModel.findOneAndUpdate(
+                { phone: withdrawItem.phone.trim() },
+                { $inc: { balance: Number(withdrawItem.amount) } }
+            );
+            withdrawItem.status = "Rejected";
+        }
+
+        await withdrawItem.save();
+        return res.json({ success: true, message: `Withdrawal request successfully ${withdrawItem.status}!` });
+    } catch (error) {
+        console.error("Admin Withdrawal Action Error:", error);
+        return res.status(500).json({ success: false, message: "Server error: " + error.message });
     }
 });
 

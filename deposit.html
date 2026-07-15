@@ -68,7 +68,8 @@
 
     <!-- Header View Area -->
     <header class="deposit-header">
-        <a href="profile .html" class="back-btn">â€¹</a>
+        <!-- Updated Dynamic Back Button -->
+<a href="javascript:void(0)" class="back-btn" onclick="handleSmartDepositBackWorkflow()">‹</a>
         <div class="header-title">Deposit</div>
         <a href="deposit-history.html" class="history-btn">Deposit history</a>
     </header>
@@ -260,6 +261,23 @@ function executeFinalDepositWorkflow() {
 
     // [    : lotus-temple  pay.html  ]
     window.location.href = "pay.html";
+}
+// === SMART DEPOSIT BACK ROUTING LOGIC ===
+function handleSmartDepositBackWorkflow() {
+    const previousPageUrl = document.referrer;
+
+    //   game.html      
+    if (previousPageUrl.includes("game.html")) {
+        window.location.href = "game.html";
+    } 
+    //   profile.html      
+    else if (previousPageUrl.includes("profile .html")) {
+        window.location.href = "profile .html";
+    } 
+    //  :          
+    else {
+        window.location.href = "profile .html";
+    }
 }
 
     </script>

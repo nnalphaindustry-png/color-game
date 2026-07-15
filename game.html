@@ -51,11 +51,9 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 .btn-withdraw-red { background: #f03e3e; }
 .btn-deposit-green { background: #2aa757; }
 
-/* 2. चलता हुआ मोटा मारकी सूचना बार */
+/* 2. चलता हुआ सूचना मारकी बार */
 .moving-notification-strip-wrapper {
-    background: white; width: 92%; margin: 10px auto 0 auto; border-radius: 20px; 
-    padding: 12px 16px; 
-    display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); overflow: hidden;
+    background: white; width: 92%; margin: 10px auto 0 auto; border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); overflow: hidden;
 }
 .speaker-icon-box { color: #f03e3e; display: flex; align-items: center; }
 .speaker-icon-box svg { width: 16px; height: 16px; }
@@ -82,7 +80,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 .clock-digit-box { background: white; color: #111; font-size: 20px; font-weight: 800; padding: 4px 8px; border-radius: 6px; min-width: 24px; text-align: center; box-shadow: 0 3px 6px rgba(0,0,0,0.1); font-family: monospace; }
 .clock-colon-separator { font-size: 20px; font-weight: 800; color: white; margin: 0 1px; }
 
-/* 5. बेटिंग डिब्बा - कलर और साइज बटन स्लिम, नंबर्स मोटे */
+/* 5. बेटिंग मुख्य डिब्बा - स्लिम लुक */
 .betting-panel-card { background: white; width: 92%; margin: 15px auto; border-radius: 20px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); position: relative; }
 .color-bet-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 .color-btn { border: none; border-radius: 12px; padding: 10px 0; font-size: 14px; font-weight: 700; color: white; cursor: pointer; text-align: center; box-shadow: 0 3px 8px rgba(0,0,0,0.1); transition: transform 0.1s; }
@@ -110,8 +108,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 /* लॉक ओवरले स्क्रीन */
 .betting-disabled-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); border-radius: 20px; display: none; justify-content: center; align-items: center; z-index: 100; }
 .lock-message-box { background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; }
-
-/* अमाउंट सेलेक्टर पॉप-अप (मोडल) */
+/* सट्टा लगाने का पॉप-अप (मोडल) */
 .bet-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
 .bet-modal-box { background: white; width: 100%; max-width: 450px; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
 .modal-header-title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 15px; color: #222; }
@@ -124,12 +121,83 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 .modal-btn-footer { border: none; border-radius: 25px; padding: 12px 0; font-size: 15px; font-weight: 700; cursor: pointer; text-align: center; }
 .btn-modal-close { background: #e2e6f0; color: #555; }
 .btn-modal-submit-bet { background: #f03e3e; color: white; }
+
+/* परिणाम इतिहास टॉगल टैब्स स्टाइल */
+.history-tabs-container { display: flex; width: 92%; margin: 18px auto 10px auto; background: white; border-radius: 14px; padding: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+.history-tab-toggle-btn { flex: 1; border: none; background: transparent; padding: 10px 0; font-size: 14px; font-weight: 700; color: #8a99a8; cursor: pointer; text-align: center; border-radius: 10px; transition: all 0.2s; }
+.history-tab-toggle-btn.active { background: #f4f6fb; color: #111; }
+.history-content-table-wrapper { background: white; width: 92%; margin: 0 auto 10px auto; border-radius: 18px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: none; }
+.history-content-table-wrapper.active { display: block; }
+
+/* === हूबहू स्क्रीनशॉट जैसा गेम इतिहास लेआउट === */
+.game-history-card-table-wrapper { background: white; width: 100%; border-radius: 12px; overflow: hidden; }
+.premium-game-table-head-red { background: #f03e3e; color: white; display: grid; grid-template-columns: 2fr 1fr 1.2fr 1fr; text-align: center; padding: 12px 6px; font-size: 14px; font-weight: 700; }
+.game-table-body-rows-list { display: flex; flex-direction: column; }
+.game-history-static-row { display: grid; grid-template-columns: 2fr 1fr 1.2fr 1fr; align-items: center; text-align: center; padding: 14px 6px; border-bottom: 1px solid #f4f6fb; font-size: 13px; font-weight: 600; color: #444; }
+.history-bold-colored-num { font-size: 22px; font-weight: 900; }
+.text-num-green { color: #2ecc71; }
+.text-num-red { color: #ff4757; }
+.text-num-violet { color: #9b59b6; }
+.history-color-dot-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin: 0 auto; }
+.dot-green { background-color: #2ecc71; }
+.dot-red { background-color: #ff4757; }
+.dot-violet { background-color: #9b59b6; }
+/* === [अपडेट]: माई हिस्ट्री के बक्सों को आपके निर्देशानुसार बड़ा और मोटा करना === */
+#user-history-list-wrapper { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.history-premium-card-row { background: white; border-radius: 12px; padding: 12px 6px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f4f6fb; }
+.history-row-left-section { display: flex; align-items: center; gap: 12px; }
+.history-indicator-pill-badge { width: 62px; height: 38px; border-radius: 10px; color: white; font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-transform: uppercase; }
+.pill-color-green { background: #2aa757; }
+.pill-color-red { background: #f03e3e; }
+.pill-color-violet { background: #b53cd4; }
+.pill-color-big { background: #e67e22; }
+.pill-color-small { background: #2980b9; }
+.history-row-center-info { display: flex; flex-direction: column; gap: 2px; }
+.history-period-id-text { font-size: 14px; font-weight: 700; color: #222; }
+.history-datetime-subtext { font-size: 11px; color: #8a99a8; }
+.history-row-right-section { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.history-status-capsule-btn { font-size: 10px; font-weight: 700; padding: 2px 12px; border-radius: 20px; }
+.status-btn-succeed { border: 1px solid #2aa757; color: #2aa757; }
+.status-btn-failed { border: 1px solid #ff6b6b; color: #ff6b6b; }
+.status-btn-wait { border: 1px solid #e67e22; color: #e67e22; }
+.history-amount-display-payout { font-size: 13px; font-weight: 800; }
+.amount-text-green { color: #2aa757; }
+.amount-text-red { color: #ff6b6b; }
+.amount-text-orange { color: #e67e22; }
+
+/* === हूबहू स्क्रीनशॉट जैसा ऑर्डर विवरण रसीद पॉप-अप (Details Modal) === */
+.receipt-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+.receipt-main-white-box { background: #f8faff; width: 100%; max-width: 400px; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+.receipt-top-header-status { background: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e2e6f0; }
+.receipt-rows-list-body { padding: 15px; display: flex; flex-direction: column; gap: 4px; }
+.receipt-detail-item-row { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 14px; border-radius: 10px; font-size: 14px; font-weight: 600; color: #444; margin-bottom: 2px; }
+.receipt-detail-item-row .label-title-grey { color: #8a99a8; font-weight: 500; }
+.receipt-detail-item-row .val-bold-dark { color: #111; font-weight: 700; }
+.receipt-copy-btn-icon { background: none; border: none; cursor: pointer; color: #f03e3e; margin-left: 6px; display: inline-flex; align-items: center; }
+.receipt-close-footer-btn { background: #f03e3e; color: white; border: none; padding: 14px 0; font-size: 16px; font-weight: 700; text-align: center; cursor: pointer; width: 100%; }
+
+/* === सुंदर कसीनो स्टाइल अलर्ट पॉप-अप === */
+.custom-premium-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; justify-content: center; align-items: center; z-index: 3000; }
+.custom-alert-card { background: white; border-radius: 24px; padding: 25px 20px; width: 85%; max-width: 340px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transform: scale(0.8); transition: all 0.2s ease-in-out; }
+.custom-alert-card.popup-animate-show { transform: scale(1); }
+.alert-animated-icon-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 30px; font-weight: bold; }
+.alert-icon-success { background: #e8f8f0; color: #2aa757; }
+.alert-icon-error { background: #fde8e8; color: #f03e3e; }
+.alert-main-heading-title { font-size: 18px; font-weight: 800; color: #222; margin-bottom: 8px; }
+.alert-subtext-description { font-size: 13px; color: #666; font-weight: 500; line-height: 1.4; margin-bottom: 20px; }
+.alert-action-ok-btn { width: 100%; border: none; border-radius: 15px; padding: 12px 0; font-size: 15px; font-weight: 700; color: white; cursor: pointer; }
+
+/* नीचे पेजिंग बटन्स */
+.history-pagination-control-row { display: flex; justify-content: center; align-items: center; gap: 12px; margin: 10px auto 20px auto; }
+.page-nav-arrow-btn { background: white; border: 1px solid #e2e6f0; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; font-weight: 800; }
+.page-nav-arrow-btn.active-next { background: #f03e3e; color: white; border-color: #f03e3e; }
+.page-counter-status-text { font-size: 12px; font-weight: 700; color: #555; background: white; padding: 5px 12px; border-radius: 6px; border: 1px solid #e2e6f0; }
 </style>
 </head>
 <body>
 <div class="app-container">
     
-    <!-- 1. टॉप वॉलेट नेविगेशन पैनल -->
+    <!-- 1. टॉप वॉलेट नेविगेशन पैनल (Withdraw, Deposit और Back लिंक्स रेडी) -->
     <div class="top-gradient-container">
         <div class="navbar-top">
             <a href="home.html" class="back-arrow-btn">
@@ -153,6 +221,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
                 <span style="font-size:13px;">👛</span> Wallet balance
             </div>
 
+            <!-- withdraw.html और deposit.html लिंक्स परफेक्टली अटैच्ड -->
             <div class="wallet-action-buttons-row">
                 <a href="withdraw.html" class="action-btn-main btn-withdraw-red">Withdraw</a>
                 <a href="deposit.html" class="action-btn-main btn-deposit-green">Deposit</a>
@@ -172,14 +241,14 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
                 Withdrawals are running successfully. Bet safe and keep winning! 91 Goa Club trustable games.
             </div>
         </div>
-        <button class="detail-static-btn" onclick="alert('Opening Notice Details...')">Detail</button>
+        <button class="detail-static-btn">Detail</button>
     </div>
         <!-- 3. गेम टाइम मोड सेलेक्शन टैब्स -->
     <div class="game-modes-tab-row">
-        <button class="mode-tab-item-btn active" onclick="changeActiveGameMode('30s')">WinGo<br>30sec</button>
-        <button class="mode-tab-item-btn" onclick="changeActiveGameMode('1m')">WinGo 1<br>Min</button>
-        <button class="mode-tab-item-btn" onclick="changeActiveGameMode('3m')">WinGo 3<br>Min</button>
-        <button class="mode-tab-item-btn" onclick="changeActiveGameMode('5m')">WinGo 5<br>Min</button>
+        <button class="mode-tab-item-btn active" id="btn-tab-30s" onclick="changeActiveGameMode('30s')">WinGo<br>30sec</button>
+        <button class="mode-tab-item-btn" id="btn-tab-1m" onclick="changeActiveGameMode('1m')">WinGo 1<br>Min</button>
+        <button class="mode-tab-item-btn" id="btn-tab-3m" onclick="changeActiveGameMode('3m')">WinGo 3<br>Min</button>
+        <button class="mode-tab-item-btn" id="btn-tab-5m" onclick="changeActiveGameMode('5m')">WinGo 5<br>Min</button>
     </div>
 
     <!-- 4. मुख्य लाल टाइमर डैशबोर्ड टिकट -->
@@ -207,14 +276,12 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
             <div class="lock-message-box">⏳ Betting locked! Wait for next round...</div>
         </div>
 
-        <!-- तीन मुख्य रंग बटन्स -->
         <div class="color-bet-row">
             <button class="color-btn btn-green-color" onclick="openBettingModal('Green')">Green</button>
             <button class="color-btn btn-violet-color" onclick="openBettingModal('Violet')">Violet</button>
             <button class="color-btn btn-red-color" onclick="openBettingModal('Red')">Red</button>
         </div>
 
-        <!-- 0-9 नंबर्स ग्रिड -->
         <div class="numbers-bet-grid">
             <button class="num-btn num-violet-red" onclick="openBettingModal('0')">0</button>
             <button class="num-btn num-green" onclick="openBettingModal('1')">1</button>
@@ -228,16 +295,42 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
             <button class="num-btn num-green" onclick="openBettingModal('9')">9</button>
         </div>
 
-        <!-- बिग और स्माल बटन्स -->
         <div class="size-bet-row">
             <button class="size-btn btn-big-size" onclick="openBettingModal('Big')">Big</button>
             <button class="size-btn btn-small-size" onclick="openBettingModal('Small')">Small</button>
         </div>
     </div>
+        <!-- 6. गेम इतिहास और यूजर रिकॉर्ड के टॉगल टैब्स -->
+    <div class="history-tabs-container">
+        <button class="history-tab-toggle-btn active" id="tab-btn-game" onclick="switchHistoryTab('game')">Game History</button>
+        <button class="history-tab-toggle-btn" id="tab-btn-user" onclick="switchHistoryTab('user')">My History</button>
+    </div>
 
-</div>
+    <!-- हूबहू स्क्रीनशॉट जैसा गेम इतिहास लेआउट कंटेनर -->
+    <div class="history-content-table-wrapper active" id="content-pane-game-history">
+        <div class="game-history-card-table-wrapper">
+            <div class="premium-game-table-head-red">
+                <div>Period</div><div>Number</div><div>Big Small</div><div>Color</div>
+            </div>
+            <div class="game-table-body-rows-list" id="game-history-rows-container"></div>
+        </div>
+    </div>
 
-<!-- अमाउंट सेलेक्टर मोडल - अब ₹1 से सट्टा शुरू करने के विकल्प के साथ -->
+    <!-- प्रीमियम माई हिस्ट्री लिस्ट कंटेनर -->
+    <div class="history-content-table-wrapper" id="content-pane-user-history">
+        <div id="user-history-list-wrapper"></div>
+    </div>
+
+    <!-- नीचे पेज बदलने वाले पेज़िंग बटन्स -->
+    <div class="history-pagination-control-row">
+        <button class="page-nav-arrow-btn" onclick="navigateHistoryPage(-1)">&lt;</button>
+        <span class="page-counter-status-text" id="display-page-number-text">1/50</span>
+        <button class="page-nav-arrow-btn active-next" onclick="navigateHistoryPage(1)">&gt;</button>
+    </div>
+
+</div> <!-- app-container end -->
+
+<!-- ₹1 से शुरू होने वाला पॉप-अप विंडो -->
 <div class="bet-modal-overlay" id="global-betting-modal">
     <div class="bet-modal-box">
         <div class="modal-header-title">Select Bet for: <span id="modal-selected-value-label" style="font-weight:800;">None</span></div>
@@ -264,24 +357,91 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
         </div>
     </div>
 </div>
+
+<!-- === हूबहू स्क्रीनशॉट जैसा ऑर्डर विवरण रसीद पॉप-अप विंडो === -->
+<div class="receipt-modal-overlay" id="order-details-receipt-modal" onclick="if(event.target===this) closeReceiptModal()">
+    <div class="receipt-main-white-box">
+        <div class="receipt-top-header-status">
+            <div class="history-indicator-pill-badge" id="receipt-top-pill-indicator">Big</div>
+            <div style="text-align: right;">
+                <div class="history-status-capsule-btn" id="receipt-top-status-capsule">Failed</div>
+                <div class="history-amount-display-payout" id="receipt-top-amount-text" style="margin-top:4px; font-size:16px;">-₹3.00</div>
+            </div>
+        </div>
+        <div class="receipt-rows-list-body">
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Order number</span><span class="val-bold-dark" style="font-size:11px; max-width:200px; word-break:break-all;"><span id="receipt-order-id-val">WG2026...</span><button class="receipt-copy-btn-icon" onclick="copyOrderNumberText()">📋</button></span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Period</span><span class="val-bold-dark" id="receipt-period-id-val">2026...</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Purchase amount</span><span class="val-bold-dark" id="receipt-purchase-amt-val">₹3.00</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Quantity</span><span class="val-bold-dark" id="receipt-quantity-val">3</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Amount after tax</span><span class="val-dark-bold" id="receipt-after-tax-val" style="font-weight:700; color:#111;">₹2.94</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Tax</span><span class="val-bold-dark" id="receipt-tax-val">₹0.06</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Result</span><span class="val-bold-dark" id="receipt-result-val" style="font-weight:800; color:#b53cd4;">0 Red Violet</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Select</span><span class="val-bold-dark" id="receipt-select-val">Big</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Status</span><span id="receipt-status-text-val" style="font-weight:700;">Failed</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Win/lose</span><span id="receipt-win-lose-val" style="font-weight:800;">-₹3.00</span></div>
+            <div class="receipt-detail-item-row"><span class="label-title-grey">Order time</span><span class="val-bold-dark" id="receipt-order-time-val">2026-07-14 09:08:04</span></div>
+        </div>
+        <button class="receipt-close-footer-btn" onclick="closeReceiptModal()">Close</button>
+    </div>
+</div>
+
+<!-- === सुंदर कसीनो स्टाइल कस्टम अलर्ट पॉप-अप विंडो === -->
+<div class="custom-premium-alert-overlay" id="global-custom-premium-alert-window">
+    <div class="custom-alert-card" id="premium-alert-inner-card">
+        <div class="alert-animated-icon-circle" id="custom-alert-icon-box">✓</div>
+        <div class="alert-main-heading-title" id="custom-alert-title-text">Success</div>
+        <div class="alert-subtext-description" id="custom-alert-body-desc">Your action was completed successfully!</div>
+        <button class="alert-action-ok-btn" id="custom-alert-action-trigger-btn" onclick="closePremiumCustomAlertWindow()">Close</button>
+    </div>
+</div>
 <script>
+// रेंडर सर्वर का मुख्य डोमेन लिंक
 const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
+
+// लोकल स्टोरेज से लॉग इन यूजर का मोबाइल नंबर
 const loggedInUserPhone = localStorage.getItem('user_phone') || "";
 
+// गेम के मुख्य वेरिएबल्स
 let activeRunningMode = "30s"; 
 let currentSelectedBetValue = "";
-let chosenBaseChipAmount = 1; // डिफ़ॉल्ट रूप से ₹1 सेट
+let chosenBaseChipAmount = 1; 
 let activeMultiplierCount = 1;
 let globalCurrentPeriodId = "";
+let currentHistoryPageNumber = 1;
+let activeRunningTabKey = "game";
+let currentlyFetchedBetsArrayData = []; 
 
-const gameTitleNamesMapping = { "30s": "WinGo 30sec", "1m": "WinGo 1 Min", "3m": "WinGo 3 Min", "5m": "WinGo 5 Min" };
-
+// होम पेज पैरामीटर्स के लिए नाम मैपिंग
+const gameTitleNamesMapping = { 
+    "30s": "WinGo 30sec", 
+    "1m": "WinGo 1 Min", 
+    "3m": "WinGo 3 Min", 
+    "5m": "WinGo 5 Min" 
+};
+// होम फ़ाइल से डायरेक्ट मोड सिंक करने का लॉजिक
 document.addEventListener("DOMContentLoaded", function () {
+    const urlSearchParameters = new URLSearchParams(window.location.search);
+    const passedModeFromHome = urlSearchParameters.get('mode'); 
+    
+    if (passedModeFromHome && ["30s", "1m", "3m", "5m"].includes(passedModeFromHome)) {
+        activeRunningMode = passedModeFromHome;
+        
+        document.querySelectorAll('.mode-tab-item-btn').forEach(btn => btn.classList.remove('active'));
+        
+        if (passedModeFromHome === "30s") document.getElementById('btn-tab-30s').classList.add('active');
+        if (passedModeFromHome === "1m") document.getElementById('btn-tab-1m').classList.add('active');
+        if (passedModeFromHome === "3m") document.getElementById('btn-tab-3m').classList.add('active');
+        if (passedModeFromHome === "5m") document.getElementById('btn-tab-5m').classList.add('active');
+        
+        document.getElementById('display-game-title-text').innerText = gameTitleNamesMapping[passedModeFromHome];
+    }
+
     fetchLiveServerBalance();
+    loadGameHistoryLogs();
+    loadUserBetsLogs();
+    
     setInterval(syncLiveServerTimerData, 1000);
 });
-
-// 1. सर्वर सिंक और 5 सेकंड लॉक नियम
 function syncLiveServerTimerData() {
     fetch(`${BACKEND_SERVER_URL}/api/game-sync`)
     .then(res => res.json())
@@ -289,7 +449,6 @@ function syncLiveServerTimerData() {
         if (resData.success && resData.data[activeRunningMode]) {
             const currentRoundData = resData.data[activeRunningMode];
             
-            // नया पीरियड आईडी रेंडर होना
             if(globalCurrentPeriodId !== currentRoundData.currentPeriod) {
                 globalCurrentPeriodId = currentRoundData.currentPeriod;
                 
@@ -298,19 +457,20 @@ function syncLiveServerTimerData() {
                 } else {
                     document.getElementById('display-live-period-number').innerText = "Loading...";
                 }
+                
                 fetchLiveServerBalance();
+                loadGameHistoryLogs();
+                loadUserBetsLogs();
             }
             
             let remainingSeconds = currentRoundData.timeLeft;
             
-            // 999 सर्वर लॉक इंजन हैंडलिंग
             if (remainingSeconds === 999 || remainingSeconds < 0) {
                 updateDigitalClockDisplay(0, 0);
                 document.getElementById('lock-overlay-screen').style.display = "flex";
                 return;
             }
             
-            // 5 सेकंड का बेटिंग लॉक नियम
             if (remainingSeconds <= 5) {
                 document.getElementById('lock-overlay-screen').style.display = "flex";
                 closeBettingModal();
@@ -324,8 +484,6 @@ function syncLiveServerTimerData() {
         }
     }).catch(err => console.error("Sync Error:", err));
 }
-
-// अंकों को अलग-अलग सफ़ेद डिब्बों में सिंगल-सिंगल डिजिट भेजने का बिल्कुल सही लॉजिक
 function updateDigitalClockDisplay(mins, secs) {
     let minString = mins.toString().padStart(2, '0');
     let secString = secs.toString().padStart(2, '0');
@@ -336,7 +494,6 @@ function updateDigitalClockDisplay(mins, secs) {
     document.getElementById('sec-digit-2').innerText = secString.charAt(1);
 }
 
-// लाइव बैलेंस सिंकर
 function fetchLiveServerBalance() {
     if (!loggedInUserPhone) return;
     fetch(`${BACKEND_SERVER_URL}/api/balance/${loggedInUserPhone.trim()}`)
@@ -347,10 +504,9 @@ function fetchLiveServerBalance() {
         }
     }).catch(err => console.error(err));
 }
-// querySelectorAll के एरे क्रैश को पूरी तरह ठीक करने वाला नया लॉजिक
 function openBettingModal(valueToSelect) {
     currentSelectedBetValue = valueToSelect;
-    chosenBaseChipAmount = 1; // डिफ़ॉल्ट चिप ₹1
+    chosenBaseChipAmount = 1; 
     activeMultiplierCount = 1;
     
     const valueLabel = document.getElementById('modal-selected-value-label');
@@ -363,16 +519,13 @@ function openBettingModal(valueToSelect) {
     }
     if(finalPriceText) finalPriceText.innerText = "₹1"; 
     
-    // एरे को लूप चलाकर पहले चिप (₹1) को एक्टिव क्लास देना (कोई एरर नहीं आएगा)
     const chips = document.querySelectorAll('.chip-btn');
     chips.forEach(c => c.classList.remove('active'));
     if(chips.length > 0) {
-        chips[0].classList.add('active'); // पहले डिब्बे (₹1) पर सही से क्लास जोड़ी
+        chips[0].classList.add('active'); 
     }
     
-    // बटन के अनुसार रंग कोड तय करना
     let dynamicColor = "#f03e3e"; 
-    
     if (valueToSelect === 'Green' || ['1', '3', '7', '9'].includes(valueToSelect)) {
         dynamicColor = "#2aa757"; 
     } else if (valueToSelect === 'Violet' || ['0', '5'].includes(valueToSelect)) {
@@ -385,12 +538,9 @@ function openBettingModal(valueToSelect) {
         dynamicColor = "#2980b9"; 
     }
     
-    // रंग लागू करना
     if(valueLabel) valueLabel.style.color = dynamicColor;
     if(finalPriceText) finalPriceText.style.color = dynamicColor;
-    if(submitBtn) {
-        submitBtn.style.background = dynamicColor;
-    }
+    if(submitBtn) submitBtn.style.background = dynamicColor;
     
     document.getElementById('global-betting-modal').style.display = "flex";
 }
@@ -418,15 +568,38 @@ function calculateTotalBetPrice() {
     const finalPriceText = document.getElementById('display-total-final-payout-text');
     if(finalPriceText) finalPriceText.innerText = "₹" + finalSum;
 }
+function showPremiumCustomAlertWindow(mainTitleHeading, textMsgDescription, alertThemeTypeFlag, themeBtnColorCode) {
+    const overlayElement = document.getElementById('global-custom-premium-alert-window');
+    const innerCardElement = document.getElementById('premium-alert-inner-card');
+    const iconBoxElement = document.getElementById('custom-alert-icon-box');
+    const titleTextElement = document.getElementById('custom-alert-title-text');
+    const descTextElement = document.getElementById('custom-alert-body-desc');
+    const actionBtnElement = document.getElementById('custom-alert-action-trigger-btn');
 
-// सुरक्षित बेट सबमिशन लॉजिक (String Format और Mongoose Validation Errors पूरी तरह फिक्स)
+    if(titleTextElement) titleTextElement.innerText = mainTitleHeading;
+    if(descTextElement) descTextElement.innerText = textMsgDescription;
+    if(actionBtnElement) actionBtnElement.style.background = themeBtnColorCode;
+
+    if(alertThemeTypeFlag === "success") {
+        iconBoxElement.className = "alert-animated-icon-circle alert-icon-success"; iconBoxElement.innerText = "✓";
+    } else {
+        iconBoxElement.className = "alert-animated-icon-circle alert-icon-error"; iconBoxElement.innerText = "✕";
+    }
+
+    if(overlayElement) overlayElement.style.display = "flex";
+    setTimeout(() => { if(innerCardElement) innerCardElement.classList.add('popup-animate-show'); }, 50);
+}
+
+function closePremiumCustomAlertWindow() {
+    document.getElementById('premium-alert-inner-card').classList.remove('popup-animate-show');
+    setTimeout(() => { document.getElementById('global-custom-premium-alert-window').style.display = "none"; }, 150);
+}
+
 function submitBetToLiveServer() {
     let finalBetAmount = chosenBaseChipAmount * activeMultiplierCount;
-    
-    if(!loggedInUserPhone) { alert("Please login again!"); return; }
-    
+    if(!loggedInUserPhone) { showPremiumCustomAlertWindow("Error", "Please login again!", "error", "#f03e3e"); return; }
     if(!globalCurrentPeriodId || globalCurrentPeriodId === "" || globalCurrentPeriodId.includes("Loading")) { 
-        alert("Wait! Server current round code is syncing. Try again in a second."); 
+        showPremiumCustomAlertWindow("Syncing", "Round code is syncing with Server. Try again.", "error", "#f03e3e"); 
         return; 
     }
 
@@ -445,23 +618,213 @@ function submitBetToLiveServer() {
     })
     .then(res => res.json())
     .then(data => {
-        alert(data.message);
         if(data.success) {
             closeBettingModal();
             fetchLiveServerBalance();
+            loadUserBetsLogs();
+            showPremiumCustomAlertWindow("Bet Placed", "Your bet was successfully submitted to data logs!", "success", "#2aa757");
+        } else {
+            showPremiumCustomAlertWindow("Bet Rejected", data.message, "error", "#f03e3e");
         }
-    }).catch(err => alert("Server network error! Check MongoDB Logs."));
+    }).catch(err => showPremiumCustomAlertWindow("Network Error", "Please check server endpoints.", "error", "#f03e3e"));
+}
+function loadGameHistoryLogs() {
+    fetch(`${BACKEND_SERVER_URL}/api/game-history/${activeRunningMode}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.success && data.list) {
+            let htmlRowsContent = "";
+            data.list.forEach(row => {
+                let numColorClass = "text-num-red";
+                let dotColorClass = "dot-red";
+                
+                if(["0","5"].includes(String(row.resultNumber))) {
+                    numColorClass = "text-num-violet";
+                    dotColorClass = "dot-violet";
+                } else if(["1","3","7","9"].includes(String(row.resultNumber))) {
+                    numColorClass = "text-num-green";
+                    dotColorClass = "dot-green";
+                }
+
+                htmlRowsContent += `
+                <div class="game-history-static-row">
+                    <div style="color: #666;">${row.periodId}</div>
+                    <div class="history-bold-colored-num ${numColorClass}">${row.resultNumber}</div>
+                    <div>${row.resultSize}</div>
+                    <div><span class="history-color-dot-indicator ${dotColorClass}"></span></div>
+                </div>`;
+            });
+            document.getElementById('game-history-rows-container').innerHTML = htmlRowsContent || "<div style='text-align:center; padding:10px;'>No results</div>";
+        }
+    }).catch(err => console.error(err));
+}
+function loadUserBetsLogs() {
+    if(!loggedInUserPhone) return;
+    fetch(`${BACKEND_SERVER_URL}/api/user-bets/${loggedInUserPhone.trim()}/${activeRunningMode}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.success && data.list) {
+            currentlyFetchedBetsArrayData = data.list; 
+            let listHtmlContent = "";
+            
+            data.list.forEach((row, loopIndex) => {
+                let pillBackgroundClass = "pill-color-red";
+                if(row.selectValue === 'Green' || ['1','3','7','9'].includes(String(row.selectValue))) pillBackgroundClass = "pill-color-green";
+                else if(row.selectValue === 'Violet' || ['0','5'].includes(String(row.selectValue))) pillBackgroundClass = "pill-color-violet";
+                else if(row.selectValue === 'Big') pillBackgroundClass = "pill-color-big";
+                else if(row.selectValue === 'Small') pillBackgroundClass = "pill-color-small";
+
+                let statusCapsuleClass = "status-btn-failed";
+                let statusButtonLabel = "Failed";
+                let amountTextClass = "amount-text-red";
+                let amountDisplaySign = `-₹${Number(row.betAmount).toFixed(2)}`;
+
+                if(row.status === "Win" || row.status === "win") {
+                    statusCapsuleClass = "status-btn-succeed";
+                    statusButtonLabel = "Succeed";
+                    amountTextClass = "amount-text-green";
+                    amountDisplaySign = `+₹${Number(row.winAmount).toFixed(2)}`;
+                } else if(row.status === "Pending" || row.status === "pending" || !row.status) {
+                    statusCapsuleClass = "status-btn-wait";
+                    statusButtonLabel = "Wait...";
+                    amountTextClass = "amount-text-orange";
+                    amountDisplaySign = `₹${Number(row.betAmount).toFixed(2)}`;
+                }
+
+                let rowFormattedTime = row.createdAt ? new Date(row.createdAt).toISOString().replace('T', ' ').substring(0, 19) : new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+                listHtmlContent += `
+                <div class="history-premium-card-row" onclick="openReceiptDetailsPopup(${loopIndex})" style="cursor:pointer;">
+                    <div class="history-row-left-section">
+                        <div class="history-indicator-pill-badge ${pillBackgroundClass}">${row.selectValue}</div>
+                        <div class="history-row-center-info">
+                            <span class="history-period-id-text">${row.periodId}</span>
+                            <span class="history-datetime-subtext">${rowFormattedTime}</span>
+                        </div>
+                    </div>
+                    <div class="history-row-right-section">
+                        <div class="history-status-capsule-btn ${statusCapsuleClass}">${statusButtonLabel}</div>
+                        <div class="history-amount-display-payout ${amountTextClass}">${amountDisplaySign}</div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('user-history-list-wrapper').innerHTML = listHtmlContent || "<div style='text-align:center; padding:15px; color:#8a99a8;'>No betting history found for this mode.</div>";
+        }
+    }).catch(err => console.error(err));
+}
+function openReceiptDetailsPopup(arrayIndexIndex) {
+    const singleBetObjectItem = currentlyFetchedBetsArrayData[arrayIndexIndex];
+    if(!singleBetObjectItem) return;
+
+    const topPill = document.getElementById('receipt-top-pill-indicator');
+    topPill.innerText = singleBetObjectItem.selectValue;
+    topPill.className = "history-indicator-pill-badge"; 
+    if(['Green','1','3','7','9'].includes(singleBetObjectItem.selectValue)) topPill.classList.add('pill-color-green');
+    else if(['Violet','0','5'].includes(singleBetObjectItem.selectValue)) topPill.classList.add('pill-color-violet');
+    else if(singleBetObjectItem.selectValue === 'Big') topPill.classList.add('pill-color-big');
+    else if(singleBetObjectItem.selectValue === 'Small') topPill.classList.add('pill-color-small');
+    else topPill.classList.add('pill-color-red');
+
+    const topStatus = document.getElementById('receipt-top-status-capsule');
+    const topAmount = document.getElementById('receipt-top-amount-text');
+    const statusTextVal = document.getElementById('receipt-status-text-val');
+    const winLoseVal = document.getElementById('receipt-win-lose-val');
+
+    if(singleBetObjectItem.status === "Win" || singleBetObjectItem.status === "win") {
+        topStatus.className = "history-status-capsule-btn status-btn-succeed"; topStatus.innerText = "Succeed";
+        topAmount.className = "history-amount-display-payout amount-text-green"; topAmount.innerText = `+₹${Number(singleBetObjectItem.winAmount).toFixed(2)}`;
+        statusTextVal.style.color = "#2aa757"; statusTextVal.innerText = "Succeed";
+        winLoseVal.style.color = "#2aa757"; winLoseVal.innerText = `+₹${Number(singleBetObjectItem.winAmount).toFixed(2)}`;
+    } else if(singleBetObjectItem.status === "Pending" || singleBetObjectItem.status === "pending") {
+        topStatus.className = "history-status-capsule-btn status-btn-wait"; topStatus.innerText = "Wait...";
+        topAmount.className = "history-amount-display-payout amount-text-orange"; topAmount.innerText = `₹${Number(singleBetObjectItem.betAmount).toFixed(2)}`;
+        statusTextVal.style.color = "#e67e22"; statusTextVal.innerText = "Pending";
+        winLoseVal.style.color = "#e67e22"; winLoseVal.innerText = "Waiting...";
+    } else {
+        topStatus.className = "history-status-capsule-btn status-btn-failed"; topStatus.innerText = "Failed";
+        topAmount.className = "history-amount-display-payout amount-text-red"; topAmount.innerText = `-₹${Number(singleBetObjectItem.betAmount).toFixed(2)}`;
+        statusTextVal.style.color = "#ff6b6b"; statusTextVal.innerText = "Failed";
+        winLoseVal.style.color = "#ff6b6b"; winLoseVal.innerText = `-₹${Number(singleBetObjectItem.betAmount).toFixed(2)}`;
+    }
+
+    const mockOrderNumber = "WG" + (singleBetObjectItem._id || "202607" + Math.floor(Math.random()*1000000));
+    document.getElementById('receipt-order-id-val').innerText = mockOrderNumber;
+    document.getElementById('receipt-period-id-val').innerText = singleBetObjectItem.periodId;
+    document.getElementById('receipt-purchase-amt-val').innerText = `₹${Number(singleBetObjectItem.betAmount).toFixed(2)}`;
+    document.getElementById('receipt-quantity-val').innerText = "1"; 
+    
+    let netBetPrice = Number(singleBetObjectItem.betAmount);
+    let taxDeductedAmount = netBetPrice * 0.02;
+    let finalAmountAfterTax = netBetPrice - taxDeductedAmount;
+    document.getElementById('receipt-after-tax-val').innerText = `₹${finalAmountAfterTax.toFixed(2)}`;
+    document.getElementById('receipt-tax-val').innerText = `₹${taxDeductedAmount.toFixed(2)}`;
+    document.getElementById('receipt-select-val').innerText = singleBetObjectItem.selectValue;
+    
+    if(singleBetObjectItem.status === "Win" || singleBetObjectItem.status === "Loss") {
+        document.getElementById('receipt-result-val').innerText = "Settled";
+    } else {
+        document.getElementById('receipt-result-val').innerText = "Waiting for result";
+    }
+
+    let rawTimeFormat = singleBetObjectItem.createdAt ? new Date(singleBetObjectItem.createdAt).toISOString().replace('T', ' ').substring(0, 19) : new Date().toISOString().replace('T', ' ').substring(0, 19);
+    document.getElementById('receipt-order-time-val').innerText = rawTimeFormat;
+
+    document.getElementById('order-details-receipt-modal').style.display = "flex";
+}
+
+function closeReceiptModal() {
+    document.getElementById('order-details-receipt-modal').style.display = "none";
+}
+
+function copyOrderNumberText() {
+    const textToCopy = document.getElementById('receipt-order-id-val').innerText;
+    navigator.clipboard.writeText(textToCopy);
+    showPremiumCustomAlertWindow("Success", "Order number copied to clipboard!", "success", "#2aa757");
 }
 
 function changeActiveGameMode(selectedModeCode) {
     activeRunningMode = selectedModeCode;
-    const modeTabsList = document.querySelectorAll('.mode-tab-item-btn');
-    modeTabsList.forEach(tab => tab.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    currentHistoryPageNumber = 1;
+    document.getElementById('display-page-number-text').innerText = "1/50";
     
-    globalCurrentPeriodId = ""; 
+    document.querySelectorAll('.mode-tab-item-btn').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(`btn-tab-${selectedModeCode}`).classList.add('active');
+    
     document.getElementById('display-game-title-text').innerText = gameTitleNamesMapping[selectedModeCode];
     document.getElementById('display-live-period-number').innerText = "Loading...";
+    
+    loadGameHistoryLogs();
+    loadUserBetsLogs();
+}
+
+function switchHistoryTab(tabKey) {
+    activeRunningTabKey = tabKey;
+    document.querySelectorAll('.history-tab-toggle-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.history-content-table-wrapper').forEach(p => p.classList.remove('active'));
+    
+    if(tabKey === 'game') {
+        document.getElementById('tab-btn-game').classList.add('active');
+        document.getElementById('content-pane-game-history').classList.add('active');
+        loadGameHistoryLogs();
+    } else {
+        document.getElementById('tab-btn-user').classList.add('active');
+        document.getElementById('content-pane-user-history').classList.add('active');
+        loadUserBetsLogs();
+    }
+}
+
+function navigateHistoryPage(directionStep) {
+    currentHistoryPageNumber += directionStep;
+    if(currentHistoryPageNumber < 1) currentHistoryPageNumber = 1;
+    if(currentHistoryPageNumber > 50) currentHistoryPageNumber = 50;
+    
+    document.getElementById('display-page-number-text').innerText = `${currentHistoryPageNumber}/50`;
+    
+    if(activeRunningTabKey === "game") {
+        loadGameHistoryLogs();
+    } else {
+        loadUserBetsLogs();
+    }
 }
 </script>
 </body>

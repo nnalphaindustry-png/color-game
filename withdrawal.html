@@ -330,12 +330,65 @@
         overlay.addEventListener('click', function(e) { if(e.target === this) this.style.display = "none"; });
     });
 
-    // कन्फर्म दबाने पर सी-पैनल सर्वर अलर्ट भी सुंदर पॉप-अप में दिखेगा
-    function submitFinalWithdrawalRequestToCPanel() {
-        closeConfirmationPopupModal();
-        const enteredAmount = document.getElementById('withdraw-amount-box-input').value;
-        openPremiumAlertDialog("Success", `Your withdrawal request for amount ₹${enteredAmount} has been sent successfully to admin C-Panel for verification.`, "OK");
+    // [MMASTER FIX]: असली डेटाबेस कनेक्शन के साथ लाइव विथड्रॉल रिक्वेस्ट फंक्शन
+function submitFinalWithdrawalRequestToCPanel() {
+    closeConfirmationPopupModal();
+    
+    // इनपुट से वैल्यूज निकालना
+    const enteredAmount = parseFloat(document.getElementById('withdraw-amount-box-input').value) || 0;
+    const loggedInUserPhone = localStorage.getItem('userPhone') || localStorage.getItem('phone') || localStorage.getItem('user_phone') || "";
+    const userUID = localStorage.getItem('user_uid') || "N/A";
+    
+    // वर्तमान में सिलेक्टेड अकाउंट वैल्यू निकालना
+    const accountValue = document.getElementById('saved-card-main-value').innerText;
+
+    // सुरक्षा जांच
+    if (!loggedInUserPhone || loggedInUserPhone.trim() === "") {
+        openPremiumAlertDialog("Error", "User details missing! Please login again.", "OK");
+        return;
     }
+
+    // बैकएंड सर्वर को डेटा भेजना
+    fetch(`${BACKEND_SERVER_LIVE_URL}/api/place-withdrawal`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            uid: userUID.trim(),
+            phone: loggedInUserPhone.trim(),
+            amount: enteredAmount,
+            method: currentSelectedMethod,
+            accountValue: accountValue.trim()
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.success) {
+            // यदि बैकएंड में विथड्रॉल सक्सेस हो गया
+            openPremiumAlertDialog("Success", "आपकी विथड्रॉल रिक्वेस्ट सफलतापूर्वक एडमिन C-Panel में भेज दी गई है!", "OK");
+            
+            // स्क्रीन पर लाइव बैलेंस को तुरंत अपडेट करना
+            if(data.newBalance !== undefined) {
+                const updatedBal = parseFloat(data.newBalance).toFixed(2);
+                document.getElementById('current-live-wallet-balance').innerText = updatedBal;
+                document.getElementById('withdrawable-inner-span').innerText = updatedBal;
+            } else {
+                fetchLiveUserBalanceFromBackend(); // फॉलबैक रिफ्रेश
+            }
+            document.getElementById('withdraw-amount-box-input').value = "";
+            calculatePayoutValues();
+        } else {
+            // यदि बैकएंड से कोई एरर आए (जैसे लो बैलेंस)
+            openPremiumAlertDialog("Withdrawal Rejected", data.message || "Request failed!", "OK");
+        }
+    })
+    .catch(error => {
+        console.error("Live withdrawal submisson error:", error);
+        openPremiumAlertDialog("Network Error", "सर्वर से संपर्क नहीं हो पाया। कृपया दोबारा प्रयास करें।", "OK");
+    });
+}
+
 
     function fetchLiveUserBalanceFromBackend() {
         const balanceTextContainer = document.getElementById('current-live-wallet-balance');

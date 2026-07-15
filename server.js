@@ -598,31 +598,39 @@ app.get('/api/deposit-history/:phone', async (req, res) => {
 
 // === ADMIN DASHBOARD STATS ROUTE ===
 app.get('/api/admin/stats', async (req, res) => {
-    try {
-        const totalUsers = await User.countDocuments();
-        
-        const allUsers = await User.find({}, 'balance');
-        let totalWalletBalance = 0;
-        allUsers.forEach(user => {
-            totalWalletBalance += (user.balance || 0);
-        });
+try {
+    const totalUsers = await User.countDocuments();
+    const allUsers = await User.find({}, 'balance');
+    let totalWalletBalance = 0;
+    allUsers.forEach(user => {
+        totalWalletBalance += (user.balance || 0);
+    });
 
-        const pendingBets = await Bet.find({ status: "Pending" });
-        let activeBetAmount = 0;
-        pendingBets.forEach(bet => {
-            activeBetAmount += Number(bet.betAmount || 0);
-        });
+    const pendingBets = await Bet.find({ status: "Pending" });
+    let activeBetAmount = 0;
+    pendingBets.forEach(bet => {
+        activeBetAmount += Number(bet.betAmount || 0);
+    });
 
-        res.json({
-            success: true,
-            totalUsers,
-            totalWalletBalance: Number(totalWalletBalance.toFixed(2)),
-            activeBetAmount
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+    // [MASTER FIX]: स्वीकृत विथड्रॉल राशि की गणना करना
+    const approvedWithdrawals = await Withdrawal.find({ status: "Approved" });
+    let totalWithdrawalBalance = 0;
+    approvedWithdrawals.forEach(w => {
+        totalWithdrawalBalance += Number(w.amount || 0);
+    });
+
+    res.json({
+        success: true,
+        totalUsers,
+        totalWalletBalance: Number(totalWalletBalance.toFixed(2)),
+        totalWithdrawalBalance: Number(totalWithdrawalBalance.toFixed(2)), // फ्रंटएंड के लिए आवश्यक लाइन
+        activeBetAmount
+    });
+} catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+}
 });
+
 
 // === ADMIN ALL USERS LIST ROUTE ===
 app.get('/api/admin/users-list', async (req, res) => {

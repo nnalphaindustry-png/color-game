@@ -258,6 +258,11 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
     color: #ffffff;     /* प्योर वाइट कलर */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* हल्का सा शैडो जिससे लुक और बेहतर लगे */
 }
+/* [5-SEC COUNTDOWN PULSE ANIMATION] */
+@keyframes pulseScaleRule {
+    0% { transform: scale(0.85); opacity: 0.7; }
+    100% { transform: scale(1.1); opacity: 1; }
+}
 
 </style>
 </head>
@@ -356,9 +361,11 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 
     <!-- 5. बेटिंग पैनल - स्लिम कलर्स और साइज बटन्स + मोटे नंबर्स -->
     <div class="betting-panel-card">
-        <div class="betting-disabled-overlay" id="lock-overlay-screen">
-            <div class="lock-message-box">⏳ Betting locked! Wait for next round...</div>
-        </div>
+        <!-- [UPGRADED 5-SEC ANIMATED COUNTDOWN OVERLAY WITH AUDIO] -->
+<div class="betting-disabled-overlay" id="lock-overlay-screen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.75); backdrop-filter: blur(3px); border-radius: 20px; justify-content: center; align-items: center; z-index: 100;">
+    <div id="countdown-huge-number" style="font-size: 110px; font-weight: 900; color: #f03e3e; text-shadow: 0 4px 15px rgba(240,62,62,0.4); animation: pulseScaleRule 0.5s ease-in-out infinite alternate; font-family: 'Arial Black', sans-serif;">5</div>
+</div>
+
 
         <div class="color-bet-row">
             <button class="color-btn btn-green-color" onclick="openBettingModal('Green')">Green</button>
@@ -468,6 +475,41 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
         <button class="receipt-close-footer-btn" onclick="closeReceiptModal()">Close</button>
     </div>
 </div>
+<!-- === [MMASTER FIX]: PREMIUM DYNAMIC WIN / LOSS POPUP OVERLAY === -->
+<div id="game-result-master-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 25000; padding: 15px;">
+    <div id="game-popup-card-box" style="position: relative; width: 100%; max-width: 340px; border-radius: 24px; padding: 25px; text-align: center; color: white; box-shadow: 0 15px 35px rgba(0,0,0,0.6); font-family: 'Inter', sans-serif;">
+        
+        <!-- टॉप क्राउन रिबन रिफ्लेक्शन -->
+        <div id="popup-top-badge-banner" style="width: 130px; height: 130px; margin: -85px auto 10px auto; background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+        
+        <!-- मुख्य संदेश -->
+        <h2 id="popup-main-status-title" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; letter-spacing: 0.5px;">Congratulations</h2>
+        
+        <!-- लॉटरी परिणाम की जानकारी पट्टी -->
+        <div style="background: rgba(255,255,255,0.12); border-radius: 12px; padding: 8px 12px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px;">
+            <span style="opacity: 0.85;">Lottery results</span>
+            <span id="popup-result-number" style="font-weight: 900; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);"></span>
+            <span id="popup-result-size" style="font-weight: 800; font-size: 13px; text-transform: uppercase;"></span>
+        </div>
+
+        <!-- बोनस/लॉस की श्वेत पर्ची (Slip) -->
+        <div style="background: #ffffff; border-radius: 14px; padding: 15px; color: #333; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 18px; position: relative;">
+            <div id="popup-amount-label-text" style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px; text-transform: uppercase;">Bonus</div>
+            <div id="popup-final-amount-value" style="font-size: 26px; font-weight: 900; color: #f03e3e; margin-bottom: 6px;">₹0.00</div>
+            <div id="popup-game-period-name" style="font-size: 11px; color: #888; font-weight: 600;">Period: WinGo 30sec</div>
+            <div id="popup-game-period-id" style="font-size: 11px; color: #222; font-family: monospace; font-weight: 700; margin-top: 2px;">--</div>
+        </div>
+
+        <!-- ऑटो क्लोज काउंटर -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.9); margin-bottom: 5px;">
+            <span style="display: inline-block; width: 14px; height: 14px; border: 1.5px solid white; border-radius: 50%; text-align: center; font-size: 9px; font-weight: bold; line-height: 11px;">✓</span>
+            <span id="popup-auto-close-countdown-text">5 seconds auto close</span>
+        </div>
+
+        <!-- नीचे लगा मैन्युअल बैक बटन (X) -->
+        <button style="position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); background: none; border: 2px solid white; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center; line-height: 1;" onclick="closeGameLiveResultMasterModal()">×</button>
+    </div>
+</div>
 
 <!-- === सुंदर कसीनो स्टाइल कस्टम अलर्ट पॉप-अप विंडो === -->
 <div class="custom-premium-alert-overlay" id="global-custom-premium-alert-window">
@@ -526,6 +568,9 @@ document.addEventListener("DOMContentLoaded", function () {
     
     setInterval(syncLiveServerTimerData, 1000);
 });
+// [MASTER CLOCK ENGINE - WITH AUDIO BEEP & 5-SEC GIANT COUNTDOWN]
+let lastPlayedSecondsValue = -1;
+
 function syncLiveServerTimerData() {
     fetch(`${BACKEND_SERVER_URL}/api/game-sync`)
     .then(res => res.json())
@@ -533,7 +578,9 @@ function syncLiveServerTimerData() {
         if (resData.success && resData.data[activeRunningMode]) {
             const currentRoundData = resData.data[activeRunningMode];
             
+            // राउंड बदलने पर रिज़ल्ट चेक करने का पुराना लॉजिक सुरक्षित है
             if(globalCurrentPeriodId !== currentRoundData.currentPeriod) {
+                const finishedPeriodId = globalCurrentPeriodId;
                 globalCurrentPeriodId = currentRoundData.currentPeriod;
                 
                 if (globalCurrentPeriodId && !globalCurrentPeriodId.includes("---")) {
@@ -544,21 +591,60 @@ function syncLiveServerTimerData() {
                 
                 fetchLiveServerBalance();
                 loadGameHistoryLogs();
-                loadUserBetsLogs();
+                
+                if (loggedInUserPhone && finishedPeriodId && !finishedPeriodId.includes("Loading")) {
+                    fetch(`${BACKEND_SERVER_URL}/api/user-bets/${loggedInUserPhone.trim()}/${activeRunningMode}`)
+                    .then(r => r.json())
+                    .then(userBetData => {
+                        if (userBetData.success && userBetData.list) {
+                            currentlyFetchedBetsArrayData = userBetData.list;
+                            const lastRoundBet = userBetData.list.find(b => b.periodId === finishedPeriodId);
+                            
+                            if (lastRoundBet) {
+                                fetch(`${BACKEND_SERVER_URL}/api/game-history/${activeRunningMode}`)
+                                .then(rh => rh.json())
+                                .then(historyData => {
+                                    let resNum = "-"; let resSize = "-";
+                                    if(historyData.success && historyData.list && historyData.list.length > 0){
+                                        const matchRecord = historyData.list.find(h => h.periodId === finishedPeriodId);
+                                        if(matchRecord) { resNum = matchRecord.resultNumber; resSize = matchRecord.resultSize; }
+                                    }
+                                    if (lastRoundBet.status === "Win" || lastRoundBet.status === "win") {
+                                        showPremiumGameResultModal(true, lastRoundBet.winAmount, finishedPeriodId, activeRunningMode, resNum, resSize);
+                                    } else if (lastRoundBet.status === "Loss" || lastRoundBet.status === "loss" || lastRoundBet.status === "Failed") {
+                                        showPremiumGameResultModal(false, lastRoundBet.betAmount, finishedPeriodId, activeRunningMode, resNum, resSize);
+                                    }
+                                });
+                            }
+                            switchHistoryTab(activeRunningTabKey);
+                        }
+                    });
+                } else {
+                    loadUserBetsLogs();
+                }
             }
             
             let remainingSeconds = currentRoundData.timeLeft;
-            
             if (remainingSeconds === 999 || remainingSeconds < 0) {
                 updateDigitalClockDisplay(0, 0);
-                document.getElementById('lock-overlay-screen').style.display = "flex";
+                document.getElementById('lock-overlay-screen').style.display = "none";
                 return;
             }
             
-            if (remainingSeconds <= 5) {
+            // === [नया लॉजिक]: आखिरी 5 सेकंड की उल्टी गिनती और आवाज ===
+            if (remainingSeconds <= 5 && remainingSeconds > 0) {
+                // बेटिंग पैनल ब्लॉक करना और बड़ा नंबर दिखाना
                 document.getElementById('lock-overlay-screen').style.display = "flex";
+                document.getElementById('countdown-huge-number').innerText = remainingSeconds;
                 closeBettingModal();
+                
+                // हर सेकंड केवल एक बार "टोंग" बीप ध्वनि बजाना
+                if (remainingSeconds !== lastPlayedSecondsValue) {
+                    playCasinoTickBeepSound();
+                    lastPlayedSecondsValue = remainingSeconds;
+                }
             } else {
+                // 5 सेकंड से ऊपर होने पर काउंटडाउन छुपाना
                 document.getElementById('lock-overlay-screen').style.display = "none";
             }
             
@@ -568,6 +654,7 @@ function syncLiveServerTimerData() {
         }
     }).catch(err => console.error("Sync Error:", err));
 }
+
 function updateDigitalClockDisplay(mins, secs) {
     let minString = mins.toString().padStart(2, '0');
     let secString = secs.toString().padStart(2, '0');
@@ -931,6 +1018,103 @@ function navigateHistoryPage(directionStep) {
         loadGameHistoryLogs();
     } else {
         loadUserBetsLogs();
+    }
+}
+let popupAutoCloseTimerReference = null;
+
+// [LIVE POPUP DISPLAY CONTROLLER ENGINE]
+function showPremiumGameResultModal(isWin, amount, periodId, gameModeKey, finalNumber, finalSize) {
+    const overlay = document.getElementById('game-result-master-overlay');
+    const cardBox = document.getElementById('game-popup-card-box');
+    const badgeBanner = document.getElementById('popup-top-badge-banner');
+    const mainTitle = document.getElementById('popup-main-status-title');
+    const amountLabel = document.getElementById('popup-amount-label-text');
+    const amountValue = document.getElementById('popup-final-amount-value');
+    const periodName = document.getElementById('popup-game-period-name');
+    const periodIdBox = document.getElementById('popup-game-period-id');
+    
+    if(!overlay) return;
+    if(popupAutoCloseTimerReference) clearInterval(popupAutoCloseTimerReference);
+
+    // मैपिंग नामों से गेम का नाम निकालना
+    const friendlyName = gameTitleNamesMapping[gameModeKey] || "WinGo Game";
+    periodName.innerText = `Period: ${friendlyName}`;
+    periodIdBox.innerText = periodId;
+    
+    document.getElementById('popup-result-number').innerText = finalNumber;
+    document.getElementById('popup-result-size').innerText = finalSize || "";
+
+    // === यदि यूजर जीतता है (WINNING SYSTEM) ===
+    if (isWin) {
+        cardBox.style.background = "linear-gradient(180deg, #f03e3e, #ff6b6b)"; 
+        badgeBanner.style.backgroundImage = "url('https://ibb.co')"; // प्रीमियम क्राउन रिबन रॉकेट लुक
+        mainTitle.innerText = "Congratulations";
+        mainTitle.style.color = "#ffffff";
+        amountLabel.innerText = "Bonus";
+        amountLabel.style.color = "#2aa757";
+        amountValue.innerText = `+₹${parseFloat(amount).toFixed(2)}`;
+        amountValue.style.color = "#2aa757"; 
+    } 
+    // === यदि यूजर हारता है (LOSSING SYSTEM) ===
+    else {
+        cardBox.style.background = "linear-gradient(180deg, #2b3a4a, #1a242f)"; 
+        badgeBanner.style.backgroundImage = "url('https://ibb.co')"; // रॉयल लुक फॉर लॉस
+        mainTitle.innerText = "Better Luck Next Time";
+        mainTitle.style.color = "#cccccc";
+        amountLabel.innerText = "Loss Amount";
+        amountLabel.style.color = "#777";
+        amountValue.innerText = `₹${parseFloat(amount).toFixed(2)}`;
+        amountValue.style.color = "#f03e3e";
+    }
+
+    overlay.style.display = 'flex';
+
+    // 5 सेकंड की टाइमिंग पर बंद होने का काउंटर
+    let secondsLeft = 5;
+    document.getElementById('popup-auto-close-countdown-text').innerText = `${secondsLeft} seconds auto close`;
+    
+    popupAutoCloseTimerReference = setInterval(() => {
+        secondsLeft--;
+        if(secondsLeft <= 0) {
+            clearInterval(popupAutoCloseTimerReference);
+            closeGameLiveResultMasterModal();
+        } else {
+            document.getElementById('popup-auto-close-countdown-text').innerText = `${secondsLeft} seconds auto close`;
+        }
+    }, 1000);
+}
+
+function closeGameLiveResultMasterModal() {
+    const overlay = document.getElementById('game-result-master-overlay');
+    if (overlay) overlay.style.display = 'none';
+    if (popupAutoCloseTimerReference) clearInterval(popupAutoCloseTimerReference);
+}
+// [NATIVE WEB AUDIO API - CASINO TONG BEEP GENERATOR]
+function playCasinoTickBeepSound() {
+    try {
+        // ब्राउज़र का ऑडियो कॉन्टेक्स्ट बनाना
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        // "टोंग" जैसी प्रीमियम हाई-पिच कसीनो टोन सेट करना (880Hz)
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, ctx.currentTime); 
+        
+        // आवाज़ को तुरंत शुरू करके धीरे से शांत (Fade Out) करना
+        gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.15);
+    } catch (e) {
+        console.log("Audio play blocked by device silent mode or browser restriction:", e);
     }
 }
 

@@ -290,7 +290,11 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 
             <!-- withdraw.html और deposit.html लिंक्स परफेक्टली अटैच्ड -->
             <div class="wallet-action-buttons-row">
-                <a href="withdrawal.html?from=game" class="action-btn-main btn-withdraw-red">Withdraw</a>
+    
+<!-- [GAME WITHDRAWAL BUTTON - UPDATED] -->
+<a href="javascript:void(0)" onclick="window.location.href='withdrawal.html?from=game'" class="action-btn-main btn-withdraw-red">Withdraw</a>
+
+
                 <a href="deposit.html" class="action-btn-main btn-deposit-green">Deposit</a>
             </div>
         </div>
@@ -929,6 +933,7 @@ function navigateHistoryPage(directionStep) {
         loadUserBetsLogs();
     }
 }
+
 </script>
 </body>
 </html>

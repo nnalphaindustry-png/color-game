@@ -77,7 +77,9 @@
     
     <!-- 1. प्रीमियम हेडर बार -->
     <div class="premium-header-bar">
-        <button class="back-action-btn" onclick="window.history.back()">‹</button>
+        <!-- अब बैक बटन सीधे ब्राउज़र हिस्ट्री पर नहीं, बल्कि आपके बनाए लॉजिक पर काम करेगा -->
+<button class="back-action-btn" onclick="goToWithdrawPageWithoutSaving()">‹</button>
+
         <span class="header-title-center">Withdraw</span>
         <span class="history-action-text" onclick="openWithdrawalHistoryPage()">Withdrawal history</span>
     </div>
@@ -354,19 +356,22 @@
     }
 
     function openWithdrawalHistoryPage() { openPremiumAlertDialog("Page Loading", "Loading Withdrawal History logs from live server...", "OK"); }
-// [DYNAMIC BACK NAVIGATION LOGIC]
+// [DYNAMIC BACK NAVIGATION LOGIC - UPDATED]
 function goToWithdrawPageWithoutSaving() {
     const urlParams = new URLSearchParams(window.location.search);
     const cameFromPage = urlParams.get('from');
-
-    // यदि यूज़र प्रोफ़ाइल पेज से आया है तो सीधे profile.html पर ही वापस जाएगा
-    if (cameFromPage === 'profile') {
-        window.location.href = "profile.html"; 
-    } else if (cameFromPage === 'game') {
+    
+    // यदि यूजर गेम पेज से आया है
+    if (cameFromPage === 'game') {
         window.location.href = "game.html";
-    } else {
-        // फॉलबैक: यदि कोई सीधा लिंक खोलता है
-        window.location.href = "game.html"; 
+    } 
+    // यदि यूजर प्रोफाइल पेज से आया है
+    else if (cameFromPage === 'profile') {
+        window.location.href = "profile .html";
+    } 
+    // आपकी शर्त: यदि किसी अन्य तरीके से या सीधे इस पेज पर आए, तो प्रोफाइल पर जाए
+    else {
+        window.location.href = "profile .html";
     }
 }
 

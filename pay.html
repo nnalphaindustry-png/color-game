@@ -35,6 +35,13 @@
 <body>
 
 <div class="pay-container">
+    <!-- TOP BACK NAV BUTTON -->
+    <div style="display: flex; align-items: center; padding-bottom: 12px; margin-bottom: 15px; border-bottom: 1px solid #f0f2f5; text-align: left;">
+        <button onclick="showDepositCancelConfirmationPopup()" style="background: none; border: none; font-size: 22px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 0; line-height: 1;">
+            ‹ <span style="font-size: 15px; font-weight: 500; font-family: sans-serif; position: relative; top: -1px;">Back</span>
+        </button>
+    </div>
+    
     <div class="pay-header">
         <h2>Deposit Amount</h2>
         <!-- यहाँ यूजर का चुना हुआ अमाउंट ऑटोमैटिक लोड होगा -->
@@ -205,6 +212,72 @@ function submitUserUTRData() {
         console.error("Deposit Error:", err);
         showBeautifulPopup("Connection Error", "Failed to connect with server! Please make sure your backend is live.", "error");
     });
+}
+// === NEW: BACK BUTTON DETECTION & CANCEL POPUP LOGIC ===
+
+// 1. पेज लोड होते ही ब्राउज़र की हिस्ट्री में एक फेक स्टेट पुश करना ताकि बैक बटन डिटेक्ट हो सके
+if (window.history && window.history.pushState) {
+    window.history.pushState('forward', null, './pay.html');
+    
+    window.addEventListener('popstate', function () {
+        // जैसे ही यूज़र बैक बटन दबाएगा, यह फंक्शन ट्रिगर होगा और पॉप-अप दिखाएगा
+        showDepositCancelConfirmationPopup();
+        // हिस्ट्री को वापस वहीं लॉक कर देना ताकि पेज तुरंत पीछे न भागे
+        window.history.pushState('forward', null, './pay.html');
+    });
+}
+
+// 2. यदि यूज़र ब्राउज़र टैब बंद करने या रिफ्रेश करने की कोशिश करे (Safe Guard)
+window.addEventListener('beforeunload', function (e) {
+    const amount = localStorage.getItem('pending_deposit_amount') || "0";
+    if (amount !== "0") {
+        e.preventDefault();
+        e.returnValue = 'Are you sure you want to cancel your deposit?';
+    }
+});
+
+// 3. सुंदर कैंसिल कन्फर्मेशन पॉप-अप बनाने का फंक्शन
+function showDepositCancelConfirmationPopup() {
+    // अगर पहले से कोई पॉप-अप स्क्रीन पर है तो उसे हटाना
+    const oldPopup = document.getElementById('cancel-confirm-overlay');
+    if (oldPopup) oldPopup.remove();
+
+    // पॉप-अप का नया HTML ढांचा बनाना
+    const overlay = document.createElement('div');
+    overlay.id = 'cancel-confirm-overlay';
+    overlay.style.cssText = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center; z-index: 10000; animation: fadeIn 0.2s ease-out;";
+
+    const box = document.createElement('div');
+    box.style.cssText = "background: white; width: 90%; max-width: 360px; padding: 25px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: #333;";
+    
+    box.innerHTML = `
+        <div style="width: 60px; height: 60px; background: #ef233c15; color: #ef233c; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; margin: 0 auto 15px auto;">⚠</div>
+        <h3 style="font-size: 19px; font-weight: bold; margin-bottom: 8px; color: #111;">Cancel Deposit?</h3>
+        <p style="font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 22px;">Are you sure you want to quit this transaction? Your pending deposit will be canceled.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+            <button id='cancel-popup-stay-btn' style='background: #111; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15);'>No, Stay</button>
+            <button id='cancel-popup-leave-btn' style='background: #ef233c; color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(239,35,60,0.2);'>Yes, Cancel</button>
+        </div>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    // बटन 1: अगर यूजर "No, Stay" दबाता है (पेज पर ही रोको)
+    document.getElementById('cancel-popup-stay-btn').onclick = function() {
+        overlay.remove();
+    };
+
+    // बटन 2: अगर यूजर "Yes, Cancel" दबाता है (डेटा साफ़ करके वापस डिपोज़िट पेज पर भेज दो)
+    document.getElementById('cancel-popup-leave-btn').onclick = function() {
+        overlay.remove();
+        // लोकल स्टोरेज से पेंडिंग ट्रांजैक्शन साफ़ करना
+        localStorage.removeItem('pending_deposit_amount');
+        localStorage.removeItem('pending_upi_intent');
+        // सुरक्षित तरीके से वापस भेजना
+        window.location.replace("deposit.html");
+    };
 }
 
 </script>

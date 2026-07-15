@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit History</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f7f9fc; color: #333; padding-bottom: 30px; }
+        
+        /* Premium Navigation Header */
+        .history-header { position: sticky; top: 0; background: white; display: flex; align-items: center; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); z-index: 100; }
+        .back-arrow-btn { background: none; border: none; font-size: 24px; font-weight: bold; color: #333; cursor: pointer; padding-right: 15px; display: flex; align-items: center; }
+        .header-title { font-size: 18px; font-weight: 600; color: #111; flex: 1; text-align: center; margin-right: 24px; }
+
+        /* Dumb Filter Row Components (For UI Match) */
+        .filter-tabs-row { display: flex; gap: 8px; overflow-x: auto; padding: 12px 15px; background: white; white-space: nowrap; border-bottom: 1px solid #edf0f5; }
+        .filter-tabs-row::-webkit-scrollbar { display: none; }
+        .tab-item { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; background: #f0f2f5; color: #555; border: none; }
+        .tab-item.active { background: #ef233c; color: white; }
+
+        .dropdown-filters-box { display: flex; gap: 10px; padding: 12px 15px; background: white; margin-bottom: 10px; }
+        .select-filter-menu { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; background: #fff; color: #333; outline: none; }
+
+        /* Dynamic History Container Area */
+        .history-list-wrapper { padding: 10px 15px; }
+        
+        /* Premium Record History Card */
+        .deposit-record-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .card-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .badge-deposit-label { background: #198754; color: white; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+        
+        .status-text-view { font-size: 14px; font-weight: 600; }
+        .status-text-view.approved { color: #198754; }   /* Complete = Green */
+        .status-text-view.pending { color: #ff9800; }    /* Pending = Orange */
+        .status-text-view.rejected { color: #ef233c; }   /* Failed = Red */
+
+        .card-data-line { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13.5px; }
+        .data-label-title { color: #777; font-weight: 400; }
+        .data-value-content { font-weight: 500; color: #222; }
+        .data-value-content.amount-highlight { font-weight: 700; color: #ff9800; }
+
+        /* Copy Button Icon Styles */
+        .copy-icon-trigger { background: none; border: none; color: #777; cursor: pointer; font-size: 12px; margin-left: 5px; padding: 2px 5px; border-radius: 4px; border: 1px solid #ddd; display: inline-flex; align-items: center; }
+        
+        /* Red Complaint Support Button Layer */
+        .complaint-btn-layout { width: 100%; background: linear-gradient(135deg, #ff4141, #ef233c); color: white; border: none; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 20px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(239, 35, 60, 0.2); }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Header Bar -->
+<div class="history-header">
+    <!-- यहाँ onclick में हमने स्मार्ट बैक फंक्शन जोड़ दिया है -->
+    <button class="back-arrow-btn" onclick="handleSmartHistoryBackWorkflow()">‹</button>
+    <div class="header-title">Deposit history</div>
+</div>
+
+<!-- Static Filter Row Tabs for Visual Consistency -->
+<div class="filter-tabs-row">
+    <button class="tab-item active">All</button>
+    <button class="tab-item">ArUpi Pay</button>
+    <button class="tab-item">NOW UPI</button>
+    <button class="tab-item">Online Pay</button>
+</div>
+
+<div class="dropdown-filters-box">
+    <select class="select-filter-menu"><option>All</option></select>
+    <select class="select-filter-menu"><option>Choose a date</option></select>
+</div>
+
+<!-- Dynamic Feed Content Destination -->
+<div id="dynamic-history-injection-layer" class="history-list-wrapper">
+    <div style="text-align: center; color: #999; padding: 40px 0; font-size: 14px;">Loading your deposit history...</div>
+</div>
+
+<script>
+    // 1. आपके रेंडर सर्वर का असली यूआरएल लिंक 
+    const SERVER_URL = "https://color-game-1kc2.onrender.com";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // लोकल स्टोरेज से लॉग्ड-इन यूज़र का फोन नंबर खींचना
+        const loggedUserPhone = localStorage.getItem('user_phone');
+
+        if (!loggedUserPhone) {
+            document.getElementById('dynamic-history-injection-layer').innerHTML = `
+                <div style="text-align: center; color: #ef233c; padding: 30px; font-weight: bold;">
+                    Session Expired! Please login again.
+                </div>`;
+            return;
+        }
+
+        // 2. डेटाबेस सर्वर से लाइव डिपॉजिट हिस्ट्री लोड करना
+        fetch(`${SERVER_URL}/api/deposit-history/${loggedUserPhone.trim()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.history && data.history.length > 0) {
+                    let fullHistoryCardsHtml = '';
+
+                    // लूप चलाकर एक-एक डिपॉजिट रिकॉर्ड का कार्ड बनाना
+                    data.history.forEach((record, index) => {
+                        // डेटाबेस स्टेटस के हिसाब से क्लास और टेक्स्ट सेट करना
+                        let statusClass = 'pending';
+                        let statusText = 'Pending';
+                        if (record.status === 'Approved') { statusClass = 'approved'; statusText = 'Complete'; }
+                        if (record.status === 'Rejected') { statusClass = 'rejected'; statusText = 'Failed'; }
+
+                        // आईएसओ डेट फॉर्मेट को यूज़र के समझने योग्य साफ़ टाइम में बदलना
+                        const formattedTime = new Date(record.createdAt).toLocaleString();
+
+                        fullHistoryCardsHtml += `
+                            <div class="deposit-record-card">
+                                <div class="card-row-top">
+                                    <span class="badge-deposit-label">Deposit</span>
+                                    <span class="status-text-view ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="card-data-line">
+                                    <span class="data-label-title">Balance</span>
+                                    <span class="data-value-content amount-highlight">₹${Number(record.amount).toFixed(2)}</span>
+                                </div>
+                                <div class="card-data-line">
+                                    <span class="data-label-title">Type</span>
+                                    <span class="data-value-content">UPI-QR</span>
+                                </div>
+                                <div class="card-data-line">
+                                    <span class="data-label-title">Time</span>
+                                    <span class="data-value-content">${formattedTime}</span>
+                                </div>
+                                <div class="card-data-line" style="margin-bottom: 5px;">
+                                    <span class="data-label-title">Order number</span>
+                                    <span class="data-value-content" style="font-size:12px; font-family:monospace; color:#555;">
+                                        ${record.utr}
+                                        <button class="copy-icon-trigger" onclick="copyUserOrderNumberString('${record.utr}')">📋 Copy</button>
+                                    </span>
+                                </div>
+                                ${statusText === 'Failed' ? `<button class="complaint-btn-layout" onclick="alert('Support channel loading...')">I want to complaint</button>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('dynamic-history-injection-layer').innerHTML = fullHistoryCardsHtml;
+                } else {
+                    // अगर कोई रिकॉर्ड न मिले
+                    document.getElementById('dynamic-history-injection-layer').innerHTML = `
+                        <div style="text-align: center; color: #a0a0a0; padding: 50px 0; font-size: 14px;">
+                            🎉 No deposit records found in your account history!
+                        </div>`;
+                }
+            })
+            .catch(err => {
+                console.error("History Sync Timeout Error:", err);
+                document.getElementById('dynamic-history-injection-layer').innerHTML = `
+                    <div style="text-align: center; color: #ef233c; padding: 30px; font-size: 13px;">
+                        Failed to load data! Please make sure your server is active.
+                    </div>`;
+            });
+    });
+
+    // यूटीआर/ऑर्डर नंबर कॉपी करने का फंक्शन
+    function copyUserOrderNumberString(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Order/UTR number copied to clipboard!");
+        }).catch(err => {
+            console.error("Could not copy text: ", err);
+        });
+    }
+    // यह फंक्शन अपने आप पता लगा लेगा कि यूजर किस पेज से यहाँ आया था
+function handleSmartHistoryBackWorkflow() {
+    const previousPageUrl = document.referrer;
+
+    // अगर यूजर deposit.html पेज से क्लिक करके आया है
+    if (previousPageUrl.includes("deposit.html")) {
+        window.location.href = "deposit.html";
+    } 
+    // अगर यूजर profile.html पेज से क्लिक करके आया है
+    else if (previousPageUrl.includes("profile .html")) {
+        window.location.href = "profile .html";
+    } 
+    // सेफ़्टी के लिए: अगर कोई और पेज हुआ तो सीधे प्रोफाइल पर भेजें
+    else {
+        window.location.href = "profile .html";
+    }
+}
+
+</script>
+
+</body>
+</html>

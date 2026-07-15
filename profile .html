@@ -116,7 +116,7 @@
                     <p>Payout history</p>
                 </div>
             </div>
-            <div class="menu-box-card" onclick="alert('Opening Deposit History...')">
+            <div class="menu-box-card" onclick="window.location.href='deposit-history.html'">
                 <div class="menu-box-icon icon-red">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 7L17 12H13V17H11V12H7L12 7Z" fill="currentColor"/></svg>
                 </div>
@@ -265,7 +265,7 @@ document.getElementById('user-uid').innerText = "UID: " + (userUID || "------");
     });
 
     // कन्फर्म बटन दबाने पर असली लॉगआउट होगा और सारा डेटा क्लियर हो जाएगा
-conFirmBtn.addEventListener('click', function() {
+confirmBtn.addEventListener('click', function() {
   localStorage.removeItem('user_phone');
   localStorage.removeItem('user_uid'); // <--- लॉगआउट होने पर असली UID को भी डिलीट करें
   window.location.href = "index.html";

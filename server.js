@@ -426,33 +426,28 @@ app.get('/api/game-sync', async (req, res) => {
 });
 
 
-// === आपके बैकएंड सर्वर (Server File) के लिए 100% फिक्स किया गया फाइनल बेटिंग एपीआई ===
+// === Aapke Back-end Server ke liye 100% Fixed Bet Placement Code ===
 app.post('/api/place-bet', async (req, res) => {
     try {
         const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
         
-        // 1. यूज़र की जांच करें
         const user = await User.findOne({ phone: phone.trim() });
         if (!user) {
             return res.json({ success: false, message: "User not found!" });
         }
 
-        // 2. वॉलेट बैलेंस चेक करें
         if (Number(user.balance) < Number(betAmount)) {
             return res.json({ success: false, message: "Balance issue! Low wallet balance." });
         }
         
-        // 3. मिनिमम बेट अमाउंट चेक (₹1 नियम)
         if (!betAmount || isNaN(betAmount) || Number(betAmount) < 1) {
             return res.json({ success: false, message: "Minimum bet amount is ₹1" });
         }
         
-        // 4. आखिरी 5 सेकंड में सट्टा लॉक करने का नियम
         if (liveGames[gameMode] && liveGames[gameMode].timeLeft <= 5) {
             return res.json({ success: false, message: "Round betting locked! Wait for next round." });
         }
 
-        // 5. पीरियड आईडी की सुरक्षा जांच
         let finalPeriodId = String(periodId).trim();
         if (!finalPeriodId || finalPeriodId === "" || finalPeriodId.includes("Loading") || finalPeriodId.includes("-")) {
             if (liveGames[gameMode] && liveGames[gameMode].currentPeriod) {
@@ -462,32 +457,29 @@ app.post('/api/place-bet', async (req, res) => {
             }
         }
         
-        // [मास्टर फिक्स]: सीधे $inc का उपयोग करके बैलेंस घटाना ताकि पुराना यूज़र वैलिडेशन एरर (uid is required) पूरी तरह बाईपास हो जाए!
         const updatedUser = await User.findOneAndUpdate(
             { phone: phone.trim() },
             { $inc: { balance: -Number(betAmount) } },
             { new: true }
         );
 
-        if (!updatedUser) {
-            return res.json({ success: false, message: "Failed to update wallet balance." });
-        }
-        
-        // 6. सट्टा डेटाबेस में रिकॉर्ड करें (केवल वही फील्ड्स जो आपके betSchema में हैं)
+        // [MASTER FIX]: Bet save karte samay status hamesha "Pending" hona chahiye aur winAmount 0!
         const newBet = new Bet({
             phone: String(phone).trim(),
             gameMode: String(gameMode).trim(),
             periodId: finalPeriodId,
             selectValue: String(selectValue).trim(),
-            betAmount: Number(betAmount)
+            betAmount: Number(betAmount),
+            winAmount: 0,
+            status: "Pending" // <--- Yeh line aapka pehle se loss dikhana band kar degi!
         });
         
         await newBet.save();
         return res.json({ success: true, message: "Bet placed successfully!", newBalance: updatedUser.balance });
         
     } catch (error) {
-        console.error("CRITICAL BETTING SERVER ERROR FIXED:", error);
-        return res.status(500).json({ success: false, message: "Server error during betting. Core database mismatch fixed." });
+        console.error("BETTING SERVER ERROR:", error);
+        return res.status(500).json({ success: false, message: "Server error during betting." });
     }
 });
 

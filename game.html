@@ -192,6 +192,73 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 .page-nav-arrow-btn { background: white; border: 1px solid #e2e6f0; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; font-weight: 800; }
 .page-nav-arrow-btn.active-next { background: #f03e3e; color: white; border-color: #f03e3e; }
 .page-counter-status-text { font-size: 12px; font-weight: 700; color: #555; background: white; padding: 5px 12px; border-radius: 6px; border: 1px solid #e2e6f0; }
+/* मुख्य लाल कार्ड - बिल्कुल आपके पहले स्क्रीनशॉट जैसा ओरिजिनल साइज */
+.main-red-timer-dashboard-card {
+    background: linear-gradient(to right, #ff4d4d, #f03e3e); 
+    width: 92%; 
+    margin: 0 auto 15px auto;
+    border-radius: 20px; 
+    padding: 15px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    color: white; 
+    box-shadow: 0 6px 15px rgba(240,62,62,0.15); 
+    position: relative;
+}
+
+/* लेफ्ट साइड का ब्लॉक */
+.timer-card-left-pane { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 4px; 
+}
+
+/* पिछले 5 नंबर्स के सर्कल्स का कंटेनर */
+.recent-results-balls-row {
+    display: flex;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+/* गोल बॉल्स का साइज - छोटा और सटीक (20px) */
+.result-ball {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.ball-red { background: linear-gradient(135deg, #ff4757, #e74c3c); }
+.ball-green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.ball-violet { background: linear-gradient(135deg, #b53cd4, #9b59b6); }
+
+/* राइट साइड का कंटेनर जो टाइमर और पीरियड नंबर को ऊपर-नीचे अलाइन करेगा */
+.timer-card-right-pane-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* टाइमर डिब्बों को राइट अलाइन रखने के लिए */
+    gap: 6px;
+}
+
+/* [UPDATED]: पीरियड नंबर का साइज बड़ा और मोटा करने के लिए */
+.timer-exact-bottom-number {
+    width: 100%;
+    text-align: center; /* टाइमर डिब्बों के ठीक नीचे सेंटर रहेगा */
+    font-size: 15px;    /* फॉन्ट साइज को बढ़ाकर 15px कर दिया है */
+    font-weight: 800;   /* इसे Extra Bold (मोटा) कर दिया है */
+    font-family: monospace, sans-serif;
+    letter-spacing: 0.8px; /* नंबर्स के बीच की दूरी थोड़ी बढ़ा दी है */
+    margin-top: 5px;    /* टाइमर से थोड़ी दूरी बनाने के लिए */
+    color: #ffffff;     /* प्योर वाइट कलर */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* हल्का सा शैडो जिससे लुक और बेहतर लगे */
+}
+
 </style>
 </head>
 <body>
@@ -223,7 +290,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 
             <!-- withdraw.html और deposit.html लिंक्स परफेक्टली अटैच्ड -->
             <div class="wallet-action-buttons-row">
-                <a href="withdraw.html" class="action-btn-main btn-withdraw-red">Withdraw</a>
+                <a href="withdrawal.html?from=game" class="action-btn-main btn-withdraw-red">Withdraw</a>
                 <a href="deposit.html" class="action-btn-main btn-deposit-green">Deposit</a>
             </div>
         </div>
@@ -251,24 +318,37 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
         <button class="mode-tab-item-btn" id="btn-tab-5m" onclick="changeActiveGameMode('5m')">WinGo 5<br>Min</button>
     </div>
 
-    <!-- 4. मुख्य लाल टाइमर डैशबोर्ड टिकट -->
-    <div class="main-red-timer-dashboard-card">
-        <div class="timer-card-left-pane">
-            <button class="how-to-play-pill-btn">How to play</button>
-            <div class="current-selected-game-title" id="display-game-title-text">WinGo 30sec</div>
-            <div class="current-period-display-row">Period: <span id="display-live-period-number">Loading...</span></div>
-        </div>
-        <div class="timer-card-right-pane">
-            <div class="time-remaining-label-title">Time remaining</div>
-            <div class="digital-clock-boxes-row">
-                <span class="clock-digit-box" id="min-digit-1">0</span>
-                <span class="clock-digit-box" id="min-digit-2">0</span>
-                <span class="clock-colon-separator">:</span>
-                <span class="clock-digit-box" id="sec-digit-1">0</span>
-                <span class="clock-digit-box" id="sec-digit-2">0</span>
-            </div>
-        </div>
+    <!-- 4. मुख्य लाल टाइमर डैशबोर्ड टिकट (Symmetric Layout) -->
+<div class="main-red-timer-dashboard-card">
+  <!-- लेफ्ट सेक्शन: गेम नाम और 5 बॉल्स अपनी पुरानी जगह पर परफेक्ट रहेंगे -->
+  <div class="timer-card-left-pane">
+    <button class="how-to-play-pill-btn">How to play</button>
+    <div class="current-selected-game-title" id="display-game-title-text">WinGo 30sec</div>
+    
+    <!-- पिछले 5 रिजल्ट्स की छोटी रंग-बिरंगी बॉल्स -->
+    <div class="recent-results-balls-row" id="top-recent-balls-container">
+      <span style="font-size: 10px; opacity: 0.7;">Loading...</span>
     </div>
+  </div>
+  
+  <!-- राइट सेक्शन: टाइमर घड़ी और उसके ठीक नीचे पीरियड नंबर -->
+  <div class="timer-card-right-pane-vertical">
+    <div class="time-remaining-label-title" style="text-align: right; margin-bottom: 4px;">Time remaining</div>
+    
+    <!-- डिजिटल क्लॉक बॉक्स -->
+    <div class="digital-clock-boxes-row">
+      <span class="clock-digit-box" id="min-digit-1">0</span>
+      <span class="clock-digit-box" id="min-digit-2">0</span>
+      <span class="clock-colon-separator">:</span>
+      <span class="clock-digit-box" id="sec-digit-1">0</span>
+      <span class="clock-digit-box" id="sec-digit-2">0</span>
+    </div>
+
+    <!-- [FIX]: सिर्फ और सिर्फ पीरियड नंबर, जो ठीक टाइमर के नीचे सेंटर में रहेगा -->
+    <div class="timer-exact-bottom-number" id="display-live-period-number">Loading...</div>
+  </div>
+</div>
+
 
     <!-- 5. बेटिंग पैनल - स्लिम कलर्स और साइज बटन्स + मोटे नंबर्स -->
     <div class="betting-panel-card">
@@ -634,10 +714,11 @@ function loadGameHistoryLogs() {
     .then(data => {
         if(data.success && data.list) {
             let htmlRowsContent = "";
-            data.list.forEach(row => {
+            let topBallsHtml = "";
+            
+            data.list.forEach((row, index) => {
                 let numColorClass = "text-num-red";
                 let dotColorClass = "dot-red";
-                
                 if(["0","5"].includes(String(row.resultNumber))) {
                     numColorClass = "text-num-violet";
                     dotColorClass = "dot-violet";
@@ -645,7 +726,8 @@ function loadGameHistoryLogs() {
                     numColorClass = "text-num-green";
                     dotColorClass = "dot-green";
                 }
-
+                
+                // नीचे की टेबल रो निर्माण
                 htmlRowsContent += `
                 <div class="game-history-static-row">
                     <div style="color: #666;">${row.periodId}</div>
@@ -653,11 +735,32 @@ function loadGameHistoryLogs() {
                     <div>${row.resultSize}</div>
                     <div><span class="history-color-dot-indicator ${dotColorClass}"></span></div>
                 </div>`;
+                
+                // ऊपर गेम नाम के नीचे सिर्फ लेटेस्ट 5 नंबर्स दिखाना
+                if (index < 5) {
+                    let ballColorTemplate = "ball-red";
+                    if(["0","5"].includes(String(row.resultNumber))) {
+                        ballColorTemplate = "ball-violet";
+                    } else if(["1","3","7","9"].includes(String(row.resultNumber))) {
+                        ballColorTemplate = "ball-green";
+                    }
+                    topBallsHtml += `<span class="result-ball ${ballColorTemplate}">${row.resultNumber}</span>`;
+                }
             });
-            document.getElementById('game-history-rows-container').innerHTML = htmlRowsContent || "<div style='text-align:center; padding:10px;'>No results</div>";
+            
+            // डेटा को HTML में रिप्लेस करना
+            document.getElementById('game-history-rows-container').innerHTML =
+            htmlRowsContent || "<div style='text-align:center; padding:10px;'>No results</div>";
+            
+            const ballsContainer = document.getElementById('top-recent-balls-container');
+            if (ballsContainer) {
+                ballsContainer.innerHTML = topBallsHtml || "<span style='font-size:11px;'>-</span>";
+            }
         }
-    }).catch(err => console.error(err));
+    }).catch(err => console.error("Error loading history logs:", err));
 }
+
+
 function loadUserBetsLogs() {
     if(!loggedInUserPhone) return;
     fetch(`${BACKEND_SERVER_URL}/api/user-bets/${loggedInUserPhone.trim()}/${activeRunningMode}`)

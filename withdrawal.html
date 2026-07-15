@@ -354,6 +354,22 @@
     }
 
     function openWithdrawalHistoryPage() { openPremiumAlertDialog("Page Loading", "Loading Withdrawal History logs from live server...", "OK"); }
+// [DYNAMIC BACK NAVIGATION LOGIC]
+function goToWithdrawPageWithoutSaving() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const cameFromPage = urlParams.get('from');
+
+    // यदि यूज़र प्रोफ़ाइल पेज से आया है तो सीधे profile.html पर ही वापस जाएगा
+    if (cameFromPage === 'profile') {
+        window.location.href = "profile.html"; 
+    } else if (cameFromPage === 'game') {
+        window.location.href = "game.html";
+    } else {
+        // फॉलबैक: यदि कोई सीधा लिंक खोलता है
+        window.location.href = "game.html"; 
+    }
+}
+
 </script>
 </body>
 </html>

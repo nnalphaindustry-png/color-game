@@ -58,6 +58,15 @@ const betSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Bet = mongoose.model('Bet', betSchema);
+// === 4. यूज़र के रिचार्ज (Deposit) का स्कीमा ===
+const depositSchema = new mongoose.Schema({
+    phone: { type: String, required: true },
+    amount: { type: Number, required: true },
+    utr: { type: String, required: true, unique: true }, // UTR यूनिक रहेगा ताकि कोई धोखा न कर सके
+    status: { type: String, default: "Pending" }, // Pending, Approved, Rejected
+    createdAt: { type: Date, default: Date.now }
+});
+const Deposit = mongoose.model('Deposit', depositSchema);
 
 
 // === LIVE GAMES TIMER ENGINE (असली गेम इंजन लॉजिक) ===
@@ -455,6 +464,44 @@ app.post('/api/place-bet', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error during betting." }); 
     }
 });
+// === नई डिपॉजिट (UTR सबमिशन) एपीआई ===
+app.post('/api/place-deposit', async (req, res) => {
+    try {
+        const { phone, amount, utr } = req.body;
+
+        // 1. पैरामीटर्स की बुनियादी जांच
+        if (!phone || !amount || !utr) {
+            return res.json({ success: false, message: "सभी पैरामीटर्स आवश्यक हैं!" });
+        }
+
+        // 2. सुरक्षा जांच: UTR ठीक 12 अंकों का होना चाहिए
+        if (utr.trim().length !== 12 || isNaN(utr)) {
+            return res.json({ success: false, message: "गलत UTR नंबर! कृपया 12 अंकों का नंबर डालें।" });
+        }
+
+        // 3. डुप्लीकेट जांच: कहीं यह UTR पहले से डेटाबेस में तो नहीं है?
+        const utrExists = await Deposit.findOne({ utr: utr.trim() });
+        if (utrExists) {
+            return res.json({ success: false, message: "यह UTR नंबर पहले ही सबमिट किया जा चुका है!" });
+        }
+
+        // 4. डेटाबेस में नया रिकॉर्ड सेव करना
+        const newDeposit = new Deposit({
+            phone: phone.trim(),
+            amount: Number(amount),
+            utr: utr.trim(),
+            status: "Pending" // शुरुआत में स्टेटस पेंडिंग रहेगा ताकि आप एडमिन से चेक कर सकें
+        });
+
+        await newDeposit.save();
+        res.json({ success: true, message: "आपका UTR सफलतापूर्वक सबमिट हो गया है! वेरिफिकेशन जारी है।" });
+
+    } catch (error) {
+        console.error("Deposit submission error:", error);
+        res.status(500).json({ success: false, message: "सर्वर एरर! कृपया दोबारा प्रयास करें।" });
+    }
+});
+
 // === ADMIN DASHBOARD STATS ROUTE ===
 app.get('/api/admin/stats', async (req, res) => {
     try {

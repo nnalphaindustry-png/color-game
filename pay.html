@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Secure Payment</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #f7f9fc; color: #333; padding: 20px; display: flex; justify-content: center; }
+        .pay-container { width: 100%; max-width: 450px; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); text-align: center; margin-top: 20px; }
+        
+        /* Amount Header */
+        .pay-header h2 { font-size: 16px; color: #666; font-weight: 500; }
+        .amount-display { font-size: 36px; font-weight: 800; color: #ef233c; margin: 10px 0 25px 0; }
+        
+        /* Pay Button */
+        .pay-now-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; background: linear-gradient(135deg, #ff4141, #ef233c); color: white; border: none; padding: 15px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 15px rgba(239, 35, 60, 0.3); transition: transform 0.2s; }
+        .pay-now-btn:active { transform: scale(0.98); }
+        
+        /* UTR Section */
+        .utr-section { margin-top: 35px; border-top: 1px dashed #e0e0e0; padding-top: 25px; text-align: left; }
+        .utr-section h3 { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 8px; }
+        .utr-section p { font-size: 12px; color: #666; margin-bottom: 15px; line-height: 1.4; }
+        
+        .utr-input-box { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; font-weight: 600; outline: none; transition: border 0.2s; letter-spacing: 1px; }
+        .utr-input-box:focus { border-color: #ef233c; }
+        
+        .submit-utr-btn { width: 100%; background-color: #111; color: white; border: none; padding: 14px; margin-top: 15px; font-size: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+        .submit-utr-btn:hover { background-color: #333; }
+        
+        /* Warning Note */
+        .secure-note { font-size: 11px; color: #999; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="pay-container">
+    <div class="pay-header">
+        <h2>Deposit Amount</h2>
+        <!-- यहाँ यूजर का चुना हुआ अमाउंट ऑटोमैटिक लोड होगा -->
+        <div class="amount-display" id="display-amount">₹0.00</div>
+    </div>
+
+    <!-- पेमेंट करने का असली लिंक बटन -->
+    <a href="#" id="dynamic-upi-link" class="pay-now-btn">
+        <span>⚡</span> Pay Now via UPI
+    </a>
+
+    <!-- UTR सबमिट करने का हिस्सा -->
+    <div class="utr-section">
+        <h3>Step 2: Input 12-Digit UTR Number</h3>
+        <p>पेमेंट सफल होने के बाद अपनी UPI ऐप (PhonePe/Paytm) से 12 अंकों का UTR / Ref No. कॉपी करके यहाँ पेस्ट करें।</p>
+        
+        <input type="number" id="utr-number-input" class="utr-input-box" placeholder="Enter 12-digit UTR number" oninput="validateUTRlength(this)">
+        
+        <button class="submit-utr-btn" onclick="submitUserUTRData()">Submit UTR</button>
+    </div>
+
+    <div class="secure-note">
+        🔒 Secure 256-bit SSL Encrypted Payment
+    </div>
+</div>
+
+<script>
+    // पेज लोड होते ही लोकल स्टोरेज से डेटा खींचना
+    document.addEventListener("DOMContentLoaded", function() {
+        const amount = localStorage.getItem('pending_deposit_amount') || "0";
+        const upiIntent = localStorage.getItem('pending_upi_intent');
+
+        // 1. स्क्रीन पर अमाउंट दिखाना
+        document.getElementById('display-amount').innerText = "₹" + Number(amount).toFixed(2);
+
+        // 2. पे बटन में असली UPI लिंक सेट करना
+        if (upiIntent) {
+            document.getElementById('dynamic-upi-link').href = upiIntent;
+        } else {
+            alert("Payment link expired or invalid! Please go back.");
+            window.location.href = "deposit.html"; // लिंक न होने पर वापस भेजना
+        }
+    });
+
+    // UTR इनपुट को सिर्फ 12 अंकों तक सीमित रखने का लॉजिक
+    function validateUTRlength(input) {
+        if (input.value.length > 12) {
+            input.value = input.value.slice(0, 12);
+        }
+    }
+
+    // UTR को असली सर्वर API पर सबमिट करने का फंक्शन
+function submitUserUTRData() {
+    const utrValue = document.getElementById('utr-number-input').value.trim();
+    const amountValue = localStorage.getItem('pending_deposit_amount');
+    const userPhone = localStorage.getItem('user_phone');
+
+    // सुरक्षा जांच
+    if (utrValue.length !== 12 || isNaN(utrValue)) {
+        alert("कृपया सही 12 अंकों का UTR नंबर दर्ज करें!");
+        return;
+    }
+
+    if (!userPhone || !amountValue) {
+        alert("यूजर सेशन या अमाउंट गायब है! कृपया दोबारा प्रयास करें।");
+        window.location.href = "deposit.html";
+        return;
+    }
+
+    // बैकएंड एपीआई को डेटा भेजना
+    fetch(`${SERVER_URL}/api/place-deposit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            phone: userPhone.trim(),
+            amount: amountValue,
+            utr: utrValue
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message); // सफलता का मैसेज दिखेगा
+            
+            // डेटा क्लियर करके प्रोफाइल पर भेजना
+            localStorage.removeItem('pending_deposit_amount');
+            localStorage.removeItem('pending_upi_intent');
+            window.location.href = "profile.html";
+        } else {
+            alert(data.message); // अगर कोई एरर या डुप्लीकेट UTR हुआ तो वो दिखेगा
+        }
+    })
+    .catch(err => {
+        console.error("Deposit Error:", err);
+        alert("सर्वर से कनेक्ट करने में विफल! कृपया इंटरनेट चेक करें।");
+    });
+}
+
+</script>
+
+</body>
+</html>

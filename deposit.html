@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Deposit</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f7f9fc; color: #333333; padding-top: 55px; padding-bottom: 80px; }
+        
+        /* Premium Header Styling */
+        .deposit-header { background-color: #ffffff; position: fixed; top: 0; left: 0; width: 100%; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #eaeaea; z-index: 100; }
+        .back-btn { background: none; color: #333333; border: none; font-size: 26px; cursor: pointer; text-decoration: none; font-weight: bold; line-height: 50px; }
+        .header-title { font-size: 18px; font-weight: bold; color: #111111; }
+        .history-btn { color: #666666; text-decoration: none; font-size: 14px; font-weight: 500; }
+
+        /* Wallet Red Gradient Balance Card */
+        .balance-card { background: linear-gradient(135deg, #ff4141, #ef233c); margin: 15px; padding: 20px; border-radius: 16px; box-shadow: 0 6px 15px rgba(239, 35, 60, 0.25); color: #ffffff; }
+        .balance-label { font-size: 13px; color: #ffe0e0; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+        .balance-value { font-size: 32px; font-weight: bold; margin-top: 8px; letter-spacing: 0.5px; }
+
+        /* Payment Mode Selector Matrix */
+        .payment-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px; }
+        .pay-option-card { background-color: #ffffff; border: 1px solid #eaeaea; border-radius: 12px; padding: 12px 5px; text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .pay-option-card.active { border: 2px solid #ef233c; background-color: #ffffff; }
+        .pay-option-card .icon { font-size: 22px; }
+        .pay-option-card .title { font-size: 11px; font-weight: 600; color: #444444; text-transform: uppercase; }
+        .coming-badge { position: absolute; top: -5px; right: -5px; background-color: #9e9e9e; color: #ffffff; font-size: 8px; padding: 2px 5px; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Main Workspace Area */
+        .deposit-main-container { background-color: #ffffff; margin: 15px; padding: 15px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .section-subheading { font-size: 14px; font-weight: bold; color: #111111; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+        .section-subheading span { color: #ef233c; }
+
+        /* Quick Amount Selection Grid */
+        .amount-selection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .amount-selection-grid button { background-color: #f8f9fa; border: 1px solid #eee; color: #444444; padding: 14px 0; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; }
+        .amount-selection-grid button.selected { background-color: #ef233c; color: #ffffff; border-color: #ef233c; box-shadow: 0 4px 10px rgba(239, 35, 60, 0.2); }
+
+        /* Manual Custom Input Field Wrapper */
+        .manual-input-box { position: relative; margin-bottom: 10px; display: flex; align-items: center; background-color: #fff4f4; border: 1px solid #ffe3e3; border-radius: 8px; padding: 12px; }
+        .manual-input-box .symbol { color: #ef233c; font-size: 16px; font-weight: bold; margin-right: 8px; }
+        .manual-input-box input { width: 100%; border: none; background: transparent; font-size: 15px; font-weight: 600; color: #333; outline: none; }
+        .amount-hint-range { font-size: 12px; color: #888888; margin-top: 5px; font-weight: 500; }
+
+        /* Bottom Sticky Action Footer */
+        .footer-payment-action { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #ffffff; padding: 12px 15px; border-top: 1px solid #eaeaea; display: flex; align-items: center; justify-content: space-between; z-index: 100; }
+        .footer-method-info { font-size: 12px; color: #666666; font-weight: 500; }
+        .footer-method-info div { font-size: 14px; font-weight: bold; color: #111111; margin-top: 2px; }
+        .submit-deposit-master-btn { background-color: #cccccc; color: #ffffff; border: none; padding: 12px 35px; font-size: 15px; font-weight: bold; border-radius: 25px; cursor: not-allowed; transition: all 0.2s ease; text-decoration: none; }
+        .submit-deposit-master-btn.active { background-color: #ff4141; color: #ffffff; cursor: pointer; box-shadow: 0 4px 12px rgba(255, 65, 65, 0.3); }
+
+        /* Premium Custom Dynamic Popup UI Elements */
+        .custom-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .custom-popup-overlay.active { opacity: 1; visibility: visible; }
+        .custom-popup-box { background-color: #ffffff; border-radius: 16px; width: 85%; max-width: 340px; padding: 25px 20px; text-align: center; transform: scale(0.8); transition: all 0.3s ease; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .custom-popup-overlay.active .custom-popup-box { transform: scale(1); }
+        .popup-status-icon { width: 50px; height: 50px; background-color: #fff0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 15px auto; }
+        .popup-status-icon.warning { background-color: #fff3cd; color: #856404; }
+        .popup-status-icon.info { background-color: #e2f0fd; color: #007bff; }
+        .popup-title { font-size: 18px; font-weight: bold; color: #111111; margin-bottom: 8px; }
+        .popup-message { font-size: 14px; color: #666666; line-height: 1.4; margin-bottom: 20px; }
+        .popup-close-btn { width: 100%; background-color: #ef233c; color: #ffffff; border: none; padding: 11px 0; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 10px rgba(239,35,60,0.2); }
+        .popup-close-btn:hover { background-color: #d91b32; }
+    </style>
+</head>
+<body>
+
+    <!-- Header View Area -->
+    <header class="deposit-header">
+        <a href="profile.html" class="back-btn">‹</a>
+        <div class="header-title">Deposit</div>
+        <a href="deposit-history.html" class="history-btn">Deposit history</a>
+    </header>
+
+    <!-- Main Live Wallet Scoreboard -->
+    <div class="balance-card">
+        <div class="balance-label">💳 Balance</div>
+        <div class="balance-value" id="user-live-wallet-balance">₹0.00</div>
+    </div>
+
+    <!-- Mode Selector Navigation Bar (NOW UPI Active, Others are Coming Soon) -->
+    <div class="payment-grid">
+        <!-- UPI-QR Blocked -->
+        <div class="pay-option-card" onclick="openPremiumCustomPopup('Coming Soon', 'UPI-QR channel is coming soon. Please use NOW UPI.', 'info')">
+            <span class="coming-badge">Soon</span>
+            <span class="icon">⚡</span>
+            <span class="title">UPI-QR</span>
+        </div>
+        
+        <!-- NOW UPI Trigger (Only Active Option) -->
+        <div class="pay-option-card active" id="btn-mode-upi">
+            <span class="icon">💎</span>
+            <span class="title">NOW UPI</span>
+        </div>
+        
+        <!-- Online Pay Block -->
+        <div class="pay-option-card" onclick="openPremiumCustomPopup('Maintenance', 'Online Pay mode is currently under network maintenance. Please try UPI channels.', 'warning')">
+            <span class="coming-badge">Soon</span>
+            <span class="icon">💳</span>
+            <span class="title">Online Pay</span>
+        </div>
+        
+        <!-- QR Pay Block -->
+        <div class="pay-option-card" onclick="openPremiumCustomPopup('Coming Soon', 'QR Pay via Direct Bank option will be active shortly.', 'info')">
+            <span class="coming-badge">Soon</span>
+            <span class="icon">🔲</span>
+            <span class="title">QR Pay</span>
+        </div>
+    </div>
+
+    <!-- Interactive Workspace Grid Panel -->
+    <div class="deposit-main-container">
+        <div class="section-subheading">
+            <span>🖲️</span> <span>Deposit amount</span>
+        </div>
+        
+        <!-- Fixed Amount Buttons Grid (Direct HTML approach to stop array crashing) -->
+        <div class="amount-selection-grid">
+            <button onclick="selectQuickAmountValue(100, this)">₹ 100</button>
+            <button onclick="selectQuickAmountValue(300, this)">₹ 300</button>
+            <button onclick="selectQuickAmountValue(500, this)">₹ 500</button>
+            <button onclick="selectQuickAmountValue(1000, this)">₹ 1K</button>
+            <button onclick="selectQuickAmountValue(2000, this)">₹ 2K</button>
+            <button onclick="selectQuickAmountValue(5000, this)">₹ 5K</button>
+            <button onclick="selectQuickAmountValue(10000, this)">₹ 10K</button>
+            <button onclick="selectQuickAmountValue(20000, this)">₹ 20K</button>
+            <button onclick="selectQuickAmountValue(50000, this)">₹ 50K</button>
+        </div>
+        
+        <!-- Amount Input Field UI structure -->
+        <div class="manual-input-box">
+            <span class="symbol">₹</span>
+            <input type="number" id="user-typed-amount-input" placeholder="Please enter the amount" oninput="handleManualTextAmountInput()">
+        </div>
+        
+        <div class="amount-hint-range">₹100.00 - ₹50,000.00</div>
+    </div>
+
+    <!-- Sticky Bottom Master Controller Footer Ribbon -->
+    <div class="footer-payment-action">
+        <div class="footer-method-info">
+            Recharge Method:
+            <div>NOW UPI</div>
+        </div>
+        <button id="footer-deposit-submit-btn" class="submit-deposit-master-btn" onclick="executeFinalDepositWorkflow()">Deposit</button>
+    </div>
+
+    <!-- Premium Animated Overlay Popup Box HTML (Hidden by default) -->
+    <div class="custom-popup-overlay" id="app-custom-popup-modal">
+        <div class="custom-popup-box">
+            <div class="popup-status-icon warning" id="popup-icon-container">⚠️</div>
+            <div class="popup-title" id="popup-title-text">Alert Notification</div>
+            <div class="popup-message" id="popup-message-text">Message details will load here.</div>
+            <button class="popup-close-btn" onclick="closePremiumCustomPopup()">Got it</button>
+        </div>
+    </div>
+        <script>
+        const SERVER_URL = "https://color-game-1kc2.onrender.com";
+        const ADMIN_VPA_ADDRESS = "9992788757@slc"; 
+        
+        let finalizedAmountToTransfer = 0;
+        const savedAccountPhone = localStorage.getItem('user_phone');
+
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!savedAccountPhone) {
+                window.location.href = "index.html";
+                return;
+            }
+            fetchLiveDatabaseBalance();
+        });
+
+        // 1. Fetch current database balance parameters (FIXED ENDPOINT)
+function fetchLiveDatabaseBalance() {
+    //   POST      GET   URL    
+    fetch(`${SERVER_URL}/api/balance/${savedAccountPhone.trim()}`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('user-live-wallet-balance').innerText = "" + (data.balance || 0).toFixed(2);
+        }
+    })
+    .catch(err => console.log("Database Sync Failure:", err));
+}
+
+
+        // 2. Capture selection updates inside standard grid layout
+        function selectQuickAmountValue(numericalValue, clickedElement) {
+            document.getElementById('user-typed-amount-input').value = ""; 
+            finalizedAmountToTransfer = numericalValue;
+
+            const allGridButtons = document.querySelectorAll('.amount-selection-grid button');
+            allGridButtons.forEach(btn => btn.classList.remove('selected'));
+            clickedElement.classList.add('selected');
+
+            evaluateSubmitButtonLockState(true);
+        }
+
+        // 3. Audit custom keyboard value entry modifications
+        function handleManualTextAmountInput() {
+            const rawValueString = document.getElementById('user-typed-amount-input').value.trim();
+            
+            const allGridButtons = document.querySelectorAll('.amount-selection-grid button');
+            allGridButtons.forEach(btn => btn.classList.remove('selected'));
+
+            const numericValue = Number(rawValueString);
+
+            if (rawValueString && numericValue >= 100) {
+                finalizedAmountToTransfer = numericValue;
+                evaluateSubmitButtonLockState(true);
+            } else {
+                finalizedAmountToTransfer = 0;
+                evaluateSubmitButtonLockState(false);
+            }
+        }
+
+        // 4. UI adjustment toggles for bottom Submission button layout
+        function evaluateSubmitButtonLockState(shouldActivate) {
+            const submitButtonNode = document.getElementById('footer-deposit-submit-btn');
+            if (shouldActivate) {
+                submitButtonNode.classList.add('active');
+            } else {
+                submitButtonNode.classList.remove('active');
+            }
+        }
+
+        // 5. Premium UI custom popup controls (Replaces native browser alert windows)
+        function openPremiumCustomPopup(title, message, iconType) {
+            document.getElementById('popup-title-text').innerText = title;
+            document.getElementById('popup-message-text').innerText = message;
+            
+            const iconNode = document.getElementById('popup-icon-container');
+            iconNode.className = "popup-status-icon " + iconType;
+            iconNode.innerText = (iconType === 'warning') ? "⚠️" : "ℹ️";
+            
+            document.getElementById('app-custom-popup-modal').classList.add('active');
+        }
+
+        function closePremiumCustomPopup() {
+            document.getElementById('app-custom-popup-modal').classList.remove('active');
+        }
+
+        // 6. Main execution loop triggered via primary button layer
+function executeFinalDepositWorkflow() {
+    if (finalizedAmountToTransfer < 100) {
+        openPremiumCustomPopup('Invalid Amount', 'The minimum permitted deposit threshold is 100. Please adjust your amount.', 'warning');
+        return;
+    }
+
+    const computedIntentDeepLink = `upi://pay?pa=${ADMIN_VPA_ADDRESS}&pn=GoaClub&am=${finalizedAmountToTransfer}&cu=INR&tn=Recharge_UID_${localStorage.getItem('user_uid')}`;
+    
+    //        pay.html    
+    localStorage.setItem('pending_deposit_amount', finalizedAmountToTransfer);
+    localStorage.setItem('pending_upi_intent', computedIntentDeepLink);
+    localStorage.setItem('active_payment_tab_mode', 'UPI');
+
+    // [    : lotus-temple  pay.html  ]
+    window.location.href = "pay.html";
+}
+
+    </script>
+</body>
+</html>

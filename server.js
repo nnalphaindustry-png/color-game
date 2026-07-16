@@ -1018,7 +1018,7 @@ app.post('/api/spin-wheel', async (req, res) => {
             { phone: user.phone },
             {
                 $inc: {
-                    ar_wallet: calculatedRewardAmt,
+                    arWallet: calculatedRewardAmt,
                     ...spinDecrementField
                 }
             }

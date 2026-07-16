@@ -243,64 +243,91 @@
     </div>
 
 </div>
-    <script>
-    // अपनी फ्रंटएंड फ़ाइल में submitGiftRedeem() फ़ंक्शन की जगह यह कोड डालें:
+    <!-- अपनी gifts.html फ़ाइल के पुराने स्क्रिप्ट को पूरी तरह हटाकर केवल इसे डालें -->
+<script>
+// Global Backend Server URL Config
+const SERVER_URL = "https://color-game-1kc2.onrender.com";
+
+// Main Function to Redeem Gift Code
 async function submitGiftRedeem() {
-    const giftCodeInput = document.getElementById('giftCodeBox').value.trim();
+    const giftCodeBox = document.getElementById('giftCodeBox');
+    if (!giftCodeBox) {
+        alert("⚠️ UI Error: Input box (giftCodeBox) not found!");
+        return;
+    }
+
+    const giftCodeInput = giftCodeBox.value.trim();
     
-    let phone = localStorage.getItem('user_phone') || localStorage.getItem('phone');
-    if (!phone) {
-        alert("सत्र समाप्त हो गया है! कृपया दोबारा लॉगिन करें।");
+    // Fetch User Phone Login Session Tracker
+    let userPhone = localStorage.getItem('user_phone') || localStorage.getItem('phone');
+    
+    // 1. Check if Session Expired
+    if (!userPhone || userPhone === "null" || userPhone === "undefined") {
+        alert("🔒 Session Expired!\nPlease login to your game account again.");
         window.location.href = "index.html";
         return;
     }
+    
+    // 2. Check if Gift Code Box is Empty
     if (giftCodeInput === "") {
-        alert("कृपया एक वैध गिफ्ट कोड डालें!");
-        return;
-    }
-    if (giftCodeInput.length < 8) {
-        alert("सुरक्षा चेतावनी: गिफ्ट कोड कम से कम 8 से 12 अक्षरों का होना चाहिए!");
+        alert("❌ Input Empty!\nPlease enter a valid gift code to claim reward.");
         return;
     }
     
     try {
-        // यहाँ हमने यूआरएल के आगे '/api/redeem-gift' जोड़ दिया है
-        const response = await fetch('https://color-game-1kc2.onrender.com', {
+        // Send POST Request to Live Backend Server
+        const response = await fetch(`${SERVER_URL}/api/redeem-gift`, {
             method: 'POST',
             mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                phone: String(phone).trim(),
-                code: String(giftCodeInput).toUpperCase()
+                phone: String(userPhone).trim(), 
+                code: String(giftCodeInput).toUpperCase().trim() 
             })
         });
         
-        if (!response.ok) {
-            alert("सर्वर ने एरर दिया है। कृपया कोड कॉन्फ़िगरेशन की जांच करें।");
+        // Security Layer: Verify Content Type is Clean JSON Data
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            alert("⚠️ Server Error!\nInvalid data format received from backend server.");
             return;
         }
         
         const result = await response.json();
-        alert(result.message); // सर्वर का मैसेज यहाँ दिखेगा
         
+        // 3. Show Beautiful English Response Message from Server
         if (result.success) {
-            document.getElementById('giftCodeBox').value = ""; // बॉक्स खाली हो जाएगा
+            // Success Popup
+            alert(`🎉 Success!\n${result.message || "Gift code redeemed successfully!"}`);
+            giftCodeBox.value = ""; // Clear input box on success
+            
+            if (typeof yebalanceupdate === "function") {
+                yebalanceupdate(); 
+            } else {
+                setTimeout(() => { location.reload(); }, 1000);
+            }
+        } else {
+            // Failure / Invalid Code Popup
+            alert(`❌ Failed!\n${result.message || "Invalid gift code. Please try again."}`);
         }
+        
     } catch (error) {
-        console.error("नेटवर्क क्रैश या एरर:", error);
-        alert("कनेक्शन अस्थिर है! कृपया 3 सेकंड के बाद दोबारा प्रयास करें।");
+        console.error("JavaScript Error Log:", error);
+        alert("📡 Connection Timeout!\nNetwork is unstable. Please try again after 3 seconds.");
     }
 }
 
-    // सुरक्षा लॉगिन चेक डेटाबेस
-    document.addEventListener("DOMContentLoaded", function () {
-        const sessionUser = localStorage.getItem('user_phone') || localStorage.getItem('phone');
-        if (!sessionUser) {
-            window.location.href = "index.html"; 
-        }
-    });
+// Security Authentication Check on Page Load
+document.addEventListener("DOMContentLoaded", function () {
+    const sessionUser = localStorage.getItem('user_phone') || localStorage.getItem('phone');
+    if (!sessionUser || sessionUser === "null" || sessionUser === "undefined") {
+        alert("🔒 Access Denied!\nPlease login first to access the gift panel.");
+        window.location.href = "index.html";
+    }
+});
 </script>
+
 </body>
 </html>

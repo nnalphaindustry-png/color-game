@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 Goa Club - Invited Users List</title>
+<style>
+:root { color-scheme: light !important; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+
+/* Main Mobile Container */
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #f4f6fb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    padding-bottom: 40px;
+}
+
+/* Top Red Header */
+.top-gradient-container {
+    background: #f03e3e;
+    padding: 12px 15px 30px 15px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    position: relative;
+}
+.navbar-top { 
+    display: flex; 
+    align-items: center; 
+    position: relative; 
+    margin-bottom: 15px; 
+}
+.back-arrow-btn { 
+    cursor: pointer; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    z-index: 12; 
+}
+.page-main-title { 
+    color: white; 
+    font-size: 18px; 
+    font-weight: 700; 
+    position: absolute; 
+    width: 100%;
+    text-align: center; 
+    left: 0; 
+    z-index: 10; 
+}
+
+/* Total Invited Counter Top Card */
+.wallet-balance-white-card {
+    background: white; 
+    border-radius: 20px; 
+    padding: 22px 15px; 
+    text-align: center; 
+    width: 100%;
+    margin-top: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+}
+.wallet-label-text { 
+    font-size: 13px; 
+    color: #8a99a8; 
+    font-weight: 700; 
+    margin-bottom: 4px; 
+}
+.currency-symbol-amount { 
+    font-size: 32px; 
+    font-weight: 900; 
+    color: #111; 
+    font-family: monospace, sans-serif;
+}
+
+/* List Wrapper Area */
+.invited-list-wrapper {
+    width: 92%;
+    margin: 20px auto 10px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* PREMIUM WHITE BANNER CARD (यूज़र डेटा का सुंदर सफ़ेद बैनर) */
+.user-premium-banner-card {
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1px solid rgba(226, 230, 240, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.banner-top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.banner-uid-label {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111;
+    font-family: monospace;
+}
+.banner-time-sub {
+    font-size: 11px;
+    color: #8a99a8;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Live Active/Inactive Status Pills */
+.banner-status-pill {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.pill-state-active {
+    background-color: #e8f8f0;
+    color: #2aa757;
+}
+.pill-state-inactive {
+    background-color: #fde8e8;
+    color: #f03e3e;
+}
+
+.banner-line-divider {
+    height: 1px;
+    background-color: #f4f6fb;
+    width: 100%;
+}
+
+/* Bottom Deposit Dual Grid Box */
+.banner-deposit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.deposit-data-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.cell-border-right {
+    border-right: 1px solid #f4f6fb;
+}
+.deposit-small-label {
+    font-size: 11px;
+    color: #8a99a8;
+    font-weight: 600;
+}
+.deposit-large-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+    font-family: monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- 1. TOP NAV BAR WITH TITLE -->
+    <div class="top-gradient-container">
+        <div class="navbar-top">
+            <!-- मुख्य डैशबोर्ड 'promotion.html' पर वापस जाने का लिंक -->
+            <a href="promotion.html" class="back-arrow-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <div class="page-main-title">Invited Users</div>
+        </div>
+
+        <!-- 2. TOTAL DIRECT INVITED USERS COUNTER CARD -->
+        <div class="wallet-balance-white-card">
+            <div class="wallet-label-text">👥 Total Invited Users</div>
+            <!-- कुल आमंत्रितों की संख्या यहाँ डायनामिक लोड होगी -->
+            <div class="currency-symbol-amount" id="display-total-direct-invites">0</div>
+        </div>
+    </div> <!-- Top Header End -->
+
+    <!-- 3. BEAUTIFUL WHITE BANNER CARDS LIST LISTING -->
+    <div class="invited-list-wrapper" id="direct-users-banners-dynamic-box">
+        <!-- डिफ़ॉल्ट रूप से लोडिंग स्टेटस दिखेगा जो जेएस से रिप्लेस हो जाएगा -->
+        <div style="text-align:center; padding:30px; color:#8a99a8; font-size:13px; background: white; border-radius: 18px;">Loading invited users list...</div>
+    </div>
+
+</div> <!-- app-container end -->
+<script>
+// बैकएंड रेंडर सर्वर का मुख्य डोमेन लिंक पाथ
+const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
+// लोकल स्टोरेज से लॉग इन एजेंट का एक्टिव मोबाइल नंबर निकालना
+const loggedInUserPhone = localStorage.getItem('user_phone') || "";
+
+// पेज स्क्रीन पर लोड होते ही डेटा फेचिंग इंजन चालू करना
+document.addEventListener("DOMContentLoaded", function () {
+    fetchDirectInvitedUsersLogs();
+});
+
+// लाइव सर्वर से इनवाइटेड यूज़र्स का डेटा फेच करने का मुख्य फंक्शन
+function fetchDirectInvitedUsersLogs() {
+    if (!loggedInUserPhone) {
+        console.warn("User phone not found in localStorage.");
+        return;
+    }
+
+    const listDynamicContainer = document.getElementById('direct-users-banners-dynamic-box');
+    listDynamicContainer.innerHTML = `<div style='text-align:center; padding:30px; color:#8a99a8; font-size:13px; background: white; border-radius: 18px;'>Loading your invited users...</div>`;
+
+    // आपके डायरेक्ट रेफरल (Level 1) की सूची मंगाने का एपीआई एंडपॉइंट पाथ
+    fetch(`${BACKEND_SERVER_URL}/api/direct-invited-details/${loggedInUserPhone.trim()}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.usersList) {
+                // 1. टॉप काउंटर पर कुल इनवाइट किए गए लोगों की संख्या दिखाना
+                let totalInvitesCount = data.usersList.length;
+                document.getElementById('display-total-direct-invites').innerText = totalInvitesCount;
+
+                if (totalInvitesCount > 0) {
+                    let htmlBannersOutput = "";
+
+                    data.usersList.forEach(user => {
+                        let todayDepositAmt = Number(user.todayDeposit || 0);
+                        let totalDepositAmt = Number(user.totalDeposit || 0);
+
+                        // स्टेटस पिल का निर्धारण (यूज़र गेम खेल रहा है या रिचार्ज किया है तो Active अन्यथा Inactive)
+                        let statusPillClass = "pill-state-inactive";
+                        let statusLabelText = "Inactive";
+
+                        if (user.isActiveUser === true || user.isActiveUser === "true" || todayDepositAmt > 0) {
+                            statusPillClass = "pill-state-active";
+                            statusLabelText = "Active";
+                        }
+
+                        // समय और तारीख को साफ़-सुथरे फ़ॉर्मेट में बदलना (उदा: 2026-07-16 11:11)
+                        let formattedJoinTime = "---";
+                        if (user.createdAt) {
+                            let rawDate = new Date(user.createdAt);
+                            let yyyy = rawDate.getFullYear();
+                            let mm = String(rawDate.getMonth() + 1).padStart(2, '0');
+                            let dd = String(rawDate.getDate()).padStart(2, '0');
+                            let hh = String(rawDate.getHours()).padStart(2, '0');
+                            let min = String(rawDate.getMinutes()).padStart(2, '0');
+                            formattedJoinTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                        }
+
+                        // आपके कहे अनुसार प्रत्येक यूज़र का सुंदर सफ़ेद बैनर कार्ड जोड़ना
+                        htmlBannersOutput += `
+                            <div class="user-premium-banner-card">
+                                <div class="banner-top-header">
+                                    <div>
+                                        <div class="banner-uid-label">👤 UID: ${user.uid || "---"}</div>
+                                        <div class="banner-time-sub">📅 Joined: ${formattedJoinTime}</div>
+                                    </div>
+                                    <span class="banner-status-pill ${statusPillClass}">${statusLabelText}</span>
+                                </div>
+                                
+                                <div class="banner-line-divider"></div>
+                                
+                                <div class="banner-deposit-grid">
+                                    <!-- आज का कुल डिपॉजिट -->
+                                    <div class="deposit-data-cell cell-border-right">
+                                        <span class="deposit-small-label">Today Deposit</span>
+                                        <span class="deposit-large-value" style="color: #2aa757;">₹${todayDepositAmt.toFixed(2)}</span>
+                                    </div>
+                                    <!-- लाइफटाइम कुल डिपॉजिट -->
+                                    <div class="deposit-data-cell">
+                                        <span class="deposit-small-label">Total Deposit</span>
+                                        <span class="deposit-large-value">₹${totalDepositAmt.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+
+                    listDynamicContainer.innerHTML = htmlBannersOutput;
+                } else {
+                    // अगर लिस्ट खाली है तो नो-डेटा का सुंदर बॉक्स दिखेगा
+                    listDynamicContainer.innerHTML = `
+                        <div style='text-align:center; padding:35px; color:#8a99a8; font-size:13px; background: white; border-radius: 18px;'>
+                            You haven't invited anyone yet.
+                        </div>`;
+                }
+            }
+        })
+        .catch(err => {
+            console.error("Error loading direct invited users list:", err);
+            listDynamicContainer.innerHTML = `
+                <div style='text-align:center; padding:30px; color:#f03e3e; background: white; border-radius: 18px;'>
+                    Server connection error. Could not load list.
+                </div>`;
+        });
+}
+</script>
+</body>
+</html>

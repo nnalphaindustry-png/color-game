@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 Goa Club - Commission Details</title>
+<style>
+:root { color-scheme: light !important; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+
+/* Main Mobile Container */
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #f4f6fb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    padding-bottom: 40px;
+}
+
+/* Top Red Header */
+.top-gradient-container {
+    background: #f03e3e;
+    padding: 12px 15px 30px 15px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    position: relative;
+}
+.navbar-top { 
+    display: flex; 
+    align-items: center; 
+    position: relative; 
+    margin-bottom: 15px; 
+}
+.back-arrow-btn { 
+    cursor: pointer; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    z-index: 12; 
+}
+.page-main-title { 
+    color: white; 
+    font-size: 18px; 
+    font-weight: 700; 
+    position: absolute; 
+    width: 100%;
+    text-align: center; 
+    left: 0; 
+    z-index: 10; 
+}
+
+/* Today Live Team Turnover Card */
+.wallet-balance-white-card {
+    background: white; 
+    border-radius: 20px; 
+    padding: 20px 15px; 
+    text-align: center; 
+    width: 100%;
+    margin-top: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+}
+.wallet-label-text { 
+    font-size: 13px; 
+    color: #8a99a8; 
+    font-weight: 700; 
+    margin-bottom: 6px; 
+}
+.currency-symbol-amount { 
+    font-size: 26px; 
+    font-weight: 900; 
+    color: #111; 
+    font-family: monospace, sans-serif;
+}
+.subtext-timer-info {
+    font-size: 11px;
+    color: #f03e3e;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* Level Tabs Layout */
+.level-modes-tab-row { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; 
+    width: 92%; 
+    margin: 20px auto 12px auto; 
+}
+.mode-tab-item-btn { 
+    background: white; 
+    border: none; 
+    border-radius: 14px; 
+    padding: 12px 4px; 
+    font-size: 13px; 
+    font-weight: 700; 
+    color: #8a99a8; 
+    cursor: pointer; 
+    text-align: center; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02); 
+    transition: all 0.2s; 
+}
+.mode-tab-item-btn.active { 
+    background: #f03e3e; 
+    color: white; 
+}
+
+/* White Banner Container for Users List */
+.team-list-banners-wrapper {
+    width: 92%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* PREMIUM WHITE BANNER CARD */
+.user-data-white-banner {
+    background: white;
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1px solid rgba(226, 230, 240, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.banner-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.banner-left-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.banner-uid-text {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111;
+    font-family: monospace;
+}
+.banner-date-text {
+    font-size: 11px;
+    color: #8a99a8;
+    font-weight: 600;
+}
+
+/* Live Active/Inactive Status Badges */
+.banner-status-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-active-on {
+    background-color: #e8f8f0;
+    color: #2aa757;
+}
+.badge-inactive-off {
+    background-color: #fde8e8;
+    color: #f03e3e;
+}
+
+/* Bottom data content inside banner card */
+.banner-bottom-data-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.data-row-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+.data-label-grey {
+    color: #8a99a8;
+    font-weight: 500;
+}
+.data-value-dark {
+    color: #111;
+    font-weight: 700;
+    font-family: monospace;
+}
+.data-value-green {
+    color: #2aa757;
+    font-weight: 800;
+    font-family: monospace;
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- 1. TOP NAV BAR WITH TITLE -->
+    <div class="top-gradient-container">
+        <div class="navbar-top">
+            <a href="promotion.html" class="back-arrow-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <div class="page-main-title">Commission Details</div>
+        </div>
+
+        <!-- 2. TODAY'S TOTAL TEAM TURNOVER SUMMARY CARD -->
+        <div class="wallet-balance-white-card">
+            <div class="wallet-label-text">📊 Today's Team Turnover</div>
+            <div class="currency-symbol-amount" id="display-team-turnover-live">₹0.00</div>
+            <div class="subtext-timer-info">⏱️ Automatically updates tonight at 12:00 AM</div>
+        </div>
+    </div>
+
+    <!-- 3. THREE LEVEL SELECTION TABS -->
+    <div class="level-modes-tab-row">
+        <button class="mode-tab-item-btn active" id="btn-level-1" onclick="changeActiveLevelTab(1)">Level 1</button>
+        <button class="mode-tab-item-btn" id="btn-level-2" onclick="changeActiveLevelTab(2)">Level 2</button>
+        <button class="mode-tab-item-btn" id="btn-level-3" onclick="changeActiveLevelTab(3)">Level 3</button>
+    </div>
+
+    <!-- 4. LIVE USERS BANNERS LIST CONTAINER -->
+    <div class="team-list-banners-wrapper" id="team-users-banners-container">
+        <div style="text-align:center; padding:30px; color:#8a99a8; font-size:13px; background: white; border-radius: 16px;">Loading team banners...</div>
+    </div>
+
+</div> <!-- app-container end -->
+<script>
+// बैकएंड सर्वर का मुख्य डोमेन पाथ URL
+const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
+// लोकल स्टोरेज से लॉग इन एजेंट का फोन नंबर
+const loggedInUserPhone = localStorage.getItem('user_phone') || "";
+
+// डिफ़ॉल्ट एक्टिव लेवल टैब (Level 1)
+let currentSelectedLevel = 1;
+
+// पेज ओपन होते ही लाइव डेटा लोड करने का ट्रिगर
+document.addEventListener("DOMContentLoaded", function () {
+    loadLiveTeamTurnoverSummary();
+    loadTeamLevelBanners(currentSelectedLevel);
+});
+
+// आज का लाइव टोटल टर्नओवर लाने का फंक्शन
+function loadLiveTeamTurnoverSummary() {
+    if (!loggedInUserPhone) return;
+
+    fetch(`${BACKEND_SERVER_URL}/api/team-turnover-summary/${loggedInUserPhone.trim()}`)
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.success) {
+                document.getElementById('display-team-turnover-live').innerText = "₹" + 
+                    Number(resData.todayTotalTurnover || 0).toFixed(2);
+            }
+        })
+        .catch(err => console.error("Error loading turnover summary:", err));
+}
+
+// लेवल टैब्स बदलने का लॉजिक फंक्शन
+function changeActiveLevelTab(levelNum) {
+    currentSelectedLevel = levelNum;
+    
+    document.querySelectorAll('.mode-tab-item-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-level-${levelNum}`).classList.add('active');
+    
+    loadTeamLevelBanners(levelNum);
+}
+
+// लेवल के हिसाब से सफ़ेद बैनर कार्ड्स लोड करने का मुख्य फंक्शन
+function loadTeamLevelBanners(levelNumber) {
+    if (!loggedInUserPhone) return;
+
+    const bannersContainer = document.getElementById('team-users-banners-container');
+    bannersContainer.innerHTML = `<div style='text-align:center; padding:30px; color:#8a99a8; font-size:13px; background: white; border-radius: 16px;'>Loading Level ${levelNumber} Banners...</div>`;
+
+    // सर्वर से उस लेवल के यूज़र्स का डेटा मंगाना
+    fetch(`${BACKEND_SERVER_URL}/api/team-details/${loggedInUserPhone.trim()}/${levelNumber}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.usersList && data.usersList.length > 0) {
+                let htmlBannersContent = "";
+                
+                data.usersList.forEach(user => {
+                    let todayBetAmount = Number(user.todayBetPlay || 0);
+                    let commissionEarned = 0;
+                    
+                    // आपके नियम के अनुसार अलग-अलग लेवल का कमीशन रेट लॉजिक
+                    if (levelNumber === 1) {
+                        // Level 1 पर 0.01% कमीशन रेट
+                        commissionEarned = todayBetAmount * 0.0001;
+                    } else if (levelNumber === 2) {
+                        // Level 2 पर 0.001% कमीशन रेट
+                        commissionEarned = todayBetAmount * 0.00001;
+                    } else if (levelNumber === 3) {
+                        // Level 3 पर 0.001% कमीशन rate
+                        commissionEarned = todayBetAmount * 0.00001;
+                    }
+                    
+                    // यूज़र आईडी एक्टिव है या बंद है चेक करना
+                    let statusBadgeClass = "badge-inactive-off";
+                    let statusLabel = "Inactive";
+                    
+                    if (user.isActiveUser === true || user.isActiveUser === "true" || todayBetAmount > 0) {
+                        statusBadgeClass = "badge-active-on";
+                        statusLabel = "Active";
+                    }
+
+                    // समय और तारीख को साफ़ सुथरे फ़ॉर्मेट में बदलना
+                    let formattedDateTime = "---";
+                    if (user.createdAt) {
+                        let rawDate = new Date(user.createdAt);
+                        let yyyy = rawDate.getFullYear();
+                        let mm = String(rawDate.getMonth() + 1).padStart(2, '0');
+                        let dd = String(rawDate.getDate()).padStart(2, '0');
+                        let hh = String(rawDate.getHours()).padStart(2, '0');
+                        let min = String(rawDate.getMinutes()).padStart(2, '0');
+                        formattedDateTime = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+                    } else {
+                        let rawDate = new Date();
+                        formattedDateTime = `${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,'0')}-${String(rawDate.getDate()).padStart(2,'0')} ${String(rawDate.getHours()).padStart(2,'0')}:${String(rawDate.getMinutes()).padStart(2,'0')}`;
+                    }
+
+                    // सफ़ेद बैनर कार्ड का HTML ढांचा इन्जेक्ट करना
+                    htmlBannersContent += `
+                        <div class="user-data-white-banner">
+                            <div class="banner-top-row">
+                                <div class="banner-left-info">
+                                    <span class="banner-uid-text">👤 UID: ${user.uid || "---"}</span>
+                                    <span class="banner-date-text">📅 ${formattedDateTime}</span>
+                                </div>
+                                <span class="banner-status-badge ${statusBadgeClass}">${statusLabel}</span>
+                            </div>
+                            
+                            <div class="banner-bottom-data-box">
+                                <div class="data-row-item">
+                                    <span class="data-label-grey">🎮 Total Bet Played</span>
+                                    <span class="data-value-dark">₹${todayBetAmount.toFixed(2)}</span>
+                                </div>
+                                <div class="data-row-item">
+                                    <span class="data-label-grey">🎁 Bonus Received</span>
+                                    <span class="data-value-green">₹${commissionEarned.toFixed(6)}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                bannersContainer.innerHTML = htmlBannersContent;
+            } else {
+                bannersContainer.innerHTML = `<div style='text-align:center; padding:30px; color:#8a99a8; font-size:13px; background: white; border-radius: 16px;'>No users found in Level ${levelNumber} banners list.</div>`;
+            }
+        })
+        .catch(err => {
+            console.error("Error loading team level details:", err);
+            bannersContainer.innerHTML = `<div style='text-align:center; padding:30px; color:#f03e3e; font-size:13px; background: white; border-radius: 16px;'>Server Error. Could not load banners data.</div>`;
+        });
+}
+</script>
+</body>
+</html>

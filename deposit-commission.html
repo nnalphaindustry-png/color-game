@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 Goa Club - Deposit Commission</title>
+<style>
+:root { color-scheme: light !important; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+
+/* Main Mobile Container */
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #f4f6fb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    padding-bottom: 40px;
+}
+
+/* Top Red Header */
+.top-gradient-container {
+    background: #f03e3e;
+    padding: 12px 15px 30px 15px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    position: relative;
+}
+.navbar-top { 
+    display: flex; 
+    align-items: center; 
+    position: relative; 
+    margin-bottom: 15px; 
+}
+.back-arrow-btn { 
+    cursor: pointer; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    z-index: 12; 
+}
+.page-main-title { 
+    color: white; 
+    font-size: 18px; 
+    font-weight: 700; 
+    position: absolute; 
+    width: 100%;
+    text-align: center; 
+    left: 0; 
+    z-index: 10; 
+}
+
+/* Total Valid Invites Top Card */
+.wallet-balance-white-card {
+    background: white; 
+    border-radius: 20px; 
+    padding: 20px 15px; 
+    text-align: center; 
+    width: 100%;
+    margin-top: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+}
+.wallet-label-text { 
+    font-size: 13px; 
+    color: #8a99a8; 
+    font-weight: 700; 
+    margin-bottom: 6px; 
+}
+.currency-symbol-amount { 
+    font-size: 28px; 
+    font-weight: 900; 
+    color: #2aa757; 
+    font-family: monospace, sans-serif;
+}
+.subtext-timer-info {
+    font-size: 11px;
+    color: #777;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+/* Milestone List Container */
+.milestone-container {
+    width: 92%;
+    margin: 20px auto 10px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* PREMIUM WHITE BANNER CARD LIST ITEM */
+.milestone-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    border: 1px solid rgba(226, 230, 240, 0.8);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.milestone-left-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 70%;
+}
+.milestone-title-bold {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111;
+}
+.milestone-reward-text {
+    font-size: 13px;
+    color: #2aa757;
+    font-weight: 700;
+}
+.milestone-progress-text {
+    font-size: 11px;
+    color: #f03e3e; /* प्रोग्रेस रिमाइंडर को साफ़ दिखने के लिए लाल शेड */
+    font-weight: 700;
+}
+
+/* CLAIM ACTIONS STATE BUTTONS */
+.claim-action-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 0;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s;
+    width: 85px;
+    text-align: center;
+}
+
+/* Lock Status Style (Grey Button) */
+.btn-state-lock {
+    background: #e2e6f0;
+    color: #8a99a8;
+    cursor: not-allowed;
+}
+
+/* Active Ready Status Style (BRIGHT RED BUTTON) */
+.btn-state-ready {
+    background: #f03e3e !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(240,62,62,0.25);
+}
+.btn-state-ready:active {
+    transform: scale(0.95);
+}
+
+/* Already Claimed Status Style (Light Green Checked Button) */
+.btn-state-claimed {
+    background: #e8f8f0;
+    color: #2aa757;
+    cursor: not-allowed;
+}
+
+/* Success Modal Style */
+.custom-premium-alert-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.4); 
+    display: none; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 3000; 
+}
+.custom-alert-card { 
+    background: white; 
+    border-radius: 24px; 
+    padding: 25px 20px; 
+    width: 85%;
+    max-width: 340px; 
+    text-align: center; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+}
+.alert-action-ok-btn { 
+    width: 100%; 
+    border: none; 
+    border-radius: 15px; 
+    padding: 12px 0; 
+    font-size: 15px; 
+    font-weight: 700; 
+    color: white; 
+    cursor: pointer; 
+    background: #2aa757;
+    margin-top: 15px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- 1. TOP NAV BAR WITH TITLE -->
+    <div class="top-gradient-container">
+        <div class="navbar-top">
+            <a href="promotion.html" class="back-arrow-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <div class="page-main-title">Deposit Commission</div>
+        </div>
+
+        <!-- 2. TOTAL VALID MEMBERS SUMMARY CARD -->
+        <div class="wallet-balance-white-card">
+            <div class="wallet-label-text">👥 Your Valid Invited Users</div>
+            <div class="currency-symbol-amount" id="display-total-valid-invites">0</div>
+            <div class="subtext-timer-info">⚠️ User must deposit minimum ₹300 to become valid</div>
+        </div>
+    </div>
+
+    <!-- 3. UPDATED MILESTONES BANNER LIST (पेज खुलते ही तुरंत साफ़-साफ़ लिस्ट दिखेगी) -->
+    <div class="milestone-container" id="milestones-cards-list-box">
+        
+        <!-- Task 1 -->
+        <div class="milestone-card" id="card_task_1">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 1 Valid User</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹50.00</span>
+                <span class="milestone-progress-text" id="progress_task_1">0 completed, 1 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_1" disabled>Lock</button>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="milestone-card" id="card_task_3">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 3 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹150.00</span>
+                <span class="milestone-progress-text" id="progress_task_3">0 completed, 3 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_3" disabled>Lock</button>
+        </div>
+
+        <!-- Task 5 -->
+        <div class="milestone-card" id="card_task_5">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 5 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹280.00</span>
+                <span class="milestone-progress-text" id="progress_task_5">0 completed, 5 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_5" disabled>Lock</button>
+        </div>
+
+        <!-- Task 10 -->
+        <div class="milestone-card" id="card_task_10">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 10 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹600.00</span>
+                <span class="milestone-progress-text" id="progress_task_10">0 completed, 10 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_10" disabled>Lock</button>
+        </div>
+
+        <!-- Task 20 -->
+        <div class="milestone-card" id="card_task_20">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 20 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹1,300.00</span>
+                <span class="milestone-progress-text" id="progress_task_20">0 completed, 20 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_20" disabled>Lock</button>
+        </div>
+
+        <!-- Task 50 -->
+        <div class="milestone-card" id="card_task_50">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 50 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹3,500.00</span>
+                <span class="milestone-progress-text" id="progress_task_50">0 completed, 50 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_50" disabled>Lock</button>
+        </div>
+
+        <!-- Task 100 -->
+        <div class="milestone-card" id="card_task_100">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 100 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹8,000.00</span>
+                <span class="milestone-progress-text" id="progress_task_100">0 completed, 100 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_100" disabled>Lock</button>
+        </div>
+
+        <!-- Task 200 -->
+        <div class="milestone-card" id="card_task_200">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 200 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹18,000.00</span>
+                <span class="milestone-progress-text" id="progress_task_200">0 completed, 200 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_200" disabled>Lock</button>
+        </div>
+
+        <!-- Task 450 -->
+        <div class="milestone-card" id="card_task_450">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 450 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹45,000.00</span>
+                <span class="milestone-progress-text" id="progress_task_450">0 completed, 450 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_450" disabled>Lock</button>
+        </div>
+
+        <!-- Task 700 -->
+        <div class="milestone-card" id="card_task_700">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 700 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹75,000.00</span>
+                <span class="milestone-progress-text" id="progress_task_700">0 completed, 700 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_700" disabled>Lock</button>
+        </div>
+
+        <!-- Task 1000 -->
+        <div class="milestone-card" id="card_task_1000">
+            <div class="milestone-left-info">
+                <span class="milestone-title-bold">Invite 1000 Valid Users</span>
+                <span class="milestone-reward-text">🎁 Bonus: ₹1,20,000.00</span>
+                <span class="milestone-progress-text" id="progress_task_1000">0 completed, 1000 remaining</span>
+            </div>
+            <button class="claim-action-btn btn-state-lock" id="btn_task_1000" disabled>Lock</button>
+        </div>
+
+    </div>
+
+</div> <!-- app-container end -->
+
+<!-- === BONUS SUCCESS CLAIM POPUP MODAL === -->
+<div class="custom-premium-alert-overlay" id="global-claim-success-window">
+    <div class="custom-alert-card">
+        <div style="width: 55px; height: 55px; background: #e8f8f0; color: #2aa757; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-size: 26px; font-weight: bold;">🎁</div>
+        <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;">Bonus Transferred!</div>
+        <div style="font-size: 13px; color: #666; font-weight: 500;" id="success-alert-message-text">Bonus automatically credited to your agent commission wallet!</div>
+        <button class="alert-action-ok-btn" onclick="closeClaimSuccessWindow()">Close</button>
+    </div>
+</div>
+<script>
+// बैकएंड रेंडर सर्वर डोमेन का मुख्य लिंक पाथ
+const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
+// लोकल स्टोरेज से लॉग इन एजेंट का फोन नंबर
+const loggedInUserPhone = localStorage.getItem('user_phone') || "";
+
+// माइलस्टोंस का नया रूल्स कॉन्फ़िगरेशन डेटा स्ट्रक्चर (1 से 1000 तक)
+const milestoneRulesList = [
+    { id: "task_1", requiredCount: 1, rewardAmount: 50 },
+    { id: "task_3", requiredCount: 3, rewardAmount: 150 },
+    { id: "task_5", requiredCount: 5, rewardAmount: 280 },
+    { id: "task_10", requiredCount: 10, rewardAmount: 600 },
+    { id: "task_20", requiredCount: 20, rewardAmount: 1300 },
+    { id: "task_50", requiredCount: 50, rewardAmount: 3500 },
+    { id: "task_100", requiredCount: 100, rewardAmount: 8000 },
+    { id: "task_200", requiredCount: 200, rewardAmount: 18000 },
+    { id: "task_450", requiredCount: 450, rewardAmount: 45000 },
+    { id: "task_700", requiredCount: 700, rewardAmount: 75000 },
+    { id: "task_1000", requiredCount: 1000, rewardAmount: 120000 }
+];
+
+// पेज लोड होते ही एपीआई रन करने का ट्रिगर
+document.addEventListener("DOMContentLoaded", function () {
+    fetchUserDepositMilestonesSummary();
+});
+
+// लाइव सर्वर से डेटा लाकर लिस्ट को डायनामिकली अपडेट करने का फंक्शन
+function fetchUserDepositMilestonesSummary() {
+    if (!loggedInUserPhone) return;
+
+    fetch(`${BACKEND_SERVER_URL}/api/deposit-milestones/${loggedInUserPhone.trim()}`)
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.success) {
+                // 1. टॉप काउंटर अपडेट करना
+                let totalValidCount = Number(resData.totalValidInvites || 0);
+                document.getElementById('display-total-valid-invites').innerText = totalValidCount;
+                
+                // सर्वर से पहले से क्लेम हो चुकी आईडी की लिस्ट प्राप्त करना (उदा: ["task_1"])
+                let alreadyClaimedIdsArray = resData.claimedMilestoneIds || [];
+                
+                // 2. लाइव स्टेटस और बचे हुए (Remaining) यूज़र्स का कैलकुलेशन अपडेट करना
+                updateLiveStatusOfMilestoneBanners(totalValidCount, alreadyClaimedIdsArray);
+            }
+        })
+        .catch(err => console.error("Error loading milestone logs from server:", err));
+}
+
+// प्रोग्रेस और बचे हुए यूज़र्स का लाइव हिसाब दिखाने वाला मुख्य फंक्शन
+function updateLiveStatusOfMilestoneBanners(currentValidCount, claimedIdsList) {
+    milestoneRulesList.forEach(task => {
+        const btnElement = document.getElementById(`btn_${task.id}`);
+        const progressTextElement = document.getElementById(`progress_${task.id}`);
+        
+        if (!btnElement || !progressTextElement) return;
+
+        let isTaskCompleted = currentValidCount >= task.requiredCount;
+        let isTaskAlreadyClaimed = claimedIdsList.includes(task.id);
+
+        // आपके कहे अनुसार प्रोग्रेस और 'Baki (Remaining)' यूज़र्स का लाइव हिसाब दिखाना
+        if (isTaskAlreadyClaimed) {
+            progressTextElement.innerText = `Status: Completed & Credited`;
+            progressTextElement.style.color = "#2aa757"; // कम्प्लीट होने पर हरा रंग
+        } else {
+            let remainingUsersNeeded = task.requiredCount - currentValidCount;
+            
+            if (remainingUsersNeeded <= 0) {
+                progressTextElement.innerText = `${currentValidCount} completed, 0 remaining! Ready to claim.`;
+                progressTextElement.style.color = "#2aa757";
+            } else {
+                // उदाहरण: 1 completed, 2 remaining साफ़-साफ़ दिखेगा
+                progressTextElement.innerText = `${currentValidCount} completed, ${remainingUsersNeeded} remaining`;
+                progressTextElement.style.color = "#f03e3e"; // बाकी होने पर लाल अलर्ट शेड
+            }
+        }
+
+        // बटन का रंग और क्लिक एक्शन बदलाव
+        if (isTaskAlreadyClaimed) {
+            btnElement.className = "claim-action-btn btn-state-claimed";
+            btnElement.innerText = "✓ Claimed";
+            btnElement.onclick = null;
+            btnElement.disabled = true;
+        } else if (isTaskCompleted) {
+            // टास्क पूरा होने पर बटन चमकदार लाल (btn-state-ready) हो जाएगा
+            btnElement.className = "claim-action-btn btn-state-ready";
+            btnElement.innerText = "Claim";
+            btnElement.removeAttribute("disabled");
+            btnElement.onclick = function() {
+                submitClaimRewardRequest(task.id, task.rewardAmount);
+            };
+        } else {
+            btnElement.className = "claim-action-btn btn-state-lock";
+            btnElement.innerText = "Lock";
+            btnElement.onclick = null;
+            btnElement.disabled = true;
+        }
+    });
+}
+
+// क्लेम दबाते ही कमीशन वॉलेट में भेजने की एपीआई रिक्वेस्ट का लॉजिक
+function submitClaimRewardRequest(taskIdCode, rewardCashAmount) {
+    if (!loggedInUserPhone) return;
+
+    fetch(`${BACKEND_SERVER_URL}/api/claim-milestone-reward`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            phone: loggedInUserPhone.trim(),
+            milestoneId: taskIdCode,
+            bonusAmount: Number(rewardCashAmount)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('success-alert-message-text').innerText = 
+                `₹${rewardCashAmount} bonus has been automatically added to your Agent Commission Dashboard wallet!`;
+            
+            document.getElementById('global-claim-success-window').style.display = "flex";
+            
+            // लिस्ट को दोबारा फ्रेश लोड करना
+            fetchUserDepositMilestonesSummary();
+        } else {
+            alert(data.message || "Could not process claim. Please try again.");
+        }
+    })
+    .catch(err => console.error("Error submitting claim to server:", err));
+}
+
+function closeClaimSuccessWindow() {
+    document.getElementById('global-claim-success-window').style.display = "none";
+}
+</script>
+</body>
+</html>

@@ -100,7 +100,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
     color: #2aa757 !important;
 }
 
-/* INVITATION SECTION STYLE */
+/* INVITATION LINK MAIN BOX (यहाँ अब ऊपर सिर्फ लिंक लोड होगा) */
 .invite-section-card {
     background: white;
     width: 92%;
@@ -122,13 +122,13 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
     background: #f4f6fb;
     border: 1px dashed #ced4da;
     border-radius: 12px;
-    padding: 12px;
+    padding: 14px 12px;
     text-align: center;
-    font-size: 22px;
-    font-weight: 900;
+    font-size: 13px; 
+    font-weight: 700;
     color: #111;
-    font-family: monospace;
-    letter-spacing: 2px;
+    word-break: break-all; 
+    line-height: 1.4;
 }
 .invite-big-copy-btn {
     background: #f03e3e;
@@ -147,7 +147,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
     transform: scale(0.97);
 }
 
-/* NAVIGATION OPTIONS LIST */
+/* NAVIGATION & NEW CODE BOX LIST */
 .agent-menu-options-list {
     width: 92%;
     margin: 10px auto;
@@ -155,6 +155,57 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
     flex-direction: column;
     gap: 10px;
 }
+
+/* NEW INVITE CODE BOX (नीचे लिस्ट में सबसे ऊपर दिखने वाला डिब्बा) */
+.menu-code-display-item {
+    background: white;
+    border-radius: 14px;
+    padding: 15px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+    border: 1px solid rgba(240, 62, 62, 0.2); /* हल्की लाल बॉर्डर आकर्षण के लिए */
+}
+.code-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.code-title-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+.code-item-right-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.live-pure-code-text {
+    font-size: 16px;
+    font-weight: 900;
+    color: #f03e3e; /* चमकीला लाल कोड */
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+.small-pure-code-copy-btn {
+    background: #f4f6fb;
+    border: 1px solid #ced4da;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+.small-pure-code-copy-btn:active {
+    transform: scale(0.9);
+    background: #e2e6f0;
+}
+
+/* Rest Navigation Buttons */
 .menu-nav-item-btn {
     background: white;
     border-radius: 14px;
@@ -169,7 +220,6 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 }
 .menu-nav-item-btn:active {
     transform: scale(0.98);
-    background: #fdfdfd;
 }
 .menu-left-content {
     display: flex;
@@ -241,7 +291,7 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
             <div class="page-main-title">Agent Commission</div>
         </div>
 
-        <!-- 2. LIVE COMMISSION BOARD (Yesterday & Total) -->
+        <!-- 2. LIVE COMMISSION BOARD -->
         <div class="wallet-balance-white-card">
             <div class="commission-board-grid">
                 
@@ -265,15 +315,29 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
         </div>
     </div> <!-- Top Header End -->
 
-    <!-- 3. INVITATION CODE & BIG COPY BUTTON BELOW -->
+    <!-- 3. INVITATION LINK DISPLAY BOX & BIG COPY LINK BUTTON (ऊपर अब सिर्फ लिंक दिखेगा) -->
     <div class="invite-section-card">
-        <div class="invite-title-text">My Invitation Code</div>
-        <div class="invite-code-box" id="display-user-invite-code">------</div>
-        <button class="invite-big-copy-btn" onclick="copyInvitationCodeText()">Copy Code</button>
+        <div class="invite-title-text">My Invitation Link</div>
+        <!-- पूरा ऑटोमैटिक जनरेटेड लिंक ऊपर लोड होगा -->
+        <div class="invite-code-box" id="display-user-invite-link">Generating link...</div>
+        <button class="invite-big-copy-btn" onclick="copyInvitationLinkText()">Copy Link</button>
     </div>
 
-    <!-- 4. NAVIGATION OPTIONS LIST -->
+    <!-- 4. NAVIGATION OPTIONS LIST (सबसे ऊपर नया कोड वाला ऑप्शन जुड़ गया है) -->
     <div class="agent-menu-options-list">
+        
+        <!-- NEW ADDED OPTION: यहाँ यूजर को उसका सिर्फ कोड दिखेगा और छोटा कॉपी बटन होगा -->
+        <div class="menu-code-display-item">
+            <div class="code-item-left">
+                <div class="menu-icon-wrapper">🔑</div>
+                <div class="code-title-label">My Invite Code</div>
+            </div>
+            <div class="code-item-right-wrapper">
+                <!-- सिर्फ 6 अक्षर का कोड यहाँ लोड होगा -->
+                <span class="live-pure-code-text" id="display-pure-only-code">------</span>
+                <button class="small-pure-code-copy-btn" onclick="copyOnlyPureCodeText()">📋 Copy</button>
+            </div>
+        </div>
         
         <!-- Option 1: Commission Board -->
         <a href="commission-details.html" class="menu-nav-item-btn">
@@ -293,11 +357,11 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
             <div class="menu-right-arrow">&gt;</div>
         </a>
 
-        <!-- Option 3: Agent/User Invite Link -->
+        <!-- Option 3: Agent Invited Users List -->
         <a href="invite-link.html" class="menu-nav-item-btn">
             <div class="menu-left-content">
                 <div class="menu-icon-wrapper">🔗</div>
-                <div class="menu-title-label">Agent Invite Link</div>
+                <div class="menu-title-label">Invited Users List</div>
             </div>
             <div class="menu-right-arrow">&gt;</div>
         </a>
@@ -306,117 +370,88 @@ body { background-color: #f4f6fb; display: flex; justify-content: center; min-he
 
 </div> <!-- app-container end -->
 
-
 <!-- === SUCCESS ALERT POPUP MODAL === -->
 <div class="custom-premium-alert-overlay" id="global-copy-alert-window">
     <div class="custom-alert-card">
         <div style="width: 50px; height: 50px; background: #e8f8f0; color: #2aa757; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; font-size: 24px; font-weight: bold;">✓</div>
         <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;">Success</div>
-        <div style="font-size: 13px; color: #666; font-weight: 500;">Invitation code copied successfully!</div>
+        <!-- यह मैसेज डायनामिकली बदलेगा (Link Copied या Code Copied) -->
+        <div style="font-size: 13px; color: #666; font-weight: 500;" id="alert-popup-success-message">Copied successfully!</div>
         <button class="alert-action-ok-btn" onclick="closeCopyAlertWindow()">Close</button>
     </div>
 </div>
-
-
-<!-- === SYSTEM JAVASCRIPT ENGINE (शुरुआत से आखिरी लाइन तक) === -->
 <script>
-// =========================================================================
-// 91 GOA CLUB - AGENT COMMISSION CORE JAVASCRIPT ENGINE (FULL CODE)
-// =========================================================================
-
-// 1. रेंडर सर्वर का मुख्य बैकेंड डोमेन लिंक
+// रेंडर सर्वर का मुख्य डोमेन लिंक
 const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
-
-// 2. लोकल स्टोरेज से लॉग इन यूजर का एक्टिव मोबाइल नंबर निकालना
+// लोकल स्टोरेज से लॉग इन यूजर का मोबाइल नंबर
 const loggedInUserPhone = localStorage.getItem('user_phone') || "";
 
-// 3. पेज पूरी तरह लोड (DOMContentLoaded) होते ही डेटा इंजन को स्टार्ट करना
 document.addEventListener("DOMContentLoaded", function () {
-    fetchLiveCommissionAndInviteData();
+    fetchLiveCommissionAndGenerateLink();
 });
 
-// 4. लाइव सर्ver से यूजर का कमीशन समरी और इनवाइट कोड फेच करने का मुख्य फंक्शन
-function fetchLiveCommissionAndInviteData() {
-    // अगर यूजर लॉग इन नहीं है तो यहीं से वापस लौट जाएं
-    if (!loggedInUserPhone) {
-        console.warn("User phone not found in localStorage. Please login again.");
-        return;
-    }
+// लाइव सर्वर से डेटा लाकर ऊपर लिंक और नीचे सिर्फ कोड सेट करने का मुख्य फंक्शन
+// === [UPDATED SCRIPT WITH REAL LIVE INDEX LINK] ===
+function fetchLiveCommissionAndGenerateLink() {
+    if (!loggedInUserPhone) return;
 
-    // बैकेंड एपीआई एंडपॉइंट पर रिक्वेस्ट भेजना
     fetch(`${BACKEND_SERVER_URL}/api/agent-summary/${loggedInUserPhone.trim()}`)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`Server returned status: ${res.status}`);
-            }
-            return res.json();
-        })
+        .then(res => res.json())
         .then(resData => {
-            // अगर सर्वर से सक्सेस रिस्पॉन्स आता है तो डेटा स्क्रीन पर रिप्लेस करें
             if (resData.success) {
+                // कल और कुल का मोटा कमीशन डेटा अपडेट
+                document.getElementById('yesterday-commission-text').innerText = "₹" + 
+                    Number(resData.yesterdayCommission || 0).toFixed(2);
                 
-                // कल का कमीशन (Yesterday Commission) मोटे टेक्स्ट बॉक्स में डालना
-                const yesterdayTextEl = document.getElementById('yesterday-commission-text');
-                if (yesterdayTextEl) {
-                    yesterdayTextEl.innerText = "₹" + Number(resData.yesterdayCommission || 0).toFixed(2);
-                }
+                document.getElementById('total-commission-text').innerText = "₹" + 
+                    Number(resData.totalCommission || 0).toFixed(2);
                 
-                // अब तक का कुल कमीशन (Total Commission) हरे मोटे टेक्स्ट बॉक्स में डालना
-                const totalTextEl = document.getElementById('total-commission-text');
-                if (totalTextEl) {
-                    totalTextEl.innerText = "₹" + Number(resData.totalCommission || 0).toFixed(2);
+                if(resData.inviteCode) {
+                    // 1. नीचे लिस्ट में सिर्फ कोड दिखाना
+                    document.getElementById('display-pure-only-code').innerText = resData.inviteCode;
+
+                    // 2. आपके गेम का असली लाइव रेंडर सर्वर लिंक
+                    const realLiveServerDomain = "https://color-game-1kc2.onrender.com";
+                    
+                    // 3. [यहाँ असली बदलाव]: लिंक को index.html के पाथ पर सेट करना
+                    const fullReferralUrlLink = `${realLiveServerDomain}/index.html?invite=${resData.inviteCode}`;
+                    
+                    // ऊपर वाले बड़े बॉक्स में असली लाइव लिंक सेव करना
+                    document.getElementById('display-user-invite-link').innerText = fullReferralUrlLink;
                 }
-                
-                // यूजर का लाइव यूनिक इनवाइट कोड बड़े डिब्बे में सेट करना
-                const inviteCodeEl = document.getElementById('display-user-invite-code');
-                if (inviteCodeEl && resData.inviteCode) {
-                    inviteCodeEl.innerText = resData.inviteCode;
-                }
-            } else {
-                console.error("Failed to load agent summary:", resData.message || "Unknown error");
             }
         })
-        .catch(err => {
-            console.error("Network Error while loading agent summary from live server:", err);
-        });
+        .catch(err => console.error("Error loading agent summary logs:", err));
 }
 
-// 5. इनवाइट कोड को मोबाइल क्लिपबोर्ड पर एक क्लिक में कॉपी करने का लॉजिक
-function copyInvitationCodeText() {
-    const codeTextEl = document.getElementById('display-user-invite-code');
-    if (!codeTextEl) return;
 
-    const codeText = codeTextEl.innerText;
-    // अगर डेटा अभी लोड हो रहा है या खाली है तो कॉपी न करें
-    if (codeText === "------" || !codeText) {
-        return;
-    }
+// फंक्शन 1: ऊपर वाले पूरे बड़े "Invitation Link" को कॉपी करने का लॉजिक
+function copyInvitationLinkText() {
+    const linkText = document.getElementById('display-user-invite-link').innerText;
+    if(linkText === "Generating link...") return;
     
-    // मॉडर्न वेब एपीआई के जरिए टेक्स्ट को डायरेक्ट क्लिपबोर्ड पर कॉपी करना
-    navigator.clipboard.writeText(codeText)
-        .then(() => {
-            // कॉपी होने के बाद सुंदर कसीनो स्टाइल सक्सेस अलर्ट पॉपअप विंडो ओपन करना
-            const alertWindowEl = document.getElementById('global-copy-alert-window');
-            if (alertWindowEl) {
-                alertWindowEl.style.display = "flex";
-            }
-        })
-        .catch(err => {
-            console.error("Could not copy invitation code text to clipboard: ", err);
-        });
+    navigator.clipboard.writeText(linkText);
+    
+    // पॉपअप मैसेज को 'Link' के लिए कस्टमाइज़ करना
+    document.getElementById('alert-popup-success-message').innerText = "Invitation link copied successfully!";
+    document.getElementById('global-copy-alert-window').style.display = "flex";
 }
 
-// 6. सक्सेस अलर्ट पॉपअप मॉडल विंडो को बंद (Close) करने का फंक्शन
+// फंक्शन 2: नीचे बने नए ऑप्शन से केवल "Invite Code" को कॉपी करने का लॉजिक
+function copyOnlyPureCodeText() {
+    const pureCodeText = document.getElementById('display-pure-only-code').innerText;
+    if(pureCodeText === "------") return;
+    
+    navigator.clipboard.writeText(pureCodeText);
+    
+    // पॉपअप मैसेज को 'Code' के लिए कस्टमाइज़ करना
+    document.getElementById('alert-popup-success-message').innerText = "Invitation code copied successfully!";
+    document.getElementById('global-copy-alert-window').style.display = "flex";
+}
+
 function closeCopyAlertWindow() {
-    const alertWindowEl = document.getElementById('global-copy-alert-window');
-    if (alertWindowEl) {
-        alertWindowEl.style.display = "none";
-    }
+    document.getElementById('global-copy-alert-window').style.display = "none";
 }
-
-// =========================================================================
-// END OF CORE JAVASCRIPT CODE - REUSE & PASTE INTO YOUR SCRIPT TAG DIRECTLY
-// =========================================================================
 </script>
 </body>
 </html>

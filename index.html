@@ -200,6 +200,27 @@
             showPopup("Login failed! Server error.");
         });
     }
+    // === लिंक से इनवाइट कोड निकालकर रजिस्ट्रेशन फॉर्म में ऑटोमैटिक भरने का लॉजिक ===
+document.addEventListener("DOMContentLoaded", function() {
+    // यूआरएल लिंक से ?invite=GOAXXXXXX चेक करना
+    const urlQueryParams = new URLSearchParams(window.location.search);
+    const referralInviteCode = urlQueryParams.get('invite');
+    
+    if (referralInviteCode) {
+        // 1. नए आने वाले यूजर के सामने सीधा 'Register' वाला टैब ओपन करना
+        switchTab('register');
+        
+        // 2. आपके कोड में बनी आईडी id="reg-invite" वाले इनपुट बॉक्स को ढूँढना
+        const inviteInputBox = document.getElementById('reg-invite');
+        
+        if (inviteInputBox) {
+            inviteInputBox.value = referralInviteCode.trim(); // कोड अपने आप डिब्बे में भर गया
+            inviteInputBox.setAttribute("readonly", true); // यूजर इसे मिटा न सके इसलिए लॉक कर दिया
+            inviteInputBox.style.backgroundColor = "#e8f8f0"; // सुंदर हल्का हरा रंग ताकि प्रीमियम लगे
+        }
+    }
+});
+
 </script>
 </body>
 </html>

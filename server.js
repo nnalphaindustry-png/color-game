@@ -610,6 +610,7 @@ app.post('/api/place-deposit', async (req, res) => {
 // === LIVE ACTIVITY AREA NEW ENGINES ===
 // ==========================================
 
+// अपनी server.js फ़ाइल में /api/redeem-gift वाले हिस्से को इस कोड से बदलें:
 app.post('/api/redeem-gift', async (req, res) => {
   try {
     const { phone, code } = req.body;
@@ -618,9 +619,12 @@ app.post('/api/redeem-gift', async (req, res) => {
       return res.status(400).json({ success: false, message: "कृपया एक वैध गिफ्ट कोड डालें।" });
     }
 
-    const gift = await GiftCode.findOne({ code: String(code).trim().toUpperCase() });
+    // FIX: मोंगूज़ मॉडल को डेटाबेस कनेक्शन से सीधे सुरक्षित रूप से उठाना
+    const GiftCodeModel = mongoose.models.GiftCode || mongoose.model('GiftCode');
+    const gift = await GiftCodeModel.findOne({ code: String(code).trim().toUpperCase() });
+    
     if (!gift) {
-      return res.status(404).json({ success: false, message: "यह गिफ्ट कोड मौजूद नहीं है!" });
+      return res.status(404).json({ success: false, message: "यह गिफ्ट कोड मौजूद नहीं है या एक्सपायर हो गया है!" });
     }
 
     if (gift.usersRedeemed && gift.usersRedeemed.includes(String(phone).trim())) {
@@ -631,31 +635,36 @@ app.post('/api/redeem-gift', async (req, res) => {
       return res.status(400).json({ success: false, message: "इस गिफ्ट कोड की सीमा समाप्त हो चुकी है!" });
     }
 
-    // यहाँ $set का उपयोग करके arWallet को सुरक्षित रूप से अपडेट किया गया है
-    const user = await User.findOne({ phone: String(phone).trim() });
+    const UserModel = mongoose.models.User || mongoose.model('User');
+    const user = await UserModel.findOne({ phone: String(phone).trim() });
     if (!user) {
       return res.status(404).json({ success: false, message: "यूजर अकाउंट नहीं मिला!" });
     }
 
+    // यूजर के वॉलेट को अपडेट करना
     user.arWallet = (Number(user.arWallet) || 0) + Number(gift.amount);
     user.totalCommission = (Number(user.totalCommission) || 0) + Number(gift.amount);
     await user.save();
 
+    // गिफ्ट कोड के यूसेज को अपडेट करना
     if (!gift.usersRedeemed) gift.usersRedeemed = [];
     gift.usersRedeemed.push(String(phone).trim());
     gift.usedCount = Number(gift.usedCount) + 1;
     await gift.save();
 
+    // अब सर्वर शुद्ध JSON डेटा ही वापस भेजेगा, HTML पेज नहीं!
     return res.status(200).json({
       success: true,
       message: `सफलता! ₹${gift.amount} आपके AR Wallet में जोड़ दिए गए हैं।`
     });
 
   } catch (error) {
-    console.error("GIFT ERROR:", error);
-    return res.status(500).json({ success: false, message: "सर्वर डेटाबेस एरर! कृपया दोबारा प्रयास करें।" });
+    console.error("GIFT REDEEM CRITICAL ERROR:", error);
+    // अगर कोई और दिक्कत भी आई, तो भी यह HTML नहीं बल्कि शुद्ध JSON एरर ही भेजेगा
+    return res.status(500).json({ success: false, message: "सर्वर डेटाबेस क्रैश एरर! कृपया कोड फिर से चेक करें।" });
   }
 });
+
 
 
 // 2. एडमिन के लिए नया गिफ्ट कोड जनरेट करने की API (इसे आप पोस्टमैन या एडमिन से चला सकते हैं)

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Lounge</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+        
+        .app-container { width: 100%; max-width: 450px; background-color: #fbfcfe; min-height: 100vh; position: relative; padding-bottom: 40px; overflow-x: hidden; }
+        
+        /* प्रीमियम कॉम्पैक्ट हेडर */
+        .vip-header { background: linear-gradient(135deg, #f43f5e, #fb7185); padding-top: 20px; padding-bottom: 45px; padding-left: 20px; padding-right: 20px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; color: white; text-align: center; position: relative; }
+
+        .back-btn { position: absolute; left: 20px; top: 22px; cursor: pointer; text-decoration: none; color: white; font-size: 20px; font-weight: bold; }
+
+        .header-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; letter-spacing: 0.5px; }
+        
+        .user-section { display: flex; align-items: center; gap: 12px; margin-top: 5px; text-align: left; }
+
+        .avatar { width: 55px; height: 55px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,0.7); overflow: hidden; background-color: #e2e8f0; }
+
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .user-details h3 { font-size: 16px; font-weight: 700; }
+
+        .vip-tag { display: inline-block; background: rgba(255,255,255,0.2); font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 20px; margin-top: 3px; }
+
+        /* स्टैट्स बॉक्स */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 90%; margin: -25px auto 20px auto; position: relative; z-index: 10; }
+
+        .stat-card { background: white; padding: 12px; border-radius: 14px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.03); }
+
+        .stat-val { font-size: 16px; font-weight: 800; color: #f43f5e; }
+
+        .stat-lbl { font-size: 11px; color: #94a3b8; margin-top: 2px; font-weight: 600; }
+
+        /* लोकल स्लाइडर कंटेनर (टच रिस्पॉन्सिव फिक्स) */
+        .local-slider-container { width: 100%; overflow: hidden; position: relative; padding: 15px 0; touch-action: pan-y; }
+
+        /* कार्ड्स का मुख्य ट्रैक - एक सीधी लाइन में लॉक */
+        .local-slider-track { display: flex; flex-direction: row; flex-wrap: nowrap; width: 100%; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); will-change: transform; }
+
+        /* छोटा और असली वीआईपी लुक वाला प्रीमियम कार्ड */
+        .vip-main-card { flex: 0 0 86%; margin-left: 7%; margin-right: 7%; border-radius: 20px; padding: 20px; color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); position: relative; height: 150px; user-select: none; }
+
+        /* लेवल 1 से 10 के सुपर कलरफुल ग्रेडिएंट लुक्स */
+        .vbg-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .vbg-2 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .vbg-3 { background: linear-gradient(135deg, #10b981, #047857); }
+        .vbg-4 { background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .vbg-5 { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .vbg-6 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .vbg-7 { background: linear-gradient(135deg, #f43f5e, #9f1239); }
+        .vbg-8 { background: linear-gradient(135deg, #374151, #111827); border: 1.5px solid #9ca3af; }
+        .vbg-9 { background: linear-gradient(135deg, #4c1d95, #2e1065); border: 1.5px solid #a78bfa; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3); }
+        .vbg-10 { background: linear-gradient(135deg, #eab308 0%, #ca8a04 40%, #854d0e 100%); border: 2.5px solid #fef08a; box-shadow: 0 12px 35px rgba(234, 179, 8, 0.4); }
+
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
+        .card-title { font-size: 22px; font-weight: 900; letter-spacing: 0.8px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+
+        .lock-badge { background: rgba(255,255,255,0.25); font-size: 10px; padding: 4px 9px; border-radius: 12px; font-weight: 700; backdrop-filter: blur(4px); }
+
+        .card-desc { font-size: 12px; opacity: 0.95; margin-bottom: 12px; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        .progress-container { background: rgba(255,255,255,0.25); height: 8px; border-radius: 6px; overflow: hidden; margin-bottom: 5px; }
+
+        .progress-bar { background: #ffffff; width: 0%; height: 100%; border-radius: 6px; transition: width 0.3s; box-shadow: 0 0 8px #fff; }
+
+        .progress-text { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; opacity: 0.95; }
+
+        /* डॉट्स इंडिकेटर */
+        .slider-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; margin-bottom: 15px; }
+
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #cbd5e1; transition: all 0.2s; }
+
+        .dot.active { background: #f43f5e; width: 14px; border-radius: 4px; }
+
+        /* सफेद पेपर शीट स्टाइल */
+        .section-title { width: 90%; margin: 5px auto 12px auto; font-size: 15px; font-weight: 700; color: #334155; }
+
+        .white-paper-container { width: 90%; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); padding: 6px 16px; border: 1px solid #f1f5f9; }
+        
+        .benefit-row { padding: 14px 0; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; }
+
+        .benefit-row.hidden { display: none !important; }
+
+        .benefit-row:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
+
+        .benefit-left { display: flex; align-items: center; gap: 12px; }
+
+        .benefit-icon { font-size: 18px; }
+
+        .benefit-info h4 { font-size: 13.5px; color: #334155; font-weight: 600; }
+
+        .benefit-info p { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+        
+        .claim-btn { background: #f43f5e; color: white; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2); transition: all 0.2s; }
+
+        .claim-btn.claimed { background: #f1f5f9; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
+
+        .value-text { font-size: 14px; font-weight: 700; color: #334155; padding-right: 5px; }
+
+        /* हिस्ट्री और रूल्स टैब बार */
+        .vip-tab-bar { display: grid; grid-template-columns: 1fr 1fr; width: 90%; margin: 25px auto 0 auto; background: #e2e8f0; padding: 4px; border-radius: 12px; }
+
+        .tab-btn { background: transparent; border: none; padding: 10px; font-size: 14px; font-weight: 700; color: #64748b; cursor: pointer; border-radius: 10px; transition: all 0.2s; text-align: center; }
+
+        .tab-btn.active { background: white; color: #f43f5e; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* डायनामिक कंटेंट बॉक्स */
+        .tab-content-box { width: 90%; margin: 15px auto 0 auto; background: white; border-radius: 16px; padding: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.01); }
+
+        .content-panel { display: none; }
+
+        .content-panel.active { display: block; }
+
+        .rule-card { margin-bottom: 16px; }
+        
+        .rule-card h5 { font-size: 12px; color: white; background: #f43f5e; display: inline-block; padding: 3px 8px; border-radius: 6px; margin-bottom: 6px; font-weight: 700; }
+
+        .rule-card p { font-size: 11px; color: #64748b; line-height: 1.5; text-align: justify; }
+
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+
+        .history-item:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
+
+        .hist-left h6 { font-size: 13px; color: #334155; font-weight: 600; }
+
+        .hist-left span { font-size: 11px; color: #94a3b8; }
+
+        .hist-right { font-size: 14px; font-weight: 700; color: #10b981; }
+
+        .no-data { text-align: center; font-size: 12px; color: #94a3b8; padding: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- प्रीमियम कॉम्पैक्ट हेडर -->
+    <div class="vip-header">
+        <a href="profile .html" class="back-btn">&#10094;</a>
+        <div class="header-title">VIP Lounge</div>
+        
+        <div class="user-section">
+            <div class="avatar">
+                <img src="profile.jpg" alt="Avatar" onerror="this.src='https://dicebear.com'">
+            </div>
+            <div class="user-details">
+                <h3 id="display-name">91GoaClub_User</h3>
+                <span class="vip-tag" id="top-vip-badge">VIP0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- दो छोटे स्टैट्स बॉक्स (EXP और टाइमर) -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-val" id="box-exp">0 EXP</div>
+            <div class="stat-lbl">My Experience</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val" id="box-days">30 Days</div>
+            <div class="stat-lbl">Maintenance Time</div>
+        </div>
+    </div>
+
+    <!-- इन-बिल्ट लोकल टच-स्लाइडर कंटेनर शुरू -->
+    <div class="local-slider-container" id="sliderContainer">
+        <div class="local-slider-track" id="sliderTrack">
+            
+            <!-- VIP 1 -->
+            <div class="vip-main-card vbg-1" data-vip="1">
+                <div class="card-top"><div class="card-title">VIP1</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 3,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 3000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 2 -->
+            <div class="vip-main-card vbg-2" data-vip="2">
+                <div class="card-top"><div class="card-title">VIP2</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 10,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 10000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 3 -->
+            <div class="vip-main-card vbg-3" data-vip="3">
+                <div class="card-top"><div class="card-title">VIP3</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 50,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 50000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 4 -->
+            <div class="vip-main-card vbg-4" data-vip="4">
+                <div class="card-top"><div class="card-title">VIP4</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 200,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 200000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 5 -->
+            <div class="vip-main-card vbg-5" data-vip="5">
+                <div class="card-top"><div class="card-title">VIP5</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 500,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 500000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 6 -->
+            <div class="vip-main-card vbg-6" data-vip="6">
+                <div class="card-top"><div class="card-title">VIP6</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 1,000,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 1000000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 7 -->
+            <div class="vip-main-card vbg-7" data-vip="7">
+                <div class="card-top"><div class="card-title">VIP7</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 3,000,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 3000000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 8 -->
+            <div class="vip-main-card vbg-8" data-vip="8">
+                <div class="card-top"><div class="card-title">VIP8</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 7,000,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 7000000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 9 -->
+            <div class="vip-main-card vbg-9" data-vip="9">
+                <div class="card-top"><div class="card-title">VIP9</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 15,000,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 15000000</span><span>Level Up Progress</span></div>
+            </div>
+
+            <!-- VIP 10 -->
+            <div class="vip-main-card vbg-10" data-vip="10">
+                <div class="card-top"><div class="card-title">👑 VIP10</div><div class="lock-badge">🔒 Locked</div></div>
+                <div class="card-desc">Upgrading requires 30,000,000 EXP</div>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+                <div class="progress-text"><span>0 / 30000000</span><span>Crown Level Progress</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- डॉट्स इंडिकेटर -->
+    <div class="slider-dots" id="sliderDots">
+        <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+        <!-- डायनामिक शीर्षक -->
+    <div class="section-title"><span id="dynamic-vip-label">VIP1</span> Benefits level</div>
+    
+    <!-- सफेद पेपर शीट कंटेनर शुरू -->
+    <div class="white-paper-container">
+        
+        <!-- 1. लेवल अप रिवॉर्ड -->
+        <div class="benefit-row">
+            <div class="benefit-left">
+                <div class="benefit-icon">🎁</div>
+                <div class="benefit-info">
+                    <h4>Level up rewards</h4>
+                    <p>Each account can only receive 1 time</p>
+                </div>
+            </div>
+            <button class="claim-btn" id="vip-claim-button" onclick="handleClaimClick()">Claim ₹30</button>
+        </div>
+
+        <!-- 2. मंथली रिवॉर्ड (जावास्क्रिप्ट से VIP 3+ होने पर अपने आप अनलॉक होगा) -->
+        <div class="benefit-row hidden" id="monthly-reward-row">
+            <div class="benefit-left">
+                <div class="benefit-icon">⭐</div>
+                <div class="benefit-info">
+                    <h4>Monthly reward</h4>
+                    <p>Each account can only receive 1 time per month</p>
+                </div>
+            </div>
+            <div class="value-text" id="monthly-reward-txt">₹0</div>
+        </div>
+
+        <!-- 3. सेफ़ बोनस (साफ़ टेक्स्ट लुक) -->
+        <div class="benefit-row">
+            <div class="benefit-left">
+                <div class="benefit-icon">🔒</div>
+                <div class="benefit-info">
+                    <h4>Safe</h4>
+                    <p>Increase the extra income of the safe</p>
+                </div>
+            </div>
+            <div class="value-text" id="safe-rate-txt">0.1%</div>
+        </div>
+
+        <!-- 4. रिबेट रेट (साफ़ टेक्स्ट लुक) -->
+        <div class="benefit-row">
+            <div class="benefit-left">
+                <div class="benefit-icon">🪙</div>
+                <div class="benefit-info">
+                    <h4>Rebate rate</h4>
+                    <p>Increase income of rebate</p>
+                </div>
+            </div>
+            <div class="value-text" id="rebate-rate-txt">0.05%</div>
+        </div>
+
+    </div> <!-- सफेद पेपर शीट कंटेनर बंद -->
+
+    <!-- हिस्ट्री और रूल्स को सेलेक्ट करने के लिए टैब बटन्स -->
+    <div class="vip-tab-bar">
+        <button class="tab-btn active" id="btn-history" onclick="switchVipTab('history')">History</button>
+        <button class="tab-btn" id="btn-rules" onclick="switchVipTab('rules')">Rules</button>
+    </div>
+
+    <!-- टैब कंटेंट बॉक्स (हिस्ट्री और रूल्स का डेटा दिखाने के लिए) -->
+    <div class="tab-content-box">
+        
+        <!-- ए. हिस्ट्री पैनल (लाइव क्लेम रिकॉर्ड यहाँ लोड होगा) -->
+        <div class="content-panel active" id="panel-history">
+            <div id="history-list-render">
+                <div class="no-data">No claim history available</div>
+            </div>
+        </div>
+
+        <!-- बी. रूल्स पैनल (आपके स्क्रीनशॉट का हूबहू टेक्स्ट नियम चार्ट) -->
+        <div class="content-panel" id="panel-rules">
+            <div class="rule-card">
+                <h5>Upgrade standard</h5>
+                <p>The VIP member's experience points (valid bet amount) that meet the requirements of the corresponding rank will be promoted to the corresponding VIP level. VIP level calculation is refreshed dynamically. The corresponding experience level is calculated according to valid odds 1:1!</p>
+            </div>
+            <div class="rule-card">
+                <h5>Upgrade order</h5>
+                <p>The VIP level that meets the corresponding requirements can be promoted by one level every day, but the VIP level cannot be promoted by leapfrogging.</p>
+            </div>
+            <div class="rule-card">
+                <h5>Level maintenance</h5>
+                <p>VIP members need to complete the maintenance requirements of the corresponding level within 30 days after the "VIP level change"; if the promotion is completed during this period, the maintenance requirements will be calculated according to the current level.</p>
+            </div>
+            <div class="rule-card">
+                <h5>Downgrade standard</h5>
+                <p>If a VIP member fails to complete the corresponding level maintenance requirements within 30 days, the system will automatically deduct the experience points corresponding to the level. If the experience points are insufficient, the level will be downgraded accordingly.</p>
+            </div>
+            <div class="rule-card">
+                <h5>Upgrade Bonus</h5>
+                <p>The upgrade benefits can be claimed on the VIP page after the member reaches the VIP membership level, and each VIP member can only get the upgrade reward of each level once.</p>
+            </div>
+            <div class="rule-card">
+                <h5>Monthly reward</h5>
+                <p>VIP members can earn the highest level of VIP rewards once a month. Can only be received once a month. Prizes cannot be accumulated and any unclaimed rewards will be refreshed on the next settlement day.</p>
+            </div>
+            <div class="rule-card">
+                <h5>Real-time rebate</h5>
+                <p>The higher the VIP level, the higher the return rate, all the games are calculated in real time and can be self-rewarded!</p>
+            </div>
+            <div class="rule-card">
+                <h5>Safe</h5>
+                <p>VIP members who have reached the corresponding level will get additional benefits on safe deposit based on the member's VIP level.</p>
+            </div>
+        </div>
+
+    </div> <!-- टैब कंटेंट बॉक्स बंद -->
+
+</div> <!-- मुख्य ऐप कंटेनर बंद -->
+<script>
+    // आपके लाइव रेंडर बैकएंड सर्वर का मुख्य URL
+    const SERVER_URL = "https://color-game-1kc2.onrender.com";
+    
+    const userPhone = localStorage.getItem('user_phone') || "";
+    const userUID = localStorage.getItem('user_uid') || "";
+
+    // वीआईपी 1 से 10 तक का फ्रंटएंड डिस्प्ले चार्ट डेटा
+    const FRONTEND_VIP_BENEFITS = {
+        1: { reward: 30, monthly: 0, safe: "0.1%", rebate: "0.05%", exp: 3000 },
+        2: { reward: 100, monthly: 0, safe: "0.15%", rebate: "0.08%", exp: 10000 },
+        3: { reward: 500, monthly: 200, safe: "0.2%", rebate: "0.12%", exp: 50000 },
+        4: { reward: 2000, monthly: 800, safe: "0.25%", rebate: "0.15%", exp: 200000 },
+        5: { reward: 5000, monthly: 2000, safe: "0.3%", rebate: "0.2%", exp: 500000 },
+        6: { reward: 10000, monthly: 4500, safe: "0.35%", rebate: "0.22%", exp: 1000000 },
+        7: { reward: 30000, monthly: 12000, safe: "0.4%", rebate: "0.25%", exp: 3000000 },
+        8: { reward: 70000, monthly: 30000, safe: "0.45%", rebate: "0.28%", exp: 7000000 },
+        9: { reward: 150000, monthly: 65000, safe: "0.5%", rebate: "0.3%", exp: 15000000 },
+        10: { reward: 300000, monthly: 150000, safe: "0.6%", rebate: "0.35%", exp: 30000000 }
+    };
+
+    let currentViewingIndex = 0; 
+    let databaseClaimedList = [];
+    let userDatabaseVipLevel = 0;
+
+    // सुरक्षा चेक
+    if (!userPhone) {
+        window.location.href = "index.html";
+    }
+
+    if(userUID) {
+        document.getElementById('display-name').innerText = "91GoaClub_" + userUID;
+    }
+
+    // ==========================================
+    // 100% वर्किंग टकराव-मुक्त स्वाइप इंजन (फिक्स)
+    // ==========================================
+    const track = document.getElementById('sliderTrack');
+    const container = document.getElementById('sliderContainer');
+    const dots = document.querySelectorAll('.dot');
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // बिना किसी टकराव के टच को सुरक्षित तरीके से कैप्चर करना
+    if (container && track) {
+        container.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        container.addEventListener('touchmove', (e) => {
+            let moveX = e.changedTouches[0].screenX;
+            if (Math.abs(moveX - touchStartX) > 15) {
+                // एरर फ्री मूव इंजन
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
+
+        container.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipeLogic();
+        }, { passive: true });
+    }
+
+    function handleSwipeLogic() {
+        const swipeDistance = touchEndX - touchStartX;
+        
+        // न्यूनतम 30px स्वाइप होने पर तुरंत रिस्पॉन्स करेगा
+        if (swipeDistance < -30 && currentViewingIndex < 9) {
+            currentViewingIndex++;
+        }
+        else if (swipeDistance > 30 && currentViewingIndex > 0) {
+            currentViewingIndex--;
+        }
+        
+        slideToIndex(currentViewingIndex);
+    }
+
+    // एलिमेंट ट्रांसफॉर्म फिक्स - जिससे TypeError कभी नहीं आएगी
+    function slideToIndex(index) {
+        if (!track) return;
+        currentViewingIndex = index;
+        
+        // बिल्कुल सटीक 100% ट्रैक खिसकाने का फार्मूला
+        const offsetPercent = index * -100;
+        track.style.transform = `translateX(${offsetPercent}%)`;
+        
+        if (dots && dots.length > 0) {
+            dots.forEach((dot, idx) => {
+                if (idx === index) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        const selectedVipLevel = index + 1;
+        updateBenefitsUI(selectedVipLevel);
+    }
+
+    window.addEventListener('resize', () => {
+        slideToIndex(currentViewingIndex);
+    });
+        // ==========================================
+    // हिस्ट्री और रूल्स बटन्स स्विच करने का लॉजिक
+    // ==========================================
+    function switchVipTab(tabName) {
+        const btnHistory = document.getElementById('btn-history');
+        const btnRules = document.getElementById('btn-rules');
+        const panelHistory = document.getElementById('panel-history');
+        const panelRules = document.getElementById('panel-rules');
+
+        if (btnHistory && btnRules && panelHistory && panelRules) {
+            btnHistory.classList.remove('active');
+            btnRules.classList.remove('active');
+            panelHistory.classList.remove('active');
+            panelRules.classList.remove('active');
+
+            if (tabName === 'history') {
+                btnHistory.classList.add('active');
+                panelHistory.classList.add('active');
+            } else if (tabName === 'rules') {
+                btnRules.classList.add('active');
+                panelRules.classList.add('active');
+            }
+        }
+    }
+
+    // ==========================================
+    // डेटाबेस से लाइव वीआईपी स्टेटस और हिस्ट्री लोड करना
+    // ==========================================
+    function loadLiveVipData() {
+        fetch(`${SERVER_URL}/api/vip-status/${userPhone}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.success) {
+                userDatabaseVipLevel = data.vipLevel || 0;
+                const liveEXP = data.currentEXP || 0;
+                databaseClaimedList = data.claimedVipLevels || [];
+
+                const topVipBadge = document.getElementById('top-vip-badge');
+                const boxExp = document.getElementById('box-exp');
+                
+                if (topVipBadge) topVipBadge.innerText = "VIP" + userDatabaseVipLevel;
+                if (boxExp) boxExp.innerText = Math.floor(liveEXP) + " EXP";
+
+                const allCards = document.querySelectorAll('.vip-main-card');
+                allCards.forEach((card, idx) => {
+                    const cardVip = idx + 1;
+                    const lockBadge = card.querySelector('.lock-badge');
+                    const progressBar = card.querySelector('.progress-bar');
+                    const progressSpan = card.querySelector('.progress-text span');
+                    
+                    const requiredExpForCard = FRONTEND_VIP_BENEFITS[cardVip].exp;
+
+                    if (userDatabaseVipLevel >= cardVip) {
+                        if (lockBadge) {
+                            lockBadge.innerText = "✔ Unlocked";
+                            lockBadge.style.background = "rgba(255,255,255,0.3)";
+                        }
+                        if (progressBar) progressBar.style.width = "100%";
+                        if (progressSpan) progressSpan.innerText = Math.floor(liveEXP) + " / " + requiredExpForCard;
+                    } else {
+                        if (lockBadge) {
+                            lockBadge.innerText = (cardVip === 10) ? "🔒 Crown Locked" : "🔒 Locked";
+                            lockBadge.style.background = "rgba(0,0,0,0.15)";
+                        }
+                        
+                        if (cardVip === userDatabaseVipLevel + 1) {
+                            let percentage = (liveEXP / requiredExpForCard) * 100;
+                            if (percentage > 100) percentage = 100;
+                            if (progressBar) progressBar.style.width = percentage + "%";
+                            if (progressSpan) progressSpan.innerText = Math.floor(liveEXP) + " / " + requiredExpForCard;
+                        } else {
+                            if (progressBar) progressBar.style.width = "0%";
+                            if (progressSpan) progressSpan.innerText = "0 / " + requiredExpForCard;
+                        }
+                    }
+                });
+
+                // क्लेम की हुई हिस्ट्री लिस्ट रेंडर करना
+                const historyRenderBox = document.getElementById('history-list-render');
+                if (historyRenderBox) {
+                    if (databaseClaimedList.length > 0) {
+                        let htmlContent = "";
+                        databaseClaimedList.forEach(lvl => {
+                            const amt = FRONTEND_VIP_BENEFITS[lvl].reward;
+                            const todayDate = new Date().toLocaleDateString('en-IN');
+                            htmlContent += `
+                                <div class="history-item">
+                                    <div class="hist-left">
+                                        <h6>VIP ${lvl} Upgrade Bonus</h6>
+                                        <span>Claim Date: ${todayDate}</span>
+                                    </div>
+                                    <div class="hist-right">+₹${amt}</div>
+                                </div>
+                            `;
+                        });
+                        historyRenderBox.innerHTML = htmlContent;
+                    } else {
+                        historyRenderBox.innerHTML = '<div class="no-data">No claim history available</div>';
+                    }
+                }
+
+                let startVipIndex = userDatabaseVipLevel;
+                if (startVipIndex >= 10) startVipIndex = 9;
+                slideToIndex(startVipIndex);
+            }
+        })
+        .catch(err => console.error("VIP Fetch Error:", err));
+    }
+
+    // स्वाइप होने पर नीचे का टेक्स्ट बदलने और मंथली रिवॉर्ड कंट्रोल करने का लॉजिक
+    function updateBenefitsUI(vipLevel) {
+        const benefitData = FRONTEND_VIP_BENEFITS[vipLevel];
+        if (!benefitData) return;
+
+        const label = document.getElementById('dynamic-vip-label');
+        const safeTxt = document.getElementById('safe-rate-txt');
+        const rebateTxt = document.getElementById('rebate-rate-txt');
+
+        if (label) label.innerText = "VIP" + vipLevel;
+        if (safeTxt) safeTxt.innerText = benefitData.safe;
+        if (rebateTxt) rebateTxt.innerText = benefitData.rebate;
+
+        const monthlyRow = document.getElementById('monthly-reward-row');
+        const monthlyTxt = document.getElementById('monthly-reward-txt');
+        
+        if (monthlyRow && monthlyTxt) {
+            if (vipLevel >= 3) {
+                monthlyRow.classList.remove('hidden');
+                monthlyTxt.innerText = "₹" + benefitData.monthly.toLocaleString('en-IN');
+            } else {
+                monthlyRow.classList.add('hidden');
+            }
+        }
+
+        const btn = document.getElementById('vip-claim-button');
+        if (btn) {
+            if (databaseClaimedList.includes(vipLevel)) {
+                btn.innerText = "Claimed";
+                btn.className = "claim-btn claimed";
+                btn.disabled = true;
+            } else {
+                btn.innerText = "Claim ₹" + benefitData.reward.toLocaleString('en-IN');
+                btn.className = "claim-btn";
+                btn.disabled = false;
+            }
+        }
+    }
+
+    function handleClaimClick() {
+        const activeVipLevelNum = currentViewingIndex + 1;
+
+        if (userDatabaseVipLevel < activeVipLevelNum) {
+            alert(`आप अभी VIP ${activeVipLevelNum} स्तर पर नहीं पहुँचे हैं! गेम खेलें और अपना EXP बढ़ाएँ।`);
+            return;
+        }
+
+        fetch(`${SERVER_URL}/api/claim-vip-reward`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: userPhone, levelToClaim: activeVipLevelNum })
+        })
+        .then(response => response.json())
+        .then(res => {
+            alert(res.message);
+            if (res.success) {
+                loadLiveVipData(); 
+            }
+        })
+        .catch(err => alert("सर्वर त्रुटि! कृपया कुछ समय पश्चात प्रयास करें।"));
+    }
+
+    window.onload = loadLiveVipData;
+</script>
+
+</body>
+</html>

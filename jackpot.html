@@ -258,18 +258,35 @@
 
 </div>
 <script>
-    // go bet par click karte hi home page par bhejna
+    // गो बेट पर क्लिक करते ही होम पेज पर भेजना
     function redirectToHome() {
         window.location.href = 'home.html';
     }
 
-    // security check: bina login user ko block rakhna
-    document.addEventListener("DOMContentLoaded", function () {
-        const sessionUser = localStorage.getItem('user_phone');
-        if (!sessionUser) {
-            window.location.href = "index.html"; 
+    // सुरक्षा जांच: ऑनरेंडर लाइव डेटाबेस स्टेटस से वेरीफाई करना
+    async function verifyLiveSession() {
+        const phone = localStorage.getItem('user_phone');
+        if (!phone) {
+            window.location.href = "index.html";
+            return;
         }
+
+        try {
+            // लाइव सर्वर पर बैलेंस चेक करके यूज़र की प्रामाणिकता जांचना
+            const response = await fetch('https://onrender.com' + phone);
+            const result = await response.json();
+            if (!result.success) {
+                window.location.href = "index.html"; // अवैध यूज़र होने पर बाहर
+            }
+        } catch (error) {
+            console.error("Jackpot live security bypass or error:", error);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        verifyLiveSession();
     });
 </script>
+
 </body>
 </html>

@@ -414,15 +414,53 @@
 
 </div>
 <script>
-    // 'Attendance' बटन क्लिक करने पर एरर पॉपअप दिखाने का फंक्शन
-    function triggerAttendanceError() {
-        const popupOverlay = document.getElementById('attendanceErrorOverlay');
-        if (popupOverlay) {
-            popupOverlay.classList.add('show');
+    // सर्वर से यूजर का लाइव बेट स्टेटस चेक करना
+    async function checkLiveAttendanceStatus() {
+        const phone = localStorage.getItem('user_phone');
+        if (!phone) return;
+
+        try {
+            // आपकी लाइव ऑनरेंडर लिंक से अटेंडेंस स्टेटस फ़ेच करना
+            const response = await fetch('https://color-game-1kc2.onrender.com' + phone);
+            const result = await response.json();
+            
+            if (result.success) {
+                // सर्वर से लाइव दिनों का डेटा और आज की कुल बेट स्क्रीन पर दिखाना
+                document.getElementById('consecutiveDaysCount').innerText = result.consecutiveDays || 0;
+                
+                // नोट: आप चाहें तो स्क्रीन पर यूज़र का आज का लाइव टर्नओवर भी ट्रैक करवा सकते हैं
+                console.log("User today's live bet play turnover:", result.todayBetPlay);
+            }
+        } catch (error) {
+            console.error("Error loading attendance status from live server:", error);
         }
     }
 
-    // एरर पॉपअप को क्लोज/बंद करने का फंक्शन
+    // 'Attendance' बटन क्लिक करने पर लाइव कंडीशन चेक करके एक्शन लेना
+    async function triggerAttendanceError() {
+        const phone = localStorage.getItem('user_phone');
+        
+        try {
+            const response = await fetch('https://onrender.com' + phone);
+            const result = await response.json();
+            
+            // अगर सर्वर पर यूजर की कंडीशन पूरी नहीं है (₹500 से कम बेट है), तो सुंदर पॉपअप दिखाओ
+            if (result.success && !result.isConditionMet) {
+                const popupOverlay = document.getElementById('attendanceErrorOverlay');
+                if (popupOverlay) {
+                    popupOverlay.classList.add('show');
+                }
+            } else if (result.success && result.isConditionMet) {
+                alert("Success! Your attendance condition is met. Processing reward with database...");
+                // भविष्य में जब हाज़िरी का दावा लाइव करेंगे, तो यहाँ क्लेम की एपीआई डलेगी
+            }
+        } catch (error) {
+            // बैकअप के तौर पर एरर पॉपअप दिखाना
+            document.getElementById('attendanceErrorOverlay').classList.add('show');
+        }
+    }
+
+    // एरर पॉपअप को बंद करने का फंक्शन
     function closeAttendanceError() {
         const popupOverlay = document.getElementById('attendanceErrorOverlay');
         if (popupOverlay) {
@@ -430,13 +468,16 @@
         }
     }
 
-    // सुरक्षा लॉगिन जांच: बिना लॉगिन यूज़र को सीधे बाहर धकेलना
+    // सुरक्षा लॉगिन जांच और ऑटो स्टेटस चेक
     document.addEventListener("DOMContentLoaded", function () {
         const sessionUser = localStorage.getItem('user_phone');
         if (!sessionUser) {
             window.location.href = "index.html"; 
+        } else {
+            checkLiveAttendanceStatus();
         }
     });
 </script>
+
 </body>
 </html>

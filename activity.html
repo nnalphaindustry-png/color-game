@@ -356,39 +356,37 @@
     </div>
 </div>
 <script>
-    // बैनर क्लिक हैंडलर
-    function openBannerPage(bannerId) {
-        alert("Banner " + bannerId + " clicked! This promotional page will be created in the next step.");
-    }
-
-    // यूजर का लाइव बेटिंग टर्नओवर सिंक करने का लॉजिक
-    async function loadUserRebateCommission() {
+    // ऑनरेंडर लाइव लिंक के साथ यूज़र का डेटाबेस स्टेटस फेच करना
+    async function loadUserActivityStats() {
         const phone = localStorage.getItem('user_phone');
         if (!phone) return;
 
         try {
-            const response = await fetch('/api/balance/' + phone);
+            // लाइव ऑनरेंडर यूआरएल का उपयोग करके सिंक करना
+            const response = await fetch('https://onrender.com' + phone);
             const result = await response.json();
             
             if (result.success) {
-                // डिफ़ॉल्ट रूप से ₹0.00 सेट किया गया है
-                document.getElementById('todayRebateDisplay').innerText = "₹0.00";
-                document.getElementById('totalRebateDisplay').innerText = "₹0.00";
+                // रात 12 बजे ट्रांसफर होने वाला कल का कमीशन और कुल तिजोरी (arWallet) का बैलेंस
+                document.getElementById('todayRebateDisplay').innerText = "₹" + Number(result.yesterdayCommission || 0).toFixed(2);
+                document.getElementById('totalRebateDisplay').innerText = "₹" + Number(result.arWallet || 0).toFixed(2);
             }
         } catch (error) {
-            console.error("Error loading rebate stats:", error);
+            console.error("Error loading activity statistics from live server:", error);
         }
     }
 
-    // सिक्योरिटी चेक और ऑटो लोड
+    // सुरक्षा लॉगिन जांच और लोड इवेंट्स
     document.addEventListener("DOMContentLoaded", function () {
         const sessionUser = localStorage.getItem('user_phone');
         if (!sessionUser) {
-            window.location.href = "index.html"; // बिना लॉगिन सीधे बाहर रिडायरेक्ट करेगा
+            window.location.href = "index.html"; 
         } else {
-            loadUserRebateCommission();
+            loadUserActivityStats();
         }
     });
 </script>
+
+
 </body>
 </html>

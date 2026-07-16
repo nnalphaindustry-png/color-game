@@ -610,48 +610,58 @@ app.post('/api/place-deposit', async (req, res) => {
 // === LIVE ACTIVITY AREA NEW ENGINES ===
 // ==========================================
 
-// 1. गिफ्ट कोड को रिडीम (Claim) करने की लाइव API
+// === FIX: 100% SOLID JSON GIFT REDEEM API ===
 app.post('/api/redeem-gift', async (req, res) => {
     try {
         const { phone, code } = req.body;
-        if (!phone || !code) {
-            return res.json({ success: false, message: "Please enter a valid gift code!" });
+        
+        // 1. अगर फोन नंबर या कोड खाली है
+        if (!phone || !code || phone === "undefined" || code === "") {
+            return res.status(200).json({ success: false, message: "Please enter a valid gift code and ensure you are logged in properly." });
         }
 
-        // डेटाबेस में कोड ढूंढें
-        const gift = await GiftCode.findOne({ code: code.trim().toUpperCase() });
+        // 2. डेटाबेस में कोड ढूंढें
+        const gift = await GiftCode.findOne({ code: String(code).trim().toUpperCase() });
         if (!gift) {
-            return res.json({ success: false, message: "Invalid Gift Code! This code does not exist." });
+            return res.status(200).json({ success: false, message: "Invalid Gift Code! This code does not exist in our database." });
         }
 
-        // चेक करें कि यूजर पहले ही क्लेम तो नहीं कर चुका
-        if (gift.usersRedeemed.includes(phone.trim())) {
-            return res.json({ success: false, message: "You have already redeemed this gift code!" });
+        // 3. चेक करें कि यूजर पहले ही क्लेम तो नहीं कर चुका
+        if (gift.usersRedeemed && gift.usersRedeemed.includes(String(phone).trim())) {
+            return res.status(200).json({ success: false, message: "You have already redeemed this gift code once!" });
         }
 
-        // चेक करें कि कोड की लिमिट खत्म तो नहीं हो गई
-        if (gift.usedCount >= gift.maxUses) {
-            return res.json({ success: false, message: "Gift code limit reached! Better luck next time." });
+        // 4. चेक करें कि कोड की लिमिट खत्म तो नहीं हो गई
+        if (Number(gift.usedCount) >= Number(gift.maxUses)) {
+            return res.status(200).json({ success: false, message: "Gift code usage limit reached! Better luck next time." });
         }
 
-        // सब सही है! यूजर के arWallet (तिजोरी) में पैसा प्लस करें और रिकॉर्ड दर्ज करें
-        await User.findOneAndUpdate(
-            { phone: phone.trim() },
-            { $inc: { arWallet: Number(gift.amount), totalCommission: Number(gift.amount) } }
+        // 5. सब सही है! यूजर के arWallet (तिजोरी) में पैसा प्लस करें
+        const updatedUser = await User.findOneAndUpdate(
+            { phone: String(phone).trim() },
+            { $inc: { arWallet: Number(gift.amount), totalCommission: Number(gift.amount) } },
+            { new: true }
         );
 
-        gift.usersRedeemed.push(phone.trim());
-        gift.usedCount += 1;
+        if (!updatedUser) {
+            return res.status(200).json({ success: false, message: "User account verification failed! Please re-login." });
+        }
+
+        // 6. कोड की हिस्ट्री और काउंट को अपडेट करें
+        if (!gift.usersRedeemed) gift.usersRedeemed = [];
+        gift.usersRedeemed.push(String(phone).trim());
+        gift.usedCount = Number(gift.usedCount) + 1;
         await gift.save();
 
-        return res.json({ 
+        return res.status(200).json({ 
             success: true, 
             message: `Success! ₹${gift.amount} added directly to your AR Wallet.` 
         });
 
     } catch (error) {
-        console.error("Gift Redeem Error:", error);
-        res.status(500).json({ success: false, message: "Server error during gift redemption." });
+        console.error("CRITICAL GIFT REDEEM ERROR:", error);
+        // यहाँ कैच (Catch) के अंदर भी रेस्पॉन्स को हमेशा सुरक्षित JSON ही रखना है ताकि SyntaxError न आए
+        return res.status(200).json({ success: false, message: "Database sync failure! Please try again after 5 seconds." });
     }
 });
 

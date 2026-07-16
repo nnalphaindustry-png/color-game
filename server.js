@@ -565,18 +565,39 @@ app.post('/api/place-bet', async (req, res) => {
             }
         }
         
-        // === [UPDATED WITH TEAM TURNOVER TRACKING] ===
+        // 1. यूजर की बेट का आधा हिस्सा EXP के रूप में निकालें
+const earnedEXP = Number(betAmount) / 2;
+
+// 2. डेटाबेस में यूजर का बैलेंस काटें और EXP जोड़ें
 const updatedUser = await User.findOneAndUpdate(
-    { phone: phone.trim() },
-    { 
-        $inc: { 
-            balance: -Number(betAmount), // यूजर का बैलेंस कटा
-            todayBetPlay: Number(betAmount) // आज की खेली गई कुल बेट में प्लस हुआ
-        },
-        $set: { isActiveUser: true } // यूजर को लाइव एक्टिव मार्क कर दिया
+  { phone: phone.trim() },
+  {
+    $inc: {
+      balance: -Number(betAmount),       
+      todayBetPlay: Number(betAmount),   
+      lifetimeEXP: earnedEXP             
     },
-    { new: true }
+    $set: { isActiveUser: true }
+  },
+  { new: true } 
 );
+
+// 3. ऑटोमैटिक VIP लेवल अपग्रेड इंजन (0 से 10 स्तर तक)
+let currentLevel = updatedUser.vipLevel || 0;
+let nextLevel = currentLevel + 1;
+
+while (nextLevel <= 10 && updatedUser.lifetimeEXP >= VIP_CONFIG[nextLevel].requiredEXP) {
+    currentLevel = nextLevel;
+    nextLevel++;
+}
+
+if (currentLevel !== updatedUser.vipLevel) {
+    await User.updateOne(
+        { phone: phone.trim() },
+        { $set: { vipLevel: currentLevel, lastVipUpgradeDate: new Date() } }
+    );
+    console.log(`[VIP LEVEL UP]: User ${phone} upgraded to VIP ${currentLevel}`);
+}
 
         // [MASTER FIX]: Bet save karte samay status hamesha "Pending" hona chahiye aur winAmount 0!
         const newBet = new Bet({
@@ -598,6 +619,67 @@ const updatedUser = await User.findOneAndUpdate(
     }
 });
 
+// === ४. फ्रंटएंड VIP पेज पर डेटा भेजने की एपीआई ===
+app.get('/api/vip-status/:phone', async (req, res) => {
+  try {
+    const user = await User.findOne({ phone: req.params.phone.trim() });
+    if (!user) return res.json({ success: false, message: "User not found!" });
+
+    const currentLevel = user.vipLevel || 0;
+    const nextLevel = currentLevel < 10 ? currentLevel + 1 : 10;
+    
+    res.json({
+      success: true,
+      vipLevel: currentLevel,
+      currentEXP: user.lifetimeEXP || 0,
+      nextLevelRequiredEXP: VIP_CONFIG[nextLevel].requiredEXP, 
+      claimedVipLevels: user.claimedVipLevels || [] 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// === ५. वीआईपी लेवल का इनाम क्लेम करने की एपीआई ===
+app.post('/api/claim-vip-reward', async (req, res) => {
+  try {
+    const { phone, levelToClaim } = req.body; 
+    const targetLevel = Number(levelToClaim);
+
+    if (targetLevel < 1 || targetLevel > 10) {
+        return res.json({ success: false, message: "गलत VIP लेवल अनुरोध!" });
+    }
+
+    const user = await User.findOne({ phone: phone.trim() });
+    if (!user) return res.json({ success: false, message: "User not found!" });
+
+    if (user.vipLevel < targetLevel) {
+        return res.json({ success: false, message: `आप अभी VIP ${targetLevel} पर नहीं पहुँचे हैं!` });
+    }
+
+    if (user.claimedVipLevels && user.claimedVipLevels.includes(targetLevel)) {
+        return res.json({ success: false, message: `आप VIP ${targetLevel} का इनाम पहले ही ले चुके हैं!` });
+    }
+
+    const rewardAmount = VIP_CONFIG[targetLevel].reward;
+
+    await User.findOneAndUpdate(
+        { phone: phone.trim() },
+        { 
+            $inc: { balance: rewardAmount },
+            $push: { claimedVipLevels: targetLevel }
+        }
+    );
+
+    return res.json({
+        success: true,
+        message: `बधाई हो! VIP ${targetLevel} का ₹${rewardAmount} इनाम आपके मेन वॉलेट में जोड़ दिया गया है।`
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: "सर्वर एरर! कृपया बाद में प्रयास करें।" });
+  }
+});
 
 // === नई डिपॉजिट (UTR सबमिशन) एपीआई ===
 app.post('/api/place-deposit', async (req, res) => {
@@ -1562,6 +1644,36 @@ function startDailyNightCommissionCronJob() {
         const currentSeconds = now.getSeconds();
 
         if (currentHours === 0 && currentMinutes === 0 && currentSeconds === 0) {
+        	        // === [VIP MAINTENANCE ENGINE] ===
+        try {
+            const activeVipUsers = await User.find({ vipLevel: { $gt: 0 } });
+            const thirtyDaysAgoDate = new Date();
+            thirtyDaysAgoDate.setDate(thirtyDaysAgoDate.getDate() - 30); 
+
+            for (let targetUser of activeVipUsers) {
+                if (targetUser.lastVipUpgradeDate < thirtyDaysAgoDate) {
+                    const currentLevel = targetUser.vipLevel;
+                    const requiredExpAmount = VIP_CONFIG[currentLevel].requiredEXP;
+
+                    if (targetUser.lifetimeEXP < requiredExpAmount) {
+                        let loweredVipLevel = currentLevel - 1; 
+                        let reducedEXP = VIP_CONFIG[loweredVipLevel] ? VIP_CONFIG[loweredVipLevel].requiredEXP : 0;
+
+                        await User.findByIdAndUpdate(targetUser._id, {
+                            $set: { 
+                                vipLevel: loweredVipLevel,
+                                lifetimeEXP: reducedEXP,
+                                lastVipUpgradeDate: new Date() 
+                            }
+                        });
+                        console.log(`[VIP DOWNGRADE SUCCESS]: User ${targetUser.phone} dropped to VIP ${loweredVipLevel}`);
+                    }
+                }
+            }
+        } catch (vipCronError) {
+            console.error("VIP Downgrade Engine Execution Error:", vipCronError);
+        }
+        
             console.log("[CRON ENGINE] Midnight 12:00 AM discovered. Processing AR Wallet transfers...");
 
             try {

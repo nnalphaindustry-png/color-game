@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema({
 lifetimeEXP: { type: Number, default: 0 },    // यूजर के कुल असली EXP (बेट राशि / 2)
 vipLevel: { type: Number, default: 0 },       // मौजूदा VIP लेवल (0 से 10)
 claimedVipLevels: { type: [Number], default: [] }, // क्लेम किए जा चुके इनामों की लिस्ट
-lastVipUpgradeDate: { type: Date, default: Date.now } // लेवल मेंटेनेंस की तारीख चेक करने के लिए
+lastVipUpgradeDate: { type: Date, default: Date.now }, // लेवल मेंटेनेंस की तारीख चेक करने के लिए
 
     // --- लाइव रिचार्ज और बेट टर्नओवर ट्रैकिंग ---
     todayBetPlay: { type: Number, default: 0 },         // आज दिनभर में खेली गई कुल बेट

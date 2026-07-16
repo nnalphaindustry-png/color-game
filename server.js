@@ -37,6 +37,8 @@ const userSchema = new mongoose.Schema({
     referredBy: { type: String, default: "" },          // इसे इनवाइट करने वाले (Parent) का फोन नंबर
     yesterdayCommission: { type: Number, default: 0 },  // रात 12 बजे ट्रांसफर होने वाला कल का कमीशन
     totalCommission: { type: Number, default: 0 },      // अब तक की कुल कुल कमाई
+        arWallet: { type: Number, default: 0 },
+        
     
     // --- लाइव रिचार्ज और बेट टर्नओवर ट्रैकिंग ---
     todayBetPlay: { type: Number, default: 0 },         // आज दिनभर में खेली गई कुल बेट
@@ -1196,7 +1198,7 @@ app.get('/api/direct-invited-details/:phone', async (req, res) => {
 // === DAILY AUTOMATIC ENGINE (रोज़ रात ठीक 12:00 बजे चलने वाली स्क्रिप्ट) ===
 // =========================================================================
 
-// 1. बोनस क्लेम करने की एपीआई रिक्वेस्ट (/api/claim-milestone-reward)
+// === [UPDATED: बोनस सीधे AR WALLET में तुरंत जमा होगा] ===
 app.post('/api/claim-milestone-reward', async (req, res) => {
     try {
         const { phone, milestoneId, bonusAmount } = req.body;
@@ -1207,95 +1209,146 @@ app.post('/api/claim-milestone-reward', async (req, res) => {
         const user = await User.findOne({ phone: phone.trim() });
         if (!user) return res.json({ success: false, message: "User not found!" });
 
-        // चेक करना कि यह टास्क पहले से क्लेम तो नहीं हो चुका है
         if (user.claimedMilestoneIds && user.claimedMilestoneIds.includes(milestoneId)) {
             return res.json({ success: false, message: "This milestone bonus has already been claimed!" });
         }
 
-        // यूजर के खाते में बोनस जोड़ना और क्लेम की हुई आईडी लिस्ट में दर्ज करना
+        // [बदलाव]: पैसा सीधे 'arWallet' में तुरंत प्लस होगा और 'totalCommission' रिकॉर्ड में दर्ज होगा
         await User.findOneAndUpdate(
             { phone: phone.trim() },
             { 
                 $inc: { 
-                    totalCommission: Number(bonusAmount), // टोटल कमीशन बोर्ड में प्लस हुआ
-                    yesterdayCommission: Number(bonusAmount) // कल की कमाई वाले बोर्ड में भी दिखेगा
+                    arWallet: Number(bonusAmount),         // तुरंत तिजोरी में जुड़ गया
+                    totalCommission: Number(bonusAmount),   // लाइफटाइम रिकॉर्ड में जुड़ा
+                    yesterdayCommission: Number(bonusAmount)
                 },
-                $push: { claimedMilestoneIds: milestoneId } // इसे क्लेम लिस्ट में लॉक कर दिया
+                $push: { claimedMilestoneIds: milestoneId }
             }
         );
 
-        res.json({ success: true, message: "Bonus transferred successfully!" });
+        res.json({ success: true, message: "Bonus transferred instantly to your AR Wallet!" });
     } catch (error) {
         console.error("Claim reward server error:", error);
         res.status(500).json({ success: false, message: "Server error during claiming." });
     }
 });
 
-// 2. हर 24 घंटे में रात 12:00 बजे ऑटोमैटिक हिसाब करने वाली टाइमर स्क्रिप्ट
+// === 4. NEW API: AR WALLET से BALANCE (MAIN WALLET) में पैसा ट्रांसफर करना ===
+app.post('/api/transfer-ar-to-main', async (req, res) => {
+    try {
+        const { phone } = req.body;
+        if (!phone) return res.json({ success: false, message: "User phone is required!" });
+
+        // यूजर को डेटाबेस में ढूँढना
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        const currentArBalance = Number(user.arWallet || 0);
+
+        // चेक करना कि तिजोरी में पैसे हैं भी या नहीं
+        if (currentArBalance <= 0) {
+            return res.json({ success: false, message: "Your AR Wallet balance is 0. Nothing to transfer!" });
+        }
+
+        // [जादू लॉजिक]: arWallet को तुरंत 0 करना और गेम balance में सारा पैसा प्लस करना
+        await User.findOneAndUpdate(
+            { phone: phone.trim() },
+            {
+                $set: { arWallet: 0 },               // तिजोरी खाली (Zero) हो गई
+                $inc: { balance: currentArBalance } // पूरा पैसा मेन वॉलेट गेमिंग बैलेंस में जुड़ गया
+            }
+        );
+
+        res.json({ 
+            success: true, 
+            message: `Successfully transferred ₹${currentArBalance.toFixed(2)} to your Main Wallet!` 
+        });
+
+    } catch (err) {
+        console.error("AR Wallet transfer API failed:", err);
+        res.status(500).json({ success: false, message: "Server error during wallet transfer." });
+    }
+});
+
+// === 5. मुख्य डैशबोर्ड पर arWallet बैलेंस भेजने के लिए पुरानी एपीआई में रिस्पॉन्स अपडेट करना ===
+// (नोट: जो हमने /api/agent-summary/:phone बनाई थी, उसमें arWallet भी रिटर्न कर देंगे)
+app.get('/api/agent-summary-updated/:phone', async (req, res) => {
+    try {
+        const user = await User.findOne({ phone: req.params.phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found" });
+        
+        res.json({
+            success: true,
+            yesterdayCommission: user.yesterdayCommission || 0,
+            totalCommission: user.totalCommission || 0,
+            inviteCode: user.inviteCode || "" ,
+            arWallet: user.arWallet || 0 // <--- यह नया डेटा फ्रंटएंड डैशबोर्ड के लिए जाएगा
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// === [UPDATED: रात 12 बजे का कमीशन अपने आप AR WALLET में ट्रांसफर होगा] ===
 function startDailyNightCommissionCronJob() {
     console.log("[CRON JOB] Automatic 12:00 AM Commission Scheduler Active.");
 
     setInterval(async () => {
         const now = new Date();
-        // भारतीय समय (IST) के अनुसार रात के ठीक 00:00:00 (12:00 AM) चेक करना
         const currentHours = now.getHours();
         const currentMinutes = now.getMinutes();
         const currentSeconds = now.getSeconds();
 
         if (currentHours === 0 && currentMinutes === 0 && currentSeconds === 0) {
-            console.log("[CRON ENGINE] Midnight 12:00 AM discovered. Calculating team commissions...");
+            console.log("[CRON ENGINE] Midnight 12:00 AM discovered. Processing AR Wallet transfers...");
 
             try {
-                // डेटाबेस के सभी यूज़र्स की लिस्ट निकालना
                 const allUsersList = await User.find({});
 
-                // प्रत्येक यूजर का अलग-अलग 3-Level टीम कमीशन जोड़ना
                 for (let agent of allUsersList) {
                     let calculatedBonusAmt = 0;
 
-                    // Level 1 यूज़र्स और उनका टर्नओवर
+                    // Level 1 टर्नओवर (0.01%)
                     const level1Users = await User.find({ referredBy: agent.phone });
-                    level1Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.0001); // 0.01% रेट
+                    level1Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.0001); 
 
-                    // Level 2 यूज़र्स और उनका टर्नओवर
+                    // Level 2 टर्नओवर (0.001%)
                     const l1Phones = level1Users.map(u => u.phone);
                     const level2Users = await User.find({ referredBy: { $in: l1Phones } });
-                    level2Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.00001); // 0.001% रेट
+                    level2Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.00001); 
 
-                    // Level 3 यूज़र्स और उनका टर्नओवर
+                    // Level 3 टर्नओवर (0.001%)
                     const l2Phones = level2Users.map(u => u.phone);
                     const level3Users = await User.find({ referredBy: { $in: l2Phones } });
-                    level3Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.00001); // 0.001% रेट
+                    level3Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.00001); 
 
-                    // अगर इस एजेंट का कोई कमिशन बना है, तो उसके डैशबोर्ड वॉलेट में क्रेडिट करना
                     if (calculatedBonusAmt > 0) {
+                        // [बदलाव]: रोज़ रात 12 बजे का कमीशन सीधे 'arWallet' तिजोरी में जमा होगा
                         await User.findByIdAndUpdate(agent._id, {
-                            $set: { yesterdayCommission: calculatedBonusAmt }, // कल की कमाई वाले बॉक्स में डाल दिया
-                            $inc: { totalCommission: calculatedBonusAmt }     // अब तक की कुल कमाई में प्लस कर दिया
+                            $set: { yesterdayCommission: calculatedBonusAmt }, 
+                            $inc: { 
+                                arWallet: calculatedBonusAmt,      // तिजोरी में अपने आप चला गया
+                                totalCommission: calculatedBonusAmt // रिकॉर्ड में प्लस हुआ
+                            }
                         });
                     } else {
-                        // अगर कोई कमिशन नहीं बना तो कल की कमाई वापस ₹0 दिखेगी
                         await User.findByIdAndUpdate(agent._id, {
                             $set: { yesterdayCommission: 0 }
                         });
                     }
                 }
 
-                // [MASTER RESET]: कमिशन बांटने के बाद, अगले दिन के लिए सभी लाइव काउंटर्स को ₹0 करना
+                // मास्टर रीसेट
                 await User.updateMany({}, {
-                    $set: { 
-                        todayBetPlay: 0,
-                        todayDeposit: 0,
-                        isActiveUser: false 
-                    }
+                    $set: { todayBetPlay: 0, todayDeposit: 0, isActiveUser: false }
                 });
 
-                console.log("[CRON ENGINE SUCCESS] All commissions transferred and active day counters reset successfully.");
+                console.log("[CRON ENGINE SUCCESS] Midnight commissions added to AR Wallet and day counters reset.");
             } catch (cronError) {
-                console.error("[CRON CRITICAL ERROR] Failed to execute midnight operations:", cronError);
+                console.error("[CRON CRITICAL ERROR] Midnight operations failed:", cronError);
             }
         }
-    }, 1000); // हर सेकंड घड़ी चेक होगी कि रात के 12 बजे या नहीं
+    }, 1000); 
 }
 
 // === SERVER START & DATABASE CONNECTION ===

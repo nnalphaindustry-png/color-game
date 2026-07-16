@@ -853,11 +853,7 @@ app.get('/api/admin/users-list', async (req, res) => {
     }
 });
 
-// === STATIC FILES SERVING ===
-app.use(express.static(path.join(__dirname, '')));
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+
 // === ADMIN SEARCH USER ROUTE ===
 // === ADMIN SEARCH USER ROUTE (BY PHONE OR UID) ===
 app.get('/api/admin/search-user/:query', async (req, res) => {
@@ -1461,7 +1457,11 @@ function startDailyNightCommissionCronJob() {
         }
     }, 1000); 
 }
-
+// === STATIC FILES SERVING ===
+app.use(express.static(path.join(__dirname, '')));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 // === SERVER START & DATABASE CONNECTION ===
 const PORT = process.env.PORT || 3000;
 

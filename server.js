@@ -359,47 +359,50 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-// === १. गेम मोड के अनुसार पिछला इतिहास भेजने की अपडेटेड एपीआई (Pagination के साथ) ===
+// === १. गेम मोड के अनुसार पिछला इतिहास भेजने की एपीआई (UPDATED WITH TOTAL PAGES) ===
 app.get('/api/game-history/:mode', async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1; // यदि पेज न दिया हो, तो पहला पेज
-    const limit = 10; // एक बार में १० रिकॉर्ड
-    const skip = (page - 1) * limit;
+    try {
+        const page = parseInt(req.query.page) || 1; 
+        const limit = 10; // एक बार में १० रिकॉर्ड
+        const skip = (page - 1) * limit;
+        
+        const list = await Period.find({ gameMode: req.params.mode })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-    const list = await Period.find({ gameMode: req.params.mode })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+        const totalRecords = await Period.countDocuments({ gameMode: req.params.mode });
+        // कुल कितने पेजेस बन रहे हैं उसकी गणना
+        const totalPages = Math.ceil(totalRecords / limit) || 1;
+        const hasMore = skip + list.length < totalRecords;
 
-    // कुल रिकॉर्ड की संख्या ताकि फ्रंटएंड को पता चले कि आगे और डेटा है या नहीं
-    const totalRecords = await Period.countDocuments({ gameMode: req.params.mode });
-    const hasMore = skip + list.length < totalRecords;
-
-    res.json({ success: true, list, hasMore });
-  } catch (err) {
-    res.status(500).json({ success: false });
-  }
+        res.json({ success: true, list, hasMore, totalPages });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
 });
 
-// === २. यूजर द्वारा विशिष्ट गेम मोड में लगाई गई बेट्स फ़िल्टर करने की अपडेटेड एपीआई ===
+// === २. यूजर द्वारा विशिष्ट गेम मोड में लगाई गई बेट्स फ़िल्टर करने की एपीआई (UPDATED WITH TOTAL PAGES) ===
 app.get('/api/user-bets/:phone/:mode', async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const skip = (page - 1) * limit;
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
 
-    const list = await Bet.find({ phone: req.params.phone.trim(), gameMode: req.params.mode })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+        const list = await Bet.find({ phone: req.params.phone.trim(), gameMode: req.params.mode })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-    const totalRecords = await Bet.countDocuments({ phone: req.params.phone.trim(), gameMode: req.params.mode });
-    const hasMore = skip + list.length < totalRecords;
+        const totalRecords = await Bet.countDocuments({ phone: req.params.phone.trim(), gameMode: req.params.mode });
+        // कुल कितने पेजेस बन रहे हैं उसकी गणना
+        const totalPages = Math.ceil(totalRecords / limit) || 1;
+        const hasMore = skip + list.length < totalRecords;
 
-    res.json({ success: true, list, hasMore });
-  } catch (err) {
-    res.status(500).json({ success: false });
-  }
+        res.json({ success: true, list, hasMore, totalPages });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
 });
 
 

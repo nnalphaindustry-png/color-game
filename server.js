@@ -123,13 +123,13 @@ const withdrawalSchema = new mongoose.Schema({
 });
 const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);
 
-// === NEW: GIFT CODE SCHEMA ===
+// === GIFT CODE SCHEMA CLEAN CODE ===
 const giftCodeSchema = new mongoose.Schema({
-    code: { type: String, required: true, unique: true }, // जैसे: GOACLUB91K
-    amount: { type: Number, required: true },             // बोनस का पैसा
-    maxUses: { type: Number, default: 100 },              // कितने लोग इस्तेमाल कर सकते हैं
-    usedCount: { type: Number, default: 0 },              // अभी तक कितने लोगों ने क्लेम किया
-    usersRedeemed: [{ type: String }]                     // जिन यूज़र्स ने क्लेम किया उनके फोन नंबर
+    code: { type: String, required: true, unique: true },
+    amount: { type: Number, required: true },
+    maxUses: { type: Number, default: 100 },
+    usedCount: { type: Number, default: 0 },
+    usersRedeemed: [{ type: String }]
 });
 const GiftCode = mongoose.model('GiftCode', giftCodeSchema);
 

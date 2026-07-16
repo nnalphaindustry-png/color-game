@@ -123,6 +123,15 @@ const withdrawalSchema = new mongoose.Schema({
 });
 const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);
 
+// === NEW: GIFT CODE SCHEMA ===
+const giftCodeSchema = new mongoose.Schema({
+    code: { type: String, required: true, unique: true }, // जैसे: GOACLUB91K
+    amount: { type: Number, required: true },             // बोनस का पैसा
+    maxUses: { type: Number, default: 100 },              // कितने लोग इस्तेमाल कर सकते हैं
+    usedCount: { type: Number, default: 0 },              // अभी तक कितने लोगों ने क्लेम किया
+    usersRedeemed: [{ type: String }]                     // जिन यूज़र्स ने क्लेम किया उनके फोन नंबर
+});
+const GiftCode = mongoose.model('GiftCode', giftCodeSchema);
 
 // === LIVE GAMES TIMER ENGINE (असली गेम इंजन लॉजिक) ===
 
@@ -597,6 +606,96 @@ app.post('/api/place-deposit', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर एरर! कृपया दोबारा प्रयास करें।" });
     }
 });
+// ==========================================
+// === LIVE ACTIVITY AREA NEW ENGINES ===
+// ==========================================
+
+// 1. गिफ्ट कोड को रिडीम (Claim) करने की लाइव API
+app.post('/api/redeem-gift', async (req, res) => {
+    try {
+        const { phone, code } = req.body;
+        if (!phone || !code) {
+            return res.json({ success: false, message: "Please enter a valid gift code!" });
+        }
+
+        // डेटाबेस में कोड ढूंढें
+        const gift = await GiftCode.findOne({ code: code.trim().toUpperCase() });
+        if (!gift) {
+            return res.json({ success: false, message: "Invalid Gift Code! This code does not exist." });
+        }
+
+        // चेक करें कि यूजर पहले ही क्लेम तो नहीं कर चुका
+        if (gift.usersRedeemed.includes(phone.trim())) {
+            return res.json({ success: false, message: "You have already redeemed this gift code!" });
+        }
+
+        // चेक करें कि कोड की लिमिट खत्म तो नहीं हो गई
+        if (gift.usedCount >= gift.maxUses) {
+            return res.json({ success: false, message: "Gift code limit reached! Better luck next time." });
+        }
+
+        // सब सही है! यूजर के arWallet (तिजोरी) में पैसा प्लस करें और रिकॉर्ड दर्ज करें
+        await User.findOneAndUpdate(
+            { phone: phone.trim() },
+            { $inc: { arWallet: Number(gift.amount), totalCommission: Number(gift.amount) } }
+        );
+
+        gift.usersRedeemed.push(phone.trim());
+        gift.usedCount += 1;
+        await gift.save();
+
+        return res.json({ 
+            success: true, 
+            message: `Success! ₹${gift.amount} added directly to your AR Wallet.` 
+        });
+
+    } catch (error) {
+        console.error("Gift Redeem Error:", error);
+        res.status(500).json({ success: false, message: "Server error during gift redemption." });
+    }
+});
+
+// 2. एडमिन के लिए नया गिफ्ट कोड जनरेट करने की API (इसे आप पोस्टमैन या एडमिन से चला सकते हैं)
+app.post('/api/admin/create-gift-code', async (req, res) => {
+    try {
+        const { code, amount, maxUses } = req.body;
+        if (!code || !amount) return res.json({ success: false, message: "Code and Amount required!" });
+
+        const newGift = new GiftCode({
+            code: String(code).trim().toUpperCase(),
+            amount: Number(amount),
+            maxUses: Number(maxUses || 100)
+        });
+
+        await newGift.save();
+        res.json({ success: true, message: `Gift Code ${code} created successfully for ₹${amount}!` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to create code: " + error.message });
+    }
+});
+
+// 3. अटेंडेंस (हाजिरी बोनस) के लिए यूजर की आज की बेटिंग चेक करने की API
+app.get('/api/attendance-status/:phone', async (req, res) => {
+    try {
+        const user = await User.findOne({ phone: req.params.phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found" });
+
+        // हाजिरी क्लेम करने के लिए कंडीशन: आज कम से कम ₹500 की बेट खेली होनी चाहिए
+        // आपके सर्वर का 'todayBetPlay' वेरिएबल इसे लाइव ट्रैक करता है
+        const isConditionMet = (user.todayBetPlay || 0) >= 500;
+
+        res.json({
+            success: true,
+            todayBetPlay: user.todayBetPlay || 0,
+            isConditionMet: isConditionMet,
+            consecutiveDays: 0, // इसे बाद में क्रॉन जॉब से सिंक करेंगे, अभी डिफ़ॉल्ट 0
+            accumulated: "0.00"
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // === नई विथड्रॉल सबमिशन एपीआई (User End) ===
 app.post('/api/place-withdrawal', async (req, res) => {
     try {

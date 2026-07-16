@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Attendance Bonus</title>
+    <style>
+        :root {
+            color-scheme: light !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-text-fill-color: initial !important;
+        }
+        body {
+            background-color: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        /* Mobile Core Container */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 90px; /* नीचे बटन के लिए जगह */
+        }
+        /* Top Navigation Navbar */
+        .navbar {
+            background-color: #ffffff !important;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eef2f5 !important;
+        }
+        .back-btn {
+            color: #333333;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            position: absolute;
+            left: 16px;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            margin: 0 auto;
+        }
+        /* Big Gradient Top Banner */
+        .attendance-banner {
+            background: linear-gradient(135deg, #ff4141, #ff5e62);
+            padding: 24px 16px;
+            color: white;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .banner-left h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .banner-left p {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-bottom: 14px;
+        }
+        /* Ribbon Days indicator label */
+        .consecutive-ribbon {
+            background: #ffffff;
+            color: #ff4141 !important;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .consecutive-ribbon span {
+            color: #333333 !important;
+            font-size: 14px;
+        }
+        .accumulated-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 2px;
+        }
+        .accumulated-amt {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        /* Banner Tiny Navigation Buttons */
+        .banner-btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .banner-mini-btn {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white !important;
+            padding: 6px 14px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        /* 6 Days Grid Cards */
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 14px;
+        }
+        .day-card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px 6px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .day-card .amount {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .day-card .coin-placeholder {
+            margin: 6px auto;
+        }
+        .day-card .day-lbl {
+            font-size: 11px;
+            color: #888888;
+            margin-top: 6px;
+            display: block;
+        }
+        /* Day 7 Premium Landscape Card */
+        .day7-large-card {
+            background: #ffffff;
+            width: 93%;
+            margin: 4px auto 14px auto;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .day7-right-info {
+            text-align: right;
+        }
+        .day7-right-info .amt7 {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .day7-right-info .lbl7 {
+            font-size: 11px;
+            color: #888888;
+        }
+        /* Fixed Footer Big Bottom Button Wrapper */
+        .footer-action-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            padding: 12px 16px;
+            box-shadow: 0 -3px 10px rgba(0,0,0,0.03);
+            z-index: 99;
+        }
+        .main-attendance-btn {
+            width: 100%;
+            background: linear-gradient(to right, #ff5757, #ff6b6b);
+            color: white !important;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 87, 87, 0.2);
+            outline: none;
+        }
+        .main-attendance-btn:active {
+            transform: scale(0.97);
+        }
+        /* Custom Premium Popup Overlay Style */
+        .error-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .error-popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .error-popup-box {
+            background: #ffffff;
+            width: 82%;
+            max-width: 350px;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .error-popup-overlay.show .error-popup-box {
+            transform: scale(1);
+        }
+        .error-popup-icon {
+            width: 55px;
+            height: 55px;
+            margin: 0 auto 14px auto;
+            background: #fff5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-popup-box h3 {
+            font-size: 17px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 6px;
+        }
+        .error-popup-box p {
+            font-size: 13px;
+            color: #666666;
+            line-height: 18px;
+            margin-bottom: 18px;
+        }
+        .error-confirm-btn {
+            background: #ff5757;
+            color: white !important;
+            border: none;
+            padding: 9px 24px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 18px;
+            cursor: pointer;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- TOP NAVBAR WITH BACK LINK TO MAIN ACTIVITY PAGE -->
+    <div class="navbar">
+        <a href="activity.html" class="back-btn">&#10094;</a>
+        <span class="page-title">Attendance</span>
+    </div>
+
+    <!-- MAIN GRADIENT BANNER CORE (BUILT-IN CALENDAR GRAPHIC) -->
+    <div class="attendance-banner">
+        <div class="banner-left">
+            <h2>Attendance bonus</h2>
+            <p>Get rewards based on consecutive login days</p>
+            
+            <div class="consecutive-ribbon">
+                Attended consecutively <span id="consecutiveDaysCount">0</span> Day
+            </div>
+            
+            <div class="accumulated-label">Accumulated</div>
+            <div class="accumulated-amt">₹0.00</div>
+            
+            <!-- Dual Action Row Labels Inside Banner -->
+            <div class="banner-btn-row">
+                <button class="banner-mini-btn" onclick="alert('Rules Coming Soon!')">Game Rules</button>
+                <button class="banner-mini-btn" onclick="alert('Attendance Logs Coming Soon!')">Attendance history</button>
+            </div>
+        </div>
+        
+        <!-- Built-in SVG Calendar Dashboard Vector Graphic -->
+        <div class="banner-right">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <rect x="20" y="25" width="60" height="55" rx="8" fill="#ffffff"/>
+                <rect x="20" y="25" width="60" height="14" rx="2" fill="#4d7cfe"/>
+                <!-- Spiral bounds rings -->
+                <circle cx="32" cy="22" r="3" fill="#ced4da"/><circle cx="50" cy="22" r="3" fill="#ced4da"/><circle cx="68" cy="22" r="3" fill="#ced4da"/>
+                <!-- Pencil/Pen drawing art vector -->
+                <path d="M75 15 L85 25 L55 55 L45 55 L45 45 Z" fill="#ffd166"/>
+                <path d="M45 55 L48 50 L45 45 Z" fill="#333333"/>
+                <!-- Calendar text simulation grids -->
+                <line x1="30" y1="50" x2="50" y2="50" stroke="#ff4141" stroke-width="4" stroke-linecap="round"/>
+                <line x1="30" y1="62" x2="65" y2="62" stroke="#ced4da" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 1 TO 6 DAYS BONUS CARDS GRID -->
+    <div class="days-grid">
+        <!-- Day 1 -->
+        <div class="day-card">
+            <span class="amount">₹7.00</span>
+            <div class="coin-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#ffb703"><circle cx="12" cy="12" r="10" stroke="#fb8500" stroke-width="1.5"/><polygon points="12 6 14 10 18 10 15 13 16 17 12 15 8 17 9 13 6 10 10 10 12 6" fill="#ffffff"/></svg>
+            </div>
+            <span class="day-lbl">1 Day</span>
+        </div>
+        <!-- Day 2 -->
+        <div class="day-card">
+            <span class="amount">₹17.00</span>
+            <div class="coin-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#ffb703"><circle cx="12" cy="12" r="10" stroke="#fb8500" stroke-width="1.5"/><polygon points="12 6 14 10 18 10 15 13 16 17 12 15 8 17 9 13 6 10 10 12 6" fill="#ffffff"/></svg>
+            </div>
+            <span class="day-lbl">2 Day</span>
+        </div>
+        <!-- Day 3 -->
+        <div class="day-card">
+            <span class="amount">₹57.00</span>
+            <div class="coin-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#ffb703"><circle cx="12" cy="12" r="10" stroke="#fb8500" stroke-width="1.5"/><polygon points="12 6 14 10 18 10 15 13 16 17 12 15 8 17 9 13 6 10 10 12 6" fill="#ffffff"/></svg>
+            </div>
+            <span class="day-lbl">3 Day</span>
+        </div>
+        <!-- Day 4 -->
+        <div class="day-card">
+            <span class="amount">₹277.00</span>
+            <div class="coin-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#ffb703"><circle cx="12" cy="12" r="10" stroke="#fb8500" stroke-width="1.5"/><polygon points="12 6 14 10 18 10 15 13 16 17 12 15 8 17 9 13 6 10 10 12 6" fill="#ffffff"/></svg>
+            </div>
+            <span class="day-lbl">4 Day</span>
+        </div>
+        <!-- Day 5 -->
+        <div class="day-card">
+            <span class="amount">₹577.00</span>
+            <div class="coin-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#ffb703"><circle cx="12" cy="12" r="10" stroke="#fb8500" stroke-width="1.5"/><polygon points="12 6 14 10 18 10 15 13 16 17 12 15 8 17 9 13 6 10 10 12 6" fill="#ffffff"/></svg>
+            </div>
+            <span class="day-lbl">5 Day</span>
+        </div>
+        <!-- Day 6 -->
+        <div class="day-card">
+            <span class="amount">₹1,777.00</span>
+            <div class="coin-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#ffb703"><circle cx="12" cy="12" r="10" stroke="#fb8500" stroke-width="1.5"/><polygon points="12 6 14 10 18 10 15 13 16 17 12 15 8 17 9 13 6 10 10 12 6" fill="#ffffff"/></svg>
+            </div>
+            <span class="day-lbl">6 Day</span>
+        </div>
+    </div>
+
+    <!-- DAY 7 PREMIUM LANDSCAPE BOX (GIFT WRAP VECTOR DESIGN) -->
+    <div class="day7-large-card">
+        <!-- SVG Gift Box with Gold Bow Ribbon and Coins Bursting around -->
+        <div>
+            <svg width="70" height="60" viewBox="0 0 80 70">
+                <rect x="15" y="25" width="45" height="35" rx="3" fill="#d90429"/>
+                <rect x="10" y="18" width="55" height="8" rx="2" fill="#ef233c"/>
+                <rect x="34" y="18" width="7" height="42" fill="#ffd166"/>
+                <!-- Ribbon loop curves -->
+                <path d="M37 18 C25 5, 15 15, 37 18 C45 15, 45 5, 37 18" fill="#ffd166"/>
+                <!-- Tiny scattering coins decoration vector -->
+                <circle cx="10" cy="52" r="4" fill="#ffb703"/><circle cx="65" cy="55" r="4" fill="#ffb703"/>
+            </svg>
+        </div>
+        <div class="day7-right-info">
+            <span class="amt7">₹5,777.00</span>
+            <span class="lbl7">7 Day</span>
+        </div>
+    </div>
+
+    <!-- STICKY ACTION BUTTON BAR -->
+    <div class="footer-action-bar">
+        <button class="main-attendance-btn" onclick="triggerAttendanceError()">Attendance</button>
+    </div>
+
+    <!-- PREMIUM CUSTOM ERROR POPUP MODAL (DEFAULT: HIDDEN) -->
+    <div class="error-popup-overlay" id="attendanceErrorOverlay">
+        <div class="error-popup-box">
+            <!-- Red Warning Alert Cross Icon via SVG -->
+            <div class="error-popup-icon">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff5757" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </div>
+            
+            <!-- English Custom Error Notification Messages -->
+            <h3>Attendance Failed</h3>
+            <p>The daily betting conditions have not been completed yet. Please fulfill the requirements and try again.</p>
+            
+            <!-- Close Confirm Button -->
+            <button class="error-confirm-btn" onclick="closeAttendanceError()">Confirm</button>
+        </div>
+    </div>
+
+</div>
+<script>
+    // 'Attendance' बटन क्लिक करने पर एरर पॉपअप दिखाने का फंक्शन
+    function triggerAttendanceError() {
+        const popupOverlay = document.getElementById('attendanceErrorOverlay');
+        if (popupOverlay) {
+            popupOverlay.classList.add('show');
+        }
+    }
+
+    // एरर पॉपअप को क्लोज/बंद करने का फंक्शन
+    function closeAttendanceError() {
+        const popupOverlay = document.getElementById('attendanceErrorOverlay');
+        if (popupOverlay) {
+            popupOverlay.classList.remove('show');
+        }
+    }
+
+    // सुरक्षा लॉगिन जांच: बिना लॉगिन यूज़र को सीधे बाहर धकेलना
+    document.addEventListener("DOMContentLoaded", function () {
+        const sessionUser = localStorage.getItem('user_phone');
+        if (!sessionUser) {
+            window.location.href = "index.html"; 
+        }
+    });
+</script>
+</body>
+</html>

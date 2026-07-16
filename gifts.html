@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Gift Rewards</title>
+    <style>
+        :root {
+            color-scheme: light !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-text-fill-color: initial !important;
+        }
+        body {
+            background-color: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        /* Mobile App Container Layout */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 30px;
+        }
+        /* Sticky Top Navbar */
+        .navbar {
+            background-color: #ffffff !important;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eef2f5 !important;
+        }
+        .back-btn {
+            color: #333333;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            position: absolute;
+            left: 16px;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            margin: 0 auto;
+        }
+        /* Gift Top Banner Graphic Background (No Outside Image Link) */
+        .gift-banner {
+            width: 100%;
+            height: 190px;
+            background: radial-gradient(circle at center, #ffeaa7 20%, #fbd57e 70%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Main Interactive Card Box */
+        .gift-action-card {
+            background: #ffffff;
+            width: 92%;
+            margin: -15px auto 14px auto;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            z-index: 10;
+        }
+        .gift-action-card h4 {
+            font-size: 16px;
+            color: #333333;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .gift-action-card p {
+            font-size: 13px;
+            color: #666666;
+            margin-bottom: 20px;
+        }
+        .gift-action-card .input-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444444;
+            margin-bottom: 10px;
+            display: block;
+        }
+        /* Gift Code Input Box style */
+        .gift-input-field {
+            width: 100%;
+            background-color: #f1f3f9 !important;
+            border: none;
+            padding: 14px 16px;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        .gift-input-field::placeholder {
+            color: #9ea4b1;
+        }
+        /* Big Red Action Button */
+        .receive-btn {
+            width: 100%;
+            background: linear-gradient(to right, #ff5757, #ff6b6b);
+            color: white !important;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 87, 87, 0.25);
+            outline: none;
+        }
+        .receive-btn:active {
+            transform: scale(0.97);
+        }
+        /* History Layout Section */
+        .history-section-card {
+            background: #ffffff;
+            width: 92%;
+            margin: 0 auto;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .history-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #f8f9fa;
+            padding-bottom: 10px;
+        }
+        .history-icon-tag {
+            width: 18px;
+            height: 18px;
+            background-color: #ff4d4d;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Empty Records Wrapper Layout */
+        .empty-history-box {
+            text-align: center;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .no-data-text {
+            font-size: 13px;
+            color: #9ca3b0;
+            margin-top: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- TOP NAVBAR (CLICK ARROW TO RETURN TO ACTIVITY.HTML) -->
+    <div class="navbar">
+        <a href="activity.html" class="back-btn">&#10094;</a>
+        <span class="page-title">Gift</span>
+    </div>
+
+    <!-- PREMUM GIFT OPENED COINS BANNER (PURE IN-BUILT VECTOR CODE) -->
+    <div class="gift-banner">
+        <svg width="180" height="150" viewBox="0 0 120 100">
+            <!-- Light Rays effect -->
+            <path d="M60 50 L10 10 M60 50 L110 10 M60 50 L10 90 M60 50 L110 90 M60 50 L60 5 M60 50 L60 95" stroke="#fbe4a1" stroke-width="6" opacity="0.4"/>
+            <!-- Open Box Base -->
+            <rect x="35" y="45" width="50" height="40" rx="3" fill="#f39c12"/>
+            <rect x="30" y="42" width="60" height="8" rx="2" fill="#e67e22"/>
+            <!-- Ribbon lines -->
+            <rect x="56" y="42" width="8" height="43" fill="#f1c40f"/>
+            <!-- Floating Lucky Game Balls & Documents from Screen -->
+            <circle cx="85" cy="25" r="8" fill="#e74c3c"/><text x="82" y="29" fill="white" font-size="10" font-weight="bold">8</text>
+            <circle cx="32" cy="22" r="7" fill="#2ecc71"/><text x="29" y="26" fill="white" font-size="8" font-weight="bold">4</text>
+            <!-- Open Box Lid Wings tilted -->
+            <rect x="18" y="28" width="25" height="6" rx="1" fill="#e67e22" transform="rotate(25 18 28)"/>
+            <rect x="78" y="38" width="25" height="6" rx="1" fill="#e67e22" transform="rotate(-25 78 38)"/>
+            <!-- Golden Coins Bursting -->
+            <circle cx="50" cy="30" r="5" fill="#f1c40f" stroke="#f39c12"/><circle cx="68" cy="28" r="6" fill="#f1c40f" stroke="#f39c12"/><circle cx="58" cy="22" r="5" fill="#f1c40f" stroke="#f39c12"/>
+        </svg>
+    </div>
+
+    <!-- GIFT INPUT ACTION CARD -->
+    <div class="gift-action-card">
+        <h4>Hi</h4>
+        <p>We have a gift for you</p>
+        
+        <span class="input-label">Please enter the gift code below</span>
+        
+        <!-- Input Text Box for 8-12 letters Gift Code -->
+        <input type="text" id="giftCodeBox" class="gift-input-field" placeholder="Please enter gift code" maxlength="20">
+        
+        <!-- Receive Request Button -->
+        <button class="receive-btn" onclick="submitGiftRedeem()">Receive</button>
+    </div>
+
+    <!-- HISTORY RECORDS BOX (DEFAULT: NO DATA LOGS SCREEN) -->
+    <div class="history-section-card">
+        <div class="history-title-row">
+            <div class="history-icon-tag">
+                <!-- Mini Document lines Icon inside red box -->
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="3" y2="18"></line></svg>
+            </div>
+            <span>History</span>
+        </div>
+
+        <!-- In-built Empty History Vector Layout -->
+        <div class="empty-history-box">
+            <svg width="120" height="80" viewBox="0 0 140 100">
+                <path d="M30 20 H100 A10 10 0 0 1 110 30 V70 A10 10 0 0 1 100 80 H30 A10 10 0 0 1 20 70 V30 A10 10 0 0 1 30 20 Z" fill="#e9ecef"/>
+                <path d="M40 40 H90 M40 52 H80 M40 64 H70" stroke="#ced4da" stroke-width="3" stroke-linecap="round"/>
+                <path d="M10 80 L35 55 L55 70 L85 45 L115 80" fill="none" stroke="#dee2e6" stroke-width="2"/>
+            </svg>
+            <div class="no-data-text">No data</div>
+        </div>
+    </div>
+
+</div>
+<script>
+    // गिफ्ट कोड रिडीम करने का फ्रंटएंड सबमिट फंक्शन
+    function submitGiftRedeem() {
+        const giftCodeInput = document.getElementById('giftCodeBox').value.trim();
+        
+        // सुरक्षा और लेंथ की प्राथमिक जांच
+        if (giftCodeInput === "") {
+            alert("Please enter a valid gift code!");
+            return;
+        }
+        
+        if (giftCodeInput.length < 8) {
+            alert("Security Warning: A valid gift code link must be at least 8 to 12 characters long!");
+            return;
+        }
+
+        // फ्रंटएंड अलर्ट (सर्वर लॉजिक हम बाद में एक साथ जोड़ेंगे)
+        alert("Verifying Gift Code: '" + giftCodeInput + "' from backend database records...");
+    }
+
+    // सुरक्षा लॉगिन जांच: बिना लॉगिन यूज़र को बाहर रिडायरेक्ट करना
+    document.addEventListener("DOMContentLoaded", function () {
+        const sessionUser = localStorage.getItem('user_phone');
+        if (!sessionUser) {
+            window.location.href = "index.html"; 
+        }
+    });
+</script>
+</body>
+</html>

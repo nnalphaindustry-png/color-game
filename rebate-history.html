@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Rebate History</title>
+    <style>
+        :root {
+            color-scheme: light !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-text-fill-color: initial !important;
+        }
+        body {
+            background-color: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        /* Mobile Screen Container */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 40px;
+        }
+        /* Sticky Top Navbar */
+        .navbar {
+            background-color: #ffffff !important;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eef2f5 !important;
+        }
+        .back-btn {
+            color: #333333;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            position: absolute;
+            left: 16px;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            margin: 0 auto;
+        }
+        /* Main History Container */
+        .history-list {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        /* Premium Rebate Card (Same as Screenshot) */
+        .rebate-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .game-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333333;
+        }
+        .status-tag {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2ec4b6 !important; /* Greenish Completed Status */
+        }
+        .time-stamp {
+            font-size: 11px;
+            color: #aaaaaa;
+            margin-bottom: 14px;
+            display: block;
+        }
+        /* Timeline List Rows */
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            padding-left: 20px;
+        }
+        /* Vertical connecting dashed line */
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 6px;
+            bottom: 6px;
+            width: 1px;
+            border-left: 1px dashed #ff8787;
+        }
+        .timeline-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            position: relative;
+        }
+        /* Timeline Radio/Circle Bullet (Pinkish border with red core) */
+        .timeline-row::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 2px;
+            width: 10px;
+            height: 10px;
+            background: #ff4d4d;
+            border: 2px solid #ffcccc;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        .row-label {
+            color: #555555;
+            font-weight: 500;
+        }
+        .row-value {
+            font-weight: bold;
+            color: #333333;
+        }
+        .row-value.rate {
+            color: #f03e3e !important; /* Red Highlight for Rate */
+        }
+        .row-value.amount {
+            color: #eccc68 !important; /* Gold Highlight for Reward Amount */
+        }
+        /* No More Data Footer */
+        .no-more {
+            text-align: center;
+            font-size: 13px;
+            color: #999999;
+            margin-top: 20px;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- TOP NAVBAR WITH BACK BUTTON -->
+    <div class="navbar">
+        <!-- एक्टिविटी पेज पर वापस जाने के लिए बैक एरो लिंक -->
+        <a href="activity.html" class="back-btn">&#10094;</a>
+        <span class="page-title">Rebate history</span>
+    </div>
+
+    <!-- BETTING REBATE HISTORY LIST (DYNAMIC ORDER SETUP) -->
+    <div class="history-list" id="rebateHistoryContainer">
+        
+        <!-- CARD 1: TODAY'S NEWEST REBATE (ALWAYS STAYS ON TOP) -->
+        <div class="rebate-card">
+            <div class="card-header">
+                <span class="game-name">Lottery</span>
+                <span class="status-tag">Completed</span>
+            </div>
+            <!-- Current Real-Time Dynamic Timestamp Indicator -->
+            <span class="time-stamp" id="currentDateTime">2026-06-19 10:04:07</span>
+            
+            <div class="timeline-container">
+                <!-- Row 1: Betting Amount -->
+                <div class="timeline-row">
+                    <span class="row-label">Betting rebate</span>
+                    <span class="row-value" id="todayTurnoverVal">2151</span>
+                </div>
+                <!-- Row 2: Fixed Rebate Rate 0.05% -->
+                <div class="timeline-row">
+                    <span class="row-label">Rebate rate</span>
+                    <span class="row-value rate">0.05%</span>
+                </div>
+                <!-- Row 3: Final Calculated Bonus Amount -->
+                <div class="timeline-row">
+                    <span class="row-label">Rebate amount</span>
+                    <span class="row-value amount" id="todayRebateAmt">1.08</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DYNAMIC HISTORICAL CARDS WILL INSERT HERE BELOW -->
+
+    </div>
+
+    <!-- NO MORE DATA FOOTER LABELS -->
+    <div class="no-more">No more</div>
+
+</div>
+<script>
+    // सर्वर से यूज़र का लाइव टर्नओवर डेटा निकालकर 0.05% कैलकुलेट करने का फंक्शन
+    async function fetchLiveBettingRebate() {
+        const phone = localStorage.getItem('user_phone');
+        if (!phone) return;
+
+        try {
+            // आपके सर्वर फ़ाइल के /api/agent-summary-updated/:phone रूट से लाइव डेटा लाना
+            const response = await fetch('/api/agent-summary-updated/' + phone);
+            const result = await response.json();
+            
+            if (result.success) {
+                // नोट: आपके बैकएंड में 'todayBetPlay' वेरिएबल में आज का लाइव टर्नओवर जमा होता है
+                // उदाहरण के लिए यदि आज का टर्नओवर 2151 रुपए है, तो 0.05% के हिसाब से ₹1.08 बनेगा
+                
+                // रीयल-टाइम लाइव डेटा मिलने पर इन फ़ील्ड्स को सिंक किया जा सकता है:
+                // document.getElementById('todayTurnoverVal').innerText = result.todayBetPlay || "0";
+                // let calculatedAmt = ((result.todayBetPlay || 0) * 0.0005).toFixed(2);
+                // document.getElementById('todayRebateAmt').innerText = calculatedAmt;
+            }
+        } catch (error) {
+            console.error("Error connecting with rebate backend server:", error);
+        }
+    }
+
+    // स्क्रीन पर करंट डेट और टाइम सेट करने का छोटा फंक्शन
+    function setLiveTimestamp() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const formatStr = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        const timeBox = document.getElementById('currentDateTime');
+        if (timeBox) timeBox.innerText = formatStr;
+    }
+
+    // सुरक्षा जांच (Security Login Check) और लोड इवेंट्स
+    document.addEventListener("DOMContentLoaded", function () {
+        const sessionUser = localStorage.getItem('user_phone');
+        if (!sessionUser) {
+            window.location.href = "index.html"; // बिना लॉगिन के सीधे बाहर रिडायरेक्ट करेगा
+        } else {
+            setLiveTimestamp();
+            fetchLiveBettingRebate();
+        }
+    });
+</script>
+</body>
+</html>

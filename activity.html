@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Activity</title>
+    <style>
+        :root {
+            color-scheme: light !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-text-fill-color: initial !important;
+        }
+        body {
+            background-color: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        /* App Container (Mobile View Layout) */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 30px;
+        }
+        /* Premium Gradient Header */
+        .header-section {
+            background: linear-gradient(to bottom, #ff4d4d, #ff6b6b);
+            color: white;
+            padding: 18px 16px;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);
+        }
+        .nav-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .game-title {
+            font-size: 19px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        /* Commission Layout */
+        .bonus-row {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .bonus-box p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        .bonus-box h3 {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        /* 4 Quick Options Grid */
+        .quick-options-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 16px 10px;
+            background: #ffffff;
+            margin: 12px auto;
+            width: 92%;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .option-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+        }
+        .option-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        .option-item p {
+            font-size: 11px;
+            font-weight: bold;
+            color: #555;
+            line-height: 13px;
+        }
+        /* Gifts & Attendance 2-Column Layout */
+        .two-col-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 92%;
+            margin: 0 auto 12px auto;
+        }
+        .half-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+        }
+        .half-card h4 {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .half-card p {
+            font-size: 11px;
+            color: #777;
+            line-height: 15px;
+            margin-bottom: 10px;
+        }
+        .card-graphic {
+            align-self: flex-end;
+            margin-top: auto;
+        }
+        /* 10 Banner List Layout */
+        .banner-list-container {
+            width: 92%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .banner-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .banner-card:active {
+            transform: scale(0.98);
+        }
+        .banner-card img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+        .banner-footer {
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #444;
+            border-top: 1px solid #f1f3f5;
+        }
+        .star-icon {
+            color: #f59f00;
+            font-size: 14px;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- TOP PREMIUM HEADER -->
+    <div class="header-section">
+        <div class="nav-row">
+            <!-- होम पेज पर वापस जाने के लिए बैक एरो बटन -->
+            <a href="home.html" class="back-btn">&#10094;</a>
+            <span class="game-title">91 GOA CLUB</span>
+            <div style="width: 20px;"></div>
+        </div>
+        
+        <!-- LIVE COMMISSION DISPLAY -->
+        <div class="bonus-row">
+            <div class="bonus-box">
+                <p>Today's Betting Rebate (0.005%)</p>
+                <h3 id="todayRebateDisplay">₹0.00</h3>
+            </div>
+            <div class="bonus-box" style="border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px;">
+                <p>Total Accumulation</p>
+                <h3 id="totalRebateDisplay">₹0.00</h3>
+            </div>
+        </div>
+    </div>
+
+        <!-- 4 QUICK OPTIONS WITH FIXED LINKS & ICONS -->
+    <div class="quick-options-grid">
+        
+        <!-- 1. Activity Award -->
+        <div class="option-item" onclick="window.location.href='activite.html'">
+            <div class="option-icon-box" style="background: #ff7675;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34M12 2a4 4 0 0 1 4 4v5a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/>
+                </svg>
+            </div>
+            <p>Activity Award</p>
+        </div>
+
+        <!-- 2. Betting Rebate -->
+        <div class="option-item" onclick="window.location.href='rebate-history.html'">
+            <div class="option-icon-box" style="background: #eccc68;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <circle cx="8" cy="8" r="6"/>
+                    <circle cx="18" cy="18" r="4"/>
+                    <path d="M12 18a6 6 0 0 0-6-6"/>
+                </svg>
+            </div>
+            <p>Betting rebate</p>
+        </div>
+
+        <!-- 3. Super Jackpot -->
+        <div class="option-item" onclick="window.location.href='jackpot.html'">
+            <div class="option-icon-box" style="background: #1e90ff;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </div>
+            <p>Super Jackpot</p>
+        </div>
+
+        <!-- 4. Invite Wheel -->
+        <div class="option-item" onclick="window.location.href='invite-wheel.html'">
+            <div class="option-icon-box" style="background: #ff6b81;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 2v20M2 12h20M5.63 5.63l12.74 12.74M5.63 18.37L18.37 5.63"/>
+                </svg>
+            </div>
+            <p>Invite Wheel</p>
+        </div>
+
+    </div>
+
+    <!-- GIFTS & ATTENDANCE 2-COLUMN CARDS WITH FIXED LINKS -->
+    <div class="two-col-row">
+        
+        <!-- Gifts Red Envelope Card -->
+        <div class="half-card" style="background: linear-gradient(135deg, #fff5f5, #ffffff);" onclick="window.location.href='gifts.html'">
+            <div>
+                <h4>Gifts</h4>
+                <p>Enter the redemption code to receive gift rewards</p>
+            </div>
+            <div class="card-graphic">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <rect x="5" y="10" width="40" height="35" rx="5" fill="#ff4d4d"/>
+                    <path d="M5 10 L25 28 L45 10" fill="none" stroke="#ffcccc" stroke-width="3"/>
+                    <circle cx="25" cy="28" r="6" fill="#ffd700"/>
+                </svg>
+            </div>
+        </div>
+        
+        <!-- Attendance Calendar Card -->
+        <div class="half-card" style="background: linear-gradient(135deg, #f7f9fc, #ffffff);" onclick="window.location.href='attendance.html'">
+            <div>
+                <h4>Attendance bonus</h4>
+                <p>The more consecutive days you sign in, the higher the reward.</p>
+            </div>
+            <div class="card-graphic">
+                <svg width="50" height="50" viewBox="0 0 50 50">
+                    <rect x="5" y="10" width="40" height="35" rx="6" fill="#3b5998"/>
+                    <rect x="5" y="10" width="40" height="10" fill="#ff4d4d"/>
+                    <circle cx="13" cy="15" r="2" fill="white"/><circle cx="25" cy="15" r="2" fill="white"/><circle cx="37" cy="15" r="2" fill="white"/>
+                    <rect x="10" y="26" width="6" height="6" rx="1" fill="#ddd"/>
+                    <rect x="22" y="26" width="6" height="6" rx="1" fill="#ddd"/>
+                    <rect x="34" y="26" width="6" height="6" rx="1" fill="#ff4d4d"/>
+                </svg>
+            </div>
+        </div>
+
+    </div>
+    
+
+    <!-- 10 BANNER IMAGES LIST -->
+    <div class="banner-list-container">
+        <!-- Banner 1 -->
+        <div class="banner-card" onclick="openBannerPage(1)">
+            <img src="active1.png" alt="WINGO WIN STREAK BONUS">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> WINGO WIN STREAK BONUS</div>
+        </div>
+        <!-- Banner 2 -->
+        <div class="banner-card" onclick="openBannerPage(2)">
+            <img src="active2.png" alt="Aviator Games">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Aviator Games</div>
+        </div>
+        <!-- Banner 3 -->
+        <div class="banner-card" onclick="openBannerPage(3)">
+            <img src="active3.png" alt="VIP Loss Rebate">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> VIP Loss Rebate</div>
+        </div>
+        <!-- Banner 4 -->
+        <div class="banner-card" onclick="openBannerPage(4)">
+            <img src="active4.png" alt="Creative Video Campaign">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Youtube&Instagram Creative Video</div>
+        </div>
+        <!-- Banner 5 -->
+        <div class="banner-card" onclick="openBannerPage(5)">
+            <img src="active5.png" alt="Sign Up Campaign">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Sign Up Bonus Campaign</div>
+        </div>
+        <!-- Banner 6 -->
+        <div class="banner-card" onclick="openBannerPage(6)">
+            <img src="active6.png" alt="Banner 6">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Mega Deposit Event</div>
+        </div>
+        <!-- Banner 7 -->
+        <div class="banner-card" onclick="openBannerPage(7)">
+            <img src="active7.png" alt="Banner 7">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Weekly Betting Rewards</div>
+        </div>
+        <!-- Banner 8 -->
+        <div class="banner-card" onclick="openBannerPage(8)">
+            <img src="active8.png" alt="Banner 8">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Mystery Red Envelope</div>
+        </div>
+        <!-- Banner 9 -->
+        <div class="banner-card" onclick="openBannerPage(9)">
+            <img src="active9.png" alt="Banner 9">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Agent Monthly Salary</div>
+        </div>
+        <!-- Banner 10 -->
+        <div class="banner-card" onclick="openBannerPage(10)">
+            <img src="active10.png" alt="Banner 10">
+            <div class="banner-footer"><span class="star-icon">&#9733;</span> Luxury Festive Giveaway</div>
+        </div>
+    </div>
+</div>
+<script>
+    // बैनर क्लिक हैंडलर
+    function openBannerPage(bannerId) {
+        alert("Banner " + bannerId + " clicked! This promotional page will be created in the next step.");
+    }
+
+    // यूजर का लाइव बेटिंग टर्नओवर सिंक करने का लॉजिक
+    async function loadUserRebateCommission() {
+        const phone = localStorage.getItem('user_phone');
+        if (!phone) return;
+
+        try {
+            const response = await fetch('/api/balance/' + phone);
+            const result = await response.json();
+            
+            if (result.success) {
+                // डिफ़ॉल्ट रूप से ₹0.00 सेट किया गया है
+                document.getElementById('todayRebateDisplay').innerText = "₹0.00";
+                document.getElementById('totalRebateDisplay').innerText = "₹0.00";
+            }
+        } catch (error) {
+            console.error("Error loading rebate stats:", error);
+        }
+    }
+
+    // सिक्योरिटी चेक और ऑटो लोड
+    document.addEventListener("DOMContentLoaded", function () {
+        const sessionUser = localStorage.getItem('user_phone');
+        if (!sessionUser) {
+            window.location.href = "index.html"; // बिना लॉगिन सीधे बाहर रिडायरेक्ट करेगा
+        } else {
+            loadUserRebateCommission();
+        }
+    });
+</script>
+</body>
+</html>

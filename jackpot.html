@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Super Jackpot</title>
+    <style>
+        :root {
+            color-scheme: light !important;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-text-fill-color: initial !important;
+        }
+        body {
+            background-color: #f4f6fb !important;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        /* Mobile View Wrapper */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb !important;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 20px;
+        }
+        /* Top Navbar Layout */
+        .navbar {
+            background-color: #ffffff !important;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eef2f5 !important;
+        }
+        .back-btn {
+            color: #333333;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            position: absolute;
+            left: 16px;
+        }
+        .page-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333333;
+            margin: 0 auto;
+        }
+        /* Super Jackpot Premium Orange-Red Banner */
+        .jackpot-banner {
+            background: linear-gradient(135deg, #ff5e3a, #ff9500);
+            padding: 24px 16px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .banner-text {
+            width: 65%;
+            z-index: 2;
+        }
+        .banner-text h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .banner-text p {
+            font-size: 11px;
+            line-height: 16px;
+            opacity: 0.95;
+            margin-bottom: 6px;
+        }
+        .banner-graphic {
+            width: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        /* Batch Action Button Bar */
+        .batch-btn-container {
+            padding: 14px;
+        }
+        .receive-batch-btn {
+            width: 100%;
+            background-color: #cbcfd8 !important; /* Disabled gray from screen */
+            color: #ffffff !important;
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: not-allowed;
+        }
+        /* Dual Navigation Option Tabs (Rule & Winning Star) */
+        .option-tabs-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 14px;
+            margin-bottom: 14px;
+        }
+        .tab-item-box {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            cursor: pointer;
+        }
+        .tab-item-box span {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444444;
+        }
+        /* Main Empty Jackpot Box Status Card */
+        .status-box-card {
+            background: #ffffff;
+            width: 93%;
+            margin: 0 auto;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .empty-illustration {
+            margin-bottom: 24px;
+            opacity: 0.7;
+        }
+        .status-msg {
+            font-size: 14px;
+            color: #555555;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+        /* Big Red Bottom Go Bet Action Button */
+        .go-bet-btn {
+            width: 90%;
+            background: linear-gradient(to right, #ff5757, #ff6b6b);
+            color: white !important;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 87, 87, 0.25);
+            outline: none;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .go-bet-btn:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- TOP NAVBAR (CLICK ARROW TO BACK ACTIVITY PAGE) -->
+    <div class="navbar">
+        <a href="activity.html" class="back-btn">&#10094;</a>
+        <span class="page-title">Super Jackpot</span>
+    </div>
+
+    <!-- PREMIUM ORANGE BANNER CARD WITH GIFT BOX VECTOR -->
+    <div class="jackpot-banner">
+        <div class="banner-text">
+            <h2>Super Jackpot</h2>
+            <p>When you get the Super Jackpot in 【Slots】 Can get 1 additional bonus</p>
+            <p>The reward is valid for 3 day, and you will not be able to claim it after it expires!</p>
+        </div>
+        <!-- In-built SVG Festive Gift Box & Envelope Graphics -->
+        <div class="banner-graphic">
+            <svg width="80" height="80" viewBox="0 0 100 100">
+                <rect x="25" y="35" width="50" height="45" rx="4" fill="#ff4d4d"/>
+                <rect x="20" y="27" width="60" height="10" rx="2" fill="#ff6b6b"/>
+                <rect x="46" y="27" width="8" height="53" fill="#ffd700"/>
+                <rect x="25" y="52" width="50" height="8" fill="#ffd700"/>
+                <path d="M50 27 C40 10, 25 20, 50 27 C65 20, 60 10, 50 27" fill="#ffd700"/>
+                <!-- Envelope Layer Floating -->
+                <rect x="65" y="55" width="25" height="18" rx="2" fill="#e63946" transform="rotate(-15 65 55)"/>
+                <circle cx="75" cy="62" r="3" fill="#ffd700"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- BATCH BUTTON HEADER BAR -->
+    <div class="batch-btn-container">
+        <button class="receive-batch-btn">
+            <!-- 4-Grid Icon Built with SVG -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Receive in batches
+        </button>
+    </div>
+
+    <!-- DUAL TABS OPTIONS (RULE & WINNING STAR) -->
+    <div class="option-tabs-row">
+        <!-- Rule Box -->
+        <div class="tab-item-box" onclick="alert('Jackpot Rules Coming Soon!')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>Rule</span>
+        </div>
+        <!-- Winning Star Box -->
+        <div class="tab-item-box" onclick="alert('Winners List Coming Soon!')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff4d4d"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>Winning star</span>
+        </div>
+    </div>
+
+    <!-- MAIN CARD BOX AREA (EMPTY RECORDS VIEW) -->
+    <div class="status-box-card">
+        <!-- Built-in Empty Document/Scroll Graphic via SVG -->
+        <div class="empty-illustration">
+            <svg width="140" height="100" viewBox="0 0 140 100">
+                <path d="M30 20 H100 A10 10 0 0 1 110 30 V70 A10 10 0 0 1 100 80 H30 A10 10 0 0 1 20 70 V30 A10 10 0 0 1 30 20 Z" fill="#e9ecef"/>
+                <path d="M40 40 H90 M40 52 H80 M40 64 H70" stroke="#ced4da" stroke-width="3" stroke-linecap="round"/>
+                <!-- Background Mountain Shading vectors -->
+                <path d="M10 80 L35 55 L55 70 L85 45 L115 80" fill="none" stroke="#dee2e6" stroke-width="2"/>
+            </svg>
+        </div>
+        
+        <!-- Status Label Text -->
+        <div class="status-msg">You don't have a big jackpot yet, let's bet</div>
+        
+        <!-- ACTION BUTTON (CLICK TO REDIRECT MAIN DASHBOARD HOME.HTML) -->
+        <button class="go-bet-btn" onclick="redirectToHome()">Go bet</button>
+    </div>
+
+</div>
+<script>
+    // go bet par click karte hi home page par bhejna
+    function redirectToHome() {
+        window.location.href = 'home.html';
+    }
+
+    // security check: bina login user ko block rakhna
+    document.addEventListener("DOMContentLoaded", function () {
+        const sessionUser = localStorage.getItem('user_phone');
+        if (!sessionUser) {
+            window.location.href = "index.html"; 
+        }
+    });
+</script>
+</body>
+</html>

@@ -23,16 +23,58 @@ global.adminManualOverride = {
     "5m": null
 };
 
-// === 1. USER SCHEMA WITH BAN TRACKING ===
+// === 1. USER SCHEMA WITH BAN TRACKING (UPDATED FOR AGENTS) ===
 const userSchema = new mongoose.Schema({
-	  uid: { type: String, required: true, unique: true }, 
+    uid: { type: String, required: true, unique: true },
     phone: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    isBanned: { type: Boolean, default: false }, // Added for tracking ban status
-    inviteCode: { type: String, default: "" },
-    balance: { type: Number, default: 70 }, 
-    createdAt: { type: Date, default: Date.now }
+    isBanned: { type: Boolean, default: false },
+    balance: { type: Number, default: 70 },
+    createdAt: { type: Date, default: Date.now },
+
+    // --- ऑटोमैटिक इनवाइट और एजेंट ट्रैकिंग के नए फील्ड्स ---
+    inviteCode: { type: String, default: "" },          // यूजर का अपना यूनिक इनवाइट कोड
+    referredBy: { type: String, default: "" },          // इसे इनवाइट करने वाले (Parent) का फोन नंबर
+    yesterdayCommission: { type: Number, default: 0 },  // रात 12 बजे ट्रांसफर होने वाला कल का कमीशन
+    totalCommission: { type: Number, default: 0 },      // अब तक की कुल कुल कमाई
+    
+    // --- लाइव रिचार्ज और बेट टर्नओवर ट्रैकिंग ---
+    todayBetPlay: { type: Number, default: 0 },         // आज दिनभर में खेली गई कुल बेट
+    todayDeposit: { type: Number, default: 0 },         // आज दिनभर में किया गया कुल रिचार्ज
+    totalDeposit: { type: Number, default: 0 },         // लाइफटाइम कुल रिचार्ज (Valid User चेक करने के लिए)
+    isActiveUser: { type: Boolean, default: false },     // यूजर ऑन/ऑफ स्टेटस ट्रैक करने के लिए
+    
+    claimedMilestoneIds: { type: [String], default: [] } // डिपाजिट बोनस के जो टास्क क्लेम हो चुके हैं (उदा: ["task_1"])
 });
+// === रजिस्ट्रेशन से पहले अपने आप यूनिक इनवाइट कोड जनरेट करने का लॉजिक ===
+userSchema.pre('save', async function (next) {
+    // अगर यूजर के पास पहले से कोड है (यानी अपडेट हो रहा है), तो दोबारा नहीं बनाएंगे
+    if (!this.isNew || this.inviteCode) return next();
+    
+    let uniqueCode = "";
+    let isCodeUnique = false;
+    const UserModel = mongoose.models.User || mongoose.model('User', userSchema);
+
+    // लूप तब तक चलेगा जब तक एकदम अनोखा कोड न मिल जाए
+    while (!isCodeUnique) {
+        // 6 अक्षरों का रैंडम कोड बनाना (जैसे: GOA74X)
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        uniqueCode = "GOA"; // कोड की शुरुआत हमेशा GOA से होगी
+        for (let i = 0; i < 5; i++) {
+            uniqueCode += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+
+        // डेटाबेस में चेक करना कि यह कोड पहले से किसी के पास तो नहीं है
+        const checkExistingCode = await UserModel.findOne({ inviteCode: uniqueCode });
+        if (!checkExistingCode) {
+            isCodeUnique = true; // अगर खाली है, तो लूप खत्म
+        }
+    }
+
+    this.inviteCode = uniqueCode; // यूजर को यह कोड अलॉट कर दिया
+    next();
+});
+
 const User = mongoose.model('User', userSchema);
 
 // 2. हर राउंड (लॉटरी रिज़ल्ट) का स्कीमा
@@ -296,39 +338,50 @@ app.get('/api/db-status', (req, res) => {
     res.json({ success: mongoose.connection.readyState === 1 });
 });
 
-// नया रजिस्ट्रेशन (Register API) - असली UID के साथ
+// // नया रजिस्ट्रेशन (Register API) - असली UID और एजेंट ट्रैकिंग के साथ
 app.post('/api/register', async (req, res) => {
-  try {
-    const { phone, password, inviteCode } = req.body;
-    
-    // चेक करें कि फोन नंबर पहले से तो नहीं है
-    const exists = await User.findOne({ phone: phone.trim() });
-    if (exists) {
-      return res.json({ success: false, message: "Already registered!" });
+    try {
+        const { phone, password, inviteCode } = req.body;
+
+        // चेक करें कि फोन नंबर पहले से तो नहीं है
+        const exists = await User.findOne({ phone: phone.trim() });
+        if (exists) {
+            return res.json({ success: false, message: "Already registered!" });
+        }
+
+        // डेटाबेस के लिए एकदम अनोखी (Unique) 6 अंकों की UID बनाने का लॉजिक
+        let uniqueUID;
+        let isUnique = false;
+        while (!isUnique) {
+            uniqueUID = Math.floor(100000 + Math.random() * 900000).toString(); // 100000 से 999999 के बीच
+            const checkData = await User.findOne({ uid: uniqueUID });
+            if (!checkData) isUnique = true; // अगर डेटाबेस में यह नंबर खाली है, तो लूप खत्म
+        }
+
+        // रेफरल कोड का पता लगाना (यह चेक करना कि यह कोड किस एजेंट का है)
+        let parentPhone = "";
+        if (inviteCode && inviteCode.trim() !== "") {
+            const parentUser = await User.findOne({ inviteCode: inviteCode.trim() });
+            if (parentUser) {
+                parentPhone = parentUser.phone; // एजेंट का फोन नंबर निकाल लिया
+            }
+        }
+
+        const newUser = new User({
+            uid: uniqueUID, // यहाँ असली जेनरेट हुई UID सेव होगी
+            phone: phone.trim(),
+            password: password.trim(),
+            referredBy: parentPhone // यहाँ सेट हो गया कि इस यूजर को किसने इनवाइट किया है
+        });
+
+        await newUser.save();
+        res.json({ success: true, message: "Registered successfully!" });
+    } catch (err) {
+        console.error("Registration failed:", err);
+        res.status(500).json({ success: false, message: "Registration failed! Server error." });
     }
-
-    // डेटाबेस के लिए एकदम अनोखी (Unique) 6 अंकों की UID बनाने का लॉजिक
-    let uniqueUID;
-    let isUnique = false;
-    while (!isUnique) {
-      uniqueUID = Math.floor(100000 + Math.random() * 900000).toString(); // 100000 से 999999 के बीच
-      const checkData = await User.findOne({ uid: uniqueUID });
-      if (!checkData) isUnique = true; // अगर डेटाबेस में यह नंबर खाली है, तो लूप खत्म
-    }
-
-    const newUser = new User({
-      uid: uniqueUID, // यहाँ असली जेनरेट हुई UID सेव होगी
-      phone: phone.trim(),
-      password: password.trim(),
-      inviteCode: inviteCode || ""
-    });
-
-    await newUser.save();
-    res.json({ success: true, message: "Registered successfully!" });
-  } catch (err) {
-    res.status(500).json({ success: false, message: "Registration failed! Server error." });
-  }
 });
+
 
 
 // LOGIN API WITH UID
@@ -471,11 +524,18 @@ app.post('/api/place-bet', async (req, res) => {
             }
         }
         
-        const updatedUser = await User.findOneAndUpdate(
-            { phone: phone.trim() },
-            { $inc: { balance: -Number(betAmount) } },
-            { new: true }
-        );
+        // === [UPDATED WITH TEAM TURNOVER TRACKING] ===
+const updatedUser = await User.findOneAndUpdate(
+    { phone: phone.trim() },
+    { 
+        $inc: { 
+            balance: -Number(betAmount), // यूजर का बैलेंस कटा
+            todayBetPlay: Number(betAmount) // आज की खेली गई कुल बेट में प्लस हुआ
+        },
+        $set: { isActiveUser: true } // यूजर को लाइव एक्टिव मार्क कर दिया
+    },
+    { new: true }
+);
 
         // [MASTER FIX]: Bet save karte samay status hamesha "Pending" hona chahiye aur winAmount 0!
         const newBet = new Bet({
@@ -877,15 +937,22 @@ app.post('/api/admin/action-deposit', async (req, res) => {
         }
 
         if (action === 'approve') {
-            // 2. यूज़र मॉडल को ढूँढना
-            const UserModel = mongoose.models.User || mongoose.model('User');
-            
-            // 3. [यहाँ सबसे बड़ा बदलाव]: सीधे $inc (Increment) का उपयोग करके बैलेंस बढ़ाना ताकि Validation Error न आए
-            const updatedUser = await UserModel.findOneAndUpdate(
-                { phone: depositItem.phone.trim() },
-                { $inc: { balance: Number(depositItem.amount) } },
-                { new: true } // ताकि अपडेटेड डेटा वापस मिले
-            );
+    // 2. यूज़र मॉडल को ढूँढना
+    const UserModel = mongoose.models.User || mongoose.model('User');
+    
+    // 3. सीधे $inc का उपयोग करके बैलेंस, आज का डिपॉजिट और लाइफटाइम डिपॉजिट एक साथ बढ़ाना
+    const updatedUser = await UserModel.findOneAndUpdate(
+        { phone: depositItem.phone.trim() },
+        { 
+            $inc: { 
+                balance: Number(depositItem.amount),       // यूजर का गेम बैलेंस बढ़ा
+                todayDeposit: Number(depositItem.amount),  // आज के कुल रिचार्ज में जुड़ा
+                totalDeposit: Number(depositItem.amount)   // लाइफटाइम कुल रिचार्ज में जुड़ा
+            }
+        },
+        { new: true }
+    );
+    
             
             if (!updatedUser) {
                 return res.json({ success: false, message: `User with phone ${depositItem.phone} not found!` });
@@ -952,18 +1019,297 @@ app.post('/api/admin/action-withdrawal', async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error: " + error.message });
     }
 });
+// =========================================================================
+// === 5 NEW API ROUTES FOR AGENT COMMISSION SYSTEM & DASHBOARDS ===
+// =========================================================================
+
+// 1. मुख्य प्रमोशन पेज के लिए समरी डेटा रूट्स (/api/agent-summary/:phone)
+app.get('/api/agent-summary/:phone', async (req, res) => {
+    try {
+        const user = await User.findOne({ phone: req.params.phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found" });
+        
+        res.json({
+            success: true,
+            yesterdayCommission: user.yesterdayCommission || 0,
+            totalCommission: user.totalCommission || 0,
+            inviteCode: user.inviteCode || ""
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 2. कमीशन डिटेल्स पेज के लिए आज का कुल टीम टर्नओवर (/api/team-turnover-summary/:phone)
+app.get('/api/team-turnover-summary/:phone', async (req, res) => {
+    try {
+        const agentPhone = req.params.phone.trim();
+        
+        // Level 1 ढूँढना
+        const level1Users = await User.find({ referredBy: agentPhone });
+        const l1Phones = level1Users.map(u => u.phone);
+        
+        // Level 2 ढूँढना
+        const level2Users = await User.find({ referredBy: { $in: l1Phones } });
+        const l2Phones = level2Users.map(u => u.phone);
+        
+        // Level 3 ढूँढना
+        const level3Users = await User.find({ referredBy: { $in: l2Phones } });
+        
+        // तीनों लेवल्स का आज का कुल टर्नओवर जोड़ना
+        let todayTotalTurnover = 0;
+        level1Users.forEach(u => todayTotalTurnover += (u.todayBetPlay || 0));
+        level2Users.forEach(u => todayTotalTurnover += (u.todayBetPlay || 0));
+        level3Users.forEach(u => todayTotalTurnover += (u.todayBetPlay || 0));
+        
+        res.json({ success: true, todayTotalTurnover });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 3. कमीशन डिटेल्स पेज के लिए लेवल-वाइज टीम लिस्ट (/api/team-details/:phone/:levelNumber)
+app.get('/api/team-details/:phone/:levelNumber', async (req, res) => {
+    try {
+        const agentPhone = req.params.phone.trim();
+        const levelNum = parseInt(req.params.levelNumber);
+        let targetUsers = [];
+        
+        // Level 1 यूज़र्स
+        const level1Users = await User.find({ referredBy: agentPhone });
+        
+        if (levelNum === 1) {
+            targetUsers = level1Users;
+        } else {
+            const l1Phones = level1Users.map(u => u.phone);
+            const level2Users = await User.find({ referredBy: { $in: l1Phones } });
+            
+            if (levelNum === 2) {
+                targetUsers = level2Users;
+            } else if (levelNum === 3) {
+                const l2Phones = level2Users.map(u => u.phone);
+                targetUsers = await User.find({ referredBy: { $in: l2Phones } });
+            }
+        }
+        
+        // फ्रंटएंड बैनर के लिए साफ़-सुथरी लिस्ट तैयार करना
+        const usersList = targetUsers.map(u => ({
+            uid: u.uid,
+            todayBetPlay: u.todayBetPlay || 0,
+            isActiveUser: u.isActiveUser || false,
+            createdAt: u.createdAt
+        }));
+        
+        res.json({ success: true, usersList });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 4. डिपॉजिट बोनस पेज के लिए मुख्य डैशबोर्ड नंबर्स (/api/deposit-dashboard-summary/:phone)
+app.get('/api/deposit-dashboard-summary/:phone', async (req, res) => {
+    try {
+        const agentPhone = req.params.phone.trim();
+        
+        // एजेंट ने जितने लोगों को सीधा इनवाइट किया है (Direct / Level 1)
+        const directUsers = await User.find({ referredBy: agentPhone });
+        
+        // कम्प्लीट वे हैं जिनका कुल रिचार्ज ₹300 या उससे ज़्यादा है
+        let completeUsersCount = 0;
+        let incompleteUsersCount = 0;
+        
+        directUsers.forEach(u => {
+            if ((u.totalDeposit || 0) >= 300) {
+                completeUsersCount++;
+            } else {
+                incompleteUsersCount++;
+            }
+        });
+        
+        // टास्क क्लेम ट्रैकिंग के लिए क्लेम की हुई आईडी की लिस्ट
+        const agentUserObj = await User.findOne({ phone: agentPhone });
+        const claimedMilestoneIds = agentUserObj ? agentUserObj.claimedMilestoneIds : [];
+        
+        res.json({
+            success: true,
+            totalValidInvites: completeUsersCount, // 1, 3, 5 टास्क के प्रोग्रेस बार के लिए
+            completeUsersCount,
+            incompleteUsersCount,
+            claimedMilestoneIds
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 5. डिपॉजिट बोनस पेज के लिए कम्प्लीट/इनकम्प्लीट यूज़र्स की लिस्ट (/api/deposit-users-list/:phone/:userTabType)
+app.get('/api/deposit-users-list/:phone/:userTabType', async (req, res) => {
+    try {
+        const agentPhone = req.params.phone.trim();
+        const tabType = req.params.userTabType.trim(); // 'complete' या 'incomplete'
+        
+        const directUsers = await User.find({ referredBy: agentPhone });
+        let filteredUsers = [];
+        
+        directUsers.forEach(u => {
+            const hasDeposited300 = (u.totalDeposit || 0) >= 300;
+            if (tabType === 'complete' && hasDeposited300) {
+                filteredUsers.push(u);
+            } else if (tabType === 'incomplete' && !hasDeposited300) {
+                filteredUsers.push(u);
+            }
+        });
+        
+        const usersList = filteredUsers.map(u => ({
+            uid: u.uid,
+            todayDeposit: u.todayDeposit || 0,
+            totalDeposit: u.totalDeposit || 0,
+            createdAt: u.createdAt
+        }));
+        
+        res.json({ success: true, usersList });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// 6. इनवाइटेड यूज़र्स (Direct Link List) पेज के लिए रूट्स (/api/direct-invited-details/:phone)
+app.get('/api/direct-invited-details/:phone', async (req, res) => {
+    try {
+        const agentPhone = req.params.phone.trim();
+        const directUsers = await User.find({ referredBy: agentPhone });
+        
+        const usersList = directUsers.map(u => ({
+            uid: u.uid,
+            todayDeposit: u.todayDeposit || 0,
+            totalDeposit: u.totalDeposit || 0,
+            isActiveUser: u.isActiveUser || false,
+            createdAt: u.createdAt
+        }));
+        
+        res.json({ success: true, usersList });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+// =========================================================================
+// === DAILY AUTOMATIC ENGINE (रोज़ रात ठीक 12:00 बजे चलने वाली स्क्रिप्ट) ===
+// =========================================================================
+
+// 1. बोनस क्लेम करने की एपीआई रिक्वेस्ट (/api/claim-milestone-reward)
+app.post('/api/claim-milestone-reward', async (req, res) => {
+    try {
+        const { phone, milestoneId, bonusAmount } = req.body;
+        if (!phone || !milestoneId || !bonusAmount) {
+            return res.json({ success: false, message: "Missing required parameters!" });
+        }
+
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        // चेक करना कि यह टास्क पहले से क्लेम तो नहीं हो चुका है
+        if (user.claimedMilestoneIds && user.claimedMilestoneIds.includes(milestoneId)) {
+            return res.json({ success: false, message: "This milestone bonus has already been claimed!" });
+        }
+
+        // यूजर के खाते में बोनस जोड़ना और क्लेम की हुई आईडी लिस्ट में दर्ज करना
+        await User.findOneAndUpdate(
+            { phone: phone.trim() },
+            { 
+                $inc: { 
+                    totalCommission: Number(bonusAmount), // टोटल कमीशन बोर्ड में प्लस हुआ
+                    yesterdayCommission: Number(bonusAmount) // कल की कमाई वाले बोर्ड में भी दिखेगा
+                },
+                $push: { claimedMilestoneIds: milestoneId } // इसे क्लेम लिस्ट में लॉक कर दिया
+            }
+        );
+
+        res.json({ success: true, message: "Bonus transferred successfully!" });
+    } catch (error) {
+        console.error("Claim reward server error:", error);
+        res.status(500).json({ success: false, message: "Server error during claiming." });
+    }
+});
+
+// 2. हर 24 घंटे में रात 12:00 बजे ऑटोमैटिक हिसाब करने वाली टाइमर स्क्रिप्ट
+function startDailyNightCommissionCronJob() {
+    console.log("[CRON JOB] Automatic 12:00 AM Commission Scheduler Active.");
+
+    setInterval(async () => {
+        const now = new Date();
+        // भारतीय समय (IST) के अनुसार रात के ठीक 00:00:00 (12:00 AM) चेक करना
+        const currentHours = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const currentSeconds = now.getSeconds();
+
+        if (currentHours === 0 && currentMinutes === 0 && currentSeconds === 0) {
+            console.log("[CRON ENGINE] Midnight 12:00 AM discovered. Calculating team commissions...");
+
+            try {
+                // डेटाबेस के सभी यूज़र्स की लिस्ट निकालना
+                const allUsersList = await User.find({});
+
+                // प्रत्येक यूजर का अलग-अलग 3-Level टीम कमीशन जोड़ना
+                for (let agent of allUsersList) {
+                    let calculatedBonusAmt = 0;
+
+                    // Level 1 यूज़र्स और उनका टर्नओवर
+                    const level1Users = await User.find({ referredBy: agent.phone });
+                    level1Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.0001); // 0.01% रेट
+
+                    // Level 2 यूज़र्स और उनका टर्नओवर
+                    const l1Phones = level1Users.map(u => u.phone);
+                    const level2Users = await User.find({ referredBy: { $in: l1Phones } });
+                    level2Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.00001); // 0.001% रेट
+
+                    // Level 3 यूज़र्स और उनका टर्नओवर
+                    const l2Phones = level2Users.map(u => u.phone);
+                    const level3Users = await User.find({ referredBy: { $in: l2Phones } });
+                    level3Users.forEach(u => calculatedBonusAmt += (u.todayBetPlay || 0) * 0.00001); // 0.001% रेट
+
+                    // अगर इस एजेंट का कोई कमिशन बना है, तो उसके डैशबोर्ड वॉलेट में क्रेडिट करना
+                    if (calculatedBonusAmt > 0) {
+                        await User.findByIdAndUpdate(agent._id, {
+                            $set: { yesterdayCommission: calculatedBonusAmt }, // कल की कमाई वाले बॉक्स में डाल दिया
+                            $inc: { totalCommission: calculatedBonusAmt }     // अब तक की कुल कमाई में प्लस कर दिया
+                        });
+                    } else {
+                        // अगर कोई कमिशन नहीं बना तो कल की कमाई वापस ₹0 दिखेगी
+                        await User.findByIdAndUpdate(agent._id, {
+                            $set: { yesterdayCommission: 0 }
+                        });
+                    }
+                }
+
+                // [MASTER RESET]: कमिशन बांटने के बाद, अगले दिन के लिए सभी लाइव काउंटर्स को ₹0 करना
+                await User.updateMany({}, {
+                    $set: { 
+                        todayBetPlay: 0,
+                        todayDeposit: 0,
+                        isActiveUser: false 
+                    }
+                });
+
+                console.log("[CRON ENGINE SUCCESS] All commissions transferred and active day counters reset successfully.");
+            } catch (cronError) {
+                console.error("[CRON CRITICAL ERROR] Failed to execute midnight operations:", cronError);
+            }
+        }
+    }, 1000); // हर सेकंड घड़ी चेक होगी कि रात के 12 बजे या नहीं
+}
 
 // === SERVER START & DATABASE CONNECTION ===
 const PORT = process.env.PORT || 3000;
 
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("MongoDB Connected Successfully!");
-        startServerTimerEngine(); // डेटाबेस कनेक्ट होते ही टाइमर चालू हो जाएगा
-        server.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-        });
-    })
+  .then(() => {
+    console.log("MongoDB Connected Successfully!");
+    startServerTimerEngine(); // डेटाबेस कनेक्ट होते ही टाइमर चालू हो जाएगा
+    startDailyNightCommissionCronJob(); // <--- रात 12 बजे वाला नया कमीशन इंजन यहाँ चालू कर दिया
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
     .catch(err => {
         console.error("Database connection error:", err);
     });

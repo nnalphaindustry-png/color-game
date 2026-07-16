@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invite Wheel</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root { color-scheme: light !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(180deg, #ff9f43 0%, #ee5253 100%); display: flex; justify-content: center; min-height: 100vh; color: #ffffff; }
+        .app-container { width: 100%; max-width: 450px; background: linear-gradient(180deg, #f39c12 0%, #d35400 100%); min-height: 100vh; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.3); padding-bottom: 40px; overflow-y: auto; }
+        .top-navbar { padding: 15px; display: flex; align-items: center; position: relative; background: rgba(0, 0, 0, 0.1); }
+        .back-btn { cursor: pointer; text-decoration: none; display: flex; align-items: center; z-index: 12; }
+        .page-title { color: #fff; font-size: 18px; font-weight: 700; position: absolute; width: 100%; text-align: center; left: 0; z-index: 10; }
+        .wheel-dashboard-card { text-align: center; margin: 20px auto 10px auto; width: 92%; }
+        .dashboard-title { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; }
+        .dashboard-earnings { font-size: 36px; font-weight: 900; color: #fffb00; margin-top: 5px; text-shadow: 0 3px 6px rgba(0,0,0,0.3); }
+        .cash-out-btn { background: linear-gradient(180deg, #ffbe76 0%, #ff9f43 100%); color: #ffffff; border: 2px solid #ffffff; padding: 10px 35px; font-size: 16px; font-weight: 800; border-radius: 25px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: 0.5px; }
+        .cash-out-btn:active { transform: scale(0.95); }
+        .spin-status-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 92%; margin: 15px auto; }
+        .spin-box { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; padding: 10px; text-align: center; backdrop-filter: blur(5px); }
+        .spin-box h3 { font-size: 11px; color: #ffffff; font-weight: 600; line-height: 1.3; }
+        .spin-count { font-size: 20px; font-weight: 900; color: #fffb00; margin-top: 4px; }
+        .wheel-section-wrapper { position: relative; width: 320px; height: 320px; margin: 25px auto; display: flex; justify-content: center; align-items: center; }
+        .wheel-outer-ring { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, transparent 66%, #e74c3c 67%, #c0392b 100%); border-radius: 50%; border: 6px solid #fffb00; box-shadow: 0 10px 25px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,251,0,0.6); z-index: 5; pointer-events: none; }
+        #wheel-canvas { width: 300px; height: 300px; border-radius: 50%; z-index: 4; transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1); box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
+        .wheel-pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 24px solid #111111; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)); z-index: 10; }
+        .spin-center-trigger-btn { position: absolute; width: 70px; height: 70px; background: radial-gradient(circle, #ffffff 0%, #f1c40f 100%); border: 4px solid #e74c3c; border-radius: 50%; color: #c0392b; font-weight: 900; font-size: 13px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; z-index: 8; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-transform: uppercase; line-height: 1.1; text-align: center; }
+        .spin-center-trigger-btn span { font-size: 9px; font-weight: 700; color: #111; }
+        .spin-center-trigger-btn:active { transform: scale(0.94); }
+        .bottom-action-wrapper { text-align: center; margin: 20px auto; width: 92%; }
+        .invite-big-btn { background: linear-gradient(180deg, #ffeaa7 0%, #f1c40f 100%); color: #d35400; border: none; padding: 12px 0; width: 100%; font-size: 15px; font-weight: 900; border-radius: 25px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-transform: uppercase; }
+        .progress-subtext { font-size: 12px; color: #ffffff; font-weight: 600; margin-top: 10px; opacity: 0.95; }
+        .history-section-title { width: 92%; margin: 20px auto 5px auto; font-size: 14px; font-weight: 700; color: #fffb00; text-transform: uppercase; }
+        .history-card-wrapper { background: rgba(0, 0, 0, 0.2); width: 92%; margin: 0 auto; border-radius: 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .history-header-grid { display: grid; grid-template-columns: 1.5fr 1fr 1.2fr; text-align: center; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.7); padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .history-rows-container { display: flex; flex-direction: column; max-height: 180px; overflow-y: auto; }
+        .history-log-row { display: grid; grid-template-columns: 1.5fr 1fr 1.2fr; align-items: center; text-align: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; font-weight: 600; color: #ffffff; }
+        .payout-text { font-weight: 800; color: #fffb00; }
+        .time-subtext { font-size: 10px; color: rgba(255,255,255,0.6); display: block; }
+        .alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
+        .alert-box { background: linear-gradient(135deg, #ffffff 0%, #f5f6fa 100%); border-radius: 20px; padding: 25px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 15px 30px rgba(0,0,0,0.4); color: #222; }
+        .alert-amount { font-size: 38px; font-weight: 900; color: #e74c3c; margin: 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .alert-btn { width: 100%; background: linear-gradient(180deg, #ee5253 0%, #c0392b 100%); color: white; border: none; padding: 12px 0; font-size: 15px; font-weight: 700; border-radius: 25px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .custom-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 10000; padding: 20px; backdrop-filter: blur(5px); }
+.custom-popup-box { background: #ffffff; border-radius: 24px; padding: 30px 20px; text-align: center; width: 100%; max-width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); color: #222; animation: popupAnim 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popupAnim { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.popup-icon-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; font-size: 30px; }
+.icon-error { background: #ffe0e0; color: #e74c3c; }
+.icon-success { background: #e0f8e9; color: #2ecc71; }
+.popup-title-text { font-size: 18px; font-weight: 900; color: #222; margin-bottom: 8px; }
+.popup-desc-text { font-size: 13px; color: #666; line-height: 1.4; margin-bottom: 20px; }
+.popup-action-btn { width: 100%; background: linear-gradient(180deg, #ff9f43 0%, #d35400 100%); color: white; border: none; padding: 12px 0; font-size: 14px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 10px rgba(211,84,0,0.3); text-transform: uppercase; }
+
+    </style>
+</head>
+<body>
+<div class="app-container">
+    
+    <!-- हेडर नेविगेशन -->
+    <div class="top-navbar">
+        <a href="home.html" class="back-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+        <div class="page-title">Invite Wheel</div>
+    </div>
+
+    <!-- डैशबोर्ड बैलेंस एरिया -->
+    <div class="wheel-dashboard-card">
+        <div class="dashboard-title">my amount(71:59:49)</div>
+        <div class="dashboard-earnings" id="total-wheel-earned">₹0.00</div>
+        <button class="cash-out-btn" onclick="triggerWheelCashOutAPI()">Cash Out</button>
+    </div>
+
+    <!-- लाइव स्पिन काउंटर्स -->
+    <div class="spin-status-row">
+        <div class="spin-box">
+            <h3>Invite Friends Spin</h3>
+            <div class="spin-count" id="count-invite-spin">0</div>
+        </div>
+        <div class="spin-box">
+            <h3>Self Deposit Spin</h3>
+            <div class="spin-count" id="count-deposit-spin">0</div>
+        </div>
+    </div>
+
+    <!-- 3D कसीनो स्पिनर संरचना -->
+    <div class="wheel-section-wrapper">
+        <div class="wheel-pointer"></div>
+        <div class="wheel-outer-ring"></div>
+        <canvas id="wheel-canvas" width="300" height="300"></canvas>
+        <div class="spin-center-trigger-btn" id="spin-btn-action" onclick="startLuckySpinProcess()">
+            X1<br><span>FREE SPIN</span>
+        </div>
+    </div>
+
+    <!-- इन्वाइट फ्रेंड्स बटन और प्रोग्रेस -->
+    <div class="bottom-action-wrapper">
+        <button class="invite-big-btn" onclick="window.location.href='promotion.html'">Invite Friends To Get Spin</button>
+        <div class="progress-subtext" id="live-progress-text">Checking reward status...</div>
+    </div>
+
+    <!-- रिकॉर्ड इतिहास लॉग्स -->
+    <div class="history-section-title">Record History</div>
+    <div class="history-card-wrapper">
+        <div class="history-header-grid">
+            <span>Type/Date</span>
+            <span>Spin Mode</span>
+            <span>Amount</span>
+        </div>
+        <div class="history-rows-container" id="spin-logs-rows-display"></div>
+    </div>
+</div>
+
+<!-- 🎁 जीत का सुंदर पॉपअप विंडो -->
+<div class="alert-overlay" id="reward-popup-overlay">
+    <div class="alert-box">
+        <h2 style="font-weight: 900; color: #d35400;">Congratulations!</h2>
+        <p style="font-size: 13px; color: #555; margin-top: 5px;">You have successfully received:</p>
+        <div class="alert-amount" id="reward-payout-text">₹0.00</div>
+        <button class="alert-btn" onclick="closeRewardPopup()">Awesome</button>
+    </div>
+</div>
+
+<!-- 🔔 सामान्य संदेशों के लिए डायनेमिक सुंदर पॉपअप (Alert की जगह) -->
+<div class="custom-popup-overlay" id="custom-universal-popup">
+    <div class="custom-popup-box">
+        <div class="popup-icon-circle" id="popup-status-icon">❌</div>
+        <div class="popup-title-text" id="popup-global-title">Alert</div>
+        <div class="popup-desc-text" id="popup-global-desc">Something went wrong.</div>
+        <button class="popup-action-btn" onclick="closeUniversalPopup()">OK</button>
+    </div>
+</div>
+<script>
+const BACKEND_URL = "https://color-game-1kc2.onrender.com";
+const userPhone = localStorage.getItem('user_phone') || "";
+
+const wheelRewardsLabels = ["₹198", "₹178", "₹98", "₹118", "₹158", "₹0-10", "₹38", "₹58"];
+const canvas = document.getElementById("wheel-canvas");
+const ctx = canvas.getContext("2d");
+const numSectors = wheelRewardsLabels.length;
+const arcAngle = (2 * Math.PI) / numSectors;
+
+let currentWheelRotationAngle = 0;
+let isWheelCurrentlySpinning = false;
+
+function drawBdgPremiumWheel() {
+    for (let i = 0; i < numSectors; i++) {
+        const sectorAngle = i * arcAngle;
+        ctx.fillStyle = (i % 2 === 0) ? "#ffffff" : "#fff9db"; 
+        ctx.beginPath();
+        ctx.moveTo(150, 150);
+        ctx.arc(150, 150, 150, sectorAngle, sectorAngle + arcAngle);
+        ctx.lineTo(150, 150);
+        ctx.fill();
+        ctx.strokeStyle = "#ff9f43";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(150, 150);
+        ctx.rotate(sectorAngle + arcAngle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#d35400";
+        ctx.font = "bold 14px Inter";
+        ctx.fillText(wheelRewardsLabels[i], 130, 5);
+        ctx.restore();
+    }
+}
+
+// सुंदर पॉपअप दिखाने का कॉमन हेल्पर फंक्शन
+function showBeautifulPopup(title, desc, isSuccess = false) {
+    document.getElementById('popup-global-title').innerText = title;
+    document.getElementById('popup-global-desc').innerText = desc;
+    const iconDiv = document.getElementById('popup-status-icon');
+    if(isSuccess) {
+        iconDiv.innerText = "✓";
+        iconDiv.className = "popup-icon-circle icon-success";
+    } else {
+        iconDiv.innerText = "✕";
+        iconDiv.className = "popup-icon-circle icon-error";
+    }
+    document.getElementById('custom-universal-popup').style.display = "flex";
+}
+
+function closeUniversalPopup() {
+    document.getElementById('custom-universal-popup').style.display = "none";
+}
+
+// सर्वर से लाइव डेटा फेच
+function syncUserWheelDashboardData() {
+    if(!userPhone) { showBeautifulPopup("Session Expired", "Please login again to access the wheel game."); return; }
+    
+    fetch(`${BACKEND_URL}/api/wheel-status/${userPhone.trim()}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                const wheelBalance = Number(data.currentWheelBalance || 0);
+                
+                // ऊपर डैशबोर्ड में केवल पहिये का अन-कैश्ड प्राइज दिखेगा
+                document.getElementById('total-wheel-earned').innerText = "₹" + wheelBalance.toFixed(2);
+                document.getElementById('count-invite-spin').innerText = data.inviteSpinsAvailable || 0;
+                document.getElementById('count-deposit-spin').innerText = data.depositSpinsAvailable || 0;
+                
+                if(wheelBalance >= 500) {
+                    document.getElementById('live-progress-text').innerText = "Target Achieved! Click Cash Out now.";
+                } else {
+                    const leftAmt = 500 - wheelBalance;
+                    document.getElementById('live-progress-text').innerText = `Only ₹${leftAmt.toFixed(2)} left to get prize ₹500.00`;
+                }
+                
+                let logsHtml = "";
+                if(data.history && data.history.length > 0) {
+                    data.history.forEach(log => {
+                        const dateFormatted = log.createdAt ? new Date(log.createdAt).toISOString().replace('T',' ').substring(0,16) : '--';
+                        logsHtml += `
+                            <div class="history-log-row">
+                                <div><span>${log.spinType === 'invite' ? 'Invite Friend' : 'Self Deposit'}</span><br><span class="time-subtext">${dateFormatted}</span></div>
+                                <div><span style="color:#fffb00;">${log.spinType.toUpperCase()}</span></div>
+                                <div class="payout-text">+₹${Number(log.amountWon).toFixed(2)}</div>
+                            </div>`;
+                    });
+                } else {
+                    logsHtml = "<div style='text-align:center; padding:15px; font-size:12px; color:rgba(255,255,255,0.6);'>No records found.</div>";
+                }
+                document.getElementById('spin-logs-rows-display').innerHTML = logsHtml;
+            }
+        }).catch(err => console.error("Sync Error:", err));
+}
+
+function startLuckySpinProcess() {
+    if (isWheelCurrentlySpinning) return;
+    if (!userPhone) return;
+
+    let chosenMode = "";
+    const inviteCount = parseInt(document.getElementById('count-invite-spin').innerText) || 0;
+    const depositCount = parseInt(document.getElementById('count-deposit-spin').innerText) || 0;
+
+    if (inviteCount > 0) { chosenMode = "invite"; } 
+    else if (depositCount > 0) { chosenMode = "deposit"; } 
+    else { showBeautifulPopup("No Spins Left", "You don't have any lucky spins available! Invite active friends or recharge."); return; }
+
+    isWheelCurrentlySpinning = true;
+    
+    fetch(`${BACKEND_URL}/api/spin-wheel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: userPhone.trim(), spinType: chosenMode })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const randomSectorIndex = Math.floor(Math.random() * numSectors); 
+            const TargetAngleStop = (2 * Math.PI) - (randomSectorIndex * arcAngle) - (arcAngle / 2);
+            const fullRutationsDegrees = (360 * (6 + Math.floor(Math.random() * 3))) * (Math.PI / 180);
+            
+            currentWheelRotationAngle += fullRutationsDegrees + TargetAngleStop;
+            canvas.style.transform = `rotate(${currentWheelRotationAngle}rad)`;
+
+            setTimeout(() => {
+                document.getElementById('reward-payout-text').innerText = "₹" + Number(data.amountWon).toFixed(2);
+                document.getElementById('reward-popup-overlay').style.display = "flex";
+                isWheelCurrentlySpinning = false;
+                syncUserWheelDashboardData();
+            }, 4100);
+        } else {
+            showBeautifulPopup("Error", data.message);
+            isWheelCurrentlySpinning = false;
+        }
+    }).catch(err => { console.error(err); isWheelCurrentlySpinning = false; });
+}
+
+// 💰 कैश आउट बटन दबाने पर वॉलेट ट्रांसफर ट्रिगर एपीआई
+function triggerWheelCashOutAPI() {
+    const curAmtText = document.getElementById('total-wheel-earned').innerText.replace('₹', '');
+    const currentAmount = parseFloat(curAmtText) || 0;
+    
+    if(currentAmount <= 0) {
+        showBeautifulPopup("Insufficient Funds", "You don't have any money in your wheel dashboard to cash out.");
+        return;
+    }
+    
+    fetch(`${BACKEND_URL}/api/wheel-cashout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: userPhone.trim() })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            showBeautifulPopup("Cash Out Success", `Successfully transferred ₹${currentAmount.toFixed(2)} to your Main Wallet!`, true);
+            syncUserWheelDashboardData();
+        } else {
+            showBeautifulPopup("Cash Out Failed", data.message);
+        }
+    }).catch(err => console.error(err));
+}
+
+function closeRewardPopup() { document.getElementById('reward-popup-overlay').style.display = "none"; }
+document.addEventListener("DOMContentLoaded", () => { drawBdgPremiumWheel(); syncUserWheelDashboardData(); });
+</script>
+</body>
+</html>

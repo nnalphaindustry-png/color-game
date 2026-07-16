@@ -38,7 +38,9 @@ const userSchema = new mongoose.Schema({
     yesterdayCommission: { type: Number, default: 0 },  // रात 12 बजे ट्रांसफर होने वाला कल का कमीशन
     totalCommission: { type: Number, default: 0 },      // अब तक की कुल कुल कमाई
         arWallet: { type: Number, default: 0 },
-        
+            inviteSpinsAvailable: { type: Number, default: 0 }, // इनवाइट पर मिले स्पिन्स
+    depositSpinsAvailable: { type: Number, default: 0 }, // खुद रिचार्ज करने पर मिले स्पिन्स
+    
     
     // --- लाइव रिचार्ज और बेट टर्नओवर ट्रैकिंग ---
     todayBetPlay: { type: Number, default: 0 },         // आज दिनभर में खेली गई कुल बेट
@@ -48,6 +50,7 @@ const userSchema = new mongoose.Schema({
     
     claimedMilestoneIds: { type: [String], default: [] } // डिपाजिट बोनस के जो टास्क क्लेम हो चुके हैं (उदा: ["task_1"])
 });
+
 // === रजिस्ट्रेशन से पहले अपने आप यूनिक इनवाइट कोड जनरेट करने का लॉजिक ===
 userSchema.pre('save', async function (next) {
     // अगर यूजर के पास पहले से कोड है (यानी अपडेट हो रहा है), तो दोबारा नहीं बनाएंगे
@@ -134,6 +137,14 @@ const giftCodeSchema = new mongoose.Schema({
 const GiftCode = mongoose.model('GiftCode', giftCodeSchema);
 
 // === LIVE GAMES TIMER ENGINE (असली गेम इंजन लॉजिक) ===
+// === LUCKY WHEEL HISTORY SCHEMA ===
+const wheelHistorySchema = new mongoose.Schema({
+    phone: { type: String, required: true },
+    spinType: { type: String, enum: ['invite', 'deposit'] },
+    amountWon: { type: Number, required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+const WheelHistory = mongoose.model('WheelHistory', wheelHistorySchema);
 
 const liveGames = {
     "30s": { duration: 30, timeLeft: 30, currentPeriod: "" },
@@ -942,6 +953,118 @@ app.post('/api/admin/delete-user', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+// === 1. यूजर का व्हील स्टेटस और AR Wallet बैलेंस चेक करने की API ===
+app.get('/api/wheel-status/:phone', async (req, res) => {
+    try {
+        const user = await User.findOne({ phone: req.params.phone.trim() });
+        if (!user) return res.json({ success: false, message: "User not found" });
+        
+        const history = await WheelHistory.find({ phone: req.params.phone.trim() }).sort({ createdAt: -1 });
+        
+        res.json({
+            success: true,
+            currentWheelBalance: user.ar_wallet || 0, // फ्रंटएंड को ar_wallet का लाइव बैलेंस भेजेगा
+            inviteSpinsAvailable: user.inviteSpinsAvailable || 0,
+            depositSpinsAvailable: user.depositSpinsAvailable || 0,
+            history
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// === 2. व्हील स्पिन करने और AR Wallet में पैसा जोड़ने की API ===
+app.post('/api/spin-wheel', async (req, res) => {
+    try {
+        const { phone, spinType } = req.body;
+        const user = await User.findOne({ phone: phone.trim() });
+        
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        if (spinType === 'invite' && (user.inviteSpinsAvailable || 0) <= 0) {
+            return res.json({ success: false, message: "No invite spins available!" });
+        }
+        if (spinType === 'deposit' && (user.depositSpinsAvailable || 0) <= 0) {
+            return res.json({ success: false, message: "No deposit spins available!" });
+        }
+
+        let calculatedRewardAmt = 0;
+
+        // नियम के अनुसार रिचार्ज अमाउंट का 2% से 6% बोनस कैलकुलेशन:
+        if (spinType === 'deposit') {
+            const lastApprovedDeposit = await Deposit.findOne({ phone: user.phone, status: "Approved" }).sort({ createdAt: -1 });
+            const baseAmountReference = lastApprovedDeposit ? lastApprovedDeposit.amount : 100;
+            
+            const minPercent = 0.02; // 2%
+            const maxPercent = 0.06; // 6%
+            const randomPercent = Math.random() * (maxPercent - minPercent) + minPercent;
+            calculatedRewardAmt = baseAmountReference * randomPercent;
+        } else {
+            // इनवाइट फ्रेंड रिचार्ज ट्रैक (न्यूनतम ₹300 मानकर उसका 2% से 6%)
+            const minPercent = 0.02;
+            const maxPercent = 0.06;
+            const randomPercent = Math.random() * (maxPercent - minPercent) + minPercent;
+            calculatedRewardAmt = 300 * randomPercent;
+        }
+
+        calculatedRewardAmt = Number(Number(calculatedRewardAmt).toFixed(2));
+        if (calculatedRewardAmt < 2) calculatedRewardAmt = 2.50; // न्यूनतम लिमिट सुरक्षा
+
+        const spinDecrementField = spinType === 'invite' ? { inviteSpinsAvailable: -1 } : { depositSpinsAvailable: -1 };
+        
+        // पैसा यूजर के 'ar_wallet' में प्लस होगा, मेन गेमिंग बैलेंस में नहीं
+        await User.findOneAndUpdate(
+            { phone: user.phone },
+            {
+                $inc: {
+                    ar_wallet: calculatedRewardAmt,
+                    ...spinDecrementField
+                }
+            }
+        );
+
+        const newLog = new WheelHistory({
+            phone: user.phone,
+            spinType: spinType,
+            amountWon: calculatedRewardAmt
+        });
+        await newLog.save();
+
+        res.json({ success: true, amountWon: calculatedRewardAmt, message: "Spin success!" });
+    } catch (error) {
+        console.error("WHEEL ERROR:", error);
+        res.status(500).json({ success: false, message: "Server error during spin." });
+    }
+});
+
+// === 3. Cash Out API: AR Wallet से पैसा काटकर Main Gaming Wallet में भेजने का लॉजिक ===
+app.post('/api/wheel-cashout', async (req, res) => {
+    try {
+        const { phone } = req.body;
+        const user = await User.findOne({ phone: phone.trim() });
+        
+        if (!user) return res.json({ success: false, message: "User not found!" });
+        
+        const transferAmount = user.ar_wallet || 0;
+        if (transferAmount <= 0) {
+            return res.json({ success: false, message: "Your AR Wallet is empty!" });
+        }
+        
+        // AR Wallet को 0 करना और मेन balance में ट्रांसफर करना
+        await User.findOneAndUpdate(
+            { phone: user.phone },
+            {
+                $set: { ar_wallet: 0 },
+                $inc: { balance: transferAmount } // मेन वॉलेट में पैसा आ गया
+            }
+        );
+        
+        res.json({ success: true, message: `Successfully transferred ₹${transferAmount.toFixed(2)} to Main Wallet!` });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Cashout failed on server." });
+    }
+});
+
 // === FIX: UPGRADED LIVE BETS SUMMARY ROUTE USING EXACT ACTIVE VARIABLES ===
 app.get('/api/admin/live-bets-summary/:gameMode', async (req, res) => {
     try {

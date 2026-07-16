@@ -1177,32 +1177,48 @@ app.post('/api/admin/action-deposit', async (req, res) => {
             return res.json({ success: false, message: "This request has already been processed!" });
         }
 
-        if (action === 'approve') {
-    // 2. यूज़र मॉडल को ढूँढना
-    const UserModel = mongoose.models.User || mongoose.model('User');
-    
-    // 3. सीधे $inc का उपयोग करके बैलेंस, आज का डिपॉजिट और लाइफटाइम डिपॉजिट एक साथ बढ़ाना
-    const updatedUser = await UserModel.findOneAndUpdate(
-        { phone: depositItem.phone.trim() },
-        { 
-            $inc: { 
-                balance: Number(depositItem.amount),       // यूजर का गेम बैलेंस बढ़ा
-                todayDeposit: Number(depositItem.amount),  // आज के कुल रिचार्ज में जुड़ा
-                totalDeposit: Number(depositItem.amount)   // लाइफटाइम कुल रिचार्ज में जुड़ा
-            }
-        },
-        { new: true }
-    );
-    
+                if (action === 'approve') {
+            // 2. यूज़र मॉडल को ढूँढना
+            const UserModel = mongoose.models.User || mongoose.model('User');
             
+            // नियम: अगर डिपॉजिट ₹100 या उससे अधिक है तो खुद का 1 स्पिन जोड़ें
+            let selfSpinAdd = 0;
+            if (Number(depositItem.amount) >= 100) {
+                selfSpinAdd = 1;
+            }
+
+            // सीधे $inc का उपयोग करके बैलेंस, आज का डिपॉजिट, लाइफटाइम डिपॉजिट और स्पिन एक साथ बढ़ाना
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { phone: depositItem.phone.trim() },
+                {
+                    $inc: {
+                        balance: Number(depositItem.amount), // यूज़र का गेम बैलेंस बढ़ा
+                        todayDeposit: Number(depositItem.amount), // आज के कुल रिचार्ज में जुड़ा
+                        totalDeposit: Number(depositItem.amount), // लाइफटाइम कुल रिचार्ज में जुड़ा
+                        depositSpinsAvailable: selfSpinAdd // यहाँ आपका 1 सेल्फ डिपॉजिट स्पिन क्रेडिट हुआ
+                    }
+                },
+                { new: true }
+            );
+
             if (!updatedUser) {
                 return res.json({ success: false, message: `User with phone ${depositItem.phone} not found!` });
+            }
+
+            // --- इनवाइट दोस्त वाला नियम (अगर इस यूजर का कोई पैरेंट एजेंट है और रिचार्ज ≥ ₹300 है) ---
+            if (updatedUser.referredBy && Number(depositItem.amount) >= 300) {
+                await UserModel.findOneAndUpdate(
+                    { phone: updatedUser.referredBy.trim() },
+                    { $inc: { inviteSpinsAvailable: 1 } } // इनवाइट करने वाले एजेंट को 1 लकी स्पिन मिला
+                );
+                console.log(`[WHEEL SUCCESS]: Agent ${updatedUser.referredBy} awarded 1 Spin for inviting ${updatedUser.phone}`);
             }
 
             depositItem.status = "Approved";
         } else if (action === 'reject') {
             depositItem.status = "Rejected";
         }
+        
 
         // 4. डिपॉजिट स्टेटस अपडेट करना
         await depositItem.save();

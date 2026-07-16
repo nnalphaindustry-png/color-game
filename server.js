@@ -963,7 +963,7 @@ app.get('/api/wheel-status/:phone', async (req, res) => {
         
         res.json({
             success: true,
-            currentWheelBalance: user.ar_wallet || 0, // फ्रंटएंड को ar_wallet का लाइव बैलेंस भेजेगा
+            currentWheelBalance: user.arWallet || 0, // यहाँ ध्यान दें: user.arWallet (W बड़ा) होना चाहिए
             inviteSpinsAvailable: user.inviteSpinsAvailable || 0,
             depositSpinsAvailable: user.depositSpinsAvailable || 0,
             history
@@ -972,6 +972,7 @@ app.get('/api/wheel-status/:phone', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
 
 // === 2. व्हील स्पिन करने और AR Wallet में पैसा जोड़ने की API ===
 app.post('/api/spin-wheel', async (req, res) => {

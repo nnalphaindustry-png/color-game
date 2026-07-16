@@ -243,60 +243,64 @@
     </div>
 
 </div>
-<script>
-    // गिफ्ट कोड रिडीम करने का लाइव सबमिट फंक्शन
-    async function submitGiftRedeem() {
-        const giftCodeInput = document.getElementById('giftCodeBox').value.trim();
-        const phone = localStorage.getItem('user_phone');
-        
-        if (giftCodeInput === "") {
-            alert("Please enter a valid gift code!");
-            return;
-        }
-        
-        if (giftCodeInput.length < 8) {
-            alert("Security Warning: A valid gift code must be at least 8 to 12 characters long!");
-            return;
-        }
-
-        try {
-            const response = await fetch('https://color-game-1kc2.onrender.com', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-        phone: phone,
-        code: giftCodeInput
-    })
-});
-
-
-            const result = await response.json();
-            
-            // सर्वर से मिलने वाले रिस्पॉन्स का अलर्ट दिखाना
-            if (result.success) {
-                alert(result.message);
-                document.getElementById('giftCodeBox').value = ""; // इनपुट बॉक्स खाली करना
-            } else {
-                alert(result.message); // एरर मैसेज दिखाना (जैसे: Invalid, Already claimed आदि)
-            }
-
-        } catch (error) {
-            console.error("Error connecting with gift backend server:", error);
-            alert("Server connection error! Please try again later.");
-        }
+    <script>
+    // अपनी फ्रंटएंड फ़ाइल में submitGiftRedeem() फ़ंक्शन की जगह यह कोड डालें:
+async function submitGiftRedeem() {
+    const giftCodeInput = document.getElementById('giftCodeBox').value.trim();
+    
+    let phone = localStorage.getItem('user_phone') || localStorage.getItem('phone');
+    if (!phone) {
+        alert("सत्र समाप्त हो गया है! कृपया दोबारा लॉगिन करें।");
+        window.location.href = "index.html";
+        return;
     }
+    if (giftCodeInput === "") {
+        alert("कृपया एक वैध गिफ्ट कोड डालें!");
+        return;
+    }
+    if (giftCodeInput.length < 8) {
+        alert("सुरक्षा चेतावनी: गिफ्ट कोड कम से कम 8 से 12 अक्षरों का होना चाहिए!");
+        return;
+    }
+    
+    try {
+        // यहाँ हमने यूआरएल के आगे '/api/redeem-gift' जोड़ दिया है
+        const response = await fetch('https://color-game-1kc2.onrender.com', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                phone: String(phone).trim(),
+                code: String(giftCodeInput).toUpperCase()
+            })
+        });
+        
+        if (!response.ok) {
+            alert("सर्वर ने एरर दिया है। कृपया कोड कॉन्फ़िगरेशन की जांच करें।");
+            return;
+        }
+        
+        const result = await response.json();
+        alert(result.message); // सर्वर का मैसेज यहाँ दिखेगा
+        
+        if (result.success) {
+            document.getElementById('giftCodeBox').value = ""; // बॉक्स खाली हो जाएगा
+        }
+    } catch (error) {
+        console.error("नेटवर्क क्रैश या एरर:", error);
+        alert("कनेक्शन अस्थिर है! कृपया 3 सेकंड के बाद दोबारा प्रयास करें।");
+    }
+}
 
-    // सुरक्षा लॉगिन जांच
+    // सुरक्षा लॉगिन चेक डेटाबेस
     document.addEventListener("DOMContentLoaded", function () {
-        const sessionUser = localStorage.getItem('user_phone');
+        const sessionUser = localStorage.getItem('user_phone') || localStorage.getItem('phone');
         if (!sessionUser) {
             window.location.href = "index.html"; 
         }
     });
 </script>
-
 </body>
 </html>

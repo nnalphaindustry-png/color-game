@@ -610,60 +610,53 @@ app.post('/api/place-deposit', async (req, res) => {
 // === LIVE ACTIVITY AREA NEW ENGINES ===
 // ==========================================
 
-// === FIX: 100% SOLID JSON GIFT REDEEM API ===
 app.post('/api/redeem-gift', async (req, res) => {
-    try {
-        const { phone, code } = req.body;
-        
-        // 1. अगर फोन नंबर या कोड खाली है
-        if (!phone || !code || phone === "undefined" || code === "") {
-            return res.status(200).json({ success: false, message: "Please enter a valid gift code and ensure you are logged in properly." });
-        }
+  try {
+    const { phone, code } = req.body;
 
-        // 2. डेटाबेस में कोड ढूंढें
-        const gift = await GiftCode.findOne({ code: String(code).trim().toUpperCase() });
-        if (!gift) {
-            return res.status(200).json({ success: false, message: "Invalid Gift Code! This code does not exist in our database." });
-        }
-
-        // 3. चेक करें कि यूजर पहले ही क्लेम तो नहीं कर चुका
-        if (gift.usersRedeemed && gift.usersRedeemed.includes(String(phone).trim())) {
-            return res.status(200).json({ success: false, message: "You have already redeemed this gift code once!" });
-        }
-
-        // 4. चेक करें कि कोड की लिमिट खत्म तो नहीं हो गई
-        if (Number(gift.usedCount) >= Number(gift.maxUses)) {
-            return res.status(200).json({ success: false, message: "Gift code usage limit reached! Better luck next time." });
-        }
-
-        // 5. सब सही है! यूजर के arWallet (तिजोरी) में पैसा प्लस करें
-        const updatedUser = await User.findOneAndUpdate(
-            { phone: String(phone).trim() },
-            { $inc: { arWallet: Number(gift.amount), totalCommission: Number(gift.amount) } },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(200).json({ success: false, message: "User account verification failed! Please re-login." });
-        }
-
-        // 6. कोड की हिस्ट्री और काउंट को अपडेट करें
-        if (!gift.usersRedeemed) gift.usersRedeemed = [];
-        gift.usersRedeemed.push(String(phone).trim());
-        gift.usedCount = Number(gift.usedCount) + 1;
-        await gift.save();
-
-        return res.status(200).json({ 
-            success: true, 
-            message: `Success! ₹${gift.amount} added directly to your AR Wallet.` 
-        });
-
-    } catch (error) {
-        console.error("CRITICAL GIFT REDEEM ERROR:", error);
-        // यहाँ कैच (Catch) के अंदर भी रेस्पॉन्स को हमेशा सुरक्षित JSON ही रखना है ताकि SyntaxError न आए
-        return res.status(200).json({ success: false, message: "Database sync failure! Please try again after 5 seconds." });
+    if (!phone || !code || phone === "undefined" || code === "") {
+      return res.status(400).json({ success: false, message: "कृपया एक वैध गिफ्ट कोड डालें।" });
     }
+
+    const gift = await GiftCode.findOne({ code: String(code).trim().toUpperCase() });
+    if (!gift) {
+      return res.status(404).json({ success: false, message: "यह गिफ्ट कोड मौजूद नहीं है!" });
+    }
+
+    if (gift.usersRedeemed && gift.usersRedeemed.includes(String(phone).trim())) {
+      return res.status(400).json({ success: false, message: "आप इस कोड को पहले ही रिडीम कर चुके हैं!" });
+    }
+
+    if (Number(gift.usedCount) >= Number(gift.maxUses)) {
+      return res.status(400).json({ success: false, message: "इस गिफ्ट कोड की सीमा समाप्त हो चुकी है!" });
+    }
+
+    // यहाँ $set का उपयोग करके arWallet को सुरक्षित रूप से अपडेट किया गया है
+    const user = await User.findOne({ phone: String(phone).trim() });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "यूजर अकाउंट नहीं मिला!" });
+    }
+
+    user.arWallet = (Number(user.arWallet) || 0) + Number(gift.amount);
+    user.totalCommission = (Number(user.totalCommission) || 0) + Number(gift.amount);
+    await user.save();
+
+    if (!gift.usersRedeemed) gift.usersRedeemed = [];
+    gift.usersRedeemed.push(String(phone).trim());
+    gift.usedCount = Number(gift.usedCount) + 1;
+    await gift.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `सफलता! ₹${gift.amount} आपके AR Wallet में जोड़ दिए गए हैं।`
+    });
+
+  } catch (error) {
+    console.error("GIFT ERROR:", error);
+    return res.status(500).json({ success: false, message: "सर्वर डेटाबेस एरर! कृपया दोबारा प्रयास करें।" });
+  }
 });
+
 
 // 2. एडमिन के लिए नया गिफ्ट कोड जनरेट करने की API (इसे आप पोस्टमैन या एडमिन से चला सकते हैं)
 app.post('/api/admin/create-gift-code', async (req, res) => {

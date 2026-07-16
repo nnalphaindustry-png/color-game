@@ -1055,7 +1055,7 @@ app.post('/api/wheel-cashout', async (req, res) => {
         await User.findOneAndUpdate(
             { phone: user.phone },
             {
-                $set: { ar_wallet: 0 },
+                $set: { ar_Wallet: 0 },
                 $inc: { balance: transferAmount } // मेन वॉलेट में पैसा आ गया
             }
         );

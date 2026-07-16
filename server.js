@@ -12,6 +12,19 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*", credentials: true }));
+// === VIP लेवल 1 से 10 की शर्तें और इनाम (₹2 बेट = 1 EXP के अनुसार) ===
+const VIP_CONFIG = {
+    1: { requiredEXP: 3000, reward: 30 },        // यूजर को लगेगा ₹3000 की बेट, पर असल में ₹6000 की बेट पर होगा
+    2: { requiredEXP: 10000, reward: 100 },      // असल में ₹20,000 की बेट
+    3: { requiredEXP: 50000, reward: 500 },      // असल में ₹1,00,000 की बेट
+    4: { requiredEXP: 200000, reward: 2000 },    // असल में ₹4,00,000 की बेट
+    5: { requiredEXP: 500000, reward: 5000 },    // असल में ₹10,00,000 की बेट
+    6: { requiredEXP: 1000000, reward: 10000 },  // असल में ₹20,00,000 की बेट
+    7: { requiredEXP: 3000000, reward: 30000 },  // असल में ₹60,00,000 की बेट
+    8: { requiredEXP: 7000000, reward: 70000 },  // असल में ₹1,40,00,000 की बेट
+    9: { requiredEXP: 15000000, reward: 150000 },// असल में ₹3,00,00,000 की बेट
+    10: { requiredEXP: 30000000, reward: 300000 }// असल में ₹6,00,00,000 की बेट
+};
 
 // === MONGODB SCHEMAS (डेटाबेस के नियम) ===
 
@@ -42,7 +55,12 @@ const userSchema = new mongoose.Schema({
     depositSpinsAvailable: { type: Number, default: 0 }, // खुद रिचार्ज करने पर मिले स्पिन्स
     todaySpinWallet: { type: Number, default: 0 }, // 🌟 नया फील्ड: बिना कैश आउट वाला आज का स्पिन रिवॉर्ड
     lifetimeSpinTotal: { type: Number, default: 0 },
-    
+    // userSchema के अंदर ये नए फ़ील्ड्स जोड़ें:
+lifetimeEXP: { type: Number, default: 0 },    // यूजर के कुल असली EXP (बेट राशि / 2)
+vipLevel: { type: Number, default: 0 },       // मौजूदा VIP लेवल (0 से 10)
+claimedVipLevels: { type: [Number], default: [] }, // क्लेम किए जा चुके इनामों की लिस्ट
+lastVipUpgradeDate: { type: Date, default: Date.now } // लेवल मेंटेनेंस की तारीख चेक करने के लिए
+
     // --- लाइव रिचार्ज और बेट टर्नओवर ट्रैकिंग ---
     todayBetPlay: { type: Number, default: 0 },         // आज दिनभर में खेली गई कुल बेट
     todayDeposit: { type: Number, default: 0 },         // आज दिनभर में किया गया कुल रिचार्ज

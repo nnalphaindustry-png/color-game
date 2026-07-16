@@ -695,6 +695,15 @@ app.get('/api/attendance-status/:phone', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+// एडमिन पैनल के लिए सभी बने हुए गिफ्ट कोड्स की लिस्ट भेजने की API
+app.get('/api/admin/live-gift-codes', async (req, res) => {
+    try {
+        const list = await GiftCode.find({}).sort({ _id: -1 }); // नए कोड सबसे ऊपर
+        res.json({ success: true, list });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // === नई विथड्रॉल सबमिशन एपीआई (User End) ===
 app.post('/api/place-withdrawal', async (req, res) => {

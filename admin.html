@@ -87,6 +87,7 @@
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'withdrawal-page')">💸 Withdrawal Approval</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'control-page')">🎮 Game Control</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
+            <li class="menu-list"><a href="#" onclick="switchAdminPage(event, 'gift-management-page')"> Gift Management</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
         </ul>
     </nav>
@@ -308,6 +309,52 @@
   </div>
 </div>
 
+<!-- PAGE 8: Gift Code Management Console -->
+<div id="gift-management-page" class="admin-page-view">
+    <h2 class="page-heading-title">Gift Code Management</h2>
+    
+    <!-- GENERATOR FORM COMPONENT -->
+    <div class="data-table-card" style="max-width: 500px; margin: 0 auto 30px auto;">
+        <h5 class="data-table-title">Generate New Gift Code Link</h5>
+        <div class="flex-input-container">
+            <div style="margin-bottom: 5px;">
+                <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">1. Gift Code Link Name</label>
+                <input type="text" id="admin-gift-code-input" placeholder="e.g. GOACLUB2026" class="input-block-field" style="text-transform: uppercase;">
+            </div>
+            <div style="margin-bottom: 5px;">
+                <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">2. Bonus Reward Amount ()</label>
+                <input type="number" id="admin-gift-amount-input" placeholder="e.g. 100" class="input-block-field">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">3. Max Users Claim Limit</label>
+                <input type="number" id="admin-gift-limit-input" placeholder="e.g. 50" class="input-block-field" value="100">
+            </div>
+            <button onclick="createNewGiftCodeAction()" class="submit-action-btn" style="width: 100%;">Create Gift Link</button>
+        </div>
+    </div>
+
+    <!-- LIVE MONITOR TRACKING TABLE -->
+    <div class="data-table-card" style="max-width: 750px; margin: 0 auto;">
+        <h5 class="data-table-title" style="color: #0dcaf0;">Active Database Gift Code Records</h5>
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Gift Code</th>
+                        <th>Amount</th>
+                        <th>Claimed Limit</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-gift-table-body">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading live promo codes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
     </main>
 
@@ -928,6 +975,93 @@ window.onload = function() {
         fetchAdminPendingWithdrawals();
     setInterval(fetchAdminPendingWithdrawals, 4000);
     
+};
+// 1.          
+function createNewGiftCodeAction() {
+    const codeName = document.getElementById('admin-gift-code-input').value.trim().toUpperCase();
+    const amountVal = document.getElementById('admin-gift-amount-input').value.trim();
+    const maxUsesLimit = document.getElementById('admin-gift-limit-input').value.trim();
+
+    //   
+    if (!codeName || !amountVal) {
+        showGlobalToastAlert("Please fill Code Name and Reward Amount fields!", true);
+        return;
+    }
+    if (codeName.length < 8) {
+        showGlobalToastAlert("Security Rule: Gift code must be at least 8 to 12 characters!", true);
+        return;
+    }
+
+    //      
+    fetch(`${SERVER_URL}/api/admin/create-gift-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            code: codeName,
+            amount: Number(amountVal),
+            maxUses: Number(maxUsesLimit || 100)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showGlobalToastAlert(data.message, false);
+            //    
+            document.getElementById('admin-gift-code-input').value = '';
+            document.getElementById('admin-gift-amount-input').value = '';
+            document.getElementById('admin-gift-limit-input').value = '100';
+            //     
+            fetchAdminLiveGiftCodes();
+        } else {
+            showGlobalToastAlert(data.message || "Failed to transmit parameter!", true);
+        }
+    })
+    .catch(err => showGlobalToastAlert("Network connection sync failure!", true));
+}
+
+// 2.               
+function fetchAdminLiveGiftCodes() {
+    const giftPageElement = document.getElementById('gift-management-page');
+    if (!giftPageElement || giftPageElement.style.display === "none") return;
+
+    //      
+    fetch(`${SERVER_URL}/api/admin/live-gift-codes`)
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.list) {
+            let rowsHtml = '';
+            data.list.forEach(item => {
+                const isExpired = item.usedCount >= item.maxUses;
+                const statusText = isExpired ? "Expired" : "Active";
+                const statusColor = isExpired ? "#dc3545" : "#198754";
+
+                rowsHtml += `
+                    <tr>
+                        <td class="id-text-format" style="font-weight: bold; letter-spacing: 0.5px;">${item.code}</td>
+                        <td style="color: #198754; font-weight: bold;">${parseFloat(item.amount).toFixed(2)}</td>
+                        <td style="color: #a0a0a0;">${item.usedCount} / ${item.maxUses}</td>
+                        <td style="color: ${statusColor}; font-weight: bold;">${statusText}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('admin-gift-table-body').innerHTML = rowsHtml ||
+                `<tr><td colspan="4" style="text-align:center; color:#a0a0a0; padding:20px;">No gift codes created yet!</td></tr>`;
+        }
+    })
+    .catch(err => {
+        document.getElementById('admin-gift-table-body').innerHTML = 
+            '<tr><td colspan="4" style="text-align:center; color:#dc3545;">Live gift codes fetching dropped!</td></tr>';
+    });
+}
+
+// 3.    -  (window.onload)     
+const originalWindowOnload = window.onload;
+window.onload = function() {
+    if (originalWindowOnload) originalWindowOnload();
+    
+    //  4          
+    fetchAdminLiveGiftCodes();
+    setInterval(fetchAdminLiveGiftCodes, 4000);
 };
 
     </script>

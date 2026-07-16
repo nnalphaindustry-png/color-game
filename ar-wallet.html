@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>91 Goa Club - AR Wallet</title>
+<style>
+:root { color-scheme: light !important; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+
+/* Main Mobile Container */
+.app-container {
+    width: 100%;
+    max-width: 450px;
+    background-color: #f4f6fb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    padding-bottom: 40px;
+}
+
+/* Top Red Header */
+.top-gradient-container {
+    background: #f03e3e;
+    padding: 12px 15px 30px 15px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+    position: relative;
+}
+.navbar-top { 
+    display: flex; 
+    align-items: center; 
+    position: relative; 
+}
+.back-arrow-btn { 
+    cursor: pointer; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    z-index: 12; 
+}
+.page-main-title { 
+    color: white; 
+    font-size: 18px; 
+    font-weight: 700; 
+    position: absolute; 
+    width: 100%;
+    text-align: center; 
+    left: 0; 
+    z-index: 10; 
+}
+
+/* PREMIUM VAULT BALANCES GRID CARD */
+.vault-master-white-card {
+    background: white; 
+    border-radius: 24px; 
+    padding: 26px 20px; 
+    text-align: center; 
+    width: 92%;
+    margin: 25px auto 15px auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(226, 230, 240, 0.8);
+}
+.vault-icon-glow {
+    font-size: 36px;
+    margin-bottom: 4px;
+}
+.vault-label-title { 
+    font-size: 13px; 
+    color: #8a99a8; 
+    font-weight: 700; 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.vault-live-amount { 
+    font-size: 32px; 
+    font-weight: 900; 
+    color: #2aa757; 
+    font-family: monospace, sans-serif;
+}
+
+/* DESCRIPTION INFO CARD */
+.info-notice-box {
+    background: #e8f8f0;
+    border: 1px solid rgba(42, 167, 87, 0.2);
+    width: 92%;
+    margin: 10px auto;
+    border-radius: 14px;
+    padding: 12px 15px;
+    font-size: 12px;
+    color: #1e7e41;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* BIG PREMIUM RED TRANSFER BUTTON */
+.master-transfer-btn-wrapper {
+    width: 92%;
+    margin: 20px auto;
+}
+.big-transfer-action-btn {
+    background: #f03e3e;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 15px 0;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(240,62,62,0.25);
+    transition: transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.big-transfer-action-btn:active {
+    transform: scale(0.97);
+}
+
+/* PREMIUM DIALOG MODAL POPUP MODESTY (सुंदर पॉप-अप्स की स्टाईलिंग) */
+.custom-premium-alert-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.4); 
+    display: none; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 3000; 
+}
+.custom-alert-card { 
+    background: white; 
+    border-radius: 24px; 
+    padding: 25px 20px; 
+    width: 85%;
+    max-width: 340px; 
+    text-align: center; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+    animation: popupGlowIn 0.2s ease-out;
+}
+
+@keyframes popupGlowIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.alert-action-ok-btn { 
+    width: 100%; 
+    border: none; 
+    border-radius: 15px; 
+    padding: 12px 0; 
+    font-size: 15px; 
+    font-weight: 700; 
+    color: white; 
+    cursor: pointer; 
+    background: #2aa757;
+    margin-top: 15px;
+}
+
+/* दो बटन्स वाले कन्फर्म पॉप-अप के लिए खास स्टाइल */
+.modal-dual-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+.modal-cancel-btn {
+    background: #e2e6f0;
+    color: #8a99a8;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.modal-confirm-red-btn {
+    background: #f03e3e;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(240,62,62,0.15);
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- 1. TOP NAV BAR WITH TITLE -->
+    <div class="top-gradient-container">
+        <div class="navbar-top">
+            <a href="profile .html" class="back-arrow-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                    <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <div class="page-main-title">AR Wallet Vault</div>
+        </div>
+    </div>
+
+    <!-- 2. LIVE AR VAULT BALANCE WHITE CARD -->
+    <div class="vault-master-white-card">
+        <div class="vault-icon-glow">🔒</div>
+        <span class="vault-label-title">Available Reward Balance</span>
+        <span class="vault-live-amount" id="display-live-ar-vault-balance">₹0.00</span>
+    </div>
+
+    <!-- 3. RULES NOTICE BOX -->
+    <div class="info-notice-box">
+        💡 <b>Note:</b> All your daily team commissions (generated at 12:00 AM) and successful milestone invite rewards are safely credited here. You can transfer this money to your Main Wallet anytime instantly.
+    </div>
+
+    <!-- 4. MAIN TRANSFER TO MAIN WALLET BUTTON -->
+    <div class="master-transfer-btn-wrapper">
+        <button class="big-transfer-action-btn" onclick="openBeautifulConfirmModal()">
+            <span>💼</span> Transfer to Main Wallet
+        </button>
+    </div>
+
+</div> <!-- app-container end -->
+
+
+<!-- ========================================================================= -->
+<!-- === THREE NEW BEAUTIFUL PREMIUM CASINO STYLE MODAL POPUPS === -->
+<!-- ========================================================================= -->
+
+<!-- पॉप-अप 1: TRANSFER CONFIRMATION MODAL (पूछने वाला पॉप-अप) -->
+<div class="custom-premium-alert-overlay" id="popup-confirm-window">
+    <div class="custom-alert-card">
+        <div style="width: 55px; height: 55px; background: #fff3cd; color: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-size: 26px; font-weight: bold;">❓</div>
+        <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;">Are you sure?</div>
+        <div style="font-size: 13px; color: #666; font-weight: 500;" id="confirm-popup-text-amount">Do you want to transfer your AR balance to Main Wallet?</div>
+        <div class="modal-dual-buttons-row">
+            <button class="modal-cancel-btn" onclick="closeBeautifulConfirmModal()">Cancel</button>
+            <button class="modal-confirm-red-btn" onclick="executeArWalletToMainTransfer()">Yes, Transfer</button>
+        </div>
+    </div>
+</div>
+
+<!-- पॉप-अप 2: SUCCESS DIALOG MODAL (सफलता का हरा पॉप-अप) -->
+<div class="custom-premium-alert-overlay" id="popup-success-window">
+    <div class="custom-alert-card">
+        <div style="width: 55px; height: 55px; background: #e8f8f0; color: #2aa757; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-size: 26px; font-weight: bold;">✓</div>
+        <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;">Transfer Success!</div>
+        <div style="font-size: 13px; color: #666; font-weight: 500;" id="success-popup-message-text">Money has been successfully credited to your main balance!</div>
+        <button class="alert-action-ok-btn" onclick="closeArSuccessWindow()">Awesome</button>
+    </div>
+</div>
+
+<!-- पॉप-अप 3: WARNING/ERROR DIALOG MODAL (चेतावनी का पीला/लाल पॉप-अप) -->
+<div class="custom-premium-alert-overlay" id="popup-warning-window">
+    <div class="custom-alert-card">
+        <div style="width: 55px; height: 55px; background: #fde8e8; color: #f03e3e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; font-size: 26px; font-weight: bold;">⚠️</div>
+        <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;">Alert</div>
+        <div style="font-size: 13px; color: #666; font-weight: 500;" id="warning-popup-message-text">Your AR Wallet balance is empty!</div>
+        <button class="alert-action-ok-btn" style="background: #f03e3e;" onclick="closeArWarningWindow()">OK</button>
+    </div>
+</div>
+<script>
+const BACKEND_SERVER_URL = "https://color-game-1kc2.onrender.com";
+const loggedInUserPhone = localStorage.getItem('user_phone') || "";
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchLiveArWalletVaultBalance();
+});
+
+// लाइव सर्वर से AR Wallet का बैलेंस लेकर स्क्रीन पर दिखाने का फंक्शन
+function fetchLiveArWalletVaultBalance() {
+    if (!loggedInUserPhone) return;
+
+    fetch(`${BACKEND_SERVER_URL}/api/agent-summary-updated/${loggedInUserPhone.trim()}`)
+        .then(res => res.json())
+        .then(resData => {
+            if (resData.success) {
+                document.getElementById('display-live-ar-vault-balance').innerText = "₹" + 
+                    Number(resData.arWallet || 0).toFixed(2);
+            }
+        })
+        .catch(err => console.error("Error loading live AR wallet balance:", err));
+}
+
+// 1. ट्रांसफर बटन दबाते ही सबसे पहले सुंदर "कन्फर्म पॉप-अप" खोलने का फंक्शन
+function openBeautifulConfirmModal() {
+    const currentBalanceText = document.getElementById('display-live-ar-vault-balance').innerText;
+    const cleanNumericBalance = Number(currentBalanceText.replace('₹', ''));
+
+    // अगर पैसे ₹0 हैं, तो कन्फर्म नहीं सीधा सुंदर "वार्निंग पॉप-अप" खोलेंगे
+    if (cleanNumericBalance <= 0) {
+        document.getElementById('warning-popup-message-text').innerText = "Your AR Wallet balance is ₹0.00. There is no money to transfer!";
+        document.getElementById('popup-warning-window').style.display = "flex";
+        return;
+    }
+
+    // कन्फर्म पॉप-अप के अंदर डायनामिक पैसे का अमाउंट सेट करना
+    document.getElementById('confirm-popup-text-amount').innerText = `Do you want to transfer all ₹${cleanNumericBalance.toFixed(2)} from your AR Vault to Main Gaming Wallet?`;
+    // कन्फर्म पॉप-अप खोलना
+    document.getElementById('popup-confirm-window').style.display = "flex";
+}
+
+// कन्फर्म पॉप-अप में 'Cancel' दबाने पर उसे बंद करने का फंक्शन
+function closeBeautifulConfirmModal() {
+    document.getElementById('popup-confirm-window').style.display = "none";
+}
+
+// 2. यूजर द्वारा 'Yes, Transfer' दबाने पर बैकएंड एपीआई रन करने का मुख्य फंक्शन
+function executeArWalletToMainTransfer() {
+    // पहले कन्फर्मेशन विंडो को बंद करना
+    closeBeautifulConfirmModal();
+
+    if (!loggedInUserPhone) return;
+
+    const currentBalanceText = document.getElementById('display-live-ar-vault-balance').innerText;
+    const cleanNumericBalance = Number(currentBalanceText.replace('₹', ''));
+
+    // सर्वर पर रिक्वेस्ट भेजना
+    fetch(`${BACKEND_SERVER_URL}/api/transfer-ar-to-main`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: loggedInUserPhone.trim() })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // सफलता का संदेश सेट करना
+            document.getElementById('success-popup-message-text').innerText = `Successfully transferred ₹${cleanNumericBalance.toFixed(2)} to your main gaming balance!`;
+            // सुंदर हरा सक्सेस पॉप-अप खोलना
+            document.getElementById('popup-success-window').style.display = "flex";
+            
+            // बैलेंस फ्रेश लोड करके ₹0.00 करना
+            fetchLiveArWalletVaultBalance();
+        } else {
+            // फेल होने पर सुंदर वार्निंग पॉप-अप दिखाना
+            document.getElementById('warning-popup-message-text').innerText = data.message || "Transfer failed. Please try again.";
+            document.getElementById('popup-warning-window').style.display = "flex";
+        }
+    })
+    .catch(err => {
+        console.error("Network error during transfer:", err);
+        document.getElementById('warning-popup-message-text').innerText = "Server network error. Could not complete transfer!";
+        document.getElementById('popup-warning-window').style.display = "flex";
+    });
+}
+
+// सक्सेस और वार्निंग विंडोज़ बंद करने के फंक्शंस
+function closeArSuccessWindow() {
+    document.getElementById('popup-success-window').style.display = "none";
+}
+function closeArWarningWindow() {
+    document.getElementById('popup-warning-window').style.display = "none";
+}
+</script>
+</body>
+</html>

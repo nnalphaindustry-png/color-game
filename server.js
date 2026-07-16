@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
             inviteSpinsAvailable: { type: Number, default: 0 }, // इनवाइट पर मिले स्पिन्स
     depositSpinsAvailable: { type: Number, default: 0 }, // खुद रिचार्ज करने पर मिले स्पिन्स
     todaySpinWallet: { type: Number, default: 0 }, // 🌟 नया फील्ड: बिना कैश आउट वाला आज का स्पिन रिवॉर्ड
-    lifetimeSpinTotal: { type: Number, default: 0 } 
+    lifetimeSpinTotal: { type: Number, default: 0 },
     
     // --- लाइव रिचार्ज और बेट टर्नओवर ट्रैकिंग ---
     todayBetPlay: { type: Number, default: 0 },         // आज दिनभर में खेली गई कुल बेट

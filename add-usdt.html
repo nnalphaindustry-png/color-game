@@ -21,7 +21,13 @@
     .main-form-input { width: 100%; background: #ffffff; border: none; padding: 16px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #222222; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.02); transition: 0.2s; }
     .main-form-input:focus { box-shadow: 0 0 0 1px #ff4d4d; }
     .main-form-input::placeholder { color: #cccccc; font-weight: 500; }
-    .fixed-bottom-button-area { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background: #f4f6fb; padding: 14px 16px 24px 16px; z-index: 999; box-shadow: 0 -4px 10px rgba(0,0,0,0.02); }
+    /* ===   CSS    === */
+.fixed-bottom-button-area {
+    width: 100%;
+    padding: 10px 0 20px 0;
+    margin-top: 15px; /*         */
+}
+
     .main-action-save-btn { width: 100%; background: #ccd1d9; color: #ffffff; border: none; padding: 15px; border-radius: 25px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; outline: none; }
     .main-action-save-btn.ready-to-click { background: linear-gradient(to right, #ff7661, #ff4d4d); box-shadow: 0 4px 12px rgba(255,77,77,0.25); }
     .modal-blur-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 20px; }
@@ -35,63 +41,66 @@
 </head>
 <body>
 <div class="app-container">
-    
-    <!-- 1. प्रीमियम लाल हेडर पट्टी -->
+
+    <!-- 1.    -->
     <div class="premium-header-bar">
-        <button class="back-action-btn" onclick="goToWithdrawPageWithoutSaving()">‹</button>
+        <button class="back-action-btn" onclick="goToWithdrawPageWithoutSaving()"></button>
         <span class="header-title-center">Add USDT Address</span>
     </div>
 
-    <!-- 2. कीबोर्ड फ्रेंडली स्क्रॉलेबल कंटेनर -->
+    <!-- 2.     -->
     <div class="scrollable-form-body">
         
-        <!-- रेड बैज रो -->
+        <!--    -->
         <div class="top-sub-badge-row">
             <div class="sub-red-badge-pill">
-                <span>₮</span><span>USDT TRC20 details</span>
+                <span></span><span>USDT TRC20 details</span>
             </div>
         </div>
 
-        <!-- फॉर्म इनपुट्स रैपर -->
+        <!--    -->
         <div class="bank-form-wrapper">
             
-            <!-- 1. नेटवर्क का प्रकार (डिफ़ॉल्ट सेट ताकि यूजर को आसानी हो) -->
+            <!-- 1.    -->
             <div class="input-group-field">
-                <label class="field-label-title"><span class="field-icon-img">⚙️</span><span>Network Chain Type</span></label>
+                <label class="field-label-title"><span class="field-icon-img"></span><span>Network Chain Type</span></label>
                 <input type="text" id="input-usdt-chain" class="main-form-input" value="TRC20" readonly style="background:#f4f6fb; color:#888;">
             </div>
 
-            <!-- 2. USDT वॉलेट पता (TRC20 Wallet Address) -->
+            <!-- 2. USDT   -->
             <div class="input-group-field">
-                <label class="field-label-title"><span class="field-icon-img">🔗</span><span>USDT TRC20 Wallet Address</span></label>
+                <label class="field-label-title"><span class="field-icon-img"></span><span>USDT TRC20 Wallet Address</span></label>
                 <input type="text" id="input-usdt-address" class="main-form-input" placeholder="Please enter or paste TRC20 address" oninput="checkFormInputsStatus()">
             </div>
 
-            <!-- 3. मोबाइल नंबर (यूज़र के लिए बिल्कुल खाली रहेगा) -->
+            <!-- 3.   -->
             <div class="input-group-field">
-                <label class="field-label-title"><span class="field-icon-img">📱</span><span>Phone number</span></label>
+                <label class="field-label-title"><span class="field-icon-img"></span><span>Phone number</span></label>
                 <input type="number" id="input-usdt-phone" class="main-form-input" placeholder="Please enter your phone number" oninput="checkFormInputsStatus()">
             </div>
 
+            <!--  FIXED:              -->
+            <div class="fixed-bottom-button-area">
+                <button id="form-save-submit-btn" class="main-action-save-btn" onclick="processAndSaveUsdtDetails()">Save</button>
+            </div>
+
+        </div> <!-- bank-form-wrapper   -->
+
+    </div> <!-- scrollable-form-body   -->
+
+    <!-- 4.    -->
+    <div class="modal-blur-overlay" id="premium-alert-dialog-modal">
+        <div class="popup-confirmation-box">
+            <div class="popup-close-x-btn" onclick="closeAlertDialogModal()"></div>
+            <div class="popup-header-title" id="alert-popup-title">Notification</div>
+            <div class="popup-message-desc-text" id="alert-popup-message">Description text.</div>
+            <button class="popup-btn" id="alert-popup-action-btn" onclick="closeAlertDialogModal()">OK</button>
         </div>
     </div>
 
-    <!-- 3. बॉटम फिक्स्ड 'Save' बटन -->
-    <div class="fixed-bottom-button-area">
-        <button id="form-save-submit-btn" class="main-action-save-btn" onclick="processAndSaveUsdtDetails()">Save</button>
-    </div>
-</div>
-
-<!-- 4. सुंदर डायलॉग पॉप-अप -->
-<div class="modal-blur-overlay" id="premium-alert-dialog-modal">
-    <div class="popup-confirmation-box">
-        <div class="popup-close-x-btn" onclick="closeAlertDialogModal()">×</div>
-        <div class="popup-header-title" id="alert-popup-title">Notification</div>
-        <div class="popup-message-desc-text" id="alert-popup-message">Description text.</div>
-        <button class="popup-btn" id="alert-popup-action-btn" onclick="closeAlertDialogModal()">OK</button>
-    </div>
 </div>
 </body>
+
 <script>
     const BACKEND_SERVER_LIVE_URL = "https://onrender.com";
 

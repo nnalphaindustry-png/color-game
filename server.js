@@ -1266,18 +1266,37 @@ app.get('/api/admin/live-bets-summary/:gameMode', async (req, res) => {
     }
 });
 
-// === 2. SET MANUAL WINNING NUMBER LOCK ===
-app.post('/api/admin/set-game-result', async (req, res) => {
-    try {
-        const { gameMode, forcedNumber } = req.body;
-        if (!gameMode || forcedNumber === undefined) return res.json({ success: false, message: "Missing parameters" });
+// === ADMIN PANEL: SEND & BROADCAST NOTIFICATION API ===
+app.post('/api/admin/send-notification', async (req, res) => {
+  try {
+    const { type, targetUsers, message } = req.body;
 
-        global.adminManualOverride[gameMode] = Number(forcedNumber);
-        res.json({ success: true, message: `Number ${forcedNumber} successfully locked for next ${gameMode} round!` });
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+    //   
+    if (!type || !message) {
+      return res.json({ success: false, message: "Missing required notification fields!" });
     }
+
+    //        
+    const newNotification = new Notification({
+      type: type, // 'ALL'  'SINGLE'
+      targetUsers: type === 'SINGLE' ? targetUsers : [], //  Single      
+      message: message.trim(),
+      createdAt: new Date()
+    });
+
+    await newNotification.save();
+
+    return res.json({ 
+      success: true, 
+      message: "Notification broadcast parameters synced and stored successfully!" 
+    });
+
+  } catch (error) {
+    console.error("NOTIFICATION SYSTEM CRITICAL ERROR:", error);
+    return res.status(500).json({ success: false, message: "Internal server database failure." });
+  }
 });
+
 
 // === 3. RESET BACK TO AUTOMATIC OVERRIDE MODE ===
 app.post('/api/admin/reset-game-auto', async (req, res) => {

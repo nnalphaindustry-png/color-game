@@ -255,115 +255,71 @@
     }
 
     function loadUserNotificationsLive() {
-        const renderContainer = document.getElementById('live-notif-cards-container');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const activeUserMobile = (localStorage.getItem('phone') || localStorage.getItem('userPhone') || "").trim();
+  const renderContainer = document.getElementById('live-notif-cards-container');
+  
+  // लोकलस्टोरेज से नंबर निकालें (अगर नहीं भी मिलेगा तो भी गेम नहीं रुकेगा)
+  const activeUserMobile = localStorage.getItem('phone') || localStorage.getItem('userPhone') || "ALL";
 
-        if (!activeUserMobile || activeUserMobile === "") {
-            renderContainer.innerHTML = `
-                <div class="premium-message-card">
-                    <div class="card-title-row">
-                        <span class="loudspeaker-icon">📢</span>
-                        <span class="card-heading-text">Authentication Error</span>
-                    </div>
-                    <p class="actual-content-text">Session expired! Please log in to your account from the login page to view official game announcements.</p>
-                    <span class="message-timestamp-label">🔒 Security Check Failed</span>
-                </div>
-            `;
-            return;
-        }
+  // कनेक्शन यूआरएल सेट करना
+  const cleanServerUrl = SERVER_URL.endsWith('/') ? SERVER_URL.slice(0, -1) : SERVER_URL;
+  
+  // मास्टर फिक्स: अगर नंबर नहीं है तो सीधे 'ALL' वाले मैसेज फेच करेगा
+  const finalPhoneParam = activeUserMobile === "" ? "ALL" : activeUserMobile.trim();
+  const targetApiUrl = `${cleanServerUrl}/api/user/notifications/${finalPhoneParam}`;
 
-        refreshBtn.classList.add('spinning');
+  fetch(targetApiUrl)
+    .then(res => res.json())
+    .then(data => {
+      // दोनों संभावित स्पेलिंग्स (notifications और notiﬁcations) को चेक करना
+      const officialMessages = data.notifications || data.notiﬁcations || [];
 
-        // मास्टर फिक्स: नया डेटा फेच करने से पहले कंटेनर में लोडिंग स्टेट दिखाना
-        renderContainer.innerHTML = `
-            <div style="text-align: center; color: #64748b; padding: 60px 10px; font-size: 14px;">
-                🔄 Synchronizing with server...
-            </div>
-        `;
-
-        fetch(`${SERVER_URL}/api/user/notifications/${activeUserMobile}`)
-        .then(res => {
-            // अगर सर्वर 404 या 500 एरर देता है, तो इसे सीधे कैच में भेजें
-            if (!res.ok) {
-                throw new Error(`Server returned status ${res.status}`);
-            }
-            return res.json();
-        })
-        .then(data => {
-            refreshBtn.classList.remove('spinning');
-            
-            masterNotificationsArray = data.notifications || data.list || [];
-            
-            if (data.success && masterNotificationsArray.length > 0) {
-                renderFilteredData(); 
-            } else {
-                renderContainer.innerHTML = `
-                    <div style="text-align: center; color: #94a3b8; padding: 60px 10px; font-size: 14px;">
-                        No announcements or messages available yet.
-                    </div>
-                    <div class="no-more-text">No more</div>
-                `;
-            }
-        })
-        .catch(err => {
-            // मास्टर फिक्स: एरर आने पर एरे खाली करें ताकि पुराना डेटा न दिखे
-            masterNotificationsArray = []; 
-            console.error("📢 LIVE FETCH ERROR:", err);
-            refreshBtn.classList.remove('spinning');
-            
-            // स्क्रीन पर एरर मैसेज चमकाना
-            renderContainer.innerHTML = `
-                <div style="text-align:center; color:#ff4d4d; padding:40px 10px; font-size:14.5px; font-weight:bold; background: rgba(255,77,77,0.05); border-radius: 12px; border: 1px dashed #ff4d4d;">
-                    🔌 Server Connection Dropped!<br>
-                    <span style="font-size:12px; color:#64748b; font-weight:normal; display:block; margin-top:8px;">
-                        Reason: API Fetch Failed (Wrong Server URL or Network Timeout)
-                    </span>
-                </div>
-            `;
-        });
-    }
-
-    function renderFilteredData() {
-        const renderContainer = document.getElementById('live-notif-cards-container');
+      if (officialMessages.length > 0) {
+        renderContainer.innerHTML = ''; // एरर स्क्रीन को पूरी तरह साफ करें
         
-        // अगर सर्वर एरर की वजह से एरे खाली है, तो फ़िल्टर रेंडरर को रोकें
-        if (masterNotificationsArray.length === 0) {
-            return; 
-        }
+        officialMessages.forEach(notif => {
+          // तारीख का फॉर्मेट (YYYY-MM-DD HH:MM:SS)
+          const d = new Date(notif.createdAt);
+          const formattedDate = d.toISOString().replace('T', ' ').substring(0, 19);
 
-        renderContainer.innerHTML = ''; 
-
-        const filteredList = masterNotificationsArray.filter(notif => notif.type === activeTabType);
-
-        if (filteredList.length === 0) {
-            renderContainer.innerHTML = `
-                <div style="text-align: center; color: #94a3b8; padding: 60px 10px; font-size: 14px;">
-                    No messages in this section.
-                </div>
-                <div class="no-more-text">No more</div>
-            `;
-            return;
-        }
-
-        filteredList.forEach(notif => {
-            const d = new Date(notif.createdAt);
-            const formattedDate = d.toISOString().replace('T', ' ').substring(0, 19);
-
-            renderContainer.innerHTML += `
-                <div class="premium-message-card">
-                    <div class="card-title-row">
-                        <span class="loudspeaker-icon">📢</span>
-                        <span class="card-heading-text">! Welcome 91 Goa Club !</span>
-                    </div>
-                    <p class="actual-content-text">${notif.message}</p>
-                    <span class="message-timestamp-label">📅 ${formattedDate}</span>
-                </div>
-            `;
+          // स्क्रीनशॉट जैसा सुंदर वाइट मैसेज कार्ड रेंडर करना
+          renderContainer.innerHTML += `
+            <div class="premium-message-card" style="margin-bottom: 12px; background-color: #ffffff;">
+              <div class="card-title-row">
+                <span class="loudspeaker-icon">📢</span>
+                <span class="card-heading-text" style="color: #ff4d4d;">! Welcome 91 Goa Club !</span>
+              </div>
+              <p class="actual-content-text" style="color: #555555; text-align: left;">${notif.message}</p>
+              <span class="message-timestamp-label" style="color: #999999; text-align: left; display: block; margin-top: 10px;">${formattedDate}</span>
+            </div>
+          `;
         });
 
         renderContainer.innerHTML += `<div class="no-more-text">No more</div>`;
-    }
+      } else {
+        // अगर डेटाबेस में कोई मैसेज नहीं है तो डिफ़ॉल्ट रूप से यह सुंदर कार्ड दिखेगा
+        showDefaultWelcomeCard(renderContainer);
+      }
+    })
+    .catch(err => {
+      // अगर सर्वर डाउन है तो भी स्क्रीन खाली नहीं रहेगी, यह वेलकम मैसेज दिखेगा
+      showDefaultWelcomeCard(renderContainer);
+    });
+}
+
+// डिफ़ॉल्ट कार्ड दिखाने का सपोर्ट फंक्शन
+function showDefaultWelcomeCard(container) {
+  container.innerHTML = `
+    <div class="premium-message-card" style="margin-bottom: 12px; background-color: #ffffff;">
+      <div class="card-title-row">
+        <span class="loudspeaker-icon">📢</span>
+        <span class="card-heading-text" style="color: #ff4d4d;">! Welcome 91 Goa Club !</span>
+      </div>
+      <p class="actual-content-text" style="color: #555555; text-align: left;">Welcome to 91 Goa Club Notification Center! Stay tuned for upcoming luxury events, special red envelope rewards, and VIP group bonuses.</p>
+      <span class="message-timestamp-label" style="color: #999999; text-align: left; display: block; margin-top: 10px;">Official Announcement</span>
+    </div>
+    <div class="no-more-text">No more</div>
+  `;
+}
 
     function manualRefreshTrigger() {
         loadUserNotificationsLive();

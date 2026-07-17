@@ -1,300 +1,378 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>91 Goa Club - Notification</title>
-  <style>
-    /* शुद्ध CSS कोड - हूबहू स्क्रीनशॉट जैसा लाइट थीम लेआउट */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      background-color: #f7f9fc; /* स्क्रीनशॉट जैसा हल्का ग्रे-व्हाइट बैकग्राउंड */
-      color: #333333;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    
-    /* 1. टॉप व्हाइट हेडर बार */
-    .app-header-bar {
-      position: sticky;
-      top: 0;
-      background-color: #ffffff; 
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #eaeaea;
-      z-index: 100;
-    }
-    .back-to-profile-link {
-      background: none;
-      border: none;
-      color: #555555; 
-      font-size: 22px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .header-main-title {
-      font-size: 18px;
-      font-weight: 500;
-      color: #333333;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    .header-right-space {
-      width: 22px; /* हेडर को बैलेंस रखने के लिए खाली स्पेस */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>91 Goa Club - Announcements</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #f4f7fc;
+            color: #333333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 1. Top Premium Header Bar */
+        .app-header-bar {
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #eef2f6;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+        .back-to-profile-link {
+            background: none;
+            border: none;
+            color: #444444;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            transition: transform 0.2s;
+        }
+        .back-to-profile-link:active {
+            transform: scale(0.9);
+        }
+        .header-main-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .sync-refresh-btn {
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 20px;
+            cursor: pointer;
+            display: inline-flex;
+        }
+        .spinning {
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-    /* मुख्य कंटेंट एरिया */
-    .content-wrapper {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      flex-grow: 1;
-    }
+        /* 2. Content Container */
+        .content-wrapper {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex-grow: 1;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
 
-    /* 2. दो सुंदर टैब बटन्स (Notification & Information) */
-    .tabs-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background-color: #ffffff;
-      padding: 5px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-    }
-    .tab-btn {
-      padding: 10px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      color: #666666;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
-      background: none;
-    }
-    .tab-btn.active-tab {
-      background-color: #ff4d4d; /* स्क्रीनशॉट जैसा लाल/टमाटर रंग का एक्टिव बटन */
-      color: #ffffff;
-      font-weight: bold;
-    }
+        /* 3. Modern Segmented Tabs */
+        .tabs-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background-color: #e2e8f0;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
+        .tab-btn {
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: all 0.25s ease;
+        }
+        .tab-btn.active-tab {
+            background-color: #ff4d4d;
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(255, 77, 77, 0.3);
+        }
 
-    /* 3. स्क्रीनशॉट जैसा व्हाइट मैसेज कार्ड */
-    .premium-message-card {
-      background-color: #ffffff;
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid #eef1f6;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-    }
-    
-    /* लाउडस्पीकर आइकॉन और हेडिंग */
-    .card-title-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .loudspeaker-icon {
-      font-size: 20px;
-    }
-    .card-heading-text {
-      font-size: 16px;
-      font-weight: bold;
-      color: #ff4d4d; /* रेड कलर हेडिंग */
-      letter-spacing: 0.3px;
-    }
-    
-    /* मुख्य मैसेज बॉडी */
-    .actual-content-text {
-      color: #555555;
-      font-size: 13.5px;
-      line-height: 1.6;
-      white-space: pre-line;
-      word-break: break-word;
-      margin-bottom: 15px;
-    }
-    
-    /* तारीख लेबल */
-    .message-timestamp-label {
-      color: #999999;
-      font-size: 12px;
-      display: block;
-    }
+        /* 4. Notification Message Cards */
+        .premium-message-card {
+            background-color: #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+            transition: transform 0.2s;
+            animation: fadeInUp 0.4s ease-out;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10deg); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .loudspeaker-icon {
+            font-size: 18px;
+            background: rgba(255, 77, 77, 0.1);
+            padding: 6px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-heading-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ff4d4d;
+            letter-spacing: 0.2px;
+        }
+        .actual-content-text {
+            color: #475569;
+            font-size: 13.5px;
+            line-height: 1.6;
+            white-space: pre-line;
+            word-break: break-word;
+            margin-bottom: 12px;
+        }
+        .message-timestamp-label {
+            color: #94a3b8;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
 
-    /* कार्ड के नीचे का 'No more' टेक्स्ट */
-    .no-more-text {
-      text-align: center;
-      color: #777777;
-      font-size: 13px;
-      margin-top: 10px;
-    }
+        .no-more-text {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
 
-    /* 4. सबसे नीचे गोल 'X' (क्लोज) बटन का फिक्स डिजाइन */
-    .bottom-close-container {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-    }
-    .circle-close-btn {
-      width: 55px;
-      height: 55px;
-      background-color: #777777; /* स्क्रीनशॉट जैसा ग्रे गोल घेरा */
-      color: #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      text-decoration: none;
-    }
-  </style>
+        /* 5. Fixed Circular Close Button */
+        .bottom-close-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        .circle-close-btn {
+            width: 50px;
+            height: 50px;
+            background-color: #1e293b;
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .circle-close-btn:active {
+            transform: scale(0.9);
+            background-color: #0f172a;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- टॉप व्हाइट हेडर बार -->
-  <header class="app-header-bar">
-    <a href="profile .html" class="back-to-profile-link">&#10094;</a>
-    <span class="header-main-title">Notification</span>
-    <div class="header-right-space"></div>
-  </header>
+    <!-- टॉप हेडर बार -->
+    <header class="app-header-bar">
+        <a href="profile .html" class="back-to-profile-link">&#10094;</a>
+        <span class="header-main-title">Notification</span>
+        <button class="sync-refresh-btn" onclick="manualRefreshTrigger()" id="refreshBtn">🔄</button>
+    </header>
 
-  <!-- मुख्य कंटेंट एरिया -->
-  <main class="content-wrapper">
-    
-    <!-- दो टैब बटन्स -->
-    <div class="tabs-container">
-      <button class="tab-btn" onclick="switchTab('NOTIF')">Notification</button>
-      <button class="tab-btn active-tab" onclick="switchTab('INFO')">Information</button>
+    <!-- मुख्य कंटेंट एरिया -->
+    <main class="content-wrapper">
+        
+        <!-- दो वर्किंग टैब्स -->
+        <div class="tabs-container">
+            <button class="tab-btn active-tab" id="tab-notif" onclick="switchTab('ALL')">Notification</button>
+            <button class="tab-btn" id="tab-info" onclick="switchTab('SINGLE')">Information</button>
+        </div>
+
+        <!-- लाइव डेटा लोड होने का बॉक्स -->
+        <div id="live-notif-cards-container">
+            <div style="text-align: center; color: #64748b; padding: 60px 10px; font-size: 14px;">
+                Connecting to 91 Goa Club server...
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- क्लोज बटन जो वापस प्रोफाइल पर ले जाएगा -->
+    <div class="bottom-close-container">
+        <a href="profile .html" class="circle-close-btn">&times;</a>
     </div>
-
-    <!-- लाइव नोटिफिकेशन्स लोड होने का कंटेनर -->
-    <div id="live-notif-cards-container">
-      <div style="text-align: center; color: #999; padding: 50px 10px; font-size: 14px;">
-        Synchronizing with 91 Goa Club server...
-      </div>
-    </div>
-
-  </main>
-
-  <!-- सबसे नीचे गोल 'X' बटन जो वापस प्रोफाइल पर ले जाएगा -->
-  <div class="bottom-close-container">
-    <a href="user-profile.html" class="circle-close-btn">&times;</a>
-  </div>
-
-  <script>
+    <script>
+    // टेस्टिंग के लिए आप इसे गलत यूआरएल (जैसे https://wrong-link-test.com) डालकर चेक कर सकते हैं
     const SERVER_URL = "https://color-game-1kc2.onrender.com";
-    let activeTabType = "INFO"; // डिफॉल्ट एक्टिव टैब
+    
+    let activeTabType = "ALL"; 
+    let masterNotificationsArray = []; 
 
-    function switchTab(type) {
-      activeTabType = type;
-      // टैब बटन्स का एक्टिव क्लास टॉगल करना
-      const buttons = document.querySelectorAll('.tab-btn');
-      if (type === 'INFO') {
-        buttons[0].classList.remove('active-tab');
-        buttons[1].classList.add('active-tab');
-      } else {
-        buttons[0].classList.add('active-tab');
-        buttons[1].classList.remove('active-tab');
-      }
-      loadUserNotificationsLive(); // दोबारा डेटा फिल्टर करके लोड करें
+    function switchTab(tabType) {
+        activeTabType = tabType;
+        const tabNotif = document.getElementById('tab-notif');
+        const tabInfo = document.getElementById('tab-info');
+        
+        if (tabType === 'ALL') {
+            tabNotif.classList.add('active-tab');
+            tabInfo.classList.remove('active-tab');
+        } else {
+            tabNotif.classList.remove('active-tab');
+            tabInfo.classList.add('active-tab');
+        }
+        renderFilteredData();
     }
 
     function loadUserNotificationsLive() {
-      const renderContainer = document.getElementById('live-notif-cards-container');
-      const activeUserMobile = localStorage.getItem('userPhone') || "";
+        const renderContainer = document.getElementById('live-notif-cards-container');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const activeUserMobile = (localStorage.getItem('phone') || localStorage.getItem('userPhone') || "").trim();
 
-      if (!activeUserMobile || activeUserMobile === "") {
-        renderContainer.innerHTML = `
-          <div class="premium-message-card">
-            <div class="card-title-row">
-              <span class="loudspeaker-icon">📢</span>
-              <span class="card-heading-text">! Welcome 91 Goa Club !</span>
-            </div>
-            <p class="actual-content-text">Authentication failed! Please log in from your profile page to view official updates, secure rewards, and luxury events.</p>
-            <span class="message-timestamp-label">2026-07-17 09:53:00</span>
-          </div>
-          <div class="no-more-text">No more</div>
-        `;
-        return;
-      }
-
-      fetch(`${SERVER_URL}/api/user/notifications/${activeUserMobile}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.notifications.length > 0) {
-            renderContainer.innerHTML = ''; 
-            
-            // टैब के हिसाब से डेटा को फिल्टर करें
-            // मान लेते हैं कि एडमिन से आए 'ALL' मैसेज Information में दिखेंगे और 'SINGLE' वाले Notification में
-            const filteredNotifications = data.notifications.filter(notif => {
-              if (activeTabType === 'INFO') return notif.type === 'ALL';
-              return notif.type === 'SINGLE';
-            });
-
-            if (filteredNotifications.length === 0) {
-              renderContainer.innerHTML = `
-                <div style="text-align: center; color: #999; padding: 40px 10px; font-size: 14px;">
-                  No content available in this section.
-                </div>
-                <div class="no-more-text">No more</div>
-              `;
-              return;
-            }
-
-            filteredNotifications.forEach(notif => {
-              // तारीख को स्क्रीनशॉट वाले फॉर्मेट (YYYY-MM-DD HH:MM:SS) में बदलना
-              const d = new Date(notif.createdAt);
-              const formattedDate = d.toISOString().replace('T', ' ').substring(0, 19);
-
-              renderContainer.innerHTML += `
-                <div class="premium-message-card" style="margin-bottom: 12px;">
-                  <div class="card-title-row">
-                    <span class="loudspeaker-icon">📢</span>
-                    <span class="card-heading-text">! Welcome 91 Goa Club !</span>
-                  </div>
-                  <p class="actual-content-text">${notif.message}</p>
-                  <span class="message-timestamp-label">${formattedDate}</span>
-                </div>
-              `;
-            });
-
-            renderContainer.innerHTML += `<div class="no-more-text">No more</div>`;
-          } else {
+        if (!activeUserMobile || activeUserMobile === "") {
             renderContainer.innerHTML = `
-              <div style="text-align: center; color: #999; padding: 50px 10px; font-size: 14px;">
-                No announcements or messages available yet.
-              </div>
-              <div class="no-more-text">No more</div>
+                <div class="premium-message-card">
+                    <div class="card-title-row">
+                        <span class="loudspeaker-icon">📢</span>
+                        <span class="card-heading-text">Authentication Error</span>
+                    </div>
+                    <p class="actual-content-text">Session expired! Please log in to your account from the login page to view official game announcements.</p>
+                    <span class="message-timestamp-label">🔒 Security Check Failed</span>
+                </div>
             `;
-          }
+            return;
+        }
+
+        refreshBtn.classList.add('spinning');
+
+        // मास्टर फिक्स: नया डेटा फेच करने से पहले कंटेनर में लोडिंग स्टेट दिखाना
+        renderContainer.innerHTML = `
+            <div style="text-align: center; color: #64748b; padding: 60px 10px; font-size: 14px;">
+                🔄 Synchronizing with server...
+            </div>
+        `;
+
+        fetch(`${SERVER_URL}/api/user/notifications/${activeUserMobile}`)
+        .then(res => {
+            // अगर सर्वर 404 या 500 एरर देता है, तो इसे सीधे कैच में भेजें
+            if (!res.ok) {
+                throw new Error(`Server returned status ${res.status}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            refreshBtn.classList.remove('spinning');
+            
+            masterNotificationsArray = data.notifications || data.list || [];
+            
+            if (data.success && masterNotificationsArray.length > 0) {
+                renderFilteredData(); 
+            } else {
+                renderContainer.innerHTML = `
+                    <div style="text-align: center; color: #94a3b8; padding: 60px 10px; font-size: 14px;">
+                        No announcements or messages available yet.
+                    </div>
+                    <div class="no-more-text">No more</div>
+                `;
+            }
         })
         .catch(err => {
-          renderContainer.innerHTML = '<div style="text-align:center; color:#ff4d4d; padding:20px; font-size:14px; font-weight:bold;">Server connection dropped!</div>';
+            // मास्टर फिक्स: एरर आने पर एरे खाली करें ताकि पुराना डेटा न दिखे
+            masterNotificationsArray = []; 
+            console.error("📢 LIVE FETCH ERROR:", err);
+            refreshBtn.classList.remove('spinning');
+            
+            // स्क्रीन पर एरर मैसेज चमकाना
+            renderContainer.innerHTML = `
+                <div style="text-align:center; color:#ff4d4d; padding:40px 10px; font-size:14.5px; font-weight:bold; background: rgba(255,77,77,0.05); border-radius: 12px; border: 1px dashed #ff4d4d;">
+                    🔌 Server Connection Dropped!<br>
+                    <span style="font-size:12px; color:#64748b; font-weight:normal; display:block; margin-top:8px;">
+                        Reason: API Fetch Failed (Wrong Server URL or Network Timeout)
+                    </span>
+                </div>
+            `;
         });
     }
 
+    function renderFilteredData() {
+        const renderContainer = document.getElementById('live-notif-cards-container');
+        
+        // अगर सर्वर एरर की वजह से एरे खाली है, तो फ़िल्टर रेंडरर को रोकें
+        if (masterNotificationsArray.length === 0) {
+            return; 
+        }
+
+        renderContainer.innerHTML = ''; 
+
+        const filteredList = masterNotificationsArray.filter(notif => notif.type === activeTabType);
+
+        if (filteredList.length === 0) {
+            renderContainer.innerHTML = `
+                <div style="text-align: center; color: #94a3b8; padding: 60px 10px; font-size: 14px;">
+                    No messages in this section.
+                </div>
+                <div class="no-more-text">No more</div>
+            `;
+            return;
+        }
+
+        filteredList.forEach(notif => {
+            const d = new Date(notif.createdAt);
+            const formattedDate = d.toISOString().replace('T', ' ').substring(0, 19);
+
+            renderContainer.innerHTML += `
+                <div class="premium-message-card">
+                    <div class="card-title-row">
+                        <span class="loudspeaker-icon">📢</span>
+                        <span class="card-heading-text">! Welcome 91 Goa Club !</span>
+                    </div>
+                    <p class="actual-content-text">${notif.message}</p>
+                    <span class="message-timestamp-label">📅 ${formattedDate}</span>
+                </div>
+            `;
+        });
+
+        renderContainer.innerHTML += `<div class="no-more-text">No more</div>`;
+    }
+
+    function manualRefreshTrigger() {
+        loadUserNotificationsLive();
+    }
+
     window.onload = function() {
-      loadUserNotificationsLive();
+        loadUserNotificationsLive();
     };
-  </script>
+</script>
+
 </body>
 </html>

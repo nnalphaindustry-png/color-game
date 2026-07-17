@@ -89,6 +89,11 @@
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
             <li class="menu-list"><a href="#" onclick="switchAdminPage(event, 'gift-management-page')"> Gift Management</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'notification-page')"> Push Notification</a></li>
+            <!-- Option 10: Agent Work Requests Panel -->
+<li class="menu-item">
+    <a href="#" onclick="switchAdminPage(event, 'agent-work-requests-page')"> Agent Requests</a>
+</li>
+
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
         </ul>
     </nav>
@@ -409,6 +414,31 @@
     <!--        'OK'  -->
     <button onclick="commitNotifUserSelection()" class="submit-action-btn" style="width: 100%;">OK (Confirm Selection)</button>
   </div>
+</div>
+<!-- PAGE 10: Agent Work Requests Verification Panel -->
+<div id="agent-work-requests-page" class="admin-page-view">
+    <h2 class="page-heading-title">Agent Work Applications</h2>
+    <div class="data-table-card">
+        <h5 class="data-table-title" style="color: #0dcaf0;">Pending Agent Approval Requests</h5>
+        <div class="table-scroll-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th>UID</th>
+                        <th>Mobile Number</th>
+                        <th>Gmail ID</th>
+                        <th>Alt Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-agent-requests-table-body">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 20px;">Loading pending applications...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
     </main>
@@ -1246,12 +1276,79 @@ function transmitAdminNotificationAction() {
   })
   .catch(err => showGlobalToastAlert("Network sync failure on notification endpoint!", true));
 }
+// === AGENT WORK ADMIN PANEL LOGIC ===
+
+// 1. Database se sabhi pending agent requests ko lekar table mein dikhana
+function fetchAdminPendingAgentRequests() {
+    const agentPageElement = document.getElementById('agent-work-requests-page');
+    // Agar yeh page active nahi hai toh faltu network call rokna
+    if (!agentPageElement || agentPageElement.style.display === "none") return;
+
+    fetch(`${SERVER_URL}/api/admin/agent-work/requests`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.list) {
+                let rowsHtml = '';
+                data.list.forEach(item => {
+                    rowsHtml += `
+                        <tr>
+                            <td class="id-text-format" style="font-weight: bold;">${item.uid || 'N/A'}</td>
+                            <td style="color: #fff; font-weight: bold;">${item.phone}</td>
+                            <td style="color: #a0a0a0;">${item.agentGmail || 'N/A'}</td>
+                            <td style="color: #a0a0a0;">${item.agentAltPhone || 'N/A'}</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="modal-btn btn-green" style="padding: 6px 12px; font-size: 13px; width: auto;" 
+                                        onclick="processAgentApplicationAction('${item._id}', 'approve')">Approve</button>
+                                    <button class="modal-btn btn-red" style="padding: 6px 12px; font-size: 13px; width: auto;" 
+                                        onclick="processAgentApplicationAction('${item._id}', 'reject')">Reject</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('admin-agent-requests-table-body').innerHTML = rowsHtml ||
+                    `<tr><td colspan="5" style="text-align:center; color:#a0a0a0; padding:20px;">No pending agent requests found!</td></tr>`;
+            }
+        })
+        .catch(err => {
+            document.getElementById('admin-agent-requests-table-body').innerHTML = 
+                '<tr><td colspan="5" style="text-align:center; color:#dc3545;">Agent data sync timeout!</td></tr>';
+        });
+}
+
+// 2. Admin dwara Approve ya Reject action lena
+function processAgentApplicationAction(userId, actionType) {
+    const confirmationText = actionType === 'approve' ? "         Approve   ?" : "      Reject   ?";
+    if (!confirm(confirmationText)) return;
+
+    fetch(`${SERVER_URL}/api/admin/agent-work/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, action: actionType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showGlobalToastAlert(data.message, false); // Apka default green alert popup
+            fetchAdminPendingAgentRequests(); // Table ko live update karna
+        } else {
+            showGlobalToastAlert(data.message, true); // Red error alert popup
+        }
+    })
+    .catch(err => {
+        showGlobalToastAlert("Server communication error!", true);
+    });
+}
 
 // 3.    -  (window.onload)     
 const originalWindowOnload = window.onload;
 window.onload = function() {
     if (originalWindowOnload) originalWindowOnload();
     
+fetchAdminPendingAgentRequests();
+setInterval(fetchAdminPendingAgentRequests, 4000); // Har 4 second mein auto refresh
+
     //  4          
     fetchAdminLiveGiftCodes();
     setInterval(fetchAdminLiveGiftCodes, 4000);

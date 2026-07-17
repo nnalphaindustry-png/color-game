@@ -68,6 +68,12 @@ lastVipUpgradeDate: { type: Date, default: Date.now }, // लेवल में
     isActiveUser: { type: Boolean, default: false },     // यूजर ऑन/ऑफ स्टेटस ट्रैक करने के लिए
     
     claimedMilestoneIds: { type: [String], default: [] } // डिपाजिट बोनस के जो टास्क क्लेम हो चुके हैं (उदा: ["task_1"])
+    // === AGENT WORK TRACKING SYSTEM FIELDS ===
+agentWorkStatus: { type: String, enum: ['None', 'Pending', 'Approved', 'Rejected'], default: 'None' }, 
+agentGmail: { type: String, default: "" },
+agentAltPhone: { type: String, default: "" },
+agentWorkAppliedAt: { type: Date }
+
 });
 
 // === रजिस्ट्रेशन से पहले अपने आप यूनिक इनवाइट कोड जनरेट करने का लॉजिक ===
@@ -655,6 +661,112 @@ app.get('/api/vip-status/:phone', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+// ========================================================
+//  AGENT WORK SYSTEM - PHASE 1 APIs
+// ========================================================
+
+//  API 1:       UID/Phone    
+app.get('/api/agent-work/status/:phone', async (req, res) => {
+    try {
+        const userPhone = req.params.phone.trim();
+        const user = await User.findOne({ phone: userPhone });
+        
+        if (!user) {
+            return res.json({ success: false, message: "User not found!" });
+        }
+
+        //     UID, Phone    
+        res.json({
+            success: true,
+            uid: user.uid,
+            phone: user.phone,
+            status: user.agentWorkStatus || 'None',
+            agentGmail: user.agentGmail || "",
+            agentAltPhone: user.agentAltPhone || ""
+        });
+    } catch (error) {
+        console.error("Error fetching agent work status:", error);
+        res.status(500).json({ success: false, message: "Server error while fetching status." });
+    }
+});
+
+//  API 2:       (Apply)   
+app.post('/api/agent-work/apply', async (req, res) => {
+    try {
+        const { phone, agentGmail, agentAltPhone } = req.body;
+
+        if (!phone || !agentGmail || !agentAltPhone) {
+            return res.json({ success: false, message: "    !" });
+        }
+
+        const user = await User.findOne({ phone: phone.trim() });
+        if (!user) {
+            return res.json({ success: false, message: "User not found!" });
+        }
+
+        //  :             
+        if (user.agentWorkStatus === 'Pending') {
+            return res.json({ success: false, message: "       !" });
+        }
+        if (user.agentWorkStatus === 'Approved') {
+            return res.json({ success: false, message: "      !" });
+        }
+
+        //   
+        user.agentWorkStatus = 'Pending';
+        user.agentGmail = agentGmail.trim();
+        user.agentAltPhone = agentAltPhone.trim();
+        user.agentWorkAppliedAt = new Date();
+
+        await user.save();
+
+        res.json({ success: true, message: "    !      " });
+    } catch (error) {
+        console.error("Error applying for agent work:", error);
+        res.status(500).json({ success: false, message: " !    " });
+    }
+});
+
+//  API 3:     -       
+app.get('/api/admin/agent-work/requests', async (req, res) => {
+    try {
+        //  'Pending'      
+        const pendingAgents = await User.find({ agentWorkStatus: 'Pending' }).sort({ agentWorkAppliedAt: -1 });
+        res.json({ success: true, list: pendingAgents });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+//  API 4:     - APPROVE  REJECT   
+app.post('/api/admin/agent-work/action', async (req, res) => {
+    try {
+        const { id, action } = req.body; // id =   MongoDB _id, action = 'approve'  'reject'
+
+        if (!id || !action) {
+            return res.json({ success: false, message: "Missing required parameters!" });
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.json({ success: false, message: "User record not found!" });
+        }
+
+        if (action === 'approve') {
+            user.agentWorkStatus = 'Approved';
+        } else if (action === 'reject') {
+            user.agentWorkStatus = 'Rejected';
+        } else {
+            return res.json({ success: false, message: "Invalid action type!" });
+        }
+
+        await user.save();
+        res.json({ success: true, message: `    ${user.agentWorkStatus}    !` });
+    } catch (error) {
+        console.error("Admin agent action error:", error);
+        res.status(500).json({ success: false, message: "Internal server error: " + error.message });
+    }
 });
 
 // === VIP    AR WALLET     API ===

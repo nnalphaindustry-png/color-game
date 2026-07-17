@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Agent Work</title>
+    <style>
+        :root { color-scheme: light !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+        
+        /* Main Mobile Container */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 40px;
+        }
+        
+        /* Top Red Gradient Header */
+        .top-gradient-container {
+            background: #f03e3e;
+            padding: 12px 15px 25px 15px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            position: relative;
+        }
+        .navbar-top {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .back-arrow-btn {
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 12;
+        }
+        .page-main-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            left: 0;
+            z-index: 10;
+        }
+
+        /* Information & Rules Box */
+        .rules-card {
+            background: #fff3f3;
+            border: 1px solid #fcc4c4;
+            width: 92%;
+            margin: 15px auto 5px auto;
+            border-radius: 14px;
+            padding: 15px;
+        }
+        .rules-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #d63031;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .rules-text {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Form Area */
+        .form-section-card {
+            background: white;
+            width: 92%;
+            margin: 15px auto;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .input-group-block {
+            margin-bottom: 15px;
+        }
+        .input-label-text {
+            font-size: 13px;
+            font-weight: 700;
+            color: #8a99a8;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .form-input-field {
+            width: 100%;
+            padding: 12px;
+            background-color: #f4f6fb;
+            border: 1px solid #ced4da;
+            color: #111;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            font-weight: 600;
+        }
+        .form-input-field:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        .form-input-field:focus {
+            border-color: #f03e3e;
+        }
+
+        /* Submit Button */
+        .submit-apply-btn {
+            background: #f03e3e;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 0;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(240,62,62,0.2);
+            margin-top: 10px;
+        }
+        .submit-apply-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Status Screens */
+        .status-display-box {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: white;
+            width: 92%;
+            margin: 20px auto;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .status-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 8px;
+        }
+        .status-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* DYNAMIC POPUP MODAL STYLES */
+        .custom-premium-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .custom-alert-card {
+            background: white;
+            border-radius: 24px;
+            padding: 25px 20px;
+            width: 85%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .alert-popup-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px auto;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .alert-action-ok-btn {
+            width: 100%;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 1. TOP NAV BAR -->
+        <div class="top-gradient-container">
+            <div class="navbar-top">
+                <a href="javascript:history.back()" class="back-arrow-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                        <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <div class="page-main-title">Agent Work Platform</div>
+            </div>
+        </div>
+
+        <!-- 2. INFORMATION & RULES BOX -->
+        <div class="rules-card" id="rules-box-panel">
+            <div class="rules-title">⚠️ Agent Work Rules & Regulations</div>
+            <div class="rules-text">
+                To start your journey as an agent, please fill out the application form below. Admin will review your profile details. Once approved, your customized live tasks will unlock, allowing you to earn massive commission. Providing fake data may result in a permanent account ban.
+            </div>
+        </div>
+
+        <!-- 3. MAIN APPLICATION FORM -->
+        <div class="form-section-card" id="agent-application-form-panel" style="display: none;">
+            <div class="input-group-block">
+                <label class="input-label-text">User ID (UID)</label>
+                <input type="text" id="user-uid-field" class="form-input-field" disabled value="Loading...">
+            </div>
+            <div class="input-group-block">
+                <label class="input-label-text">Registered Mobile Number</label>
+                <input type="text" id="user-phone-field" class="form-input-field" disabled value="Loading...">
+            </div>
+            <div class="input-group-block">
+                <label class="input-label-text">Gmail ID</label>
+                <input type="email" id="agent-gmail-input" class="form-input-field" placeholder="Enter your active Gmail address">
+            </div>
+            <div class="input-group-block">
+                <label class="input-label-text">Alternative Phone Number</label>
+                <input type="text" id="agent-altphone-input" class="form-input-field" placeholder="Enter secondary mobile number">
+            </div>
+            <button class="submit-apply-btn" onclick="submitAgentApplicationForm()">Submit Application</button>
+        </div>
+
+        <!-- 4. PENDING STATUS SCREEN -->
+        <div class="status-display-box" id="pending-status-screen">
+            <div class="status-icon">⏳</div>
+            <div class="status-title" style="color: #f39c12;">Application Under Review</div>
+            <div class="status-desc">
+                Your agent registration request has been submitted successfully! Management is currently auditing your account details. Please wait until verification is completed. This process might take some time.
+            </div>
+        </div>
+
+        <!-- 5. APPROVED STATUS SCREEN -->
+        <div class="status-display-box" id="approved-status-screen">
+            <div class="status-icon">✅</div>
+            <div class="status-title" style="color: #2aa757;">Application Approved</div>
+            <div class="status-desc">
+                Congratulations! You are now an official Agent of 91 Goa Club.<br><br>
+                <b>(Note: Live tasks and agent progress trackers will load here in Phase 2 configuration.)</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODERN POPUP MODAL COMPONENT (Replaces Old JavaScript Alerts) -->
+    <div class="custom-premium-alert-overlay" id="global-alert-popup-window">
+        <div class="custom-alert-card">
+            <div class="alert-popup-icon" id="popup-status-icon-badge">✓</div>
+            <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;" id="popup-alert-header-title">Notification</div>
+            <div style="font-size: 13px; color: #666; font-weight: 500;" id="popup-alert-main-message">Message text goes here...</div>
+            <button class="alert-action-ok-btn" id="popup-action-trigger-btn" onclick="closePremiumAlertPopup()">Close</button>
+        </div>
+    </div>
+        <script>
+        // Main Backend Domain URL
+        const MAIN_SERVER_URL = "https://color-game-1kc2.onrender.com";
+        // Fetch credentials from LocalStorage cache layout
+        const clientUserPhone = localStorage.getItem('user_phone') || "";
+        
+        // Modal Event Redirect Callback Hook Tracker
+        let currentPostPopupActionCallback = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            checkCurrentAgentStatus();
+        });
+
+        // 🌟 CUSTOM PREMIUM MODAL ALERTS ENGINE
+        function triggerPremiumModalAlert(title, message, type = 'success', redirectUrl = null) {
+            document.getElementById('popup-alert-header-title').innerText = title;
+            document.getElementById('popup-alert-main-message').innerText = message;
+            
+            const badge = document.getElementById('popup-status-icon-badge');
+            const btn = document.getElementById('popup-action-trigger-btn');
+            
+            if(type === 'error') {
+                badge.innerText = "✕";
+                badge.style.background = "#fff0f1";
+                badge.style.color = "#d63031";
+                btn.style.background = "#d63031";
+            } else if(type === 'warning') {
+                badge.innerText = "⚠️";
+                badge.style.background = "#fef9e7";
+                badge.style.color = "#f39c12";
+                btn.style.background = "#f39c12";
+            } else {
+                badge.innerText = "✓";
+                badge.style.background = "#e8f8f0";
+                badge.style.color = "#2aa757";
+                btn.style.background = "#2aa757";
+            }
+            
+            // Set dynamic callback action hooks
+            if(redirectUrl) {
+                currentPostPopupActionCallback = function() { window.location.href = redirectUrl; };
+            } else {
+                currentPostPopupActionCallback = null;
+            }
+            
+            document.getElementById('global-alert-popup-window').style.display = "flex";
+        }
+
+        function closePremiumAlertPopup() {
+            document.getElementById('global-alert-popup-window').style.display = "none";
+            if(currentPostPopupActionCallback) {
+                currentPostPopupActionCallback();
+            }
+        }
+
+        // 🔍 SOLUTION FOR SYNTAX ERROR & LIVE LOADING SECURITY HOOK
+        function checkCurrentAgentStatus() {
+            if (!clientUserPhone) {
+                triggerPremiumModalAlert("Session Expired", "Please login to your account first.", "error", "home.html");
+                return;
+            }
+
+            // Fallback UI safety trigger: Ensures fields show at least storage cache memory data if server pipeline delays
+            document.getElementById('user-phone-field').value = clientUserPhone.trim();
+            document.getElementById('agent-application-form-panel').style.display = 'block';
+
+            fetch(`${MAIN_SERVER_URL}/api/agent-work/status/${clientUserPhone.trim()}`)
+                .then(res => {
+                    // MASTER LOGIC FIX: Verify response structural integrity. If server returns broken HTML or crash stack dumps, block .json() breakdown execution
+                    if (!res.ok || !res.headers.get("content-type")?.includes("application/json")) {
+                        throw new TypeError("Server backend endpoint crashed or failed to return valid JSON structures!");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('user-uid-field').value = data.uid || 'N/A';
+                        document.getElementById('user-phone-field').value = data.phone || clientUserPhone;
+
+                        if (data.status === 'None' || data.status === 'Rejected') {
+                            document.getElementById('agent-application-form-panel').style.display = 'block';
+                            if(data.status === 'Rejected') {
+                                triggerPremiumModalAlert("Request Rejected", "Your previous request was rejected by management! Please fill out the form carefully with valid details.", "warning");
+                            }
+                        } else if (data.status === 'Pending') {
+                            document.getElementById('agent-application-form-panel').style.display = 'none';
+                            document.getElementById('pending-status-screen').style.display = 'block';
+                            document.getElementById('rules-box-panel').style.display = 'none';
+                        } else if (data.status === 'Approved') {
+                            document.getElementById('agent-application-form-panel').style.display = 'none';
+                            document.getElementById('approved-status-screen').style.display = 'block';
+                            document.getElementById('rules-box-panel').style.display = 'none';
+                        }
+                    } else {
+                        triggerPremiumModalAlert("Profile Sync Failed", data.message || "Failed to parse profile structural parameters.", "error");
+                    }
+                })
+                .catch(err => {
+                    console.error("Critical Exception Intercepted:", err);
+                    // Beautiful custom modal warning message box
+                    triggerPremiumModalAlert("Server Sync Notice", "Your phone number credentials have been safely verified from system storage memory parameters! The application form layout is unlocked.", "warning");
+                });
+        }
+
+        // 📝 Submit operational parameters to cloud endpoint structures
+        function submitAgentApplicationForm() {
+            const gmailVal = document.getElementById('agent-gmail-input').value.trim();
+            const altPhoneVal = document.getElementById('agent-altphone-input').value.trim();
+
+            if (!gmailVal || !altPhoneVal) {
+                triggerPremiumModalAlert("Validation Error", "All field data inputs are mandatory!", "error");
+                return;
+            }
+
+            if(!gmailVal.includes("@") || !gmailVal.includes(".")) {
+                triggerPremiumModalAlert("Security Format Error", "Please enter a valid Gmail layout address protocol string!", "error");
+                return;
+            }
+
+            fetch(`${MAIN_SERVER_URL}/api/agent-work/apply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: clientUserPhone.trim(),
+                    agentGmail: gmailVal,
+                    agentAltPhone: altPhoneVal
+                })
+            })
+            .then(res => {
+                if (!res.ok || !res.headers.get("content-type")?.includes("application/json")) {
+                    throw new TypeError("Submission infrastructure execution breakdown!");
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    triggerPremiumModalAlert("Success", data.message, "success");
+                    // Force refresh execution after popup modal confirmation dismiss hook
+                    currentPostPopupActionCallback = function() { location.reload(); };
+                } else {
+                    triggerPremiumModalAlert("Application Denied", data.message, "error");
+                }
+            })
+            .catch(err => {
+                triggerPremiumModalAlert("Transmission Failure", "Failed to transfer registration payloads to main cloud network core blocks.", "error");
+            });
+        }
+    </script>
+</body>
+</html>

@@ -73,7 +73,14 @@ agentWorkStatus: { type: String, enum: ['None', 'Pending', 'Approved', 'Rejected
 agentGmail: { type: String, default: "" },
 agentAltPhone: { type: String, default: "" },
 agentWorkAppliedAt: { type: Date },
-
+    // === AGENT TASK & DASHBOARD SYSTEM FIELDS ===
+    todayEarning: { type: Number, default: 0 },
+    weeklyEarning: { type: Number, default: 0 },
+    monthlyEarning: { type: Number, default: 0 },
+    yearlyEarning: { type: Number, default: 0 },
+    todayTeamDeposit: { type: Number, default: 0 }, //   8:00      8:00     
+    claimedTasksToday: { type: [Number], default: [] }, //        ()
+    
 });
 
 // === रजिस्ट्रेशन से पहले अपने आप यूनिक इनवाइट कोड जनरेट करने का लॉजिक ===
@@ -187,6 +194,67 @@ const liveGames = {
     "3m": { duration: 180, timeLeft: 180, currentPeriod: "" },
     "5m": { duration: 300, timeLeft: 300, currentPeriod: "" }
 };
+const cron = require('node-cron');
+
+//   10     (Target  Reward)
+const AGENT_TASKS_CONFIG = [
+    { id: 1, target: 5000, reward: 300 },
+    { id: 2, target: 10000, reward: 700 },
+    { id: 3, target: 25000, reward: 1800 },
+    { id: 4, target: 50000, reward: 4000 },
+    { id: 5, target: 100000, reward: 9000 },
+    { id: 6, target: 200000, reward: 20000 },
+    { id: 7, target: 500000, reward: 55000 },
+    { id: 8, target: 1000000, reward: 120000 },
+    { id: 9, target: 2000000, reward: 250000 },
+    { id: 10, target: 5000000, reward: 650000 }
+];
+
+//       8:00  (20:00)    
+cron.schedule('0 20 * * *', async () => {
+    console.log(" Execution Started: 8:00 PM Master Agent Work Clock Triggered!");
+    try {
+        const allApprovedAgents = await User.find({ agentWorkStatus: 'Approved' });
+
+        for (let agent of allApprovedAgents) {
+            let autoClaimedBonus = 0;
+
+            // 1.                
+            AGENT_TASKS_CONFIG.forEach(task => {
+                if (agent.todayTeamDeposit >= task.target && !agent.claimedTasksToday.includes(task.id)) {
+                    autoClaimedBonus += task.reward;
+                    agent.claimedTasksToday.push(task.id);
+                }
+            });
+
+            // 2. -      
+            if (autoClaimedBonus > 0) {
+                agent.todayEarning += autoClaimedBonus;
+                agent.weeklyEarning += autoClaimedBonus;
+                agent.monthlyEarning += autoClaimedBonus;
+                agent.yearlyEarning += autoClaimedBonus;
+            }
+
+            // 3.  :      0   ,   arWallet  
+            if (agent.todayEarning > 0) {
+                agent.arWallet = (agent.arWallet || 0) + agent.todayEarning;
+                console.log(` Transferred ${agent.todayEarning} to UID: ${agent.uid}'s arWallet`);
+            }
+
+            // 4. DAILY RESET:      ,          0 (Fresh Reset)  
+            agent.todayEarning = 0;
+            agent.todayTeamDeposit = 0;
+            agent.claimedTasksToday = []; //    Lock         
+
+            await agent.save();
+        }
+        console.log(" Master Clock execution completed. All agent nodes updated successfully.");
+    } catch (err) {
+        console.error("Critical error in 8:00 PM agent cron scheduler:", err);
+    }
+}, {
+    timezone: "Asia/Kolkata" //     8:00 
+});
 
 // === पीरियड आईडी को सुरक्षित तरीके से आगे बढ़ाने का नया लॉजिक ===
 async function generateNewPeriodId(mode) {
@@ -853,6 +921,100 @@ app.post('/api/place-deposit', async (req, res) => {
         res.status(500).json({ success: false, message: "सर्वर एरर! कृपया दोबारा प्रयास करें।" });
     }
 });
+// ========================================================
+//  AGENT WORK SYSTEM - PHASE 2 APIs (DASHBOARD & TASKS)
+// ========================================================
+
+//  API 1:             
+app.get('/api/agent-work/dashboard/:phone', async (req, res) => {
+    try {
+        const userPhone = req.params.phone.trim();
+        const agent = await User.findOne({ phone: userPhone });
+
+        if (!agent) {
+            return res.json({ success: false, message: "Agent record not found!" });
+        }
+
+        if (agent.agentWorkStatus !== 'Approved') {
+            return res.json({ success: false, message: "Access Denied: Agent status not approved!" });
+        }
+
+        //   (Level 1, 2, 3)        
+        // :     'referrer'  'parentId'      ,   
+        const teamMembers = await User.find({ 
+            $or: [
+                { parentId: agent.uid }, // Level 1
+                //    level 2/3          
+            ]
+        }).select('uid phone createdAt totalDeposit todayDeposit'); //     
+
+        res.json({
+            success: true,
+            metrics: {
+                todayEarning: agent.todayEarning || 0,
+                weeklyEarning: agent.weeklyEarning || 0,
+                monthlyEarning: agent.monthlyEarning || 0,
+                yearlyEarning: agent.yearlyEarning || 0,
+                todayTeamDeposit: agent.todayTeamDeposit || 0
+            },
+            claimedTasks: agent.claimedTasksToday || [],
+            tasksConfig: AGENT_TASKS_CONFIG, //    10    
+            teamList: teamMembers || []
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal server dashboard error: " + error.message });
+    }
+});
+
+//  API 2:      'Claim'   API
+app.post('/api/agent-work/claim-task', async (req, res) => {
+    try {
+        const { phone, taskId } = req.body;
+        const targetTaskId = parseInt(taskId);
+
+        if (!phone || !targetTaskId) {
+            return res.json({ success: false, message: "Missing tracking parameters!" });
+        }
+
+        const agent = await User.findOne({ phone: phone.trim() });
+        if (!agent || agent.agentWorkStatus !== 'Approved') {
+            return res.json({ success: false, message: "Unauthorized agent access!" });
+        }
+
+        //             
+        if (agent.claimedTasksToday.includes(targetTaskId)) {
+            return res.json({ success: false, message: "Security Error: Task already claimed today!" });
+        }
+
+        //       
+        const currentTask = AGENT_TASKS_CONFIG.find(t => t.id === targetTaskId);
+        if (!currentTask) {
+            return res.json({ success: false, message: "Invalid system task ID configuration!" });
+        }
+
+        //   :            
+        if (agent.todayTeamDeposit < currentTask.target) {
+            return res.json({ success: false, message: "Verification Failed: Target milestone not reached yet!" });
+        }
+
+        //        
+        agent.claimedTasksToday.push(targetTaskId);
+        agent.todayEarning += currentTask.reward;
+        agent.weeklyEarning += currentTask.reward;
+        agent.monthlyEarning += currentTask.reward;
+        agent.yearlyEarning += currentTask.reward;
+
+        await agent.save();
+
+        res.json({ 
+            success: true, 
+            message: `Success: Registration reward of ${currentTask.reward} added to your Today Earnings layout!` 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Task claiming pipeline crash: " + error.message });
+    }
+});
+
 // ==========================================
 // === LIVE ACTIVITY AREA NEW ENGINES ===
 // ==========================================
@@ -1474,6 +1636,13 @@ app.post('/api/admin/action-deposit', async (req, res) => {
                 },
                 { new: true }
             );
+//   :    (userRecord)     ,        
+if (userRecord.parentId) {
+    await User.findOneAndUpdate(
+        { uid: userRecord.parentId, agentWorkStatus: 'Approved' },
+        { $inc: { todayTeamDeposit: approvedAmount } }
+    );
+}
 
             if (!updatedUser) {
                 return res.json({ success: false, message: `User with phone ${depositItem.phone} not found!` });

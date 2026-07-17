@@ -640,46 +640,51 @@ app.get('/api/vip-status/:phone', async (req, res) => {
   }
 });
 
-// === ५. वीआईपी लेवल का इनाम क्लेम करने की एपीआई ===
+// === VIP    AR WALLET     API ===
 app.post('/api/claim-vip-reward', async (req, res) => {
   try {
-    const { phone, levelToClaim } = req.body; 
+    const { phone, levelToClaim } = req.body;
     const targetLevel = Number(levelToClaim);
 
     if (targetLevel < 1 || targetLevel > 10) {
-        return res.json({ success: false, message: "गलत VIP लेवल अनुरोध!" });
+      return res.json({ success: false, message: " VIP  !" });
     }
 
     const user = await User.findOne({ phone: phone.trim() });
     if (!user) return res.json({ success: false, message: "User not found!" });
 
     if (user.vipLevel < targetLevel) {
-        return res.json({ success: false, message: `आप अभी VIP ${targetLevel} पर नहीं पहुँचे हैं!` });
+      return res.json({ success: false, message: `  VIP ${targetLevel}    !` });
     }
 
     if (user.claimedVipLevels && user.claimedVipLevels.includes(targetLevel)) {
-        return res.json({ success: false, message: `आप VIP ${targetLevel} का इनाम पहले ही ले चुके हैं!` });
+      return res.json({ success: false, message: ` VIP ${targetLevel}       !` });
     }
 
     const rewardAmount = VIP_CONFIG[targetLevel].reward;
 
+    // ===  : balance   arWallet  totalCommission   ===
     await User.findOneAndUpdate(
-        { phone: phone.trim() },
-        { 
-            $inc: { balance: rewardAmount },
-            $push: { claimedVipLevels: targetLevel }
-        }
+      { phone: phone.trim() },
+      {
+        $inc: { 
+          arWallet: rewardAmount,             //    AR Wallet  
+          totalCommission: rewardAmount       //      
+        },
+        $push: { claimedVipLevels: targetLevel }
+      }
     );
 
     return res.json({
-        success: true,
-        message: `बधाई हो! VIP ${targetLevel} का ₹${rewardAmount} इनाम आपके मेन वॉलेट में जोड़ दिया गया है।`
+      success: true,
+      message: ` ! VIP ${targetLevel}  ${rewardAmount}   AR Wallet     `
     });
 
   } catch (err) {
-    res.status(500).json({ success: false, message: "सर्वर एरर! कृपया बाद में प्रयास करें।" });
+    res.status(500).json({ success: false, message: " !     " });
   }
 });
+
 
 // === नई डिपॉजिट (UTR सबमिशन) एपीआई ===
 app.post('/api/place-deposit', async (req, res) => {

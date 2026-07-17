@@ -926,27 +926,23 @@ app.post('/api/place-deposit', async (req, res) => {
 // ========================================================
 
 //  API 1:             
+// === [FIXED AGENT DASHBOARD TELEMETRY ENGINE] ===
 app.get('/api/agent-work/dashboard/:phone', async (req, res) => {
     try {
         const userPhone = req.params.phone.trim();
         const agent = await User.findOne({ phone: userPhone });
-
+        
         if (!agent) {
             return res.json({ success: false, message: "Agent record not found!" });
         }
-
         if (agent.agentWorkStatus !== 'Approved') {
             return res.json({ success: false, message: "Access Denied: Agent status not approved!" });
         }
 
-        //   (Level 1, 2, 3)        
-        // :     'referrer'  'parentId'      ,   
-        const teamMembers = await User.find({ 
-            $or: [
-                { parentId: agent.uid }, // Level 1
-                //    level 2/3          
-            ]
-        }).select('uid phone createdAt totalDeposit todayDeposit'); //     
+        // [MANDATORY FIELD FIX]:   'referredBy'        
+        const teamMembers = await User.find({
+            referredBy: agent.phone.trim()
+        }).select('uid phone createdAt totalDeposit todayDeposit');
 
         res.json({
             success: true,
@@ -958,10 +954,12 @@ app.get('/api/agent-work/dashboard/:phone', async (req, res) => {
                 todayTeamDeposit: agent.todayTeamDeposit || 0
             },
             claimedTasks: agent.claimedTasksToday || [],
-            tasksConfig: AGENT_TASKS_CONFIG, //    10    
-            teamList: teamMembers || []
+            tasksConfig: AGENT_TASKS_CONFIG, 
+            teamList: teamMembers || [] //            
         });
+
     } catch (error) {
+        console.error("Agent Dashboard Logic Crash:", error);
         res.status(500).json({ success: false, message: "Internal server dashboard error: " + error.message });
     }
 });

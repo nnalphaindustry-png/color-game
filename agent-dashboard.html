@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Agent Dashboard</title>
+    <style>
+        :root { color-scheme: light !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+        
+        /* Main Container */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 40px;
+        }
+        
+        /* Navbar Top */
+        .top-gradient-container {
+            background: #f03e3e;
+            padding: 15px 15px 20px 15px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+        .navbar-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .back-arrow-btn {
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 12;
+        }
+        .page-main-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .task-redirect-btn {
+            background: white;
+            color: #f03e3e;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 4 Earnings Grid Boxes */
+        .metrics-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 92%;
+            margin: 20px auto 10px auto;
+        }
+        .metric-card-box {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border-left: 4px solid #ced4da;
+        }
+        .box-today { border-left-color: #f03e3e; }
+        .box-weekly { border-left-color: #3b5bdb; }
+        .box-monthly { border-left-color: #0ca678; }
+        .box-yearly { border-left-color: #f59f00; }
+        
+        .metric-label-text {
+            font-size: 12px;
+            color: #868e96;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .metric-amount-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #212529;
+        }
+
+        /* Live Team History Section */
+        .history-section-wrapper {
+            background: white;
+            width: 92%;
+            margin: 15px auto;
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .section-header-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .live-indicator-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2b8a3e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Table Responsive Layout */
+        .table-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th {
+            font-size: 11px;
+            color: #adb5bd;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 10px 8px;
+            border-bottom: 2px solid #f1f3f5;
+        }
+        td {
+            font-size: 13px;
+            color: #343a40;
+            font-weight: 600;
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        .uid-highlight {
+            color: #212529;
+            font-weight: 700;
+        }
+        .time-subtext {
+            font-size: 11px;
+            color: #868e96;
+            font-weight: 400;
+        }
+
+        /* Premium Modal Alert Window */
+        .custom-popup-overlay-window {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .popup-modal-card-box {
+            background: white;
+            border-radius: 24px;
+            padding: 25px 20px;
+            width: 85%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .popup-state-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px auto;
+            font-size: 24px;
+            font-weight: bold;
+            background: #fff0f1;
+            color: #d63031;
+        }
+        .popup-dismiss-btn {
+            width: 100%;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+            background: #d63031;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 1. TOP NAV BAR SECTION -->
+        <div class="top-gradient-container">
+            <div class="navbar-top">
+                <a href="javascript:history.back()" class="back-arrow-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                        <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <div class="page-main-title">Agent Workspace</div>
+                <a href="task-page.html" class="task-redirect-btn">Tasks</a>
+            </div>
+        </div>
+
+        <!-- 2. 4 EARNINGS METRICS BOX GRID -->
+        <div class="metrics-grid-layout">
+            <div class="metric-card-box box-today">
+                <div class="metric-label-text">Today Earning</div>
+                <div class="metric-amount-value" id="box-today-earning">₹0.00</div>
+            </div>
+            <div class="metric-card-box box-weekly">
+                <div class="metric-label-text">Weekly Earning</div>
+                <div class="metric-amount-value" id="box-weekly-earning">₹0.00</div>
+            </div>
+            <div class="metric-card-box box-monthly">
+                <div class="metric-label-text">Monthly Earning</div>
+                <div class="metric-amount-value" id="box-monthly-earning">₹0.00</div>
+            </div>
+            <div class="metric-card-box box-yearly">
+                <div class="metric-label-text">Yearly Earning</div>
+                <div class="metric-amount-value" id="box-yearly-earning">₹0.00</div>
+            </div>
+        </div>
+
+        <!-- 3. LIVE INVITATION & TEAM DEPOSIT HISTORY TABLE -->
+        <div class="history-section-wrapper">
+            <div class="section-header-title">
+                <span>Invited Team Statistics</span>
+                <span style="font-size: 12px; color: #2b8a3e; display: flex; align-items: center; gap: 4px;">
+                    <span class="live-indicator-dot"></span> Live Syncing
+                </span>
+            </div>
+            
+            <div class="table-scroll-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Reg Time</th>
+                            <th>Total Dep</th>
+                            <th>Today Dep</th>
+                        </tr>
+                    </thead>
+                    <tbody id="live-team-table-data-body">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #adb5bd; padding: 30px 10px;">
+                                Syncing active team nodes...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODERN POPUP MODAL ARCHITECTURE -->
+    <div class="custom-popup-overlay-window" id="dashboard-error-popup-window">
+        <div class="popup-modal-card-box">
+            <div class="popup-state-badge">✕</div>
+            <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;">Sync Timeout</div>
+            <div style="font-size: 13px; color: #666; font-weight: 500;" id="popup-error-message-text">Failed to fetch telemetry parameters.</div>
+            <button class="popup-dismiss-btn" onclick="closeDashboardErrorPopup()">Acknowledge</button>
+        </div>
+    </div>
+        <script>
+        // Main Cloud Server Endpoint Pipeline URL
+        const BACKEND_SERVICE_URL = "https://color-game-1kc2.onrender.com";
+        // LocalStorage identity cache tracker tokens
+        const registeredUserPhone = localStorage.getItem('user_phone') || "";
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchAgentDashboardLiveTelemetry();
+            // 🔄 AUTO-REFRESH ENGINE: बिना पेज लोड किए हर 4 सेकंड में लाइव टीम लिस्ट और डिब्बे अपडेट करना
+            setInterval(fetchAgentDashboardLiveTelemetry, 4000);
+        });
+
+        // 💥 DYNAMIC POPUP MODAL CORE CONTROLLERS
+        function launchDashboardErrorModal(msg) {
+            document.getElementById('popup-error-message-text').innerText = msg;
+            document.getElementById('dashboard-error-popup-window').style.display = "flex";
+        }
+
+        function closeDashboardErrorPopup() {
+            document.getElementById('dashboard-error-popup-window').style.display = "none";
+            window.location.href = "home.html"; // Redirect on master crash parameters
+        }
+
+        // 🔍 FETCH SYSTEM TELEMETRY AND UPDATE METRICS GRIDS
+        function fetchAgentDashboardLiveTelemetry() {
+            if (!registeredUserPhone) {
+                launchDashboardErrorModal("Active session payload not discovered. Please re-authenticate login.");
+                return;
+            }
+
+            fetch(`${BACKEND_SERVICE_URL}/api/agent-work/dashboard/${registeredUserPhone.trim()}`)
+                .then(res => {
+                    if (!res.ok || !res.headers.get("content-type")?.includes("application/json")) {
+                        throw new TypeError("Cloud cluster breakdown triggered structural JSON error!");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // 1. Update 4 Earning Boxes Render Layouts
+                        document.getElementById('box-today-earning').innerText = `₹${parseFloat(data.metrics.todayEarning).toFixed(2)}`;
+                        document.getElementById('box-weekly-earning').innerText = `₹${parseFloat(data.metrics.weeklyEarning).toFixed(2)}`;
+                        document.getElementById('box-monthly-earning').innerText = `₹${parseFloat(data.metrics.monthlyEarning).toFixed(2)}`;
+                        document.getElementById('box-yearly-earning').innerText = `₹${parseFloat(data.metrics.yearlyEarning).toFixed(2)}`;
+
+                        // 2. Build live invited team rows parameters
+                        let tableRowsHtml = "";
+                        if (data.teamList && data.teamList.length > 0) {
+                            data.teamList.forEach(member => {
+                                // Iso timestamp layout structural breakdown to readable local format
+                                const creationDateObj = new Date(member.createdAt);
+                                const localizedTimeStr = creationDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                
+                                tableRowsHtml += `
+                                    <tr>
+                                        <td class="uid-highlight">${member.uid || 'N/A'}</td>
+                                        <td class="time-subtext">${localizedTimeStr}</td>
+                                        <td style="color: #2b8a3e; font-weight: 700;">₹${member.totalDeposit || 0}</td>
+                                        <td style="color: #e67e22; font-weight: 700;">₹${member.todayDeposit || 0}</td>
+                                    </tr>
+                                `;
+                            });
+                        } else {
+                            tableRowsHtml = `
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: #868e96; padding: 25px 5px; font-size: 12px;">
+                                        No registered team nodes found in your tier structure today.
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                        document.getElementById('live-team-table-data-body').innerHTML = tableRowsHtml;
+                    } else {
+                        // If user status is not approved, block workspace access parameters
+                        launchDashboardErrorModal(data.message || "Identity access control verification denied!");
+                    }
+                })
+                .catch(err => {
+                    console.error("Dashboard engine telemetry fault:", err);
+                    // Silent logging into logs layout to protect continuous interval loop crashes
+                });
+        }
+    </script>
+</body>
+</html>

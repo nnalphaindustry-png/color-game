@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>91 Goa Club - Agent Tasks</title>
+    <style>
+        :root { color-scheme: light !important; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #f4f6fb; display: flex; justify-content: center; min-height: 100vh; }
+        
+        /* Main Container */
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #f4f6fb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 40px;
+        }
+        
+        /* Navbar Top */
+        .top-gradient-container {
+            background: #f03e3e;
+            padding: 15px 15px 20px 15px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+        .navbar-top {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .back-arrow-btn {
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 12;
+        }
+        .page-main-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            left: 0;
+            z-index: 10;
+        }
+
+        /* Target Summary Box */
+        .summary-card-box {
+            background: linear-gradient(135deg, #212529, #343a40);
+            width: 92%;
+            margin: 20px auto 10px auto;
+            border-radius: 18px;
+            padding: 18px;
+            color: white;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+        .summary-label {
+            font-size: 11px;
+            color: #adb5bd;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .summary-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fcc4c4;
+            margin-top: 2px;
+        }
+
+        /* Task Cards Layout Container */
+        .tasks-scroll-list-area {
+            width: 92%;
+            margin: 10px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .task-node-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .task-meta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .task-title-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #212529;
+            line-height: 1.4;
+        }
+        .task-reward-badge {
+            font-size: 13px;
+            font-weight: 800;
+            color: #2b8a3e;
+            background: #e8f8f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        /* Live Progress Bar Layout */
+        .progress-track-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: #f1f3f5;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-fill-bar-moving {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f03e3e, #ff6b6b);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+        .progress-numeric-text {
+            font-size: 11px;
+            color: #868e96;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Adaptive Claim Action Buttons */
+        .task-action-btn-trigger {
+            width: 100%;
+            border: none;
+            padding: 10px 0;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-locked-state {
+            background-color: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+        .btn-claimable-state {
+            background: #f03e3e;
+            color: white;
+            box-shadow: 0 4px 10px rgba(240,62,62,0.15);
+        }
+        .btn-claimable-state:active { transform: scale(0.98); }
+        .btn-completed-state {
+            background-color: #e8f8f0;
+            color: #2b8a3e;
+            cursor: not-allowed;
+        }
+
+        /* Custom Popup Modal Styles */
+        .custom-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .popup-modal-box-layout {
+            background: white;
+            border-radius: 24px;
+            padding: 25px 20px;
+            width: 85%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .popup-badge-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px auto;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .popup-action-close-btn {
+            width: 100%;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 1. TOP NAV BAR SECTION -->
+        <div class="top-gradient-container">
+            <div class="navbar-top">
+                <a href="agent-dashboard.html" class="back-arrow-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+                        <path d="M15 19L8 12L15 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                <div class="page-main-title">Daily Agent Tasks</div>
+            </div>
+        </div>
+
+        <!-- 2. LIVE TEAM DEPOSIT SUMMARY CARD -->
+        <div class="summary-card-box">
+            <div class="summary-label">Today Total Team Deposit</div>
+            <div class="summary-value" id="live-team-deposit-counter">₹0.00</div>
+            <div style="font-size: 10px; color: #a8aeb4; margin-top: 6px; font-weight: 500;">
+                *Resets everyday automatically at 8:00 PM Indian Standard Time
+            </div>
+        </div>
+
+        <!-- 3. DYNAMIC 10 PROGRESSIVE TASK BOX CONTAINER LIST -->
+        <div class="tasks-scroll-list-area" id="dynamic-agent-tasks-root-wrapper">
+            <!-- Dynamic task rows injection layout via JavaScript code strings -->
+            <div style="text-align: center; color: #adb5bd; padding: 40px 10px; font-size: 13px; font-weight: 600;">
+                Compiling agent task matrices...
+            </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM ALERT POPUP MODAL ENGINES -->
+    <div class="custom-popup-overlay" id="task-system-popup-window">
+        <div class="popup-modal-box-layout">
+            <div class="popup-badge-icon" id="modal-status-badge-icon">✓</div>
+            <div style="font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px;" id="modal-popup-header-title">Notification</div>
+            <div style="font-size: 13px; color: #666; font-weight: 500;" id="modal-popup-body-message">Operation execution successful.</div>
+            <button class="popup-action-close-btn" id="modal-action-trigger-btn" onclick="dismissTaskPopupModal()">Close</button>
+        </div>
+    </div>
+        <script>
+        // Main Cloud Server Architecture Pipeline Link
+        const SYSTEM_API_SERVER_URL = "https://color-game-1kc2.onrender.com";
+        // LocalStorage user authentication identification memory token
+        const authenticatedUserPhone = localStorage.getItem('user_phone') || "";
+
+        // 📋 100% CLIENT SIDE HARD CODED STATIC FALLBACK CONFIGURATION MATRIX
+        const DEFAULT_TASKS_FALLBACK = [
+            { id: 1, target: 5000, reward: 300 },
+            { id: 2, target: 10000, reward: 700 },
+            { id: 3, target: 25000, reward: 1800 },
+            { id: 4, target: 50000, reward: 4000 },
+            { id: 5, target: 100000, reward: 9000 },
+            { id: 6, target: 200000, reward: 20000 },
+            { id: 7, target: 500000, reward: 55000 },
+            { id: 8, target: 1000000, reward: 120000 },
+            { id: 9, target: 2000000, reward: 250000 },
+            { id: 10, target: 5000000, reward: 650000 }
+        ];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadAgentTasksTelemetryData();
+            // 🔄 AUTO-REFRESH SYNC ENGINE: 4 Second Refresh Loop
+            setInterval(loadAgentTasksTelemetryData, 4000);
+        });
+
+        // 🌟 CUSTOM PREMIUM POPUP ALERT MODULE SYSTEM
+        function triggerTaskSystemPremiumPopup(title, msg, type = 'success') {
+            document.getElementById('modal-popup-header-title').innerText = title;
+            document.getElementById('modal-popup-body-message').innerText = msg;
+            
+            const iconBadge = document.getElementById('modal-status-badge-icon');
+            const actionBtn = document.getElementById('modal-action-trigger-btn');
+            
+            if(type === 'error') {
+                iconBadge.innerText = "✕";
+                iconBadge.style.background = "#fff0f1";
+                iconBadge.style.color = "#d63031";
+                actionBtn.style.background = "#d63031";
+            } else {
+                iconBadge.innerText = "✓";
+                iconBadge.style.background = "#e8f8f0";
+                iconBadge.style.color = "#2aa757";
+                actionBtn.style.background = "#2aa757";
+            }
+            document.getElementById('task-system-popup-window').style.display = "flex";
+        }
+
+        function dismissTaskPopupModal() {
+            document.getElementById('task-system-popup-window').style.display = "none";
+        }
+                // 🔍 LOAD SYSTEM METRIC TELEMETRY & BUILD DYNAMIC 10 TASK CARD BOXES
+        function loadAgentTasksTelemetryData() {
+            if (!authenticatedUserPhone) {
+                triggerTaskSystemPremiumPopup("Session Expired", "Authentication credentials not found! Please login.", "error");
+                window.location.href = "home.html";
+                return;
+            }
+
+            fetch(`${SYSTEM_API_SERVER_URL}/api/agent-work/dashboard/${authenticatedUserPhone.trim()}`)
+                .then(res => {
+                    if (!res.ok || !res.headers.get("content-type")?.includes("application/json")) {
+                        throw new TypeError("Server pipeline communication transmission fault!");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    let currentTeamDeposit = 0;
+                    let claimedTasksArray = [];
+                    let activeTasksConfig = DEFAULT_TASKS_FALLBACK;
+
+                    if (data && data.success) {
+                        currentTeamDeposit = Number(data.metrics?.todayTeamDeposit || 0);
+                        claimedTasksArray = data.claimedTasks || [];
+                        if (data.tasksConfig && data.tasksConfig.length > 0) {
+                            activeTasksConfig = data.tasksConfig;
+                        }
+                    }
+
+                    // 1. Update master total summary card value text layout
+                    document.getElementById('live-team-deposit-counter').innerText = `₹${currentTeamDeposit.toFixed(2)}`;
+
+                    // 2. Map and parse dynamic 10 progressive structures
+                    let collectiveCardsHtml = "";
+                    
+                    activeTasksConfig.forEach(task => {
+                        const targetVal = Number(task.target || 0);
+                        const rewardVal = Number(task.reward || 0);
+
+                        let calculatedPercentage = (currentTeamDeposit / targetVal) * 100;
+                        if(calculatedPercentage > 100) calculatedPercentage = 100;
+                        if(isNaN(calculatedPercentage)) calculatedPercentage = 0;
+                        
+                        let actionButtonHtml = "";
+                        if (claimedTasksArray.includes(task.id)) {
+                            actionButtonHtml = `<button class="task-action-btn-trigger btn-completed-state" disabled>Completed</button>`;
+                        } else if (currentTeamDeposit >= targetVal) {
+                            actionButtonHtml = `<button class="task-action-btn-trigger btn-claimable-state" onclick="executeManualTaskBonusClaim(${task.id})">Claim Reward</button>`;
+                        } else {
+                            actionButtonHtml = `<button class="task-action-btn-trigger btn-locked-state" disabled>Locked</button>`;
+                        }
+
+                        collectiveCardsHtml += `
+                            <div class="task-node-card">
+                                <div class="task-meta-header">
+                                    <div class="task-title-text">Accumulate overall team deposit milestone target value up to ₹${targetVal.toLocaleString('en-IN')} inside daily cycle running timeline windows.</div>
+                                    <div class="task-reward-badge">+₹${rewardVal}</div>
+                                </div>
+                                <div class="progress-track-bar-bg">
+                                    <div class="progress-fill-bar-moving" style="width: ${calculatedPercentage}%;"></div>
+                                </div>
+                                <div class="progress-numeric-text">
+                                    ₹${currentTeamDeposit.toLocaleString('en-IN')} / ₹${targetVal.toLocaleString('en-IN')} (${calculatedPercentage.toFixed(0)}%)
+                                </div>
+                                <div style="margin-top: 4px;">
+                                    ${actionButtonHtml}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('dynamic-agent-tasks-root-wrapper').innerHTML = collectiveCardsHtml;
+                })
+                .catch(err => {
+                    console.error("Falling back to client-side compile matrices mapping rules:", err);
+                    
+                    document.getElementById('live-team-deposit-counter').innerText = "₹0.00";
+                    let fallbackHtml = "";
+                    DEFAULT_TASKS_FALLBACK.forEach(task => {
+                        fallbackHtml += `
+                            <div class="task-node-card">
+                                <div class="task-meta-header">
+                                    <div class="task-title-text">Accumulate overall team deposit milestone target value up to ₹${task.target.toLocaleString('en-IN')} inside daily cycle running timeline windows.</div>
+                                    <div class="task-reward-badge">+₹${task.reward}</div>
+                                </div>
+                                <div class="progress-track-bar-bg">
+                                    <div class="progress-fill-bar-moving" style="width: 0%;"></div>
+                                </div>
+                                <div class="progress-numeric-text">
+                                    ₹0 / ₹${task.target.toLocaleString('en-IN')} (0%)
+                                </div>
+                                <div style="margin-top: 4px;">
+                                    <button class="task-action-btn-trigger btn-locked-state" disabled>Locked</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('dynamic-agent-tasks-root-wrapper').innerHTML = fallbackHtml;
+                });
+        }
+
+        // 🎁 EXECUTE MANUAL CLAIM ROUTINE HOOK TO SERVER INJECTIONS
+        function executeManualTaskBonusClaim(targetId) {
+            fetch(`${SYSTEM_API_SERVER_URL}/api/agent-work/claim-task`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: authenticatedUserPhone.trim(),
+                    taskId: targetId
+                })
+            })
+            .then(res => {
+                if (!res.ok || !res.headers.get("content-type")?.includes("application/json")) {
+                    throw new TypeError("Structural network execution error payload!");
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    triggerTaskSystemPremiumPopup("Reward Claimed", data.message, "success");
+                    loadAgentTasksTelemetryData();
+                } else {
+                    triggerTaskSystemPremiumPopup("Claim Denied", data.message, "error");
+                }
+            })
+            .catch(err => {
+                triggerTaskSystemPremiumPopup("Transmission Timeout", "Critical pipeline error during verification processing.", "error");
+            });
+        }
+        
+    </script>
+</body>
+</html>

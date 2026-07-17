@@ -543,7 +543,14 @@ app.post('/api/place-bet', async (req, res) => {
         if (!user) {
             return res.json({ success: false, message: "User not found!" });
         }
-
+    // Master Deposit Security Check
+    if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
+      return res.json({ 
+        success: false, 
+        message: "To play games or use your signup bonus, you must complete your first deposit/recharge first!" 
+      });
+    }
+    
         if (Number(user.balance) < Number(betAmount)) {
             return res.json({ success: false, message: "Balance issue! Low wallet balance." });
         }
@@ -646,21 +653,22 @@ app.post('/api/claim-vip-reward', async (req, res) => {
     const { phone, levelToClaim } = req.body;
     const targetLevel = Number(levelToClaim);
 
-    if (targetLevel < 1 || targetLevel > 10) {
-      return res.json({ success: false, message: " VIP  !" });
-    }
+      if (targetLevel < 1 || targetLevel > 10) {
+    return res.json({ success: false, message: "Invalid VIP level requested!" });
+  }
+  
 
     const user = await User.findOne({ phone: phone.trim() });
     if (!user) return res.json({ success: false, message: "User not found!" });
 
-    if (user.vipLevel < targetLevel) {
-      return res.json({ success: false, message: `  VIP ${targetLevel}    !` });
-    }
-
-    if (user.claimedVipLevels && user.claimedVipLevels.includes(targetLevel)) {
-      return res.json({ success: false, message: ` VIP ${targetLevel}       !` });
-    }
-
+      if (user.vipLevel < targetLevel) {
+    return res.json({ success: false, message: `You have not reached VIP Level ${targetLevel} yet!` });
+  }
+  
+      if (user.claimedVipLevels && user.claimedVipLevels.includes(targetLevel)) {
+    return res.json({ success: false, message: `You have already claimed the rewards for VIP Level ${targetLevel}!` });
+  }
+  
     const rewardAmount = VIP_CONFIG[targetLevel].reward;
 
     // ===  : balance   arWallet  totalCommission   ===
@@ -675,13 +683,13 @@ app.post('/api/claim-vip-reward', async (req, res) => {
       }
     );
 
-    return res.json({
-      success: true,
-      message: ` ! VIP ${targetLevel}  ${rewardAmount}   AR Wallet     `
-    });
-
+      return res.json({
+    success: true,
+    message: `Congratulations! Your VIP Level ${targetLevel} reward of ${rewardAmount} has been credited to your AR Wallet.`
+  });
+  
   } catch (err) {
-    res.status(500).json({ success: false, message: " !     " });
+      res.status(500).json({ success: false, message: "Server error! Please try again later." });
   }
 });
 
@@ -757,7 +765,14 @@ app.post('/api/redeem-gift', async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: "यूजर अकाउंट नहीं मिला!" });
     }
-
+    // Master Deposit Security Check
+    if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "To redeem gift codes, you must complete your first deposit/recharge first!" 
+      });
+    }
+    
     // यूजर के वॉलेट को अपडेट करना
     user.arWallet = (Number(user.arWallet) || 0) + Number(gift.amount);
     user.totalCommission = (Number(user.totalCommission) || 0) + Number(gift.amount);
@@ -1137,7 +1152,13 @@ app.post('/api/wheel-cashout', async (req, res) => {
         const user = await User.findOne({ phone: phone.trim() });
         
         if (!user) return res.json({ success: false, message: "User not found!" });
-        
+            // Master Deposit Security Check
+    if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
+      return res.json({ 
+        success: false, 
+        message: "To transfer funds from AR Wallet to Main Wallet, you must complete your first deposit/recharge first!" 
+      });
+    }
         const transferAmount = user.todaySpinWallet || 0;
         if (transferAmount <= 0) {
             return res.json({ success: false, message: "Today's earning box is empty!" });

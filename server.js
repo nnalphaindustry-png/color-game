@@ -80,7 +80,11 @@ agentWorkAppliedAt: { type: Date },
     yearlyEarning: { type: Number, default: 0 },
     todayTeamDeposit: { type: Number, default: 0 }, //   8:00      8:00     
     claimedTasksToday: { type: [Number], default: [] }, //        ()
-    
+    // === NEW ANTI-FRAUD & WAGER ENGINES ===
+wagerRequired: { type: Number, default: 70 }, //  70   1x   
+wagerPlayed: { type: Number, default: 0 },
+isIllegalBetted: { type: Boolean, default: false },
+
 });
 
 // === रजिस्ट्रेशन से पहले अपने आप यूनिक इनवाइट कोड जनरेट करने का लॉजिक ===
@@ -619,30 +623,22 @@ app.get('/api/game-sync', async (req, res) => {
 
 
 // === Aapke Back-end Server ke liye 100% Fixed Bet Placement Code ===
+// === [ANTI-FRAUD UPGRADED] PLACE BET ENGINE ===
 app.post('/api/place-bet', async (req, res) => {
     try {
         const { phone, gameMode, periodId, selectValue, betAmount } = req.body;
-        
         const user = await User.findOne({ phone: phone.trim() });
-        if (!user) {
-            return res.json({ success: false, message: "User not found!" });
+        if (!user) return res.json({ success: false, message: "User not found!" });
+
+        if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
+            return res.json({ success: false, message: "To play games or use your signup bonus, you must complete your first deposit/recharge first!" });
         }
-    // Master Deposit Security Check
-    if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
-      return res.json({ 
-        success: false, 
-        message: "To play games or use your signup bonus, you must complete your first deposit/recharge first!" 
-      });
-    }
-    
         if (Number(user.balance) < Number(betAmount)) {
             return res.json({ success: false, message: "Balance issue! Low wallet balance." });
         }
-        
         if (!betAmount || isNaN(betAmount) || Number(betAmount) < 1) {
-            return res.json({ success: false, message: "Minimum bet amount is ₹1" });
+            return res.json({ success: false, message: "Minimum bet amount is 1" });
         }
-        
         if (liveGames[gameMode] && liveGames[gameMode].timeLeft <= 5) {
             return res.json({ success: false, message: "Round betting locked! Wait for next round." });
         }
@@ -655,42 +651,65 @@ app.post('/api/place-bet', async (req, res) => {
                 return res.json({ success: false, message: "Round ID syncing error. Please try again." });
             }
         }
+
+        // ---  CRITICAL ILLEGAL BETTING CHECK ENGINE  ---
+        const currentSelection = String(selectValue).trim().toLowerCase();
+        const existingRoundBets = await Bet.find({ phone: user.phone, periodId: finalPeriodId, gameMode: gameMode });
         
-        // 1. यूजर की बेट का आधा हिस्सा EXP के रूप में निकालें
-const earnedEXP = Number(betAmount) / 2;
+        let isTriggeringFraud = false;
+        existingRoundBets.forEach(oldBet => {
+            const oldSelection = String(oldBet.selectValue).trim().toLowerCase();
+            if ((oldSelection === "big" && currentSelection === "small") || (oldSelection === "small" && currentSelection === "big")) {
+                isTriggeringFraud = true;
+            }
+            if ((oldSelection === "red" && currentSelection === "green") || (oldSelection === "green" && currentSelection === "red")) {
+                isTriggeringFraud = true;
+            }
+        });
 
-// 2. डेटाबेस में यूजर का बैलेंस काटें और EXP जोड़ें
-const updatedUser = await User.findOneAndUpdate(
-  { phone: phone.trim() },
-  {
-    $inc: {
-      balance: -Number(betAmount),       
-      todayBetPlay: Number(betAmount),   
-      lifetimeEXP: earnedEXP             
-    },
-    $set: { isActiveUser: true }
-  },
-  { new: true } 
-);
+        // ---  CALCULATE PROGRESS AND PENALTY ---
+        let penaltyWagerAdd = 0;
+        let markIllegal = user.isIllegalBetted || false;
 
-// 3. ऑटोमैटिक VIP लेवल अपग्रेड इंजन (0 से 10 स्तर तक)
-let currentLevel = updatedUser.vipLevel || 0;
-let nextLevel = currentLevel + 1;
+        if (isTriggeringFraud) {
+            markIllegal = true;
+            const remainingWager = Math.max(0, (user.wagerRequired || 0) - (user.wagerPlayed || 0));
+            penaltyWagerAdd = remainingWager * 11; //      12     11  RA 
+            console.log(`[FRAUD ALERT]: User ${user.phone} committed illegal hedging. 12x Penalty Triggered!`);
+        }
 
-while (nextLevel <= 10 && updatedUser.lifetimeEXP >= VIP_CONFIG[nextLevel].requiredEXP) {
-    currentLevel = nextLevel;
-    nextLevel++;
-}
+        const earnedEXP = Number(betAmount) / 2;
 
-if (currentLevel !== updatedUser.vipLevel) {
-    await User.updateOne(
-        { phone: phone.trim() },
-        { $set: { vipLevel: currentLevel, lastVipUpgradeDate: new Date() } }
-    );
-    console.log(`[VIP LEVEL UP]: User ${phone} upgraded to VIP ${currentLevel}`);
-}
+        //  
+        const updatedUser = await User.findOneAndUpdate(
+            { phone: phone.trim() },
+            {
+                $inc: {
+                    balance: -Number(betAmount),
+                    todayBetPlay: Number(betAmount),
+                    lifetimeEXP: earnedEXP,
+                    wagerPlayed: Number(betAmount), //  
+                    wagerRequired: penaltyWagerAdd //   
+                },
+                $set: { 
+                    isActiveUser: true,
+                    isIllegalBetted: markIllegal
+                }
+            },
+            { new: true }
+        );
 
-        // [MASTER FIX]: Bet save karte samay status hamesha "Pending" hona chahiye aur winAmount 0!
+        // VIP   
+        let currentLevel = updatedUser.vipLevel || 0;
+        let nextLevel = currentLevel + 1;
+        while (nextLevel <= 10 && updatedUser.lifetimeEXP >= VIP_CONFIG[nextLevel].requiredEXP) {
+            currentLevel = nextLevel;
+            nextLevel++;
+        }
+        if (currentLevel !== updatedUser.vipLevel) {
+            await User.updateOne({ phone: phone.trim() }, { $set: { vipLevel: currentLevel, lastVipUpgradeDate: new Date() } });
+        }
+
         const newBet = new Bet({
             phone: String(phone).trim(),
             gameMode: String(gameMode).trim(),
@@ -698,38 +717,23 @@ if (currentLevel !== updatedUser.vipLevel) {
             selectValue: String(selectValue).trim(),
             betAmount: Number(betAmount),
             winAmount: 0,
-            status: "Pending" // <--- Yeh line aapka pehle se loss dikhana band kar degi!
+            status: "Pending"
         });
-        
         await newBet.save();
-        return res.json({ success: true, message: "Bet placed successfully!", newBalance: updatedUser.balance });
-        
+
+        let fraudWarning = isTriggeringFraud ? " (Warning: Illegal bet detected! 12x Penalty applied to your turnover requirement)." : "";
+        return res.json({ 
+            success: true, 
+            message: `Bet placed successfully!${fraudWarning}`, 
+            newBalance: updatedUser.balance 
+        });
+
     } catch (error) {
         console.error("BETTING SERVER ERROR:", error);
         return res.status(500).json({ success: false, message: "Server error during betting." });
     }
 });
 
-// === ४. फ्रंटएंड VIP पेज पर डेटा भेजने की एपीआई ===
-app.get('/api/vip-status/:phone', async (req, res) => {
-  try {
-    const user = await User.findOne({ phone: req.params.phone.trim() });
-    if (!user) return res.json({ success: false, message: "User not found!" });
-
-    const currentLevel = user.vipLevel || 0;
-    const nextLevel = currentLevel < 10 ? currentLevel + 1 : 10;
-    
-    res.json({
-      success: true,
-      vipLevel: currentLevel,
-      currentEXP: user.lifetimeEXP || 0,
-      nextLevelRequiredEXP: VIP_CONFIG[nextLevel].requiredEXP, 
-      claimedVipLevels: user.claimedVipLevels || [] 
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
 // ========================================================
 //  AGENT WORK SYSTEM - PHASE 1 APIs
 // ========================================================
@@ -1131,33 +1135,46 @@ app.get('/api/admin/live-gift-codes', async (req, res) => {
     }
 });
 
-// === नई विथड्रॉल सबमिशन एपीआई (User End) ===
+// === [GATEKEEPER SECURITY] SYSTEM WITH DISCOUNTS & PENALTIES ===
 app.post('/api/place-withdrawal', async (req, res) => {
     try {
         const { uid, phone, amount, method, accountValue } = req.body;
-
         if (!phone || !amount || !method || !accountValue) {
             return res.json({ success: false, message: "All fields are required!" });
         }
-
+        
         const user = await User.findOne({ phone: phone.trim() });
-        if (!user) {
-            return res.json({ success: false, message: "User account not found!" });
-        }
+        if (!user) return res.json({ success: false, message: "User account not found!" });
 
         if (Number(user.balance) < Number(amount)) {
             return res.json({ success: false, message: "Insufficient wallet balance!" });
         }
-
         if (Number(amount) < 100 || Number(amount) > 50000) {
-            return res.json({ success: false, message: "Amount must be between ₹100 and ₹50,000!" });
+            return res.json({ success: false, message: "Amount must be between 100 and 50,000!" });
         }
 
-        // 1. यूज़र के वॉलेट से बैलेंस तुरंत माइनस करना
+        // --- LIVE TELEMETRY CHECK FOR BETTING TURNOVER ---
+        let requiredTarget = Number(user.wagerRequired || 0);
+        let totalPlayed = Number(user.wagerPlayed || 0);
+
+        //  :            ,   50%    !
+        if (user.agentWorkStatus === 'Approved' && !user.isIllegalBetted) {
+            requiredTarget = requiredTarget * 0.5; //    
+        }
+
+        if (totalPlayed < requiredTarget) {
+            const remainingBet = Math.ceil(requiredTarget - totalPlayed);
+            let reasonText = user.isIllegalBetted ? "due to Illegal Betting Penalty" : "due to betting turnover rules";
+            return res.json({ 
+                success: false, 
+                message: `Withdrawal Locked! You must play bets worth ${remainingBet} more ${reasonText} before cashing out.` 
+            });
+        }
+
+        //      
         user.balance -= Number(amount);
         await user.save();
 
-        // 2. डेटाबेस में विथड्रॉल रिकॉर्ड पेंडिंग स्टेटस के साथ सेव करना
         const newWithdrawal = new Withdrawal({
             uid: uid || "N/A",
             phone: phone.trim(),
@@ -1174,6 +1191,7 @@ app.post('/api/place-withdrawal', async (req, res) => {
         res.status(500).json({ success: false, message: "Server error! Please try again." });
     }
 });
+
 
 // === यूज़र की डिपॉजिट हिस्ट्री खींचने की एपीआई ===
 app.get('/api/deposit-history/:phone', async (req, res) => {
@@ -1450,34 +1468,38 @@ app.post('/api/wheel-cashout', async (req, res) => {
     try {
         const { phone } = req.body;
         const user = await User.findOne({ phone: phone.trim() });
-        
         if (!user) return res.json({ success: false, message: "User not found!" });
-            // Master Deposit Security Check
-    if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
-      return res.json({ 
-        success: false, 
-        message: "To transfer funds from AR Wallet to Main Wallet, you must complete your first deposit/recharge first!" 
-      });
-    }
-        const transferAmount = user.todaySpinWallet || 0;
-        if (transferAmount <= 0) {
-            return res.json({ success: false, message: "Today's earning box is empty!" });
+
+        if (!user.totalDeposit || Number(user.totalDeposit) <= 0) {
+            return res.json({ success: false, message: "To transfer funds from AR Wallet to Main Wallet, you must complete your first deposit/recharge first!" });
         }
-        
-        // 🌟 फाइनल एक्शन: आज की कमाई को 0 करो और सारा पैसा उठाकर सीधे arWallet में प्लस कर दो!
+
+        const transferAmount = user.todaySpinWallet || 0;
+        if (transferAmount <= 0) return res.json({ success: false, message: "Today's earning box is empty!" });
+
+        // --- SMART WAger CONFIG FOR WHEEL BONUS ---
+        let wagerToLock = 0;
+        //       ,     1x    
+        if (user.agentWorkStatus !== 'Approved') {
+            wagerToLock = Number(transferAmount);
+        }
+
         await User.findOneAndUpdate(
             { phone: user.phone },
             {
                 $set: { todaySpinWallet: 0 },
-                $inc: { arWallet: transferAmount } // पैसा कन्फर्म सीधे आपके arWallet में चला गया
+                $inc: { 
+                    arWallet: transferAmount,
+                    wagerRequired: wagerToLock //     
+                }
             }
         );
-        
         res.json({ success: true, message: "Successfully transferred to arWallet!" });
     } catch (err) {
         res.status(500).json({ success: false, message: "Cashout operation failed." });
     }
 });
+
 
 
 // === FIX: UPGRADED LIVE BETS SUMMARY ROUTE USING EXACT ACTIVE VARIABLES ===

@@ -72,7 +72,7 @@ lastVipUpgradeDate: { type: Date, default: Date.now }, // लेवल में
 agentWorkStatus: { type: String, enum: ['None', 'Pending', 'Approved', 'Rejected'], default: 'None' }, 
 agentGmail: { type: String, default: "" },
 agentAltPhone: { type: String, default: "" },
-agentWorkAppliedAt: { type: Date }
+agentWorkAppliedAt: { type: Date },
 
 });
 

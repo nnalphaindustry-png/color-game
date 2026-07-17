@@ -1570,6 +1570,40 @@ app.post('/api/admin/send-notification', async (req, res) => {
   }
 });
 
+// === [MANDATORY FIX] ADMIN MANUAL HACK TRIGER ROUTE ===
+//      'lockForcedResultAction'     
+app.post('/api/admin/set-game-result', async (req, res) => {
+    try {
+        const { gameMode, forcedNumber } = req.body;
+
+        //   
+        if (!gameMode || forcedNumber === undefined || forcedNumber === null) {
+            return res.json({ success: false, message: "Game mode or forced number is missing!" });
+        }
+
+        const num = Number(forcedNumber);
+        if (num < 0 || num > 9) {
+            return res.json({ success: false, message: "Target winning number must be between 0 and 9!" });
+        }
+
+        //    'global.adminManualOverride'     
+        if (global.adminManualOverride && global.adminManualOverride.hasOwnProperty(gameMode)) {
+            global.adminManualOverride[gameMode] = num;
+            console.log(`[ADMIN HACK ACTIVATED]: Mode ${gameMode} is forced to win with Number: ${num}`);
+            
+            return res.json({ 
+                success: true, 
+                message: `Number ${num} successfully locked for the next ${gameMode} round!` 
+            });
+        } else {
+            return res.json({ success: false, message: "Invalid game mode configuration discovered!" });
+        }
+
+    } catch (error) {
+        console.error("CRITICAL OVERRIDE SETTING ERROR:", error);
+        res.status(500).json({ success: false, message: "Internal server error during result injection." });
+    }
+});
 
 // === 3. RESET BACK TO AUTOMATIC OVERRIDE MODE ===
 app.post('/api/admin/reset-game-auto', async (req, res) => {

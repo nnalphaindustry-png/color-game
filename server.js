@@ -1628,76 +1628,82 @@ app.get('/api/admin/pending-deposits', async (req, res) => {
     }
 });
 
-// === फाइनल एडमिन डिपॉजिट एक्शन रूट (VALIDATION BYPASS FIXED) ===
+// === [MANDATORY AGENT & SPIN PRESERVED FIX] ===
 app.post('/api/admin/action-deposit', async (req, res) => {
     try {
-        const { id, action } = req.body; 
+        const { id, action } = req.body;
 
         if (!id || !action) {
             return res.json({ success: false, message: "Missing id or action parameter!" });
         }
 
-        // 1. डेटाबेस से पेंडिंग डिपॉजिट रिकॉर्ड ढूंढें
+        // 1.     
         const depositItem = await Deposit.findById(id);
         if (!depositItem) {
             return res.json({ success: false, message: "Deposit record not found!" });
         }
-        
+
         if (depositItem.status !== "Pending") {
             return res.json({ success: false, message: "This request has already been processed!" });
         }
 
-                if (action === 'approve') {
-            // 2. यूज़र मॉडल को ढूँढना
+        if (action === 'approve') {
             const UserModel = mongoose.models.User || mongoose.model('User');
             
-            // नियम: अगर डिपॉजिट ₹100 या उससे अधिक है तो खुद का 1 स्पिन जोड़ें
+            // [ 1]:       
             let selfSpinAdd = 0;
             if (Number(depositItem.amount) >= 100) {
                 selfSpinAdd = 1;
             }
 
-            // सीधे $inc का उपयोग करके बैलेंस, आज का डिपॉजिट, लाइफटाइम डिपॉजिट और स्पिन एक साथ बढ़ाना
+            //   ,      
             const updatedUser = await UserModel.findOneAndUpdate(
                 { phone: depositItem.phone.trim() },
                 {
                     $inc: {
-                        balance: Number(depositItem.amount), // यूज़र का गेम बैलेंस बढ़ा
-                        todayDeposit: Number(depositItem.amount), // आज के कुल रिचार्ज में जुड़ा
-                        totalDeposit: Number(depositItem.amount), // लाइफटाइम कुल रिचार्ज में जुड़ा
-                        depositSpinsAvailable: selfSpinAdd // यहाँ आपका 1 सेल्फ डिपॉजिट स्पिन क्रेडिट हुआ
-                    }
+                        balance: Number(depositItem.amount),
+                        todayDeposit: Number(depositItem.amount),
+                        totalDeposit: Number(depositItem.amount),
+                        depositSpinsAvailable: selfSpinAdd //   
+                    },
+                    $set: { isActiveUser: true }
                 },
                 { new: true }
             );
-//   :    (userRecord)     ,        
-if (userRecord.parentId) {
-    await User.findOneAndUpdate(
-        { uid: userRecord.parentId, agentWorkStatus: 'Approved' },
-        { $inc: { todayTeamDeposit: approvedAmount } }
-    );
-}
 
             if (!updatedUser) {
                 return res.json({ success: false, message: `User with phone ${depositItem.phone} not found!` });
             }
 
-            // --- इनवाइट दोस्त वाला नियम (अगर इस यूजर का कोई पैरेंट एजेंट है और रिचार्ज ≥ ₹300 है) ---
-            if (updatedUser.referredBy && Number(depositItem.amount) >= 300) {
-                await UserModel.findOneAndUpdate(
-                    { phone: updatedUser.referredBy.trim() },
-                    { $inc: { inviteSpinsAvailable: 1 } } // इनवाइट करने वाले एजेंट को 1 लकी स्पिन मिला
-                );
-                console.log(`[WHEEL SUCCESS]: Agent ${updatedUser.referredBy} awarded 1 Spin for inviting ${updatedUser.phone}`);
+            // [ 2]:        ( 'updatedUser'    )
+            if (updatedUser.referredBy) {
+                //     
+                const parentAgent = await UserModel.findOne({ phone: updatedUser.referredBy.trim() });
+                
+                if (parentAgent && parentAgent.agentWorkStatus === 'Approved') {
+                    await UserModel.findOneAndUpdate(
+                        { uid: parentAgent.uid },
+                        { $inc: { todayTeamDeposit: Number(depositItem.amount) } }
+                    );
+                }
+
+                // [ 3]: 300           
+                if (Number(depositItem.amount) >= 300) {
+                    await UserModel.findOneAndUpdate(
+                        { phone: updatedUser.referredBy.trim() },
+                        { $inc: { inviteSpinsAvailable: 1 } }
+                    );
+                    console.log(`[WHEEL SUCCESS]: Agent ${updatedUser.referredBy} awarded 1 Spin for invite.`);
+                }
             }
 
-            depositItem.status = "Approved";
-        } else if (action === 'reject') {
-            depositItem.status = "Rejected";
-        }
-        
+            depositItem.status = 'Approved';
 
-        // 4. डिपॉजिट स्टेटस अपडेट करना
+        } else if (action === 'reject') {
+            depositItem.status = 'Rejected';
+        }
+
+        // 4.         (   )
         await depositItem.save();
         return res.json({ success: true, message: `Deposit successfully ${depositItem.status}!` });
 
@@ -1706,6 +1712,7 @@ if (userRecord.parentId) {
         return res.status(500).json({ success: false, message: "Internal server error: " + error.message });
     }
 });
+
 // === 1. एडमिन पैनल के लिए सभी पेंडिंग विथड्रॉल की लिस्ट भेजने की API ===
 app.get('/api/admin/pending-withdrawals', async (req, res) => {
     try {

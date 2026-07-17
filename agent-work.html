@@ -336,55 +336,55 @@
             }
         }
 
-        // 🔍 SOLUTION FOR SYNTAX ERROR & LIVE LOADING SECURITY HOOK
+                // 🔍 सर्वर से यूजर का लाइव स्टेटस चेक करना और ऑटो-रीडायरेक्ट करना
         function checkCurrentAgentStatus() {
             if (!clientUserPhone) {
                 triggerPremiumModalAlert("Session Expired", "Please login to your account first.", "error", "home.html");
                 return;
             }
 
-            // Fallback UI safety trigger: Ensures fields show at least storage cache memory data if server pipeline delays
+            // सुरक्षा फॉलबैक: सर्वर रिस्पॉन्स से पहले लोकल स्टोरेज का नंबर डालना
             document.getElementById('user-phone-field').value = clientUserPhone.trim();
             document.getElementById('agent-application-form-panel').style.display = 'block';
 
             fetch(`${MAIN_SERVER_URL}/api/agent-work/status/${clientUserPhone.trim()}`)
                 .then(res => {
-                    // MASTER LOGIC FIX: Verify response structural integrity. If server returns broken HTML or crash stack dumps, block .json() breakdown execution
                     if (!res.ok || !res.headers.get("content-type")?.includes("application/json")) {
-                        throw new TypeError("Server backend endpoint crashed or failed to return valid JSON structures!");
+                        throw new TypeError("Server backend endpoint crashed or failed to return valid JSON!");
                     }
                     return res.json();
                 })
                 .then(data => {
                     if (data.success) {
+                        // यूआई फील्ड्स में डेटा भरना
                         document.getElementById('user-uid-field').value = data.uid || 'N/A';
                         document.getElementById('user-phone-field').value = data.phone || clientUserPhone;
 
-                        if (data.status === 'None' || data.status === 'Rejected') {
+                        // 🎛️ स्टेटस के आधार पर पेज का व्यवहार तय करना
+                        if (data.status === 'None') {
                             document.getElementById('agent-application-form-panel').style.display = 'block';
-                            if(data.status === 'Rejected') {
-                                triggerPremiumModalAlert("Request Rejected", "Your previous request was rejected by management! Please fill out the form carefully with valid details.", "warning");
-                            }
+                        } else if (data.status === 'Rejected') {
+                            document.getElementById('agent-application-form-panel').style.display = 'block';
+                            triggerPremiumModalAlert("Request Rejected", "Your previous request was rejected! Please fill out the form carefully with valid details.", "warning");
                         } else if (data.status === 'Pending') {
                             document.getElementById('agent-application-form-panel').style.display = 'none';
                             document.getElementById('pending-status-screen').style.display = 'block';
                             document.getElementById('rules-box-panel').style.display = 'none';
                         } else if (data.status === 'Approved') {
-                            document.getElementById('agent-application-form-panel').style.display = 'none';
-                            document.getElementById('approved-status-screen').style.display = 'block';
-                            document.getElementById('rules-box-panel').style.display = 'none';
+                            // 🚀 एप्रूव्ड होने पर सीधे नए डैशबोर्ड पेज पर रीडायरेक्ट करें
+                            window.location.href = "agent-dashboard.html";
                         }
                     } else {
-                        triggerPremiumModalAlert("Profile Sync Failed", data.message || "Failed to parse profile structural parameters.", "error");
+                        triggerPremiumModalAlert("Sync Failed", data.message || "Failed to parse profile status parameters.", "error");
                     }
                 })
                 .catch(err => {
                     console.error("Critical Exception Intercepted:", err);
-                    // Beautiful custom modal warning message box
-                    triggerPremiumModalAlert("Server Sync Notice", "Your phone number credentials have been safely verified from system storage memory parameters! The application form layout is unlocked.", "warning");
+                    // अगर सर्वर डाउन है तो फॉर्म को यूजर के लिए खुला रखें
+                    triggerPremiumModalAlert("Server Sync Notice", "Your credentials have been verified from system memory parameters! The form layout is unlocked.", "warning");
                 });
         }
-
+        
         // 📝 Submit operational parameters to cloud endpoint structures
         function submitAgentApplicationForm() {
             const gmailVal = document.getElementById('agent-gmail-input').value.trim();

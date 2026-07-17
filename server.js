@@ -67,7 +67,7 @@ lastVipUpgradeDate: { type: Date, default: Date.now }, // लेवल में
     totalDeposit: { type: Number, default: 0 },         // लाइफटाइम कुल रिचार्ज (Valid User चेक करने के लिए)
     isActiveUser: { type: Boolean, default: false },     // यूजर ऑन/ऑफ स्टेटस ट्रैक करने के लिए
     
-    claimedMilestoneIds: { type: [String], default: [] } // डिपाजिट बोनस के जो टास्क क्लेम हो चुके हैं (उदा: ["task_1"])
+    claimedMilestoneIds: { type: [String], default: [] }, // डिपाजिट बोनस के जो टास्क क्लेम हो चुके हैं (उदा: ["task_1"])
     // === AGENT WORK TRACKING SYSTEM FIELDS ===
 agentWorkStatus: { type: String, enum: ['None', 'Pending', 'Approved', 'Rejected'], default: 'None' }, 
 agentGmail: { type: String, default: "" },

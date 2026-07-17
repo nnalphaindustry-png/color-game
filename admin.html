@@ -88,6 +88,7 @@
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'control-page')">🎮 Game Control</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'management-page')">🔍 User Management</a></li>
             <li class="menu-list"><a href="#" onclick="switchAdminPage(event, 'gift-management-page')"> Gift Management</a></li>
+            <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'notification-page')"> Push Notification</a></li>
             <li class="menu-item"><a href="#" onclick="switchAdminPage(event, 'settings-page')">⚙️ Settings</a></li>
         </ul>
     </nav>
@@ -354,6 +355,60 @@
             </table>
         </div>
     </div>
+</div>
+<!-- PAGE 9: Dynamic Admin Notification Engine -->
+<div id="notification-page" class="admin-page-view">
+  <h2 class="page-heading-title">Broadcast System Notifications</h2>
+  
+  <div class="data-table-card" style="max-width: 550px; margin: 0 auto 30px auto; padding: 25px; background-color: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px;">
+    <h5 class="data-table-title" style="color: #ffc107; font-size: 16px; margin-bottom: 20px;">Send Live Push Message</h5>
+    
+    <!-- 1.      -->
+    <div style="margin-bottom: 15px;">
+      <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">1. Select Audience Group</label>
+      <select id="notif-target-type" onchange="handleNotificationTargetToggle()" class="input-block-field" style="width: 100%; padding: 12px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px; font-size: 16px; outline: none;">
+        <option value="">-- Click to Select Option --</option>
+        <option value="ALL">All Registered Users</option>
+        <option value="SINGLE">Single / Specific Users List</option>
+      </select>
+    </div>
+
+    <!-- 2.          -->
+    <div id="selected-users-badge-area" style="margin-bottom: 15px; display: none; background: #121212; padding: 10px; border: 1px solid #333; border-radius: 6px;">
+      <label style="color: #a0a0a0; font-size: 11px; display: block; margin-bottom: 6px; text-transform: uppercase;">Targeted Users Stack:</label>
+      <div id="selected-users-list-badges" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+    </div>
+
+    <!-- 3.            -->
+    <div id="notification-message-write-box" style="display: none; margin-top: 15px;">
+      <label style="color: #a0a0a0; font-size: 13px; display: block; margin-bottom: 6px; text-transform: uppercase;">2. Type Announcement Message</label>
+      <textarea id="notif-message-payload" rows="4" placeholder="Enter your text notification message here..." class="input-block-field" style="width: 100%; padding: 12px; background-color: #121212; border: 1px solid #333; color: white; border-radius: 6px; font-size: 15px; resize: vertical; outline: none; box-sizing: border-box;"></textarea>
+      
+      <button onclick="transmitAdminNotificationAction()" class="submit-action-btn" style="width: 100%; margin-top: 15px; padding: 12px; background-color: #ffc107; color: #121212; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px;"> Broadcast Message</button>
+    </div>
+  </div>
+</div>
+
+<!-- =================      - (Modal Overlay) ================= -->
+<div class="popup-modal-overlay" id="notifUserSelectorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); z-index: 2000; align-items: center; justify-content: center; padding: 15px;">
+  <div class="popup-modal-box" style="background-color: #1a1a1a; border: 1px solid #333333; border-radius: 12px; width: 100%; max-width: 450px; padding: 22px; position: relative; color: white;">
+    
+    <!--   (X)  -    -->
+    <button class="popup-close-btn" onclick="abortNotifUserSelectorModal()" style="position: absolute; top: 15px; right: 15px; background: none; color: #888888; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+    
+    <div class="popup-header-title" style="color: #ffc107; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #2d2d2d; padding-bottom: 10px; font-weight: bold;"> Search & Select Users</div>
+    
+    <!--     -->
+    <input type="text" id="notif-user-search-input" onkeyup="executeRealtimeUserSearchForNotif()" placeholder="Type User Mobile Number or UID..." class="input-block-field" style="margin-bottom: 15px; box-sizing: border-box;">
+    
+    <!--          -->
+    <div id="notif-search-results-list" style="max-height: 200px; overflow-y: auto; background-color: #121212; border: 1px solid #2d2d2d; padding: 5px; border-radius: 6px; margin-bottom: 15px;">
+      <div style="padding: 15px; color: #666; text-align: center; font-size: 13.5px;">Start typing mobile number or UID above...</div>
+    </div>
+    
+    <!--        'OK'  -->
+    <button onclick="commitNotifUserSelection()" class="submit-action-btn" style="width: 100%;">OK (Confirm Selection)</button>
+  </div>
 </div>
 
     </main>
@@ -1052,6 +1107,144 @@ function fetchAdminLiveGiftCodes() {
         document.getElementById('admin-gift-table-body').innerHTML = 
             '<tr><td colspan="4" style="text-align:center; color:#dc3545;">Live gift codes fetching dropped!</td></tr>';
     });
+}
+let trackedSelectedUsersForNotification = []; //        
+
+// 1.           
+function handleNotificationTargetToggle() {
+  const selectedChoice = document.getElementById('notif-target-type').value;
+  const messageWritingBox = document.getElementById('notification-message-write-box');
+  const selectorPopupModal = document.getElementById('notifUserSelectorModal');
+  const badgeDisplayArea = document.getElementById('selected-users-badge-area');
+
+  if (selectedChoice === 'ALL') {
+    trackedSelectedUsersForNotification = []; //     
+    badgeDisplayArea.style.display = 'none';
+    messageWritingBox.style.display = 'block'; //    
+  } else if (selectedChoice === 'SINGLE') {
+    selectorPopupModal.style.display = 'flex'; //      - 
+    messageWritingBox.style.display = 'none';
+  } else {
+    messageWritingBox.style.display = 'none';
+    badgeDisplayArea.style.display = 'none';
+  }
+}
+
+// 2. -  (X)       
+function abortNotifUserSelectorModal() {
+  document.getElementById('notifUserSelectorModal').style.display = 'none';
+  if (trackedSelectedUsersForNotification.length === 0) {
+    document.getElementById('notif-target-type').value = '';
+  }
+}
+
+// 3.         -   
+function executeRealtimeUserSearchForNotif() {
+  const queryToken = document.getElementById('notif-user-search-input').value.trim();
+  const searchResultsView = document.getElementById('notif-search-results-list');
+  
+  if (queryToken.length < 3) {
+    searchResultsView.innerHTML = '<div style="padding:15px; color:#666; text-align:center; font-size:13px;">Type at least 3 characters...</div>';
+    return;
+  }
+
+  //      API      
+  fetch(`${SERVER_URL}/api/admin/search-user/${queryToken}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.user) {
+        searchResultsView.innerHTML = '';
+        const userObj = data.user;
+        const isAlreadyChecked = trackedSelectedUsersForNotification.includes(userObj.phone) ? 'checked' : '';
+        
+        searchResultsView.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
+            <div>
+              <span style="font-weight:bold; color:#fff; display:block; font-size:14px;">${userObj.phone}</span>
+              <small style="color:#0dcaf0; font-family:monospace;">UID: ${userObj.uid || 'N/A'}</small>
+            </div>
+            <input type="checkbox" value="${userObj.phone}" class="notif-panel-user-cb" ${isAlreadyChecked} style="transform: scale(1.3); cursor:pointer;">
+          </div>
+        `;
+      } else {
+        searchResultsView.innerHTML = '<div style="padding:15px; color:#dc3545; text-align:center; font-size:13px;">No matching user found!</div>';
+      }
+    })
+    .catch(err => {
+      searchResultsView.innerHTML = '<div style="padding:15px; color:#dc3545; text-align:center; font-size:13px;">Search sync dropped!</div>';
+    });
+}
+
+// 4. 'OK'    -             
+function commitNotifUserSelection() {
+  const foundCheckboxes = document.querySelectorAll('.notif-panel-user-cb');
+  
+  foundCheckboxes.forEach(cb => {
+    if (cb.checked && !trackedSelectedUsersForNotification.includes(cb.value)) {
+      trackedSelectedUsersForNotification.push(cb.value);
+    } else if (!cb.checked && trackedSelectedUsersForNotification.includes(cb.value)) {
+      trackedSelectedUsersForNotification = trackedSelectedUsersForNotification.filter(p => p !== cb.value);
+    }
+  });
+
+  document.getElementById('notifUserSelectorModal').style.display = 'none';
+
+  const badgeDisplayArea = document.getElementById('selected-users-badge-area');
+  const badgeContainer = document.getElementById('selected-users-list-badges');
+  const messageWritingBox = document.getElementById('notification-message-write-box');
+
+  if (trackedSelectedUsersForNotification.length > 0) {
+    badgeContainer.innerHTML = '';
+    trackedSelectedUsersForNotification.forEach(phoneNum => {
+      badgeContainer.innerHTML += `
+        <span style="background: rgba(13, 110, 253, 0.15); color: #0dcaf0; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid rgba(13, 110, 253, 0.3);">
+           ${phoneNum}
+        </span>
+      `;
+    });
+    badgeDisplayArea.style.display = 'block';
+    messageWritingBox.style.display = 'block'; //     
+  } else {
+    badgeDisplayArea.style.display = 'none';
+    messageWritingBox.style.display = 'none';
+    document.getElementById('notif-target-type').value = '';
+  }
+}
+
+// 5.          
+function transmitAdminNotificationAction() {
+  const chosenType = document.getElementById('notif-target-type').value;
+  const rawMessage = document.getElementById('notif-message-payload').value.trim();
+
+  if (!rawMessage) {
+    showGlobalToastAlert("Please compose a notification message body first!", true);
+    return;
+  }
+
+  fetch(`${SERVER_URL}/api/admin/send-notification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: chosenType,
+      targetUsers: trackedSelectedUsersForNotification,
+      message: rawMessage
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      showGlobalToastAlert("Broadcast parameters synced! Notification sent successfully.", false);
+      //    
+      document.getElementById('notif-message-payload').value = '';
+      document.getElementById('notif-target-type').value = '';
+      document.getElementById('notification-message-write-box').style.display = 'none';
+      document.getElementById('selected-users-badge-area').style.display = 'none';
+      trackedSelectedUsersForNotification = [];
+    } else {
+      showGlobalToastAlert(data.message || "Transmission failed!", true);
+    }
+  })
+  .catch(err => showGlobalToastAlert("Network sync failure on notification endpoint!", true));
 }
 
 // 3.    -  (window.onload)     

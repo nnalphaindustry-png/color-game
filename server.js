@@ -164,6 +164,17 @@ const wheelHistorySchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const WheelHistory = mongoose.model('WheelHistory', wheelHistorySchema);
+const mongoose = require('mongoose');
+
+const NotificationSchema = new mongoose.Schema({
+  type: { type: String, enum: ['ALL', 'SINGLE'], required: true }, // ALL  SINGLE
+  targetUsers: [{ type: String }], //  Single        ID  
+  message: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+module.exports = Notification;
 
 const liveGames = {
     "30s": { duration: 30, timeLeft: 30, currentPeriod: "" },
@@ -943,6 +954,24 @@ app.get('/api/withdrawal-history/:phone', async (req, res) => {
             message: "सर्वर डेटाबेस से इतिहास खींचने में असमर्थ रहा।" 
         });
     }
+});
+// === USER APP: GET LIVE NOTIFICATIONS ===
+app.get('/api/user/notifications/:phone', async (req, res) => {
+  try {
+    const userPhone = String(req.params.phone).trim();
+
+    //       'ALL' ( )        ('SINGLE') 
+    const messages = await Notification.find({
+      $or: [
+        { type: 'ALL' },
+        { type: 'SINGLE', targetUsers: userPhone }
+      ]
+    }).sort({ createdAt: -1 }); //    
+
+    return res.json({ success: true, notifications: messages });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error fetching notifications." });
+  }
 });
 
 // === ADMIN DASHBOARD STATS ROUTE ===
